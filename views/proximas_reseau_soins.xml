@@ -1,0 +1,700 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+
+<odoo>
+        <!-- res.users -->
+        <record id="proximas_view_users_simple_form" model="ir.ui.view">
+            <field name="name">proximas.users.simplified.form</field>
+            <field name="model">res.users</field>
+            <field name="priority">1</field>
+            <field name="inherit_id" ref="base.view_users_simple_form"/>
+            <field name="arch" type="xml">
+                <field name="name" position="replace" />
+                <field name="login" position="replace">
+                    <!--<label for="login" string="Utilisateur (login)" />-->
+                    <field name="login" placeholder="login/email@votre_domaine.com"/>
+                </field>
+            </field>
+        </record>
+        <!-- POOL MEDICAL Search & Filter View-->
+        <record id="search_proximas_pool_medical" model="ir.ui.view">
+            <field name="model">proximas.pool.medical</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="num_ordre"/>
+                    <field name="name"/>
+                    <field name="grade"/>
+                    <field name="email"/>
+                    <field name="mobile"/>
+                    <field name="specialite"/>
+                    <filter string="Specialité"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'specialite'}"
+                    />
+                </search>
+            </field>
+        </record>
+        <!-- POOL MLEDICAL List view -->
+         <record id="proximas_pool_medical_tree_view" model="ir.ui.view">
+            <field name="name">Pool Medical list view</field>
+            <field name="model">proximas.pool.medical</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="num_ordre"/>
+                    <field name="name"/>
+                    <field name="grade"/>
+                    <field name="mobile"/>
+                    <field name="email"/>
+                    <field name="is_conseil"/>
+                    <field name="specialite"/>
+                </tree>
+            </field>
+         </record>
+        <!-- PRESTATIONS FOURNIES Tree view -->
+        <record id="proximas_prestation_fournie_view_list" model="ir.ui.view">
+           <field name="name">prestation fournie list view</field>
+           <field name="model">proximas.prestation</field>
+           <field name="arch" type="xml">
+               <tree>
+                   <!--<field name="code_prestation_id"/>-->
+                   <field name="prestataire_id"/>
+                   <field name="code"/>
+                   <field name="name"/>
+                   <field name="mt_cout_unit"/>
+                   <field name="forfait_sam"/>
+                   <field name="forfait_ticket"/>
+                   <field name="mt_rabais"/>
+                   <field name="remise"/>
+                   <field name="taux_couvert_prestation"/>
+                   <field name="rubrique_id"/>
+                   <field name="code_medical_id"/>
+                   <field name="coefficient"/>
+                   <field name="accord_prealable"/>
+                   <field name="cout_modifiable"/>
+                   <field name="quantite_exige"/>
+                   <field name="arret_prestation"/>
+               </tree>
+           </field>
+        </record>
+        <!-- PRESTATIONS FOUNIES Search & Filter View-->
+        <record id="proximas_prestation_fournie_search_view" model="ir.ui.view">
+            <field name="model">proximas.prestation</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="prestataire_id"/>
+                    <field name="code"/>
+                    <field name="code_prestation_id"/>
+                    <field name="name"/>
+                    <field name="code_medical_id"/>
+                    <field name="rubrique_id"/>
+                    <field name="mt_cout_unit"/>
+                    <field name="code_non_controle"/>
+                    <field name="forfait_sam"/>
+                    <field name="forfait_ticket"/>
+                    <field name="mt_rabais"/>
+                    <field name="remise"/>
+                    <field name="taux_couvert_prestation"/>
+                    <field name="coefficient"/>
+                    <field name="accord_prealable"/>
+                    <field name="cout_modifiable"/>
+                    <field name="quantite_exige"/>
+                    <field name="arret_prestation"/>
+                    <field name="prestataire_id"
+                           filter_domain="[('prestataire_id', 'child_of',self)]"
+                    />
+                    <filter name="arret_prestation"
+                            string="En Arrêt?"
+                            domain="[('arret_prestation', '=', True)]"
+                    />
+                    <group expand="0" string="Groupé par...">
+                        <filter string="Prestataire"
+                                domain="[]"
+                                context="{'group_by':'prestataire_id'}" />
+                        <filter string="Prestation"
+                                domain="[]"
+                                context="{'group_by':'code_prestation_id'}" />
+                        <!--<filter string="Code Médical"
+                                domain="[]"
+                                context="{'group_by':'code_medical_id'}" />
+                        <filter string="Rubrique"
+                                domain="[]"
+                                context="{'group_by':'rubrique_id'}" />-->
+                    </group>
+                </search>
+            </field>
+        </record>
+         <!-- POOL PRESTATION Form view-->
+        <record id="proximas_medical.prestation_fournie_form_view" model="ir.ui.view">
+           <field name="name">prestation form view</field>
+           <field name="model">proximas.prestation</field>
+           <field name="arch" type="xml">
+               <form>
+                   <sheet>
+                       <group col="6" colspan="2">
+                           <group>
+                               <field name="code_prestation_id"
+                                      options='{"no_open": True, "no_create": True}'/>
+                               <field name="rubrique_id"
+                                      options='{"no_open": True, "no_create": True}'/>
+                               <field name="code_medical_id"/>
+                               <field name="coefficient"/>
+                               <field name="mt_cout_unit"/>
+                               <field name="code_non_controle"/>
+                               <field name="forfait_sam"/>
+                               <field name="forfait_ticket"/>
+                           </group>
+                           <group>
+                               <field name="remise"/>
+                               <field name="mt_rabais"/>
+                               <field name="accord_prealable"/>
+                               <field name="cout_modifiable"/>
+                               <field name="quantite_exige"/>
+                               <field name="arret_prestation"/>
+                           </group>
+                       </group>
+                       <hr/>
+                       <notebook>
+                           <page string="NOTES / OBSERVATION:">
+                               <field name="note"/>
+                           </page>
+                       </notebook>
+                   </sheet>
+               </form>
+           </field>
+        </record>
+        <!-- Prestataire List view -->
+        <record id="proximas_prestataire_view_list" model="ir.ui.view">
+            <field name="name">Prestataire list view</field>
+            <field name="model">res.partner</field>
+            <field name="priority">15</field>
+            <field name="inherit_id" ref="base.view_partner_tree"/>
+            <field name="arch" type="xml">
+                <field name="display_name" position="replace">
+                    <!--<field name="ref"/>
+                    <field name="alias"/>-->
+                    <!--<field name="display_name"/>-->
+                    <field name="name"/>
+                    <field name="categorie_id"/>
+                    <field name="date_convention"/>
+                    <field name="ref"/>
+                </field>
+            </field>
+        </record>
+        <!-- PRESTATAIR (RES_PARTNER) List view-->
+        <record id="proximas_prestataire_view_form" model="ir.ui.view">
+            <field name="name">Prestataire form view</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                        <h1 position="replace">
+                            <h2>
+                                <field name="is_prestataire" invisible="1"/>
+                                <field name="name" default_focus="1" placeholder="Dénomination" attrs="{'required' : [('type', '=', 'contact')]}"/>
+                            </h2>
+                        </h1>
+                        <notebook position="inside">
+                            <page string="Détails Prestataire"
+                                  attrs="{'invisible': [('is_prestataire','=',False)]}">
+                                <group col="6" colspan="2">
+                                   <field name="standing_id"
+                                          options='{"no_open": True, "no_create": True}'/>
+                                   <field name="categorie_id"
+                                          options='{"no_open": True, "no_create": True}'
+                                          attrs="{'required': [('is_prestataire','=',True)]}"
+                                   />
+                                   <field name="is_public"/>
+                                    <field name="is_groupe"/>
+                                   <field name="date_convention"
+                                          attrs="{'required': [('is_prestataire','=',True)]}"
+                                   />
+                                   <field name="activation_date"
+                                          attrs="{'required': [('is_prestataire','=',True)]}"
+                                   />
+                                   <field name="mt_caution"/>
+                                   <field name="mt_prefinancement"/>
+                                   <field name="mt_seuil_prefinancement"/>
+                                   <field name="mt_rabais_pc"/>
+                                   <field name="mt_rabais_facture"/>
+                                   <field name="remise_pc"/>
+                                   <field name="tx_remise_facture"/>
+                                </group>
+                            </page>
+                            <page string="Utilisateurs"
+                                  attrs="{'invisible': [('is_prestataire','=',False)]}">
+                                <field name="user_ids">
+                                    <tree>
+                                         <field name="partner_id"/>
+                                         <field name="name"/>
+                                         <field name="login"/>
+                                         <field name="lang"/>
+                                         <field name="email"/>
+                                         <field name="login_date"/>
+                                     </tree>
+                                </field>
+                            </page>
+                            <page string="Pool Médical"
+                                  attrs="{'invisible': [('is_prestataire','=',False)]}">
+                                  <field name="pool_medical_ids">
+                                      <!--attrs="{'required': [('categorie_id','!=','Pharmacie')]}"-->
+                                      <tree class="text-info">
+                                          <field name="num_ordre"/>
+                                          <field name="name"/>
+                                          <field name="grade"/>
+                                          <field name="mobile"/>
+                                          <field name="email"/>
+                                          <!--<field name="is_conseil"/>-->
+                                          <field name="specialite"/>
+                                      </tree>
+                                  </field>
+                            </page>
+                            <page string="Offre Prestations"
+                                  attrs="{'invisible': [('is_prestataire','=',False)]}">
+                                 <field name="prestation_ids"
+                                        context="{'form_view_ref': 'proximas_medical.prestation_fournie_form_view'}">
+                                     <tree class="text-info">
+                                         <field name="code_prestation_id"/>
+                                         <!--<field name="rubrique_id"/>-->
+                                         <!--<field name="code_medical_id"/>-->
+                                         <field name="mt_cout_unit"/>
+                                         <field name="coefficient"/>
+                                         <field name="forfait_sam"/>
+                                         <field name="forfait_ticket"/>
+                                         <field name="remise"/>
+                                         <field name="mt_rabais"/>
+                                         <field name="accord_prealable"/>
+                                         <field name="cout_modifiable"/>
+                                         <field name="quantite_exige"/>
+                                     </tree>
+                                 </field>
+                            </page>
+                      </notebook>
+                    <!--</sheet>-->
+                <!--</form>-->
+            </field>
+         </record>
+         <!-- SMS USER List view -->
+         <record id="proximas_sms_user_view_list" model="ir.ui.view">
+            <field name="name">User SMS list view</field>
+            <field name="model">proximas.sms.user</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="mobile"/>
+                    <field name="prestataire_id"/>
+                    <field name="pool_medical_id"/>
+                    <field name="note"/>
+                </tree>
+            </field>
+         </record>
+         <!-- SMS USER Form view-->
+         <record id="proximas_sms_user_view_form" model="ir.ui.view">
+            <field name="name">SMS User form view</field>
+            <field name="model">proximas.sms.user</field>
+            <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title" name="title">
+                            <label for="name" string="Noms &amp; Prénoms:" class="oe_edit_only"/>
+                            <h2><field name="name" default_focus="1" placeholder="Identification Utilisateur" class="text-primary"/></h2>
+                        </div>
+                        <group col="4" colspan="2">
+                            <field name="mobile"/>
+                            <field name="prestataire_id"
+                                   domain="[('is_prestataire', '=', True),]"
+                                   options='{"no_open": True, "no_create": True}'/>
+                            <field name="pool_medical_id"
+                                   domain="[('prestataire_id', '=', prestataire_id)]"
+                                   options ='{ "no_open": True, "no_create": True}'/>
+                            <!--('(                                 categorie_id', '=', 'CRO')-->
+                        </group>
+                        <hr/>
+                        <notebook>
+                            <page string="NOTES / OBSERVATION:">
+                                <field name="note"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+         </record>
+         <!-- CATEGORIE PRESTATAIRE List view -->
+         <record id="proximas_categorie_prestataire_view_list" model="ir.ui.view">
+            <field name="name">Catégorie Prestataire list view</field>
+            <field name="model">proximas.categorie.prestataire</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="id"/>
+                    <field name="name"/>
+                    <field name="libelle"/>
+                    <field name="active"/>
+                    <field name="note"/>
+                </tree>
+            </field>
+         </record>
+         <!-- CATEGORIE PRESTATAIRE Form view-->
+         <record id="proximas_categorie_prestataire_view_form" model="ir.ui.view">
+            <field name="name">Catégorie Prestataire form view</field>
+            <field name="model">proximas.categorie.prestataire</field>
+            <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <group>
+                            <group>
+                                <field name="name" class="h4 text-primary"/>
+                                <field name="libelle" class="h5 text-primary"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="NOTES / OBSERVATION:">
+                                <field name="note"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+         </record>
+        <!-- GRADE MEDECIN List view -->
+         <record id="proximas_grade_medecin_view_list" model="ir.ui.view">
+            <field name="name">Grades Médecins list view</field>
+            <field name="model">proximas.grade.medecin</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="id"/>
+                    <field name="grade"/>
+                    <field name="name"/>
+                    <field name="note"/>
+                </tree>
+            </field>
+         </record>
+         <!-- GRADES MEDECIN Form view-->
+         <record id="proximas_grade_medecin_view_form" model="ir.ui.view">
+            <field name="name">Grade Médecin form view</field>
+            <field name="model">proximas.grade.medecin</field>
+            <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_title" name="title">
+                            <label for="grade" string="Grade:" class="oe_edit_only"/>
+                            <h2><field name="grade" default_focus="1" placeholder="Grade" class="text-primary"/></h2>
+                        </div>
+                        <group>
+                            <field name="name" string="Description" class="h4 text-primary" placeholder="texte descriptif pour le grade"/>
+                        </group>
+                        <hr/>
+                        <notebook>
+                            <page string="NOTES / OBSERVATION:">
+                                <field name="note"/>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+         </record>
+         <!-- MEDECIN List view -->
+         <record id="proximas_medecin_view_list" model="ir.ui.view">
+            <field name="name">Médecin list view</field>
+            <field name="model">proximas.medecin</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="num_ordre"/>
+                    <field name="name"/>
+                    <field name="grade_id"/>
+                    <field name="phone"/>
+                    <field name="email"/>
+                    <field name="is_conseil"/>
+                    <field name="specialite_id"/>
+                </tree>
+            </field>
+         </record>
+         <!-- MEDECIN (RES_PARTNER) Form view-->
+         <record id="proximas_medecin_view_form" model="ir.ui.view">
+            <field name="name">Medecin form view</field>
+            <field name="model">proximas.medecin</field>
+            <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+            <field name="arch" type="xml">
+                <form>
+                    <sheet>
+                        <div class="oe_right oe_button_box" name="buttons" />
+                            <field name="is_medecin" invisible="1"/>
+                            <field name="is_company" invisible="1"/>
+                            <field name="name" invisible="1"/>
+                        <field name="full_name" invisible="1"/>
+                            <field name="parent_id" invisible="1"/>
+                        <field name="image"
+                               widget='image'
+                               class="oe_left oe_avatar rounded img-thumbnail"
+                               options="{'preview_image': 'image_medium', 'size': [90, 90]}" />
+                        <div class="oe_title" name="title">
+                            <label for="nom" string="Nom" class="oe_edit_only"/>
+                            <h2><field name="nom" default_focus="1" placeholder="nom de famille" class="text-primary"/></h2>
+                            <label for="prenoms" string="Prénom(s)" class="oe_edit_only"/>
+                            <h2><field name="prenoms"  placeholder="prénoms" class="text-primary"/></h2>
+                        </div>
+                        <!--<group>
+                            <field name="name"/>
+                        </group>-->
+                        <hr/>
+                        <notebook>
+                            <page string="Infos Personnelles">
+                                <group col="6" colspan="2">
+                                    <group>
+                                        <field name="genre" required="1" widget="radio" options="{'horizontal': True}"/>
+                                        <field name="num_ordre"/>
+                                        <field name="grade_id" options='{"no_open": True, "no_create": True}'/>
+                                        <field name="specialite_id" options='{"no_open": True, "no_create": True}'/>
+                                    </group>
+                                    <group>
+                                        <field name="title" options='{"no_open": True}'
+                                                    attrs="{'invisible': [('is_company', '=', True)]}"/>
+                                        <field name="function" placeholder="e.g. Médecin Chef"
+                                                    attrs="{'invisible': [('is_company','=', True)]}"/>
+                                        <field name="is_conseil"/>
+                                    </group>
+                                </group>
+                                <hr/>
+                            </page>
+                            <page string="Adresse &amp; Contacts">
+                                <group>
+                                    <group>
+                                        <field name="type" attrs="{'invisible': [('parent_id','=', False)]}" groups="base.group_no_one"/>
+                                        <label for="street" string="Address"/>
+                                        <div class="o_address_format">
+                                            <field name="street" placeholder="Commune..." class="o_address_street"
+                                                attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                            <field name="street2" placeholder="Quartier..." class="o_address_street"
+                                                attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                            <field name="city" placeholder="Ville" class="o_address_city"
+                                                attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                            <field name="zip" placeholder="Boîte Postale" class="o_address_zip"
+                                                attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                            <field name="country_id" placeholder="Pays" class="o_address_country" options='{"no_open": True, "no_create": True}'
+                                                attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
+                                                context="{'default_country_id':'CI'}"/>
+                                        </div>
+                                        <field name="website" widget="url" placeholder="e.g. www.proximas.net"/>
+                                    </group>
+                                 <group>
+                                        <field name="phone" widget="phone"/>
+                                        <field widget="mask" data-inputmask-mask="(999)99-99-99-99" name="mobile"/>
+                                        <field name="fax"/>
+                                        <field name="user_ids" invisible="1"/>
+                                        <field name="email" widget="email" attrs="{'required': [('user_ids','!=', [])]}"/>
+                                        <!--<field name="lang"/>
+                                        <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>-->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Notes / Observation">
+                                <field name="note"/>
+                            </page>
+                      </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- POOL PRESTATION WIZARD Form view-->
+        <record id="proximas_pool_prestation_wizard_view_form" model="ir.ui.view">
+           <field name="name">pool prestation wizard form view</field>
+           <field name="model">pool.prestation.wizard</field>
+           <field name="arch" type="xml">
+               <form>
+                   <sheet>
+                       <div class="oe_title" name="title">
+                           <label for="prestataire_id" string="Prestataire" />
+                           <h2><field name="prestataire_id" default_focus="1"
+                                      placeholder="Sélectionner le prestataire "
+                                      options='{"no_open": True, "no_create": True}'/>
+                           </h2>
+                       </div>
+                       <hr/>
+                       <notebook>
+                           <page string="Création du Pool Prestations Médicales:">
+                               <field name="prestation_ids">
+                                   <!--<tree>
+                                       <field name="num_ordre"/>
+                                       <field name="name"/>
+                                       <field name="mobile"/>
+                                       <field name="email"/>
+                                       <field name="is_conseil"/>
+                                       <field name="specialite_id"/>
+                                    </tree>-->
+                               </field>
+                           </page>
+                       </notebook>
+                   </sheet>
+                   <footer>
+                       <button name='record_pool'
+                            string='Valider'
+                            class='btn-primary'
+                            type='object'/>
+                            ou
+                       <button string='Cancel'
+                            class='btn-default'
+                            special='cancel'/>
+                   </footer>
+               </form>
+           </field>
+        </record>
+        <!-- POOL MEDICAL WIZARD Form view-->
+        <record id="proximas_pool_medical_wizard_view_form" model="ir.ui.view">
+           <field name="name">pool medical wizard form view</field>
+           <field name="model">pool.medical.wizard</field>
+           <field name="arch" type="xml">
+               <form>
+                   <sheet>
+                       <div class="oe_title" name="title">
+                           <label for="prestataire_id" string="Prestataire" />
+                           <h2><field name="prestataire_id" default_focus="1"
+                                      placeholder="Sélectionner le prestataire"
+                                      options='{"no_open": True, "no_create": True}'/>
+                           </h2>
+                       </div>
+                       <hr/>
+                       <notebook>
+                           <page string="Création du Pool Médical:">
+                               <field name="medecin_ids">
+                                   <!--<tree>
+                                       <field name="num_ordre"/>
+                                       <field name="name"/>
+                                       <field name="mobile"/>
+                                       <field name="email"/>
+                                       <field name="is_conseil"/>
+                                       <field name="specialite_id"/>
+                                    </tree>-->
+                               </field>
+                           </page>
+                       </notebook>
+                   </sheet>
+                   <footer>
+                       <button name='record_pool'
+                            string='Valider'
+                            class='btn-primary'
+                            type='object'/>
+                            ou
+                       <button string='Cancel'
+                            class='btn-default'
+                            special='cancel'/>
+                   </footer>
+               </form>
+           </field>
+        </record>
+        <act_window id="proximas_pool_prestation_wizard_action" name="Assistant Création Pool Prestations"
+                    res_model="pool.prestation.wizard"
+                    view_mode="form"
+                    target="new"
+                    />
+        <act_window id="proximas_pool_medical_wizard_action" name="Assistant Création Pool Médical Prestataire"
+                    res_model="pool.medical.wizard"
+                    view_mode="form"
+                    target="new"
+                    />
+        <record model="ir.actions.act_window" id="proximas_prestation_action">
+            <field name="name">Proximaas: Gestion Prestations Fournies</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.prestation</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="proximas_prestation_fournie_search_view" />
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <!--<record id="base.action_partner_tree_view1" model="ir.actions.act_window.view">
+            <field name="sequence" eval="0"/>
+            <field name="view_mode">tree</field>
+            &lt;!&ndash;<field name="view_id" ref="base.view_partner_tree"/>&ndash;&gt;
+            <field name="view_id" ref="proximas_prestataire_view_list"/>
+            <field name="act_window_id" ref="proximas_prestataire_action"/>
+        </record>-->
+        <record id="proximas_prestataire_action" model="ir.actions.act_window">
+            <field name="name">Proximaas: Prestataire Conventionné</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="view_id" ref="proximas_prestataire_view_list"/>
+            <!--<field name="search_view_id" ref="proximas_prestataire_view_search"/>-->
+            <field name="domain">[('is_prestataire', '=', True)]</field>
+            <field name="context">
+                {'default_customer': False, 'default_supplier': True, 'default_company_type': 'company',
+                'default_is_company': True, 'default_is_prestataire': True, 'default_parent_id': False}
+            </field>
+            <field name="help" type="html">
+                  <p class="oe_view_nocontent_create">
+                    Cliquez pour enregistrer une nouvelle convention Prestataire.
+                  </p><p>
+                    Proximas vous aide à suivre facilement toutes les conventions avec les prestataires de soins médicaux  :
+                    Détails de prestations médicales offertes, ainsi que les éléments (tarifs, coefiscients et autres
+                    plafonds arrêtés, etc.) à prendre en compte dans la gestion quuotidienne des prises en charge, etc.
+                  </p>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_medecin_action">
+            <field name="name">Proximaas: Médécin et Corps médical</field>
+            <field name="res_model">proximas.medecin</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[('is_medecin', '=', True)]</field>
+            <field name="context">
+                {'default_customer': False, 'default_supplier': True, 'default_is_medecin': True,
+                'default_is_contact': True,'default_parent_id': False, 'default_type':'contact', 'default_country_id':'CI'}
+            </field>
+            <field name="help" type="html">
+                  <p class="oe_view_nocontent_create">
+                    Cliquez pour enregistrer un médecin dans la base de données Proximas..
+                  </p><p>
+                    Proximas vous aide à suivre facilement toutes les conventions avec les prestataires de soins médicaux  :
+                    Détails de prestations médicales offertes, ainsi que les médecins et le personnel du corps médical
+                    à prendre en compte dans la gestion quuotidienne des prises en charge, etc.
+                  </p>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_grade_action">
+            <field name="name">Proximaas: Gestion Grades Médecin</field>
+            <field name="res_model">proximas.grade.medecin</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Cliquez pour enregistrer un nouvel grade pour médecin.
+              </p>
+              <p>
+                Proximas vous aide à créer et suivre facilement tous les médecins qui interviennent dans le processus de
+                prise en charge médicale et paramédicale, selon leur grade et attributions dans la chaine de valeur...
+              </p>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_categorie_prestaire_action">
+            <field name="name">Proximaas: Gestion Catégorie Prestataire</field>
+            <field name="res_model">proximas.categorie.prestataire</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Cliquez pour enregistrer une nouvelle catégorie.
+              </p><p>
+                Proximas vous aide à créer et suivre facilement tous les types de prestataires selon leur catégorie...
+              </p>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_sms_users_action">
+           <field name="name">Proximaas: Gestion Utilisateurs SMS</field>
+           <field name="res_model">proximas.sms.user</field>
+           <field name="view_mode">tree,form</field>
+           <field name="help" type="html">
+             <p class="oe_view_nocontent_create text-primary">
+               Cliquez pour enregistrer un nouvel utlisateur pour l'envoi et la réception de SMS via l'API 2-way-SMS.
+             </p>
+             <p class="text-mute text-justify">
+               Proximas vous aide à créer et suivre facilement les prises en charge médicales via une API d'échange de
+               données. Ce système vous permet à travers de simples syntaxe via le texto, d'envoyer des requêtes vers
+               le serveur, pour la création instantannée de prises en charge. Ce système est un paliatif à la non disponibilité
+               d'internet dans certaines zones. Grâce au simple SMS, les utilisateurs interagissent avec le
+               serveur comme s'ils y étaient connectés pour assurer le suivi de prises en charge des assurés et par la même
+               occasion, assurer la prise en compte des prestations fournies en temps réel...
+             </p>
+           </field>
+        </record>
+</odoo>

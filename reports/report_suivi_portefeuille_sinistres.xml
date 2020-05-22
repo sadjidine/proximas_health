@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+
+<odoo>
+    <record model="report.paperformat" id="paperformat_report_suivi_sinistres">
+        <field name="name">European A4 Landscape</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_width">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">35</field>
+        <field name="margin_right">5</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">30</field>
+        <field name="dpi">90</field>
+    </record>
+    <report id="report_report_suivi_sinistres_template"
+            string="Rapports Suivi Portefeuille de Risques"
+            model="proximas.sinistre.report.wizard"
+            name="proximas_medical.report_suivi_sinistres_view"
+            report_type="qweb-pdf"
+            paperformat="paperformat_report_suivi_sinistres"
+            menu="False"
+
+    />
+    <template id="report_suivi_sinistres_view">
+        <t t-call="report.html_container">
+            <t t-call="report.external_layout">
+                <div class="page">
+                    <!--Rapport Détaillé par  Rubrique médicale -->
+                    <t t-if="report_kpi in ['rubrique'] and report_type in ['detail']">
+                        <div class="header">
+                            <h4 class="bg-primary">
+                                <strong>
+                                    RAPPORT DE SUIVI DU PORTEFEUILLE DE RISQUES - DETAILS SINISTRES / RUBRIQUE MEDICALE
+                                </strong>
+                            </h4>
+                            <p>SAM : <strong><span t-esc="res_company.rml_header1"/></strong></p>
+                            <p class="h5"> Détails des sinistres pour la rubrique médicale: <strong class="text-primary"><t t-esc="rubrique_medicale"/> </strong></p>
+                            <p>
+                               <span> Période du: </span> <strong><t t-esc="date_debut"/></strong><span> Au: </span><strong><t t-esc="date_fin"/></strong>
+                            </p>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped" style="width: 100% border-bottom: 2px solid black">
+                                <thead class="bg-primary" >
+                                    <th class="text-right">Date Acte</th>
+                                    <th class="text-left">Code ID.</th>
+                                    <th>Assuré bénéficiare</th>
+                                    <th class="text-center">Age</th>
+                                    <th>Genre</th>
+                                    <th>Lien Fam.</th>
+                                    <th>Prestation Médicale</th>
+                                    <th class="text-right">S/Total</th>
+                                    <th class="text-right">S/Tot. PC</th>
+                                    <th class="text-right">S/Tot. NPC</th>
+                                    <th class="text-right">Mt. Exclu</th>
+                                    <th class="text-right">Ticket Mod.</th>
+                                    <th class="text-right">Part SAM</th>
+                                </thead>
+                                <tbody>
+                                    <!--<t t-set="num" t-value="0"/>
+                                    <t t-set="tot_cout_moyen" t-value="0"/>
+                                    <t t-set="tot_nbre_actes" t-value="0"/>-->
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <!--<t t-set="num" t-value="num + 1"/>
+                                        <t t-set="cout_moyen" t-value="0"/>
+                                        <t t-if="int(doc['nbre_actes']) != 0">
+                                            <t t-set="cout_moyen" t-value="int(doc['cout_total'])/int(doc['nbre_actes'])"/>
+                                        </t>
+                                        <t t-set="tot_cout_moyen" t-value="tot_cout_moyen + cout_moyen"/>-->
+                                        <t t-set="date_execution" t-value="datetime.datetime.strptime(doc['date_execution'],'%Y-%m-%d')"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['mt_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <tr>
+                                            <td class="text-right"><span t-esc="date_execution.strftime('%d/%m/%Y')"/></td>
+                                            <td><span t-esc="doc['code_id']"/></td>
+                                            <td><span t-esc="doc['assure_id'].name"/></td>
+                                            <td class="text-center"><span t-esc="doc['age']"/></td>
+                                            <td><span t-esc="doc['genre']"/></td>
+                                            <td><span t-esc="doc['statut_familial']"/></td>
+                                            <td class="text-primary"><span t-esc="doc['details_prestation']"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['mt_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><strong><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="7"><strong>TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </t>
+                    <!--Rapport Regroupement par Rubrique médicale-->
+                    <t t-if="report_kpi in ['rubrique'] and report_type in ['groupe']">
+                        <div class="header">
+                            <h4 class="bg-primary">
+                                <strong>
+                                    RAPPORT DE SUIVI DU PORTEFEUILLE DE RISQUES - SINISTRES / RUBRIQUE MEDICALE
+                                </strong>
+                            </h4>
+                            <p>SAM : <strong><span t-esc="res_company.rml_header1"/></strong></p>
+                            <p>
+                               <span> Période du: </span> <strong><t t-esc="date_debut"/></strong><span> Au: </span><strong><t t-esc="date_fin"/></strong>
+                            </p>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped" style="width: 100% border-bottom: 2px solid black">
+                                <thead class="bg-primary" >
+                                    <th class="text-right">N°</th>
+                                    <th class="text-left">Rubrique Médicale</th>
+                                    <th class="text-right">Coût Moyen</th>
+                                    <th class="text-right">Nbre. Actes</th>
+                                    <th class="text-right">S/Totaux</th>
+                                    <th class="text-right">S/Totaux PC</th>
+                                    <th class="text-right">S/Totaux NPC</th>
+                                    <th class="text-right">S/Tot. Exclus</th>
+                                    <th class="text-right">S/Tot. ASSURE</th>
+                                    <th class="text-right">S/Tot. Part SAM</th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="num" t-value="0"/>
+                                    <t t-set="tot_cout_moyen" t-value="0"/>
+                                    <t t-set="tot_nbre_actes" t-value="0"/>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="num" t-value="num + 1"/>
+                                        <t t-set="cout_moyen" t-value="0"/>
+                                        <t t-if="int(doc['nbre_actes']) != 0">
+                                            <t t-set="cout_moyen" t-value="int(doc['cout_total'])/int(doc['nbre_actes'])"/>
+                                        </t>
+                                        <t t-set="tot_cout_moyen" t-value="tot_cout_moyen + cout_moyen"/>
+                                        <t t-set="tot_nbre_actes" t-value="tot_nbre_actes + int(doc['nbre_actes'])"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['total_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <tr>
+                                            <td class="text-center"><span t-esc="num"/></td>
+                                            <td class="text-primary"><strong><span t-esc="doc['rubrique_medicale']"/></strong></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><strong><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="3"><strong>TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_nbre_actes).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </t>
+                    <!--Cas Rapport détaillé par Contrat adhérent -->
+                    <t t-if="report_kpi in ['contrat'] and report_type in ['detail']">
+                        <div class="header">
+                            <h4 class="bg-primary">
+                                <strong>
+                                    RAPPORT DE SUIVI DU PORTEFEUILLE DE RISQUES - DETAILS SINISTRES / CONTRAT (ADHERENT)
+                                </strong>
+                            </h4>
+                            <!--<p>SAM : <strong><span t-esc="res_company.rml_header1"/></strong></p>-->
+                            <h5> Détails des sinistres contrat adhérent: <strong class="text-primary"><t t-esc="contrat_adherent"/></strong></h5>
+                            <h6> Police Couverture: <strong class="text-primary"><t t-esc="police_id"/></strong></h6>
+                            <p>
+                               <span> Période du: </span> <strong><t t-esc="date_debut"/></strong><span> Au: </span><strong><t t-esc="date_fin"/></strong>
+                            </p>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped" style="width: 100% border-bottom: 2px solid black">
+                                <thead class="bg-primary" >
+                                    <th class="text-right">Date Acte</th>
+                                    <th class="text-left">Code ID.</th>
+                                    <th>Assuré Bénéficiaire</th>
+                                    <th class="text-center">Age</th>
+                                    <th>Genre</th>
+                                    <th>Lien Fam.</th>
+                                    <th>Prestation / Dispensation</th>
+                                    <th class="text-right">S/Total</th>
+                                    <th class="text-right">S/Tot. PC</th>
+                                    <th class="text-right">S/Tot. NPC</th>
+                                    <th class="text-right">Mt. Exclu</th>
+                                    <th class="text-right">Ticket Mod.</th>
+                                    <th class="text-right">Part SAM</th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="date_execution" t-value="datetime.datetime.strptime(doc['date_execution'],'%Y-%m-%d')"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['mt_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <tr>
+                                            <td class="text-right"><span t-esc="date_execution.strftime('%d/%m/%Y')"/></td>
+                                            <td><span t-esc="doc['code_id']"/></td>
+                                            <td><span t-esc="doc['assure_id'].name"/></td>
+                                            <td class="text-center"><span t-esc="doc['age']"/></td>
+                                            <td><span t-esc="doc['genre']"/></td>
+                                            <td><span t-esc="doc['statut_familial']"/></td>
+                                            <td class="text-primary"><span t-esc="doc['details_prestation']"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['mt_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><strong><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="7"><strong>TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </t>
+                    <!--Rapport Regroupement par Contrat Adhérent-->
+                    <t t-if="report_kpi in ['contrat'] and report_type in ['groupe']">
+                        <div class="header">
+                            <h4 class="bg-primary">
+                                <strong>
+                                    RAPPORT DE SUIVI DU PORTEFEUILLE DE RISQUES - SINISTRES / CONTRAT (ADHERENT)
+                                </strong>
+                            </h4>
+                            <p>SAM : <strong><span t-esc="res_company.rml_header1"/></strong></p>
+                            <p>
+                               <span> Période du: </span> <strong><t t-esc="date_debut"/></strong><span> Au: </span><strong><t t-esc="date_fin"/></strong>
+                            </p>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped" style="width: 100% border-bottom: 2px solid black">
+                                <thead class="bg-primary" >
+                                    <th class="text-right">N°</th>
+                                    <th class="text-left">Noms &amp; Prénoms Adhérent/Souscripteur</th>
+                                    <th class="text-right">Coût Moyen</th>
+                                    <th class="text-right">Nbre. Actes</th>
+                                    <th class="text-right">S/Totaux</th>
+                                    <th class="text-right">S/Totaux PC</th>
+                                    <th class="text-right">S/Totaux NPC</th>
+                                    <th class="text-right">S/Tot. Exclus</th>
+                                    <th class="text-right">S/Tot. ASSURE</th>
+                                    <th class="text-right">S/Tot. Part SAM</th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="num" t-value="0"/>
+                                    <t t-set="tot_cout_moyen" t-value="0"/>
+                                    <t t-set="tot_nbre_actes" t-value="0"/>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="num" t-value="num + 1"/>
+                                        <t t-set="cout_moyen" t-value="0"/>
+                                        <t t-if="int(doc['nbre_actes']) != 0">
+                                            <t t-set="cout_moyen" t-value="int(doc['cout_total'])/int(doc['nbre_actes'])"/>
+                                        </t>
+                                        <t t-set="tot_cout_moyen" t-value="tot_cout_moyen + cout_moyen"/>
+                                        <t t-set="tot_nbre_actes" t-value="tot_nbre_actes + int(doc['nbre_actes'])"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['total_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <tr>
+                                            <td class="text-center"><span t-esc="num"/></td>
+                                            <td class="text-primary"><strong><span t-esc="doc['contrat_adherent']"/></strong></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><strong><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="3"><strong>TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_nbre_actes).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </t>
+                    <!--Cas Rapport détaillé par Assuré Bénéficiaire -->
+                    <t t-if="report_kpi in ['assure'] and report_type in ['detail']">
+                        <div class="header">
+                            <h4 class="bg-primary">
+                                <strong>
+                                    RAPPORT DE SUIVI DU PORTEFEUILLE DE RISQUES - DETAILS SINISTRES / ASSURE (BENEFICIAIRE)
+                                </strong>
+                            </h4>
+                            <!--<p>SAM : <strong><span t-esc="res_company.rml_header1"/></strong></p>-->
+                            <h5> Détails des sinistres de l'assuré: <strong class="text-primary"><t t-esc="assure"/></strong></h5>
+                            <h6> Police Couverture: <strong class="text-primary"><t t-esc="police_id"/></strong></h6>
+                            <p>
+                               <span> Période du: </span> <strong><t t-esc="date_debut"/></strong><span> Au: </span><strong><t t-esc="date_fin"/></strong>
+                            </p>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped" style="width: 100% border-bottom: 2px solid black">
+                                <thead class="bg-primary" >
+                                    <th class="text-right">Date Acte</th>
+                                    <th class="text-left">Code ID.</th>
+                                    <th>Assuré Bénéficiaire</th>
+                                    <th class="text-center">Age</th>
+                                    <th>Genre</th>
+                                    <th>Lien Fam.</th>
+                                    <th>Prestation / Dispensation</th>
+                                    <th class="text-right">S/Total</th>
+                                    <th class="text-right">S/Tot. PC</th>
+                                    <th class="text-right">S/Tot. NPC</th>
+                                    <th class="text-right">Mt. Exclu</th>
+                                    <th class="text-right">Ticket Mod.</th>
+                                    <th class="text-right">Part SAM</th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="date_execution" t-value="datetime.datetime.strptime(doc['date_execution'],'%Y-%m-%d')"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['mt_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <tr>
+                                            <td class="text-right"><span t-esc="date_execution.strftime('%d/%m/%Y')"/></td>
+                                            <td><span t-esc="doc['code_id']"/></td>
+                                            <td><span t-esc="doc['assure_id'].name"/></td>
+                                            <td class="text-center"><span t-esc="doc['age']"/></td>
+                                            <td><span t-esc="doc['genre']"/></td>
+                                            <td><span t-esc="doc['statut_familial']"/></td>
+                                            <td class="text-primary"><span t-esc="doc['details_prestation']"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['mt_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><strong><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="7"><strong>TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </t>
+                    <!--Rapport Regroupement par Assure Beneficiaire-->
+                    <t t-if="report_kpi in ['assure'] and report_type in ['groupe']">
+                        <div class="header">
+                            <h4 class="bg-primary">
+                                <strong>
+                                    RAPPORT DE SUIVI DU PORTEFEUILLE DE RISQUES - SINISTRES / ASSURE (BENEFICIAIRE)
+                                </strong>
+                            </h4>
+                            <p>SAM : <strong><span t-esc="res_company.rml_header1"/></strong></p>
+                            <p>
+                               <span> Période du: </span> <strong><t t-esc="date_debut"/></strong><span> Au: </span><strong><t t-esc="date_fin"/></strong>
+                            </p>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped" style="width: 100% border-bottom: 2px solid black">
+                                <thead class="bg-primary" >
+                                    <th class="text-right">N°</th>
+                                    <th class="text-right">Code ID.</th>
+                                    <th class="text-left">Noms &amp; Prénoms Assuré</th>
+                                    <th class="text-right">Lien Fam.</th>
+                                    <th class="text-right">Coût Moyen</th>
+                                    <th class="text-right">Nbre. Actes</th>
+                                    <th class="text-right">S/Totaux</th>
+                                    <th class="text-right">S/Totaux PC</th>
+                                    <th class="text-right">S/Totaux NPC</th>
+                                    <th class="text-right">S/Tot. Exclus</th>
+                                    <th class="text-right">S/Tot. ASSURE</th>
+                                    <th class="text-right">S/Tot. Part SAM</th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="num" t-value="0"/>
+                                    <t t-set="tot_cout_moyen" t-value="0"/>
+                                    <t t-set="tot_nbre_actes" t-value="0"/>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="num" t-value="num + 1"/>
+                                        <t t-set="cout_moyen" t-value="0"/>
+                                        <t t-if="int(doc['nbre_actes']) != 0">
+                                            <t t-set="cout_moyen" t-value="int(doc['cout_total'])/int(doc['nbre_actes'])"/>
+                                        </t>
+                                        <t t-set="tot_cout_moyen" t-value="tot_cout_moyen + cout_moyen"/>
+                                        <t t-set="tot_nbre_actes" t-value="tot_nbre_actes + int(doc['nbre_actes'])"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['total_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <tr>
+                                            <td class="text-center"><span t-esc="num"/></td>
+                                            <td class="text-primary"><span t-esc="doc['code_id']"/></td>
+                                            <td class="text-primary"><strong><span t-esc="doc['assure_beneficiaire']"/></strong></td>
+                                            <td class="text-primary"><strong><span t-esc="doc['statut_familial']"/></strong></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><strong><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="5"><strong>TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_nbre_actes).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </t>
+                </div>
+                <div class="footer">
+                    <div class="row text-center" style="border-top: 2px solid black;margin-top:10px;">
+                        <div class="col-xs-4 text-left">
+                            SIGEM - Proximaas. Tous droits reservés. Copyright © 2018.
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <t t-set="date" t-value="datetime.datetime.now()"/>
+                            <p>Edité par: <span t-esc="user.name"/> le: <span t-esc="date.strftime('%d-%m-%Y - %H:%M:%S')"/></p>
+                        </div>
+                        <div class="col-xs-4 text-right">
+                            <ul class="list-inline">
+                                <li>Page:</li>
+                                <li>
+                                    <span class="page"/>
+                                </li>
+                                <li>/</li>
+                                <li>
+                                    <span class="topage"/>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<record id="custom_dashboard_kanban_view" model="ir.ui.view">
+  <field name="name">custom.proximas.dashboard.view</field>
+  <field name="model">custom.proximas.dashboard</field>
+  <field name="arch" type="xml">
+    <kanban class="oe_background_grey o_kanban_dashboard o_salesteam_kanban o_project_kanban " create="0">
+       <field name="color"/>
+       <field name="name"/>
+       <templates>
+          <span t-name="kanban-box"> <!-- Use <t> tag instead of <span> for color change -->
+             <div t-attf-class="#{kanban_color(record.color.raw_value)} ">
+                <div class="o_project_kanban_manage">
+                   <a class="o_kanban_manage_toggle_button" href="#">More
+                       <i class="fa fa-caret-down"/>
+                    </a>
+                </div>
+                <div class="o_project_kanban_main" >
+                  <div class="o_kanban_card_content o_visible">
+                      <div class="o_kanban_primary_left" >
+                          <div class="">
+                              <center>
+                                 <span>
+                                    <span t-field="record.name"/>
+                                  </span>
+                              </center>
+                           </div>
+                            <div>
+                            <center>
+                               <button class="btn btn-primary" type="action" name="dashboard_sales_action_id" string="Quotations">Quotations</button>
+                                    <button class="btn btn-primary" type="action" name="dashboard_sales_order_action_id" >Sales order</button>
+                                    <h3>Custom Dashboard for Sales</h3>
+                               </center>
+                                </div>
+                            </div>
+                        </div>
+                     <div class="o_kanban_card_manage_pane o_invisible">
+                         <div class="col-xs-6 o_kanban_card_manage_section o_kanban_manage_view">
+                             <div class="o_kanban_card_manage_title">
+                                 <span>View</span>
+                             </div>
+                            </div>
+                          <div t-if="widget.editable" class="o_project_kanban_colorpicker" >
+                            <ul class="oe_kanban_colorpicker" data-field="color"/>
+                          </div>
+                     </div>
+                   </div>
+                </div>
+            </span>
+        </templates>
+    </kanban>
+  </field>
+</record>

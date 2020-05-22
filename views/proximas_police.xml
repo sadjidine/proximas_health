@@ -1,0 +1,979 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+
+<odoo>
+    <data>
+        <!-- CONTRAT wizard -->
+        <record id='contrat_wizard_form' model='ir.ui.view'>
+            <field name='name'>contrat wizard form view</field>
+            <field name='model'>proximas.contrat.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Contrat Adhérent">
+                    <sheet>
+                        <div class="panel">
+                          <h2 class="panel-header text-primary">Proximas : Assistant Création Contrat : </h2>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0">
+                              <p class="text-primary">Cet assistant vous permet de saisir les informations essentielles
+                                sur le souscripteur Adhérent afin de vous permettre d'évaluer si celui-ci remplit
+                                les conditions d'adhésion..
+                              </p>
+                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                              </footer>
+                            </blockquote>
+                          </div>
+                        </div>
+                        <group>
+                            <group col="4" colspan="2">
+                                <field name='police_id' options='{"no_open": True, "no_create": True}'/>
+                                <field name="date_activation"/>
+                                <field name='nom'/>
+                                <field name="prenoms"/>
+                                <field name="matricule"/>
+                                <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                                <field name="groupe_id" options='{"no_open": True, "no_create": True}'/>
+                                <field name="date_naissance"/>
+                                <field name="genre" widget="radio" options="{'horizontal': true}"/>
+                                <field name="age"/>
+                            </group>
+                        </group>
+                    </sheet>
+                    <footer class="oe_left">
+                        <button name='open_contrat_popup'
+                        string='Valider'
+                        class='btn btn-primary'
+                        type='object'/>
+                        /
+                        <button string='Cancel'
+                        class='btn btn-default'
+                        special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <!-- POOL CONTRAT ADHERENTS WIZARD Form view-->
+        <record id="proximas_pool_contrat_wizard_form" model="ir.ui.view">
+           <field name="name">pool contrat wizard form</field>
+           <field name="model">proximas.pool.contrat.wizard</field>
+           <field name="arch" type="xml">
+               <form>
+                   <sheet>
+                       <div class="panel">
+                          <h4 class="panel-header text-primary">Proximas : Assistant Création de Pool de Contrats : </h4>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0">
+                              <p class="text-primary">Cet assistant vous permet de créer à la volée, un ensemble de contrats pour
+                                  adhérents/souscripteurs. Pour cela, Il suffit de sélectionner le régime de couverture
+                                  (Police) concernée et sélectionner le pool d'adhérents/Soucripteurs pour lesquels un
+                                  contrat sera automatiquement créer...
+                              </p>
+                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                              </footer>
+                            </blockquote>
+                          </div>
+                       </div>
+                       <div class="oe_title" name="title">
+                           <label for="police_id" string="Police Couverture" />
+                           <h2><field name="police_id" default_focus="1"
+                                      placeholder="Sélectionner la régime de couverture"
+                                      options='{"no_open": True, "no_create": True}'/>
+                           </h2>
+                       </div>
+                       <hr/>
+                       <notebook>
+                           <page string="Création du Pool de contrat adhérents:">
+                               <field name="adherent_ids">
+                                   <!--<tree>
+                                       <field name="num_ordre"/>
+                                       <field name="name"/>
+                                       <field name="mobile"/>
+                                       <field name="email"/>
+                                       <field name="is_conseil"/>
+                                       <field name="specialite_id"/>
+                                    </tree>-->
+                               </field>
+                           </page>
+                       </notebook>
+                   </sheet>
+                   <footer>
+                       <button name='record_pool'
+                            string='Valider'
+                            class='btn-primary'
+                            type='object'/>
+                            /
+                       <button string='Cancel'
+                            class='btn-default'
+                            special='cancel'/>
+                   </footer>
+               </form>
+           </field>
+        </record>
+         <!-- COTISATION List view -->
+        <record id="proximas_prime_list_view" model="ir.ui.view">
+           <field name="name">Primes list view</field>
+           <field name="model">proximas.prime</field>
+           <field name="arch" type="xml">
+               <tree>
+                   <field name="name"/>
+                   <field name="police_id"/>
+                   <field name="applicable"/>
+                   <field name="periodicite"/>
+                   <field name="date_debut"/>
+                   <field name="date_fin"/>
+                   <field name="mt_prime"/>
+               </tree>
+           </field>
+        </record>
+        <!-- COTISATION Form view-->
+        <record id="proximas_prime_form_view" model="ir.ui.view">
+           <field name="name">Primes form view</field>
+           <field name="model">proximas.prime</field>
+           <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+           <field name="arch" type="xml">
+               <form>
+                   <sheet>
+                       <group col="4" colspane="2">
+                          <field name="name" string="Libellé Prime" required="1"/>
+                          <field name="police_id" required="1"
+                                 options='{"no_open": True, "no_create": True}'/>
+                          <field name="applicable" required="1" widget="radio" options="{'horizontal': true}"/>
+                          <field name="periodicite" required="1"/>
+                          <field name="date_debut" required="1"/>
+                          <field name="date_fin"/>
+                          <field name="mt_prime" required="1"/>
+                       </group>
+                       <group>
+                           <field name="note"/>
+                       </group>
+                       <!--<hr/>
+                       <notebook>
+                           <page string="NOTES / OBSERVATION:">
+                               <field name="note"/>
+                           </page>
+                       </notebook>-->
+                   </sheet>
+               </form>
+           </field>
+        </record>
+        <!-- CONTRAT POLICE Search & Filter-->
+        <record id="search_proximas_contrat" model="ir.ui.view">
+            <field name="model">proximas.contrat</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="code_id"/>
+                    <field name="code_id_externe"/>
+                    <field name="matricule"/>
+                    <field name="num_contrat"/>
+                    <field name="nom"/>
+                    <field name="prenoms"/>
+                    <field name="date_naissance"/>
+                    <field name="age"/>
+                    <field name="phone"/>
+                    <field name="mobile"/>
+                    <field name="mobile_2"/>
+                    <field name="email"/>
+                    <field name="police_id"/>
+                    <field name="localite_id"/>
+                    <field name="groupe_id"/>
+                    <newline />
+                    <group expand="0" string="Grouper par...">
+                        <filter name="actif"
+                            string="Contrats Actifs"
+                            domain="[('actif', '=', True)]"
+                        />
+                        <filter name="actif"
+                            string="Contrats Désactivés"
+                            domain="[('actif', '=', False)]"
+                        />
+                    </group>
+                </search>
+            </field>
+        </record>
+        <!-- CONTRAT POLICE List-->
+        <record model="ir.ui.view" id="proximas_contrat_view_list">
+          <field name="name">Proximas Contrat list</field>
+          <field name="model">proximas.contrat</field>
+          <field name="arch" type="xml">
+            <tree create="0">
+              <field name="matricule"/>
+              <field name="code_id"/>
+              <field name="code_id_externe"/>
+              <field name="police_id"/>
+              <field name="adherent_id"/>
+              <field name="age"/>
+              <field name="localite_id"/>
+              <field name="groupe_id"/>
+              <field name="date_activation" string="Date Contrat"/>
+              <!--<field name="jours_contrat"/>-->
+              <field name="actif"/>
+              <!--<field name="totaux_prime_police"/>
+              <field name="totaux_prime_contrat"/>
+              <field name="totaux_prime"/>-->
+              <field name="totaux_net_payable"/>
+              <field name="mt_totaux_versmt_cotisation"/>
+              <field name="mt_reste_payable"/>
+            </tree>
+          </field>
+        </record>
+        <!-- CONTRAT POLICE form -->
+        <record id="proximas_contrat_view_form" model="ir.ui.view">
+              <field name="name">Contrat form</field>
+              <field name="model">proximas.contrat</field>
+              <field name="arch" type="xml">
+                  <form string="Gestion : Contrat Police" create="0">
+                      <!--<header>
+                          <button name="toggle_active" type="object"
+                          string="Activé/Désactivé" class="oe_highlight"/>
+                      </header>-->
+                      <sheet>
+                          <!--<field name="id" invisible="1"/>-->
+                          <!--<div class="oe_button_box" name="button_box">
+                              &lt;!&ndash;<button name="toggle_actif" type="object" class="oe_stat_button" icon="fa-check">
+                                  <field name="actif" widget="boolean_button"
+                                         options='{"terminology":"custom",
+                                         "terminology_values":{
+                                         "string_true":"Activé(e)",
+                                         "hover_true":"Désactivé(e)",
+                                         "string_false":"Désactivé(e)",
+                                         "hover_false":"Réactivé(e)"
+                                         }}'
+                                  />
+                              </button>&ndash;&gt;
+                          </div>-->
+                          <div class="oe_button_box" name="button_box">
+                            <button name="toggle_actif" type="object" class="oe_stat_button" icon="fa-check">
+                                <field name="actif" widget="boolean_button" options='{"terminology": "active"}'/>
+                            </button>
+                        </div>
+                          <field name="photo"
+                                 widget='image'
+                                 class="oe_left oe_kanban_avatar"
+                                 options="{'preview_image': 'photo', 'size': [90,120]}"
+                                 readonly="1"/>
+                          <!--options="{'preview_image': 'image_medium', 'size': [90,120]}" -->
+                          <div class="oe_left text-primary">
+                              <h3><field name="name_adherent" readonly="1"/></h3>
+                              <group>
+                                  <field name="code_id" string="Code ID."/>
+                                  <field name="police_id" options='{"no_open": True, "no_create": True}'/>
+                                  <field name="num_contrat" string="Num. Contrat"/>
+                              </group>
+                              <group>
+                                  <field name="is_assure" invisible="1"/>
+                                  <field name="is_company" invisible="1"/>
+                                  <field name="name" invisible="1"/>
+                                  <field name="adherent_id" invisible="1"/>
+                              </group>
+                          </div>
+                          <hr/>
+                        <notebook>
+                            <page string="Infos Adhérent">
+                                <group col="6" colspan="2">
+                                  <field name="code_id_externe"
+                                     class="text-danger"
+                                   />
+                                   <field name="matricule"/>
+                                   <field name="ref"/>
+                                   <field name="statut_familial"/>
+                                   <field name="date_naissance" required="1"/>
+                                   <field name="age" />
+                                   <field name="genre" required="1" widget="radio" options="{'horizontal': true}"/>
+                                   <field name="date_inscription" />
+                                   <field name="date_activation_adherent"/>
+                                   <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                                   <field name="groupe_id" options='{"no_open": True, "no_create": True}'/>
+                                   <field name="cas_chronique" string="Malade chronique?"/>
+                              </group>
+                            </page>
+                            <page string="Conditions Générales">
+                                <group col="8" colspan="2">
+                                    <field name="age_limite_adherent"/>
+                                    <field name="nbre_conjoint"/>
+                                    <field name="nbre_conjoint_supp"/>
+                                    <field name="nbre_enfant"/>
+                                    <field name="nbre_enfant_supp"/>
+                                    <field name="nbre_cas_chronique"/>
+                                    <field name="date_activation"/>
+                                    <field name="validite_contrat"/>
+                                    <field name="date_echeance_police"/>
+                                    <field name="nbre_renouvellement_contrat"/>
+                                    <field name="delai_carence"/>
+                                    <field name="mt_annuel"/>
+                                    <field name="date_debut_contrat"/>
+                                    <field name="date_fin_prevue" string="Date Fin Contrat"/>
+                                    <field name="date_resiliation"/>
+                                    <field name="effectif_contrat"/>
+                                    <field name="retard_cotisation"/>
+                                    <field name="mt_reste_payable"/>
+                                    <field name="nbre_versmt_cotisation"/>
+                                    <field name="mt_totaux_versmt_cotisation"/>
+                                    <field name="nbre_maxi_conjoint"/>
+                                    <field name="nbre_maxi_enfant"/>
+                                    <field name="nbre_maxi_ascendant"/>
+                                    <field name="nbre_maxi_parent"/>
+                                    <field name="jours_contrat"/>
+                                    <field name="actif"/>
+                                    <field name="totaux_prime_police"/>
+                                    <field name="totaux_prime_contrat"/>
+                                    <field name="totaux_prime"/>
+                                    <field name="totaux_net_payable_police"/>
+                                    <field name="totaux_net_payable_contrat"/>
+                                    <field name="totaux_net_payable"/>
+                                </group>
+                            </page>
+                            <page string="Ayants-droit Déclarés">
+                                <field name="ayant_droit_ids"
+                                        mode="kanban"
+                                        domain="[('is_assure', '=', True)]"
+                                        context="{'default_contact_id': active_id,
+                                                    'default_use_parent_address': True,
+                                                    'default_is_assure': True,
+                                                    'default_customer': True}}">
+                                    <kanban>
+                                        <field name="color" />
+                                        <field name="name" />
+                                        <field name="statut_familial"/>
+                                        <field name="title" />
+                                        <field name="email" />
+                                        <field name="parent_id" />
+                                        <field name="is_company" />
+                                        <field name="function" />
+                                        <field name="phone" data-inputmask="'mask': '99 99 99 99'" />
+                                        <field name="street" />
+                                        <field name="street2" />
+                                        <field name="zip" />
+                                        <field name="city" />
+                                        <field name="country_id" />
+                                        <field name="mobile" data-inputmask="'mask': '99 99 99 99'" />
+                                        <field name="fax" data-inputmask="'mask': 99 99 99 99'" />
+                                        <field name="state_id" />
+                                        <field name="image"/>
+                                        <templates>
+                                            <t t-name="kanban-box">
+                                                <t t-set="color"
+                                                    t-value="kanban_color(record.color.raw_value)" />
+                                                <div style="position: relative"
+                                                        t-att-class="color + (record.title.raw_value == 1 ? ' kanban_color_alert' : '')">
+                                                    <a t-if="! read_only_mode"
+                                                        type="delete"
+                                                        style="position: absolute; right: 0; padding: 4px; diplay: inline-block">
+                                                        X
+                                                    </a>
+                                                    <div class="module_vignette">
+                                                        <a type="open">
+                                                            <t t-if="record.image.raw_value === true">
+                                                                <img t-att-src="kanban_image('proximas.ayant.droit',
+                                                                                                'image',
+                                                                                                record.id.value,
+                                                                                                {'preview_image': 'image_small'})"
+                                                                        width="90" height="120" class="oe_kanban_avatar"
+                                                                />
+                                                            </t>
+                                                            <t t-if="record.image and record.image.raw_value !== false">
+                                                                <img t-att-src="'data:image/png;base64,'+record.image.raw_value"
+                                                                     width="90" height="120" class="oe_kanban_avatar"
+                                                                />
+                                                            </t>
+                                                            <t t-if="record.image.raw_value === false and
+                                                                        (!record.image or record.image.raw_value === false)">
+                                                                <t t-if="record.is_company.raw_value === true">
+                                                                    <img t-att-src='_s + "/base/static/src/img/company_image.png"'
+                                                                         width="90" height="120" class="oe_kanban_avatar"
+                                                                    />
+                                                                </t>
+                                                                <t t-if="record.is_company.raw_value === false">
+                                                                    <img t-att-src='_s + "/base/static/src/img/avatar.png"'
+                                                                         width="90" height="120" class="oe_kanban_avatar"
+                                                                    />
+                                                                </t>
+                                                            </t>
+                                                        </a>
+                                                        <div class="module_desc">
+                                                            <div class="kanban_box_content kanban_color_bglight kanban_color_border">
+                                                                <table class="kanban_table">
+                                                                    <tr>
+                                                                        <td class="kanban_title1" align="left" valign="middle">
+                                                                            <h4 t-if="record.statut_familial.raw_value" class="text-center">
+                                                                                <a type="open">
+                                                                                    <field name="statut_familial"/>
+                                                                                </a>
+                                                                            </h4>
+                                                                            <h4 class="text-center">
+                                                                                <a type="open">
+                                                                                    <field name="name" />
+                                                                                </a>
+                                                                            </h4>
+                                                                            <h4 class="text-success" align="center">
+                                                                                <field name="code_id" />
+                                                                            </h4>
+                                                                            <div>
+                                                                                <a t-if="record.email.raw_value"
+                                                                                    t-att-href="'mailto:'+record.email.value">
+                                                                                    <field name="email" />
+                                                                                </a>
+                                                                            </div>
+                                                                            <div t-if="record.phone.raw_value">
+                                                                                Phone:
+                                                                                <field name="phone"
+                                                                                        data-inputmask="'mask': '9999-9999'" />
+                                                                            </div>
+                                                                            <div t-if="record.mobile.raw_value">
+                                                                                Mobile:
+                                                                                <field name="mobile" data-inputmask="'mask': '9999-9999'" />
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </templates>
+                                    </kanban>
+                                    <form string="AYANT-DROIT">
+                                        <sheet>
+                                            <div class="oe_right oe_button_box" name="buttons" />
+                                            <field name="image"
+                                                   widget='image'
+                                                   class="oe_avatar"
+                                                   options="{'preview_image': 'image_medium', 'size': [90, 120]}" />
+                                            <div class="oe_title" name="title">
+                                                <h2><field name="nom" placeholder="Nom"/></h2>
+                                                <h2><field name="prenoms" placeholder="Prénoms"/></h2>
+                                                <h3 class="text-primary"><field name="code_id"/></h3>
+                                                <field name="name" invisible="1"/>
+                                                <field name="full_name" invisible="1"/>
+                                            </div>
+                                            <group name="data">
+                                                <group name="main">
+                                                    <field name="code_id_externe"/>
+                                                    <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                                                    <field name="statut" required="1"/>
+                                                    <field name="date_inscription" />
+                                                    <field name="date_activation"/>
+                                                </group>
+                                                <group>
+                                                    <field name="date_naissance" required="1"/>
+                                                    <field name="age" />
+                                                    <field name="genre" widget="radio" options="{'horizontal': true}"
+                                                           onchange="_check_genre()" required="1"/>
+                                                    <field name="cas_chronique"/>
+                                                    <field name="decede"/>
+                                                </group>
+                                            </group>
+                                        </sheet>
+                                        <!--<sheet>
+                                            <field name="image"
+                                                    widget='image'
+                                                    class="avatar left"
+                                                    options='{"preview_image": "image_medium"}' />
+                                            <div class="title oe_right">
+                                                    <label for="name" string="Nom et Prénoms" class="edit_only" />
+                                                    <h2>
+                                                        <field name="nom"
+                                                                style="width: 90%%"
+                                                                placeholder="Nom de famille"
+                                                                 />
+                                                        <field name="prenoms"
+                                                                style="width: 90%%"
+                                                                placeholder="Prénom(s)"
+                                                                 />
+                                                    </h2>
+                                            </div>
+                                            <group name="data">
+                                            <group name="main">
+                                                <field name="ref" />
+                                                <field name="code_id" />
+                                                <field name="est_invalide"/>
+                                            </group>
+                                            <group>
+                                                <field name="date_naissance" />
+                                                <field name="age" />
+                                                <field name="statut_familial" />
+                                                <field name="date_inscription" />
+                                                <field name="genre" />
+                                            </group>
+                                            </group>
+                                            <group col="2" colspan="2">
+                                                <field name="customer" invisible="True" />
+                                                <field name="use_parent_address" invisible="False"/>
+                                                <field class="inline" name="type" invisible="True"/>
+                                                <label for="street" string="Address" />
+                                                <div name="div_address" class="o_address_format">
+                                                    <field name="street"
+                                                            placeholder="Quartier..."
+                                                            class="o_address_street" />
+                                                    <field name="street2"
+                                                            placeholder="Rue..."
+                                                            class="o_address_street" />
+                                                    <field name="city"
+                                                            placeholder="Ville"
+                                                            class="o_address_city" />
+                                                    &lt;!&ndash;<field name="state_id"
+                                                            class="o_address_state"
+                                                            placeholder="State"
+                                                            options='{"no_open": True}'
+                                                            context="{'country_id': country_id, 'zip': zip}" />
+                                                    <field name="zip"
+                                                            placeholder="ZIP"
+                                                            class="o_address_zip" />&ndash;&gt;
+                                                    <field name="country_id"
+                                                            placeholder="Pays"
+                                                            class="o_address_country"
+                                                            options='{"no_open": True, "no_create": True}' />
+                                                </div>
+                                            </group>
+                                        </sheet>-->
+                                    </form>
+                                </field>
+                            </page>
+                            <page string="Adresse &amp; Contacts :">
+                                <group>
+                                    <group>
+                                        <field name="type" invisible="1"/>
+                                        <label for="street" string="Adresse :"/>
+                                        <div class="o_address_format">
+                                            <field name="street" placeholder="Commune..." class="o_address_street"/>
+                                            <field name="street2" placeholder="Quartier..." class="o_address_street"/>
+                                            <field name="city" placeholder="Ville" class="o_address_city"/>
+                                            <field name="zip" placeholder="Boîte Postale" class="o_address_zip"/>
+                                            <field name="country_id" placeholder="Pays" class="o_address_country"
+                                                   options='{"no_open": True, "no_create": True}'/>
+                                        </div>
+                                    </group>
+                                     <group>
+                                        <field name="phone" widget="phone" placeholder="Ex.: 01 01 01 01"/>
+                                        <field name="mobile" widget="phone"/>
+                                        <field name="mobile_2" widget="phone"/>
+                                        <field name="email" widget="email"/>
+                                        <!--<field name="lang"/>
+                                        <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>-->
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Prime(s) Contrat">
+                                <field name="prime_contrat_ids">
+                                    <tree class="text-primary" editable="bottom">
+                                        <field name="name"/>
+                                        <field name="applicable"/>
+                                        <field name="periodicite"/>
+                                        <field name="date_debut" required="1"/>
+                                        <field name="date_fin"/>
+                                        <field name="mt_prime"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Règlements Prime(s)">
+                                <field name="cotisation_ids">
+                                    <tree class="text-primary" editable="bottom">
+                                        <field name="date_versement"/>
+                                        <field name="mode_paiement"/>
+                                        <field name="ref_cheque"/>
+                                        <field name="mt_versement" sum="S/Totaux :"/>
+                                        <field name="note"/>
+                                    </tree>
+                                </field>
+                            </page>
+                            <page string="Notes / Observation :">
+                              <field name="note"/>
+                            </page>
+                        </notebook>
+                      </sheet>
+                  </form>
+              </field>
+        </record>
+        <!-- CONTROLE ANTECEDENT List-->
+        <record model="ir.ui.view" id="controle_antecedent_list_view">
+          <field name="name">Proximas Contrôle Antécédent list</field>
+          <field name="model">proximas.controle.antecedent</field>
+          <field name="arch" type="xml">
+            <tree>
+              <field name="id"/>
+              <field name="police_id"/>
+              <field name="pathologie_id"/>
+              <field name="pathologie"/>
+              <field name="plafond_individu"/>
+              <field name="plafond_famille"/>
+              <field name="nbre_pec"/>
+              <field name="delai_attente"/>
+              <field name="controle_strict"/>
+            </tree>
+          </field>
+        </record>
+        <!-- CONTROLE ANTECEDENT form -->
+        <record id="controle_antecedent_view_form" model="ir.ui.view">
+              <field name="name">Contrôle Antécédent form</field>
+              <field name="model">proximas.controle.antecedent</field>
+              <field name="arch" type="xml">
+                  <form string="Configuration : Contrôle Antécédent">
+                      <sheet>
+                          <group col="4" colspan="2">
+                              <group>
+                                <!--<field name="police_id"
+                                       options='{"no_open": True, "no_create": True}'
+                                       class="text-primary"/>-->
+                                <field name="pathologie_id"
+                                       options='{"no_open": True, "no_create": True}'
+                                       class="text-primary"/>
+                                <field name="pathologie" class="text-success"/>
+                                <field name="plafond_individu" class="text-info"/>
+                                <field name="plafond_famille" class="text-info"/>
+                              </group>
+                              <group class="text-info">
+                                <field name="nbre_pec"/>
+                                <field name="delai_attente"/>
+                                <field name="controle_strict"/>
+                              </group>
+                        </group>
+                        <hr/>
+                        <notebook>
+                            <page string="Notes / Observation :">
+                              <field name="note"/>
+                            </page>
+                        </notebook>
+                      </sheet>
+                  </form>
+              </field>
+        </record>
+        <!-- CONTROLE RUBRIQUE List-->
+        <record model="ir.ui.view" id="controle_rubrique_list_view">
+          <field name="name">Proximas Contrôle Rubrique list</field>
+          <field name="model">proximas.controle.rubrique</field>
+          <field name="arch" type="xml">
+            <tree>
+              <field name="police_id"/>
+              <field name="rubrique_id"/>
+              <field name="statut_familial"/>
+              <field name="genre"/>
+              <field name="age_limite"/>
+              <field name="plafond_individu"/>
+              <field name="plafond_famille"/>
+              <field name="delai_carence"/>
+              <field name="delai_attente"/>
+              <field name="controle_strict"/>
+              <field name="ticket_exigible"/>
+            </tree>
+          </field>
+        </record>
+        <!-- CONTROLE RUBRIQUE form -->
+        <record id="controle_rubrique_view_form" model="ir.ui.view">
+              <field name="name">Contrôle Rubrique form</field>
+              <field name="model">proximas.controle.rubrique</field>
+              <field name="arch" type="xml">
+                  <form string="Configuration : Contrôle Rubrique">
+                      <sheet>
+                          <group col="6" colspan="2">
+                              <group>
+                                <!--<field name="police_id"
+                                       options='{"no_open": True, "no_create": True}'/>-->
+                                <field name="rubrique_id"
+                                       options='{"no_open": True, "no_create": True}'/>
+                                <field name="genre"/>
+                                <field name="statut_familial"/>
+                                <field name="plafond_individu"/>
+                                <field name="plafond_famille"/>
+                                <field name="delai_carence"/>
+                              </group>
+                              <group>
+                                <field name="delai_attente"/>
+                                <field name="age_limite"/>
+                                <field name="nbre_actes_maxi_individu"/>
+                                <field name="nbre_actes_maxi_famille"/>
+                                <field name="controle_strict"/>
+                                <field name="ticket_exigible"/>
+                              </group>
+                          </group>
+                          <hr/>
+                        <notebook>
+                            <page string="Notes / Observation :">
+                              <field name="note"/>
+                            </page>
+                        </notebook>
+                      </sheet>
+                  </form>
+              </field>
+        </record>
+         <!-- CONTROLE CODE MEDICAL POLICE List-->
+        <record model="ir.ui.view" id="controle_code_medical_police_list_view">
+          <field name="name">Proximas Contrôle Code médical Police list</field>
+          <field name="model">proximas.code.medical.police</field>
+          <field name="arch" type="xml">
+            <tree>
+              <field name="police_id"/>
+              <field name="code_medical_id"/>
+              <field name="code_medical"/>
+              <field name="tx_public"/>
+              <field name="tx_prive"/>
+              <field name="tx_remb_couvert"/>
+              <field name="mt_plafond"/>
+              <field name="controle_strict"/>
+              <field name="delai_attente"/>
+              <field name="note"/>
+            </tree>
+          </field>
+        </record>
+        <!-- CONTROLE CODE MEDICAL POLICE form -->
+        <record id="controle_code_medical_police_view_form" model="ir.ui.view">
+              <field name="name">Contrôle Code Médical Police form</field>
+              <field name="model">proximas.code.medical.police</field>
+              <field name="arch" type="xml">
+                  <form string="Configuration : Contrôle Code médical">
+                      <sheet>
+                          <group col="4" colspan="2">
+                              <group>
+                                <!--<field name="police_id"
+                                       class="text-primary"
+                                       options='{"no_open": True, "no_create": True}'/>-->
+                                <field name="code_medical_id"
+                                       options='{"no_open": True, "no_create": True}'
+                                       class="text-primary"/>
+                                <field name="code_medical"/>
+                                <field name="controle_strict"/>
+                              </group>
+                              <group class="text-info">
+                                <field name="tx_public" class="text-info"/>
+                                <field name="tx_prive" class="text-info"/>
+                                <field name="mt_plafond" />
+                                <field name="delai_attente"/>
+                              </group>
+                          </group>
+                        <notebook>
+                            <page string="Notes / Observation :">
+                              <field name="note"/>
+                            </page>
+                        </notebook>
+                      </sheet>
+                  </form>
+              </field>
+        </record>
+        <!-- POLICE form -->
+        <record id="police_converture_view_form" model="ir.ui.view">
+              <field name="name">Police Couverture form</field>
+              <field name="model">proximas.police</field>
+              <field name="arch" type="xml">
+                  <form string="Paramètres : Police Couverture">
+                      <sheet>
+                          <div class="oe_right oe_button_box" name="buttons" />
+                          <!--<div class="oe_title oe_left" name="title">
+                               <label for="name" string="Code Police" />
+                               <h3 class="text-primary"><field name="name" default_focus="1" placeholder="Code de la police"/></h3>
+                              &lt;!&ndash; <label for="libelle" string="Libellé" />
+                               <h3 class="text-primary"><field name="libelle" default_focus="1" placeholder="libellé de la police"/></h3>&ndash;&gt;
+                          </div>-->
+                          <div col="6" colspan="2">
+                             <!-- <group>
+                                  <field name="name"/>
+                                  <field name="libelle"/>
+                                  <field name="structure_id" string="Organisation"
+                                         placeholder="Sélectionnez l'organisation"
+                                         options='{"no_open": True, "no_create": True}'/>
+                              </group>-->
+                              <div>
+                                  <label for="name" string="Libellé Police:" class="oe_edit_only"/>
+                                  <h2 class="text-success"><field name="name" placeholder="Définissez le texte nominatif de la police"/></h2>
+                                  <group>
+                                      <field name="libelle" string="Description Police"
+                                             placeholder="indiquer un texte descriptif de la police"/>
+                                      <field name="structure_id" options='{"no_open": True, "no_create": True}'/>
+                                  </group>
+                              </div>
+                              <!--<div>
+                                  <label for="structure_id" string="Organisation :" />
+                                  <h3><field name="structure_id"/></h3>
+                              </div>-->
+                          </div>
+                          <hr/>
+                          <notebook>
+                              <page string="Cotisations &amp; Primes">
+                                  <field name="prime_police_ids">
+                                      <tree string="Primes">
+                                          <!--<field name="police_id"/>-->
+                                          <field name="name"/>
+                                          <field name="applicable" />
+                                          <field name="periodicite"/>
+                                          <field name="date_debut"/>
+                                          <field name="date_fin"/>
+                                          <field name="mt_prime"/>
+                                          <field name="note"/>
+                                      </tree>
+                                  </field>
+                              </page>
+                              <page string="Conditions Générales">
+                                  <group col="8" colspan="2">
+                                     <field name="mode_controle_plafond" required="1"/>
+                                     <field name="mt_droit_adhesion"/>
+                                     <field name="droit_adhesion_individu"/>
+                                     <field name="mt_prime_police" string="Prime Contrat"/>
+                                     <field name="retard_cotisation"/>
+                                     <field name="mt_forfait_accouchement"/>
+                                     <field name="plafond_individu"/>
+                                     <field name="plafond_famille"/>
+                                     <field name="seuil_alerte" string="Seuil Alerte Plafonds"/>
+                                     <field name="delai_carence"/>
+                                     <field name="mt_supplement_maladie" string="Mt. Supp. Mal. Chronique"/>
+                                     <field name="controle_genre"/>
+                                     <field name="controle_retard_cotisation" string="Contrôle/retard cotisation"/>
+                                     <field name="validite_pec" string="Délai validité PEC"/>
+                                     <field name="nbre_prescription_maxi"/>
+                                     <field name="mt_plafond_prescription"/>
+                                     <field name="tx_couv_public_couvert" string="Taux Remb. Public Couvert"/>
+                                     <field name="tx_couv_public" string="Taux Couv. Public"/>
+                                     <field name="tx_couv_prive_couvert" string="Taux Remb. Privé Couvert"/>
+                                     <field name="tx_couv_prive" string="Taux Couv. Privé"/>
+                                     <field name="mt_supplement_conjoint" string="Mt. Suup./Conjoint"/>
+                                     <field name="mt_supplement_enfant" string="Montant Enft. Supp."/>
+                                     <field name="nbre_maxi_demande" string="Maxi Demande Remb."/>
+                                     <field name="mt_plafond_remb_individu" string="Plafonc/individu Remb."/>
+                                     <field name="mt_plafond_remb_famille" string="Plafond Remb./Famille"/>
+                                     <field name="mt_plafond_remb_demande" string="Plafond Remb./Demande"/>
+                                     <field name="marge_medicament"/>
+                                     <field name="age_limite_adherent"/>
+                                     <field name="age_limite_conjoint"/>
+                                     <field name="age_limite_enfant"/>
+                                     <field name="age_majorite_enfant"/>
+                                     <field name="nbre_limite_conjoint"/>
+                                     <field name="supplement_conjoint"/>
+                                     <field name="nbre_maxi_conjoint"/>
+                                     <field name="nbre_limite_enfant"/>
+                                     <field name="supplement_enfant"/>
+                                     <field name="nbre_maxi_enfant"/>
+                                     <field name="enfant_invalide"/>
+                                     <field name="nbre_limite_ascendant"/>
+                                     <field name="supplement_ascendant"/>
+                                     <field name="nbre_maxi_ascendant"/>
+                                     <field name="nbre_limite_parent"/>
+                                     <field name="supplement_parent"/>
+                                     <field name="nbre_maxi_parent"/>
+                                     <field name="validite_contrat"/>
+                                     <field name="date_echeance" required="1"/>
+                                     <field name="mt_capital_deces"/>
+                                     <field name="mt_frais_funeraire"/>
+                                  </group>
+                              </page>
+                              <page string="Contrôles Rubriques Médicales">
+                                  <field name="controle_rubrique_ids">
+                                      <tree>
+                                          <field name="rubrique_id"/>
+                                          <field name="genre"/>
+                                          <field name="statut_familial"/>
+                                          <field name="age_limite"/>
+                                          <field name="delai_carence"/>
+                                          <field name="plafond_individu"/>
+                                          <field name="plafond_famille"/>
+                                          <field name="nbre_actes_maxi_individu" string="Nbre. Actes/Individu"/>
+                                          <field name="nbre_actes_maxi_famille" string="Nbre. Actes/Famille"/>
+                                          <field name="ticket_exigible"/>
+                                          <!--<field name="controle_delai"/>
+                                          <field name="verou"/>-->
+                                      </tree>
+                                  </field>
+                              </page>
+                              <page string="Conrôles Codes Médicaux">
+                                  <field name="controle_medical_ids">
+                                      <tree>
+                                          <field name="code_medical_id"/>
+                                          <field name="tx_public"/>
+                                          <field name="tx_prive"/>
+                                          <field name="tx_remb_couvert"/>
+                                          <field name="mt_plafond"/>
+                                          <field name="delai_attente"/>
+                                          <field name="controle_strict"/>
+                                      </tree>
+                                  </field>
+                              </page>
+                              <page string="Contrôles Antécédants Médicaux">
+                                  <field name="controle_antecedent_ids">
+                                      <tree>
+                                          <field name="pathologie_id"/>
+                                          <field name="nbre_pec"/>
+                                          <field name="plafond_individu"/>
+                                          <field name="plafond_famille"/>
+                                          <field name="delai_attente"/>
+                                          <field name="controle_strict"/>
+                                      </tree>
+                                  </field>
+                              </page>
+                              <page string="Observation">
+                                  <field name="note"/>
+                              </page>
+                        </notebook>
+                      </sheet>
+                  </form>
+              </field>
+        </record>
+        <!-- POLICE List-->
+        <record model="ir.ui.view" id="controle_rubrique_view_list">
+          <field name="name">Proximas Police list</field>
+          <field name="model">proximas.police</field>
+          <field name="arch" type="xml">
+            <tree>
+              <field name="id"/>
+              <!--<field name="structure_id"/>-->
+              <field name="name"/>
+              <field name="mt_droit_adhesion"/>
+              <field name="droit_adhesion_individu"/>
+              <field name="mt_prime_police"/>
+              <field name="delai_carence"/>
+              <field name="plafond_individu"/>
+              <field name="plafond_famille"/>
+            </tree>
+          </field>
+        </record>
+        <act_window id="proximas_pool_contrat_wizard_action" name="Création Pool Contrat Adhérents"
+                    res_model="proximas.pool.contrat.wizard"
+                    view_mode="form" target="new"/>
+        <act_window id="proximas_contrat_wizard_action" name="Création Nouveau Contrat"
+                    res_model="proximas.contrat.wizard"
+                    view_mode="form" target="new"/>
+        <record id="contrat_adherent_action" model="ir.actions.act_window">
+            <field name="name">Proximaas: Gestion Contrat d'Adhésion (Souscripteurs)</field>
+            <field name="res_model">proximas.contrat</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="search_proximas_contrat" />
+            <field name="context">{'default_country_id.code':'CIV'}</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Cliquez pour enregistrer un nouveau contrat de souscription.
+              </p><p>
+                Proximas vous aide à suivre facilement tous les contrats liés à
+                un souscripteur : Détails Police de couverture, ayant-droit,
+                Cotisation, Suspensions, etc.
+              </p>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_police_action">
+            <field name="name">Proximaas: Gestion Police Couverture</field>
+            <field name="res_model">proximas.police</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                Cliquez pour enregistrer une nouvelle police de couverture.
+              </p><p>
+                Proximas vous aide à suivre facilement tous les options de couverture :
+                Détails de prestations médicales, sociales, ainsi que les détails éléments en prendre en compte dans la
+                gestion quuotidienne des prises en charge, etc.
+              </p>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_ctrl_rubrique_action">
+            <field name="name">Proximaas: Contrôle Rubrique Médicale</field>
+            <field name="res_model">proximas.controle.rubrique</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_ctrl_code_medical_action">
+            <field name="name">Proximaas: Contrôle Code Médical / Police</field>
+            <field name="res_model">proximas.code.medical.police</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_ctrl_antecedent_action">
+            <field name="name">Proximaas: Contrôle Antécédent Médical / Police</field>
+            <field name="res_model">proximas.controle.antecedent</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,1101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+
+<odoo>
+    <data>
+        <!-- AYANT-DROIT VIEW -->
+        <record id="proximas_ayant_droit_view_tree" model="ir.ui.view">
+            <field name="name">proximas.ayant.droit.tree</field>
+            <field name="model">proximas.ayant.droit</field>
+            <field name="arch" type="xml">
+                <tree string="Assuré Couverture" create="1" edite="1">
+                    <field name="code_id" />
+                    <field name="nom"/>
+                    <field name="prenoms"/>
+                    <!--<field name="full_name" string="Nom et Prénoms"/>-->
+                    <field name="genre" />
+                    <field name="statut_familial"/>
+                    <field name="date_naissance"/>
+                    <field name="age" />
+                    <field name="age_details" />
+                    <field name="date_activation"/>
+                    <field name="contrat_id"/>
+                    <field name="motif_desactivation"/>
+                </tree>
+            </field>
+        </record>
+        <!-- AYANT-DROITS Search & Filter View-->
+        <record id="search_proximas_ayant_droit" model="ir.ui.view">
+            <field name="model">proximas.ayant.droit</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="code_id"/>
+                    <field name="code_id_externe"/>
+                    <field name="contrat_id"/>
+                    <field name="name" string="Nom et Prénoms"/>
+                    <field name="nom"/>
+                    <field name="prenoms"/>
+                    <field name="date_naissance"/>
+                    <field name="age"/>
+                    <field name="genre"/>
+                    <field name="statut_familial"/>
+                    <field name="phone"/>
+                    <field name="mobile"/>
+                    <field name="mobile_2"/>
+                    <field name="email"/>
+                    <field name="localite_id"
+                           filter_domain="[('localite_id', 'child_of',self)]"
+                    />
+                    <field name="groupe_id"
+                           filter_domain="[('groupe_id', 'child_of',self)]"
+                    />
+                    <filter string="Date Activation"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'date_activation'}"
+                    />
+                    <group expand="0" string="Groupé par...">
+                        <filter string="Statut Familial"
+                                domain="[]"
+                                context="{'group_by':'statut_familial'}" />
+                        <filter string="Genre"
+                                domain="[]"
+                                context="{'group_by':'genre'}" />
+                        <filter string="Localité"
+                                domain="[]"
+                                context="{'group_by':'localite_id'}" />
+                        <filter string="Groupe"
+                                domain="[]"
+                                context="{'group_by':'groupe_id'}" />
+                        <filter string="Contrat"
+                                domain="[]"
+                                context="{'group_by':'contrat_id'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+        <record id="proximas_ayant_droit_view_form" model="ir.ui.view">
+            <field name="name">proximas.ayant.droit.form</field>
+            <field name="model">proximas.ayant.droit</field>
+            <field name="arch" type="xml">
+            <form string="Ayant-droit">
+                <!--<header />-->
+                <sheet>
+                    <div class="oe_right oe_button_box" name="buttons" />
+                    <field name="image"
+                           widget='image'
+                           class="oe_left oe_avatar"
+                           options="{'preview_image': 'image_medium', 'size': [90, 90]}" />
+                    <div class="oe_title" name="title">
+                        <h2><field name="nom" placeholder="Nom"/></h2>
+                        <h2><field name="prenoms" placeholder="Prénoms"/></h2>
+                        <h3 class="text-primary"><field name="code_id"/></h3>
+                        <field name="name" invisible="1"/>
+                        <field name="full_name" invisible="1"/>
+                    </div>
+                    <group name="data">
+                        <group name="main">
+                            <!--<field name="code_id" string="Code Identification" class="text-primary h4"/>-->
+                            <field name="code_id_externe"/>
+                            <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                            <field name="quartier"/>
+                            <field name="statut" required="1"/>
+                            <field name="date_inscription" />
+                            <field name="date_activation"/>
+                        </group>
+                        <group>
+                            <field name="date_naissance" required="1"/>
+                            <field name="age" />
+                            <field name="genre" widget="radio" options="{'horizontal': true}"
+                                   onchange="_check_genre()" required="1"/>
+                            <field name="groupe_sanguin"/>
+                            <field name="cas_chronique"/>
+                            <field name="decede"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+            </field>
+        </record>
+        <!-- ADHERENT Search & Filter View-->
+        <record id="search_proximas_adherent" model="ir.ui.view">
+            <field name="model">proximas.adherent</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="code_id"/>
+                    <field name="code_id_externe"/>
+                    <field name="matricule"/>
+                    <field name="name" string="Nom et Prénoms"/>
+                    <field name="nom"/>
+                    <field name="prenoms"/>
+                    <field name="date_naissance"/>
+                    <field name="age"/>
+                    <field name="phone"/>
+                    <field name="mobile"/>
+                    <field name="mobile_2"/>
+                    <field name="email"/>
+                    <field name="localite_id"
+                           filter_domain="[('localite_id', 'child_of',self)]"
+                    />
+                    <field name="groupe_id"
+                           filter_domain="[('groupe_id', 'child_of',self)]"
+                    />
+                    <filter name="contrat_actif"
+                            string="Adhérent Actifs"
+                            domain="[('is_assure', '=', True)]"
+                    />
+                    <filter string="Date Inscription"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'date_inscription'}"
+                    />
+                </search>
+            </field>
+        </record>
+        <!-- ADHERENT LIST VIEW -->
+        <record id="proximas_adherent_view_tree" model="ir.ui.view">
+            <field name="name">proximas.adherent.tree</field>
+            <field name="model">proximas.adherent</field>
+            <field name="arch" type="xml">
+                <tree string="Assuré Couverture">
+                    <field name="code_id" />
+                    <field name="matricule" />
+                    <!--<field name="name" string="Nom et Prénoms"/>-->
+                    <field name="full_name"/>
+                    <field name="genre" />
+                    <field name="date_naissance"/>
+                    <field name="age" />
+                    <field name="age_details" />
+                    <field name="statut_familial"/>
+                    <field name="date_activation"/>
+                    <field name="state"/>
+                    <field name="motif_desactivation"/>
+                </tree>
+            </field>
+        </record>
+        <!-- ADHERENT KANBAN VIEW -->
+        <record model="ir.ui.view" id="proximas_adherent_view_kanban">
+            <field name="name">proximas.adherent.kanban</field>
+            <field name="model">proximas.adherent</field>
+            <field name="type">kanban</field>
+            <field name="arch" type="xml">
+                <kanban class="background_grey" string="Assure">
+                    <field name="name" />
+                    <field name="age" />
+                    <field name="genre" />
+                    <field name="ref" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click o_res_partner_kanban">
+                                <div class="o_kanban_tags_section oe_kanban_partner_categories" />
+                                <div class="o_kanban_image">
+                                    <img t-att-src="kanban_image('proximas.adherent', 'image', record.id.value)"
+                                            width="70"
+                                            height="90"
+                                            class="employee_picture" />
+                                </div>
+                                <div class="oe_kanban_details">
+                                    <div class="o_kanban_title">
+                                        <strong class="text-primary"><field name="name"/></strong>
+                                    </div>
+                                    <ul>
+                                        <li t-if="record.code_id.raw_value">
+                                            <strong>Code ID.:</strong>
+                                            <strong class="text-danger"><field name="code_id"/></strong>
+                                        </li>
+                                        <li t-if="record.age.raw_value">
+                                            <strong>Age:</strong>
+                                            <field name="age" />
+                                        </li>
+                                        <li t-if="record.genre.raw_value">
+                                            <strong>Genre:</strong>
+                                            <field name="genre" />
+                                        </li>
+                                        <!--<li t-if="record.matricule.raw_value">
+                                            <strong>Matricule N°:</strong>
+                                            <field name="matricule" />
+                                        </li>-->
+                                        <li t-if="record.statut_familial.raw_value">
+                                            <strong>Statut:</strong>
+                                            <strong class="text-success"><field name="statut_familial" /></strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+        <!-- ADHERENT FORM VIEW -->
+        <record id="proximas_adherent_view_form" model="ir.ui.view">
+            <field name="name">proximas.adherent.form</field>
+            <field name="model">proximas.adherent</field>
+            <field name="arch" type="xml">
+            <form string="Adherent">
+                <!--<header />-->
+                <sheet>
+                    <div class="oe_right oe_button_box" name="buttons" />
+                    <field name="is_assure" invisible="1"/>
+                    <field name="is_company" invisible="1"/>
+                    <field name="name" invisible="1"/>
+                    <field name="parent_id" invisible="1"/>
+                    <field name="image" widget='image'
+                               class="oe_avatar oe_left"
+                               options="{'preview_image': 'image_medium', 'size': [180, 240]}"/>
+                    <div class="oe_left text-primary">
+                        <h2><field name="name" readonly="1"/></h2>
+                        <group>
+                            <field name="code_id" string="Code ID."/>
+                            <!--<field name="name" default_focus="1"  string="Adhérent" placeholder="Nom &amp; Prénoms"-->
+                                   <!--class="text-primary" readonly="1"/>-->
+                            <field name="statut_familial" string="Lien Parenté"/>
+                            <field name="state" string="Statut Contrat"/>
+                        </group>
+                    </div>
+                    <!--<label for="nom" string="Nom" class="oe_edit_only"/>
+                        <h4><field name="nom" default_focus="1" placeholder="nom de famille" class="text-primary"/></h4>
+                        <label for="prenoms" string="Prénom(s)" class="oe_edit_only"/>
+                        <h4><field name="prenoms"  placeholder="prénoms" class="text-primary"/></h4>-->
+                    <hr/>
+                    <group col="6" colspan="2">
+                       <field name="nom"/>
+                       <field name="prenoms"/>
+                       <field name="code_id_externe" class="text-primary"/>
+                       <field name="matricule"/>
+                       <field name="date_naissance" />
+                       <field name="age" />
+                       <field name="genre" required="1" widget="radio" options="{'horizontal': true}"/>
+                       <field name="groupe_sanguin"/>
+                       <field name="date_inscription" />
+                       <field name="date_activation"/>
+                        <field name="quartier"/>
+                       <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                       <field name="groupe_id" options='{"no_open": True, "no_create": True}'/>
+                       <field name="cas_chronique" string="Malade chronique?"/>
+                    </group>
+                    <!--<div class="oe_left">
+                        <label for="code_id" string="Code Identification:"/>
+                        <h3><field name="code_id" string="Code ID." class="text-primary"/></h3>
+                    </div>
+                    <div class="oe_right">
+                        <label for="stete" string="Statut Activation:"/>
+                        <h3><field name="state" string="Statut" class="text-muted text-right"/></h3>
+                    </div>-->
+                    <hr/>
+                    <notebook>
+                        <page string="Adresse &amp; Contacts :">
+                            <group>
+                                <group>
+                                    <field name="type" invisible="1"/>
+                                    <label for="street" string="Address"/>
+                                    <div class="o_address_format">
+                                        <field name="street" placeholder="Commune..." class="o_address_street"
+                                            attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                        <field name="street2" placeholder="Quartier..." class="o_address_street"
+                                            attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                        <field name="city" placeholder="Ville" class="o_address_city"
+                                            attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                        <field name="zip" placeholder="Boîte Postale" class="o_address_zip"
+                                            attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                        <field name="country_id" placeholder="Pays" class="o_address_country" options='{"no_open": True, "no_create": True}'
+                                            attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
+                                            context="{'default_code':'CI'}"/>
+                                    </div>
+                                </group>
+                                 <group>
+                                    <field name="phone" widget="phone" placeholder="Ex.: 01 01 01 01"/>
+                                    <field name="mobile" widget="phone"/>
+                                    <field name="mobile_2"/>
+                                    <field name="user_ids" invisible="1"/>
+                                    <field name="email" widget="email" attrs="{'required': [('user_ids','!=', [])]}"/>
+                                    <!--<field name="lang"/>
+                                    <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>-->
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes / Observations :">
+                                <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+            </field>
+        </record>
+        <!-- ASSURE SEARCH VIEW -->
+        <record id="proximas_assure_view_search" model="ir.ui.view">
+            <field name="name">proximas.assure.search</field>
+            <field name="model">proximas.assure</field>
+            <field name="arch" type="xml">
+                <search string="Assurés">
+                    <field name="code_id"/>
+                    <field name="code_id_externe" />
+                    <field name="matricule"/>
+                    <field name="name" string="Nom et Prénoms"/>
+                    <field name="nom"/>
+                    <field name="prenoms"/>
+                    <field name="statut_familial" />
+                    <field name="genre" />
+                    <field name="date_naissance" />
+                    <field name="groupe_sanguin"/>
+                    <field name="age_entier"/>
+                    <field name="quartier"/>
+                    <field name="localite_id"/>
+                    <field name="groupe_id"/>
+                    <field name="parent_id" invisible="1" />
+                    <filter name="assure_id"
+                            string="Assuré"
+                            domain="[]" />
+                    <separator />
+                    <filter name="contrat_id"
+                            string="Contrat/Famille"
+                            domain="[]" />
+                    <separator />
+                    <filter name="genre"
+                            string="Genre"
+                            domain="[]" />
+                    <separator />
+                    <filter name="statut_familial"
+                            string="Lien Parenté"
+                            domain="[]" />
+                    <separator />
+                    <newline />
+                    <group expand="0" string="Groupé par...">
+                        <filter string="Contrat/Famille"
+                                domain="[]"
+                                context="{'group_by':'num_contrat'}" />
+                        <filter string="Date Activation"
+                                domain="[]"
+                                context="{'group_by':'date_activation'}" />
+                        <filter string="Statut Familial"
+                                domain="[]"
+                                context="{'group_by':'statut_familial'}" />
+                        <filter string="Genre"
+                                domain="[]"
+                                context="{'group_by':'genre'}" />
+                        <filter string="Localité"
+                                domain="[]"
+                                context="{'group_by':'localite_id'}" />
+                        <filter string="Groupe"
+                                domain="[]"
+                                context="{'group_by':'groupe_id'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+        <!-- ASSURE LIST/TREE VIEW -->
+        <record id="proximas_assure_view_tree" model="ir.ui.view">
+            <field name="name">proximas.assure.tree</field>
+            <field name="model">proximas.assure</field>
+            <field name="arch" type="xml">
+                <tree string="Assuré Couverture" colors="blue:state=='attente';green:state=='actif';red:state!='actif';">
+                    <field name="code_id" />
+                    <field name="nom"/>
+                    <field name="prenoms"/>
+                    <field name="ref" />
+                    <field name="genre" />
+                    <field name="date_naissance"/>
+                    <field name="age" />
+                    <field name="age_details" />
+                    <field name="statut_familial"/>
+                    <field name="state"/>
+                    <field name="motif_desactivation"/>
+                </tree>
+            </field>
+        </record>
+        <!-- ASSURE KANBAN VIEW -->
+        <record model="ir.ui.view" id="proximas_assure_kanban_view">
+            <field name="name">proximas.assure.kanban</field>
+            <field name="model">proximas.assure</field>
+            <field name="type">kanban</field>
+            <field name="arch" type="xml">
+                <kanban class="background_grey" string="Bénéficiaire">
+                    <field name="name" />
+                    <field name="age" />
+                    <field name="genre" />
+                    <field name="ref" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click o_res_partner_kanban">
+                                <div class="o_kanban_tags_section oe_kanban_partner_categories" />
+                                <div class="o_kanban_image">
+                                    <img t-att-src="kanban_image('proximas.assure', 'image', record.id.value)"
+                                            width="70"
+                                            height="90"
+                                            class="employee_picture" />
+                                </div>
+                                <div class="oe_kanban_details">
+                                    <div class="o_kanban_title">
+                                        <strong class="text-primary"><field name="display_name"/></strong>
+                                    </div>
+                                    <ul>
+                                        <li t-if="record.code_id.raw_value">
+                                            <strong>Code ID.:</strong>
+                                            <strong class="text-danger"><field name="code_id"/></strong>
+                                        </li>
+                                        <li t-if="record.age.raw_value">
+                                            <strong>Age:</strong>
+                                            <field name="age" />
+                                        </li>
+                                        <li t-if="record.genre.raw_value">
+                                            <strong>Genre:</strong>
+                                            <field name="genre" />
+                                        </li>
+                                        <li t-if="record.matricule.raw_value">
+                                            <strong>Matricule N°:</strong>
+                                            <field name="matricule" />
+                                        </li>
+                                        <li t-if="record.statut_familial.raw_value">
+                                            <strong>Statut:</strong>
+                                            <strong class="text-success"><field name="statut_familial" /></strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+        <!-- ASSURE FORM VIEW -->
+        <record id="proximas_assure_view_form" model="ir.ui.view">
+            <field name="name">proximas.assure.form</field>
+            <field name="model">proximas.assure</field>
+            <field name="arch" type="xml">
+            <form string="Assure" create="0">
+                <!--<header />-->
+                <header>
+                    <button name="%(action_report_visa_sante_card)d" string="CARTE VISA SANTE"
+                            type="action" icon="fa-file-o" class="oe_highlight"
+                            help="Impression de la carte d'accès aux soins (Carte Visa Santé)."
+                            attrs="{'invisible': [('state','!=','actif')]}"/>
+                </header>
+                <sheet>
+                    <div class="oe_right oe_button_box" name="buttons" />
+                    <notebook>
+                        <page string="Identification Assuré">
+                            <field name="image"
+                                   widget='image'
+                                   class="oe_left oe_avatar"
+                                   options="{'preview_image': 'image', 'size': [90, 160]}" />
+                            <div class="oe_title oe_left" name="title">
+                                <label for="nom" string="Nom/Prénoms"  class="oe_edit_only"/>
+                                <h3><field name="nom" placeholder="Nom"/></h3>
+                                <!--<label for="prenoms" string="Prénom(s)"  class="oe_edit_only"/>-->
+                                <h3><field name="prenoms" placeholder="Prénoms"/></h3>
+                                <field name="full_name" invisible="1"/>
+                                <field name="name" invisible="1"/>
+                                <h4 class="text-muted"><field name="code_id"/></h4>
+                                <h4 class="text-muted"><field name="statut_familial" /></h4>
+                            </div>
+                            <newline/>
+                            <hr/>
+                            <group string="Informations Assuré" col="6" colspan="2">
+                                <field name="code_id_externe"/>
+                                <field name="date_naissance"/>
+                                <field name="age"/>
+                                <field name="genre"/>
+                                <field name="groupe_sanguin"/>
+                                <field name="quartier"/>
+                                <field name="localite_id" options ='{"no_open": True, "no_create": True}'/>
+                                <field name="state" />
+                                <field name="date_deces"/>
+                                <field name="date_activation"/>
+                                <field name="decede"/>
+                                <field name="matricule"/>
+                                <field name="contrat_id" readonly="1"/>
+                                <field name="police_id" options ='{"no_open": True, "no_create": True}'/>
+                                <field name="date_inscription"/>
+                                <!--<field name="delai_carence"/>
+                                <field name="jours_activation_assure"/>
+                                <field name="sous_totaux_assure"/>
+                                <field name="nbre_actes_assure"/>
+                                <field name="sous_totaux_contrat"/>-->
+                            </group>
+                        </page>
+                        <!--<page string="Informations Principales">
+                        </page>-->
+                        <page string="Adresses &amp; Contacts"
+                              >
+                            <group string="Adresses">
+                                <group>
+                                    <label for="street" string="Adresse" />
+                                    <div>
+                                        <field name="use_parent_address"
+                                                class="edit_only inline"
+                                                invisible="1" />
+                                        <label for="use_parent_address"
+                                                class="edit_only"
+                                                invisible="1" />
+                                        <field name="street"
+                                                placeholder="Street..." />
+                                        <field name="street2" />
+                                        <div class="address_format">
+                                            <field name="city"
+                                                    placeholder="City"
+                                                    style="width: 40%" />
+                                            <field name="state_id"
+                                                    class="no_button"
+                                                    placeholder="State"
+                                                    style="width: 37%"
+                                                    options='{"no_open": True}' />
+                                            <field name="zip"
+                                                    placeholder="ZIP"
+                                                    style="width: 20%" />
+                                        </div>
+                                        <field name="country_id"
+                                                placeholder="Country"
+                                                class="no_button"
+                                                options='{"no_open": True}' />
+                                    </div>
+                                    <field name="website"
+                                            widget="url"
+                                            placeholder="e.g. https://sigemci.net" />
+                                </group>
+                                <group>
+                                    <field name="phone"
+                                            placeholder="e.g. +1 (888) 678-6313" />
+                                    <field name="mobile" />
+                                    <field name="fax" />
+                                    <field name="email"
+                                           widget="email" />
+                                </group>
+                            </group>
+                            <group>
+                                <field name="parent_id"
+                                        colspan="2"
+                                        string="Adhérent Principal"
+                                         />
+                            </group>
+                            <!--<group>
+                                <field name="lang" />
+                                <field name="opt_out"
+                                    string="I don't want to receive commercial messages" />
+                            </group>-->
+                        </page>
+                        <page string="Contrôle Code Sécurité">
+                            <group col="4" colspan="2">
+                                    <field name="code_perso"/>
+                                    <field name="code_pass" invisible="True"/>
+                                </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                </form>
+            </field>
+        </record>
+        <!-- JUSTIFICATIF ENFANT ASSISTANT WIZARD FORM -->
+        <record id='proximas_justificatif_enfant_wizard_form' model='ir.ui.view'>
+            <field name='name'>Assistant Justificatif Enfant Assuré form</field>
+            <field name='model'>proximas.justificatif.enfant.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Création Prise en charge Assuré">
+                    <sheet>
+                        <div class="panel">
+                            <h3 class="panel-header text-primary">
+                              Assistant Enregistrement de Justificatif Enfant:
+                          </h3>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0">
+                                <!--<separator class="text-success fa fa-plus-square"/>-->
+                              <p class="text-primary h5">Cet assistant vous permet de démarrer la procédure d'enregistrement
+                                  de justificatif (Scolarité/Invalidité) d'un enfant assuré. vous devez au préalable vous
+                                  munir du certificat de scolarite (Fréquentation) ou d'invalidité délivré et dûment
+                                  signé par une autorité compétente en la matière.
+                              </p>
+                              <p class="text-primary h5">Pour enregistrer le certificat de décès concerné, vous allez
+                                  indiquer le Code d'identification de l'assuré, inscrit sur la carte d'accès, dans le
+                                  champ ci-dessous :
+                                  <field name='code_saisi'  class="text-primary h4"
+                                         default_focus="1"
+                                         placeholder="Ex.: 01234567AB"/>
+                                  <hr/>
+                              </p>
+                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner
+                                  tous les champs :
+                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                              </footer>
+                            </blockquote>
+                          </div>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button name='open_popup'
+                            string='Valider'
+                            class='btn-primary'
+                            type='object'/>
+                                    /
+                        <button string='Annuler'
+                            class='btn-default'
+                            special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <!-- JUSTIFICATIF ENFANT SEARCH VIEW -->
+        <record id="justificatif_enfant_search_view" model="ir.ui.view">
+            <field name="name">justificatif_enfant_search_view</field>
+            <field name="model">proximas.justificatif.enfant</field>
+            <field name="arch" type="xml">
+                <search >
+                    <field name="code_id"/>
+                    <field name="code_id_externe"/>
+                    <field name="assure_id"/>
+                    <field name="age"/>
+                    <field name="genre"/>
+                    <field name="num_contrat"/>
+                    <field name="libelle_police"/>
+                    <field name="type_justificatif"/>
+                    <field name="date_delivrance"/>
+                    <field name="date_validite"/>
+                    <field name="date_saisie"/>
+                    <field name="en_cours"/>
+                    <filter string="Assuré (Individu)"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'assure_id'}"
+                    />
+                    <filter string="Genre"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'genre'}"
+                    />
+                    <filter string="Contrat (Famille)"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'num_contrat'}"
+                    />
+                    <filter string="Police (Regime)"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'libelle_police'}"
+                    />
+                    <filter string="En cours"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'en_cours'}"
+                    />
+                </search>
+            </field>
+        </record>
+        <!-- JUSTIFICATIF List view -->
+        <record id="proximas_justificatif_view_list" model="ir.ui.view">
+           <field name="name">justificatif list view</field>
+           <field name="model">proximas.justificatif.enfant</field>
+           <field name="arch" type="xml">
+               <tree create="0">
+                   <field name="code_id"/>
+                   <field name="code_id_externe"/>
+                   <field name="assure_id"/>
+                   <field name="type_justificatif"/>
+                   <field name="date_delivrance"/>
+                   <field name="date_validite"/>
+                   <field name="date_saisie"/>
+                   <field name="en_cours"/>
+                   <field name="note"/>
+               </tree>
+           </field>
+        </record>
+        <!-- JUSTIFICATIF Form view-->
+        <record id="proximas_justificatif_view_form" model="ir.ui.view">
+           <field name="name">justificatif form view</field>
+           <field name="model">proximas.justificatif.enfant</field>
+           <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+           <field name="arch" type="xml">
+               <form create="0">
+                   <sheet>
+                       <field name="photo"
+                               widget='image'
+                               class="oe_left oe_avatar rounded"
+                               options="{'preview_image': 'photo', 'size': [90, 120]}" />
+                       <div class="oe_title">
+                           <field name="assure_id" required="1" invisible="1"/>
+                           <label for="name" string="Nom et Prénoms" />
+                           <h2 class="text-primary"><field name="name"/></h2>
+                               <field name="date_naissance"/>
+                               <field name="statut_familial"/>
+                       </div>
+                       <newline/>
+                       <group col="6" colspane="2" >
+                           <field name="type_justificatif"/>
+                           <field name="date_delivrance"/>
+                           <field name="date_validite"
+                                  attrs="{'required' : [('type_justificatif', '=', 'scolarite')]}"/>
+                           <field name="date_saisie" readonly="1"/>
+                           <field name="en_cours"/>
+                           <field name="doc_justificatif"
+                                  widget='binary'
+                                  filename="doc_filename"/>
+                           <field name="doc_filename"
+                                  invisible="1"
+                           />
+                       </group>
+                       <separator/>
+                       <group invisible="0" >
+                           <field name="jours_valide"/>
+                       </group>
+                       <notebook>
+                           <page string="NOTES / OBSERVATION:">
+                               <field name="note"/>
+                           </page>
+                       </notebook>
+                   </sheet>
+               </form>
+           </field>
+        </record>
+         <!-- SANCTION Search view -->
+        <record id="proximas_sanction_search_view" model="ir.ui.view">
+           <field name="name">sanction Search view</field>
+           <field name="model">proximas.sanction</field>
+           <field name="arch" type="xml">
+               <tree>
+                   <field name="code_id"/>
+                   <field name="code_id_externe"/>
+                   <field name="assure_id"/>
+                   <field name="name"/>
+                   <field name="date_naissance"/>
+                   <field name="genre"/>
+                   <field name="statut_familial"/>
+                   <field name="type_sanction"/>
+                   <field name="ref_piece"/>
+                   <field name="date_debut"/>
+                   <field name="date_fin"/>
+                   <field name="en_cours"/>
+               </tree>
+           </field>
+        </record>
+        <!-- SANCTION List view -->
+        <record id="proximas_sanction_view_list" model="ir.ui.view">
+           <field name="name">sanction list view</field>
+           <field name="model">proximas.sanction</field>
+           <field name="arch" type="xml">
+               <tree create="0">
+                   <field name="code_id"/>
+                   <field name="code_id_externe" string="Code ID. Ext."/>
+                   <field name="assure_id" string="Noms &amp; Prénoms"/>
+                   <field name="date_naissance" string="Date Naiss."/>
+                   <field name="genre"/>
+                   <field name="statut_familial"/>
+                   <field name="type_sanction" string="Sanction"/>
+                   <field name="ref_piece" string="Réf. Pièce"/>
+                   <field name="date_debut"/>
+                   <field name="date_fin"/>
+                   <field name="en_cours" string="En cours?"/>
+               </tree>
+           </field>
+        </record>
+        <!-- SANCTION Form view-->
+        <record id="proximas_sanction_view_form" model="ir.ui.view">
+           <field name="name">sanction form view</field>
+           <field name="model">proximas.sanction</field>
+           <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+           <field name="arch" type="xml">
+               <form create="0">
+                   <sheet>
+                       <field name="photo"
+                               widget='image'
+                               class="oe_left oe_avatar rounded"/>
+                       <div class="oe_title">
+                           <label for="assure_id" string="Nom &amp; Prénoms assuré" />
+                           <h2><field name="assure_id" default_focus="1" placeholder="Sélectionner l'assuré dans liste"
+                                      options='{"no_open": True, "no_create": True}' readonly="1"/></h2>
+                               <field name="date_naissance"/>
+                               <field name="statut_familial"/>
+                       </div>
+                       <newline/>
+                       <group col="6" colspane="2"  >
+                           <field name="type_sanction"/>
+                           <field name="date_debut"/>
+                           <field name="date_fin"
+                                  attrs="{'required' : [('type_sanction', '=', 'suspens')]}"/>
+                           <field name="en_cours"/>
+                           <field name="ref_piece"/>
+                           <field name="pv_sanction"
+                                  widget='image'/>
+                           <field name="motif_sanction"/>
+                       </group>
+                       <group invisible="1" >
+                           <field name="jours_restant"/>
+                       </group>
+                       <separator/>
+                       <notebook>
+                           <page string="NOTES / OBSERVATION:">
+                               <field name="note"/>
+                           </page>
+                       </notebook>
+                   </sheet>
+               </form>
+           </field>
+        </record>
+        <!-- SANCTION ASSISTANT WIZARD FORM -->
+        <record id='proximas_sanction_assure_wizard_form' model='ir.ui.view'>
+            <field name='name'>Assistant Sanction Assuré form</field>
+            <field name='model'>proximas.sanction.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Création Prise en charge Assuré">
+                    <sheet>
+                        <div class="panel">
+                            <h3 class="panel-header text-primary">
+                              Assistant Création Suspension/Exclusion Assuré:
+                          </h3>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0">
+                                <!--<separator class="text-success fa fa-plus-square"/>-->
+                              <p class="text-primary h5">Cet assistant vous permet de démarrer la procédure de sanction
+                                  (Suspension/Exclusion) d'un assuré. vous devez au préalable vous munir du procès-verbal
+                                  (PV) de la décision de sanction délivrée par l'organe exécutif et/ou le conseil
+                                  d'admininstration.
+                              </p>
+                              <p class="text-primary h5">Pour enregistrer le certificat de décès concerné, vous allez
+                                  indiquer le Code d'identification de l'assuré, inscrit sur la carte d'accès, dans le
+                                  champ ci-dessous :
+                                  <field name='code_saisi'  class="text-primary h4"
+                                         default_focus="1"
+                                         placeholder="Ex.: 01234567AB"/>
+                                  <hr/>
+                              </p>
+                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner
+                                  tous les champs :
+                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                              </footer>
+                            </blockquote>
+                          </div>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button name='open_popup'
+                            string='Valider'
+                            class='btn-primary'
+                            type='object'/>
+                                    /
+                        <button string='Annuler'
+                            class='btn-default'
+                            special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <!-- DECES Search view -->
+        <record id="proximas_deces_search_view" model="ir.ui.view">
+           <field name="name">deces search view</field>
+           <field name="model">proximas.deces</field>
+           <field name="arch" type="xml">
+               <tree>
+                   <field name="code_id"/>
+                   <field name="code_id_externe"/>
+                   <field name="assure_id"/>
+                   <field name="name"/>
+                   <field name="date_naissance"/>
+                   <field name="genre"/>
+                   <field name="statut_familial"/>
+                   <field name="date_deces"/>
+                   <field name="date_certificat"/>
+                   <field name="date_reglement"/>
+                   <field name="mt_reglement"/>
+                   <field name="note"/>
+               </tree>
+           </field>
+        </record>
+        <!-- DECES List view -->
+        <record id="proximas_deces_view_list" model="ir.ui.view">
+           <field name="name">deces list view</field>
+           <field name="model">proximas.deces</field>
+           <field name="arch" type="xml">
+               <tree create="0">
+                   <field name="code_id"/>
+                   <field name="code_id_externe" string="Code ID. Ext."/>
+                   <field name="assure_id" string="Noms &amp; Prénoms"/>
+                   <field name="date_naissance" string="Date Naiss."/>
+                   <field name="genre"/>
+                   <field name="statut_familial"/>
+                   <field name="date_deces"/>
+                   <field name="date_certificat"/>
+                   <field name="date_reglement"/>
+                   <field name="mt_reglement"/>
+                   <field name="note"/>
+               </tree>
+           </field>
+        </record>
+        <!-- DECLARATION DECES form -->
+        <record id="declaration_deces_view_form" model="ir.ui.view">
+              <field name="name">Déclaration Décès form</field>
+              <field name="model">proximas.deces</field>
+              <field name="arch" type="xml">
+                  <form string="Décaration : Décès Assuré" create="0">
+                      <sheet>
+                          <div class="oe_right oe_button_box" name="buttons" />
+                            <field name="photo" widget='image' class="oe_left oe_avatar" options="{'size': [90, 90]}"/>
+                            <div class="oe_title" name="title">
+                                <label for="assure_id" string="Identification de l'assuré :" class="oe_edit_only"/>
+                                <h2>
+                                    <field name="assure_id" class="text-primary"
+                                           options='{"no_open": True, "no_create": True}' readonly="True"/>
+                                </h2>
+                                    <b><field name="date_naissance" class="text-danger"/></b>
+                                    <b><field name="statut_familial" class="text-info"/></b>
+                            </div>
+                          <hr/>
+                          <group col="4" colspan="2" class="oe_left">
+                             <field name="code_id" class="text-danger"/>
+                             <field name="police_id"/>
+                             <field name="date_deces"/>
+                             <field name="ref_certificat"/>
+                             <field name="date_certificat"/>
+                             <field name="doc_certificat" widget="image" options="{'size': [210, 297]}"/>
+                          </group>
+                          <group attrs="{'invisible': [('mt_reglement_deces','=', 0)]}">
+                             <field name="mt_reglement_deces"/>
+                             <field name="date_reglement"/>
+                             <field name="mt_reglement"/>
+                             <field name="mode_reglement"/>
+                             <field name="ref_reglement"/>
+                             <field name="beneficiaire"/>
+                             <field name="type_piece"/>
+                             <field name="ref_piece"/>
+                             <field name="validite_piece"/>
+                          </group>
+                        <notebook>
+                            <page string="NOTE / OBSERVATION :">
+                              <field name="note"/>
+                            </page>
+                        </notebook>
+                      </sheet>
+                  </form>
+              </field>
+        </record>
+        <!-- DECES ASSISTANT WIZARD FORM -->
+        <record id='proximas_deces_assure_wizard_form' model='ir.ui.view'>
+            <field name='name'>Assistant Déclaration Décès form</field>
+            <field name='model'>proximas.deces.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Création Prise en charge Assuré">
+                    <sheet>
+                        <div class="panel">
+                            <h3 class="panel-header text-primary">
+                              Assistant Déclaration Décès Assuré:
+                          </h3>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0">
+                                <!--<separator class="text-success fa fa-plus-square"/>-->
+                              <p class="text-primary h5">Cet assistant vous permet de démarrer la procédure de déclaration
+                                  de décès pour un assuré. vous devez au préalable vous munir du certificat de décès
+                                  délivré par une autorité compétente et vérifier la validité dudit certificat.
+                              </p>
+                              <p class="text-primary h5">Pour enregistrer le certificat de décès concerné, vous allez
+                                  indiquer le Code d'identification de l'assuré, inscrit sur la carte d'accès, dans le
+                                  champ ci-dessous :
+                                  <field name='code_saisi'  class="text-primary h4"
+                                         default_focus="1"
+                                         placeholder="Ex.: 01234567AB"/>
+                                  <hr/>
+                              </p>
+                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                              </footer>
+                            </blockquote>
+                          </div>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button name='open_popup'
+                            string='Valider'
+                            class='btn-primary'
+                            type='object'/>
+                                    /
+                        <button string='Annuler'
+                            class='btn-default'
+                            special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <!--  MENUS ACTIONS VIEWS-->
+        <record model="ir.actions.act_window" id="proximas_adherent_action">
+            <field name="name">Proximaas: Gestion Dossiers Adhérent(es)</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.adherent</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="search_view_id" ref="search_proximas_adherent"/>
+            <!--<field name="search_view_id" ref="proximas_assure_view_search" />-->
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_ayant_droit_action">
+            <field name="name">Proximaas: Gestion Dossiers Ayant-droits</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.ayant.droit</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="search_proximas_ayant_droit"/>
+            <!--<field name="search_view_id" ref="proximas_assure_view_search" />-->
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_assure_action">
+            <field name="name">Proximaas: Gestion Dossiers Assurés(Bénéficiaires)</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.assure</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="search_view_id" ref="proximas_assure_view_search"/>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_assistant_justificatif_action">
+            <field name="name">Proximaas: Assistant Gestion de Justificatifs (Scolarité/Invalidité)</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.justificatif.enfant.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        <record id="proximas_list_justificatif_action" model="ir.actions.act_window">
+            <field name="name">Proximaas: Gestion des Justificatifs (Scolarité/Invalidité)</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.justificatif.enfant</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="justificatif_enfant_search_view"/>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+         <record model="ir.actions.act_window" id="proximas_assistant_sanction_action">
+            <field name="name">Proximaas: Assistant Gestion de Sanctions</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.sanction.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        <record id="proximas_list_sanction_action" model="ir.actions.act_window">
+            <field name="name">Proximaas: Gestion des Sanctions &amp; Suspensions(Assurés)</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.sanction</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="proximas_sanction_search_view" />
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_deces_wizard_action">
+            <field name="name">Proximaas: Assistant Déclaration Décès Assuré</field>
+            <field name="res_model">proximas.deces.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+        <record id="proximas_deces_action" model="ir.actions.act_window">
+            <field name="name">Proximaas: Gestion des Cas de Décès</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.deces</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="search_view_id" ref="proximas_deces_search_view" />
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+    </data>
+</odoo>

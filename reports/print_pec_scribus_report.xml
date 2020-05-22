@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+    <report string="Edition Bulletin Prise en charge" id="action_pec_scribus_report" model="proximas.prise.charge"
+                            report_type="scribus_pdf" name="proximas_medical.pec_scribus_report" />
+
+    <record id="action_pec_scribus_report" model="ir.actions.report.xml">
+        <field name="scribus_pec_report_template" type="base64" file="proximas_medical/reports/imprime_prise_charge_report.sla" />
+    </record>
+</odoo>

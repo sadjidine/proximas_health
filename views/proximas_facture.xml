@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+<odoo>
+    <data>
+        <!-- FACTURE VIEW TREE -->
+        <record id="proximas_facture_view_tree" model="ir.ui.view">
+            <field name="name">proximas.facture.view</field>
+            <field name="model">proximas.facture</field>
+            <field name="arch" type="xml">
+                <tree string="Facture Prestataires" create="0">
+                    <!--<field name="id"/>-->
+                    <field name="name"/>
+                    <field name="num_facture"/>
+                    <field name="prestataire" />
+                    <field name="date_emission"/>
+                    <field name="date_reception" />
+                    <field name="nbre_prestations" sum="Nbre. Actes"/>
+                    <field name="totaux_exclusions_facture" sum="Exclusions"/>
+                    <field name="net_prestataire_facture" sum="Net à payer"/>
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
+        <!-- PFACTURE PRESTATAIRE SEARCH VIEW -->
+        <record id="proximas_facture_view_search" model="ir.ui.view">
+            <field name="name">proximas.facture.search</field>
+            <field name="model">proximas.facture</field>
+            <field name="arch" type="xml">
+                <search string="Facture Prestataire">
+                    <field name="name"/>
+                    <field name="num_facture"/>
+                    <field name="prestataire" />
+                    <field name="date_emission"/>
+                    <field name="date_reception" />
+                    <field name="nbre_prestations"/>
+                    <field name="totaux_exclusions_facture"/>
+                    <field name="net_prestataire_facture"/>
+                    <field name="state" />
+                    <filter name="prestataire_id"
+                            string="Prestataire"
+                            domain="[]" />
+                    <separator />
+                    <newline />
+                    <group expand="0" string="Grouper par...">
+                        <filter string="Prestataire"
+                                domain="[]"
+                                context="{'group_by':'prestataire_id'}" />
+                        <filter string="Date Emission"
+                                domain="[]"
+                                context="{'group_by':'date_emission'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+        <!-- FACTURE Form view-->
+        <record id="proximas_facture_view_form" model="ir.ui.view">
+           <field name="name">facture form view</field>
+           <field name="model">proximas.facture</field>
+           <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+           <field name="arch" type="xml">
+               <form create="0">
+                   <header>
+                       <button name="%(action_facture_report)d" string="Aperçu Facture"
+                               type="action" icon="gtk-print" class="oe_highlight"
+                               help="Générer et éditer la facture Prestataire."
+                               attrs="{'invisible': [('nbre_actes_facture','=',0)]}"
+                               />
+                       <button name="Enattente" type="workflow" icon="fa-hospital-o"
+                               string="Remettre en Attente" states="traite,cloture" class="oe_highlight"
+                               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                               help="Permet de remettre le statut de la facture dans l'état de depart =>(En attente)."/>
+                       <button name="Traitement" type="workflow"
+                               string="Transmettre la facture" icon="fa-hand-o-right"
+                               attrs="{'invisible': ['|',('nbre_actes_facture','=',0),('state','!=','attente')]}"
+                               help="Permet de transmettre la facture pour traitement." class="oe_highlight"/>
+                               <!--states="cours,valide"-->
+                       <button name="Clôture" type="workflow" icon="fa-check-circle"
+                               string="Clôturer la facture" class="oe_highlight"
+                               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                               states="traite"
+                               help="Permet de valider et clôturer la facture après traitement pour d'evantuels exclusions."/>
+                       <field name="state"
+                              widget="statusbar"/><!-- statusbar_visible="cours,oriente,termine,expire,valide"-->
+                   </header>
+                   <sheet>
+                       <div class="oe_right oe_button_box" name="buttons">
+                           <button name="proximas_medical.sinistres_filtre_action" class="oe_stat_button"
+                                   icon="fa-list"
+                                   type="action"
+                                   context="{'search_default_adherent_id': adherent_id}">
+                               <field name="nbre_actes_facture" widget="statinfo" string="Nbre.Actes" />
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-archive"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="totaux_actes_facture" widget="statinfo" string="Totaux"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-archive"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="totaux_actes_pc_facture" widget="statinfo" string="Totaux PC"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-archive"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="totaux_actes_npc_facture" widget="statinfo" string="Totaux NPC"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-bank"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="totaux_part_sam_facture" widget="statinfo" string="Totaux SAM"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-user"
+                                   context="{'search_default_num_contrat: num_contrat}">
+                               <field name="totaux_ticket_moderateur_facture" widget="statinfo" string="Ticket Mod."/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-scissors"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="totaux_exclusions_facture" widget="statinfo" string="Totaux Exclus"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-gift"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="net_prestataire_facture" widget="statinfo" string="Net à Payer"/>
+                           </button>
+                       </div>
+                       <div class="oe_title oe_left">
+                           <!--<label for="num_facture" string="Code Facture" />-->
+                           <label for="prestataire_id" string="Prestataire Conventionné" />
+                           <h2 class="bg-info"><field name="prestataire_id"
+                                  options ='{"no_open": True, "no_create": True}'
+                                  required="1"
+                                  readonly="1"/>
+                           </h2>
+                           <!--<label for="street" string="Address"/>
+                            <group>
+                                <div class="o_address_format">
+                                    <field name="street" placeholder="Street..." class="o_address_street"/>
+                                    <field name="street2" placeholder="Street 2..." class="o_address_street"/>
+                                    <field name="city" placeholder="City" class="o_address_city"/>
+                                    <field name="state_id" class="o_address_state" placeholder="State" options='{"no_open": True}' on_change="onchange_state(state_id)"/>
+                                    <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                    <field name="country_id" placeholder="Country" class="o_address_country" options='{"no_open": True, "no_create": True}'/>
+                                </div>
+                            </group>-->
+                       </div>
+
+                       <field name="num_facture" invisible="1"/>
+                       <div class="oe_right"><h2 class="text-primary"><field name="code_facture"/></h2></div>
+                       <hr/>
+                       <group col="4" colspan="2" >
+                           <field name="name"/>
+                           <field name="ref_interne"
+                                  states="traite,cloture"
+                                  attrs="{'required': [('state','in',['traite','cloture'])]}"
+                                  groups="base.group_system,proximas_medical.group_operator,proximas_medical.group_manager,proximas_medical.group_admin"
+                           />
+                           <field name="date_reception"/>
+                           <!--<field name="mt_total_facture"/>
+                           <field name="mt_total_exclusions"/>
+                           <field name="nbre_prestations"/>-->
+                           <field name="date_emission"
+                                  states="traite,cloture"
+                                  attrs="{'required': [('state','in',['traite','cloture'])]}"
+                                  groups="base.group_system,proximas_medical.group_operator,proximas_medical.group_manager,proximas_medical.group_admin"
+                           />
+                           <field name="doc_joint"
+                                  states="traite,clotue"
+                                  groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                                  attrs="{'required': [('state','in',['traite','cloture'])]}"
+                                  widget='binary'
+                                  filename="doc_filename"
+                           />
+                           <field name="doc_filename"
+                                  invisible="1"
+                                  states="traite,cloture"
+                                  attrs="{'required': [('state','in',['traite','cloture'])]}"
+                                  groups="base.group_system,proximas_medical.group_operator,proximas_medical.group_manager,proximas_medical.group_admin"
+                           />
+                       </group>
+                       <hr/>
+                       <notebook>
+                           <page string="Détails Facture (Prestations facturées)">
+                               <field name="details_pec_ids" options='{"no_create": True}'
+                                      required="1"
+                                      class="text-info"
+                                      widget="many2many"
+                                      context="{'default_prestataire_id':prestataire_id, 'default_facture_id':id}"
+                                      domain="[('prestataire','=',prestataire_id),('date_execution','!=',None),
+                                      ('date_execution','!=',None),('facture_id','=',None),('total_pc','>',0),
+                                      ('pec_state','in',['dispense','oriente','termine'])]"
+                               ><!--('facture_id','=',None) '|','&amp;','&amp;','&amp;','&amp;','&amp;',-->
+                                <!--'form_view_ref':'proximas_medical.exclusion_details_pec_soins_form',-->
+                                   <form string="Détails de Prise en charge Assuré">
+                                        <sheet>
+                                            <notebook>
+                                                <page string="Détails - Prestation Médicale / Pharmacie">
+                                                    <group>
+                                                        <field name="prestataire"
+                                                               options='{"no_open": True, "no_create": True}'
+                                                               class="text-success"
+                                                               readonly="1"/>
+                                                        <field name="date_execution" readonly="1"/>
+                                                        <field name="details_prestation"
+                                                               class="text-primary"
+                                                               string="Prestation/Médicament"/>
+                                                        <!--<field name="produit_phcie"/>-->
+                                                    </group>
+                                                    <group invisible="1">
+                                                        <field name="assure_id"/>
+                                                        <field name="pool_medical_id"/>
+                                                        <field name="pool_medical_crs_id"/>
+                                                    </group>
+                                                    <group invisible="1">
+                                                        <field name="prestataire_phcie_id"/>
+                                                        <field name="police_id"/>
+                                                        <field name="rubrique_id" readonly="1"/>
+                                                        <field name="cout_unite"/>
+                                                        <field name="quantite_exige"/>
+                                                        <field name="cout_modifiable"/>
+                                                    </group>
+                                                    <separator/>
+                                                    <group col="6" colspan="2">
+                                                        <field name="coefficient"
+                                                               attrs="{'invisible': [('quantite_exige','=',True)]}"/>
+                                                        <field name="quantite_livre" readonly="1"
+                                                               attrs="{'invisible': [('quantite_exige','=',False)]}"/>
+                                                        <field name="cout_unitaire"
+                                                               attrs="{'invisible': [('cout_modifiable','=',True)]}"/>
+                                                        <field name="cout_unit" readonly="1"
+                                                               attrs="{'invisible': [('cout_modifiable','=',False)]}"/>
+                                                        <field name="cout_total"/>
+                                                        <field name="total_pc"/>
+                                                        <field name="total_npc"/>
+                                                        <field name="taux_couvert"/>
+                                                        <field name="net_tiers_payeur"/>
+                                                        <field name="ticket_moderateur"/>
+                                                        <field name="net_prestataire"/>
+                                                    </group>
+                                                    <hr/>
+                                                    <group col="6" colspan="2" invisible="1">
+                                                        <field name="prestation_cro_id"/>
+                                                        <field name="prestation_crs_id"/>
+                                                        <field name="prestation_id"/>
+                                                        <field name="code_medical_id"/>
+                                                        <field name="zone_couverte"/>
+                                                    </group>
+                                                </page>
+                                                <page string="Exclusion Sur Prestation/Dispensation "
+                                                      groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,
+                                                      proximas_medical.group_medical">
+                                                    <group>
+                                                        <field name="mt_exclusion" string="Montant à exclure"/>
+                                                        <field name="motif_exclusion"
+                                                               string="Motif d'exclusion"
+                                                               attrs="{'required': [('mt_exclusion','!=',0)]}"
+                                                        />
+                                                    </group>
+                                                </page>
+                                            </notebook>
+                                        </sheet>
+                                    </form>
+                                    <tree string="Details PEC"  edit="true">
+                                        <field name="num_pec"/>
+                                        <field name="facture_id"/>
+                                        <field name="code_id"/>
+                                        <field name="assure_id"/>
+                                        <field name="date_execution" string="Date"/>
+                                        <field name="details_prestation" string="Prestation"/>
+                                        <!--<field name="produit_phcie_id"/>-->
+                                        <!--<field name="quantite"/>-->
+                                        <!--<field name="cout_unit"/>-->
+                                        <!--<field name="cout_total" sum="S/Totaux"/>-->
+                                        <field name="total_pc" sum="Totaux TTC"/>
+                                        <field name="taux_couvert"/>
+                                        <field name="ticket_moderateur" sum="Totaux Ticket Modérateur"/>
+                                        <field name="net_prestataire" sum="Totaux Net A Payer"/>
+                                    </tree>
+                               </field>
+                           </page>
+                           <page string="2. Notes/Observation">
+                               <field name="note"/>
+                           </page>
+                       </notebook>
+                   </sheet>
+                   <sheet position="after">
+                        <div class="oe_chatter">
+                            <field name="message_follower_ids"
+                            widget="mail_followers" />
+                            <field name="message_ids" widget="mail_thread" />
+                        </div>
+                    </sheet>
+               </form>
+           </field>
+        </record>
+        <!-- FACTURE WIZARD FORM -->
+        <record id='proximas_facture_crea_wizard_form' model='ir.ui.view'>
+            <field name='name'>Assistant Création Facture Prestataire</field>
+            <field name='model'>proximas.facture.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Création Facture Prestataire">
+                    <sheet>
+                        <div class="panel">
+                          <h4 class="panel-header text-primary">Assistant de Création Facture pour un Prestataire : </h4>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0">
+                              <p class="text-muted h5">Cet assistant vous permet de créer une nouvelle facture pour un prestataire.
+                                  Vous devez au préalable, vous munir de l'original de la facture du prestataire concerné.
+                                  Pour commencer le traitement de la facture, vous allez indiquer les informations
+                                  nécessaires dans les champs ci-dessous. Puis sélectionner les prestations fournies
+                                  et rattachées à la facture. Pour créer ensuite, en cliquant sur le bouton
+                                  "Créer Facture" au bas du formulaire.
+                              </p>
+                            </blockquote>
+                               <hr/>
+                              <group invisible="1">
+                                  <field name="current_user"/>
+                                  <field name="current_prestataire"/>
+                                  <field name="is_prestataire" readonly="1"/>
+                              </group>
+                              <group col="6" colspan="2">
+                                  <group>
+                                      <field name="prestataire_id"
+                                             options='{"no_open": True, "no_create": True}'
+                                             groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                                             required="1"
+                                      />
+                                      <field name="name" required="1"/>
+                                      <field name="date_emission" required="1"/>
+                                  </group>
+                              </group>
+                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                                  <cite title="Champs obligatoires">dont le fond est colorié?</cite>
+                              </footer>
+                          </div>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button name='record_facture_details'
+                            string='Créer la Facture'
+                            class='btn-primary'
+                            type='object'/>
+                                     -
+                        <button string='Annuler'
+                            class='btn-default'
+                            special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_create_facture_action">
+            <field name="name">Proximaas: Création Facture Prestataire</field>
+            <field name="res_model">proximas.facture.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_list_facture_action">
+            <field name="name">Proximaas: Gestion Factures Prestataires</field>
+            <field name="res_model">proximas.facture</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+    </record>
+    </data>
+</odoo>

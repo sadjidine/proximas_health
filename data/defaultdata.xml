@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="first_assure_dashboard_item" model="proximas.assure.dashboard">
+            <field name="name">Kanban Assures #1</field>
+            <field name="description">A description for record #1.</field>
+        </record>
+    </data>
+</odoo>

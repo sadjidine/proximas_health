@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <report
+            id="action_report_visa_sante_card"
+            model="proximas.assure"
+            string="Carte_Visa_Sante"
+            name="proximas_medical.report_assure_visa_sante_card"
+            file="proximas_medical.report_assure_visa_sante_card"
+            attachment_use="True"
+            attachment="'VISA-SANTE - %s - %s' %(object.name,time.strftime('%d-%m-%Y'))+'.pdf'"
+            report_type="qweb-pdf"
+        />
+        <!--file="proximas_medical.assure_visa_sante_card"-->
+        <template id="report_assure_visa_sante_card">
+            <t t-call="report.html_container">
+                <!-- REMEMBER, docs is the selected records either in form view or checked in list view (usually). So the line below says use the following template for each record that has been selected. -->
+                <t t-foreach="docs" t-as="assure">
+                    <t>
+                         <div class="page" t-attf-style="background-image:url('/proximas_medical/static/src/img/carte_visa_fond_vert.png');background-size:270mm 170mm;
+                         width:270mm;height:170mm;">
+                             <!--<div class="oe_structure"/>-->
+                             <style type="text/css">
+                            <![CDATA[
+                            /* Arvo */
+                            @font-face {
+                              font-family: 'Arvo';
+                              font-style: normal;
+                              font-weight: 400;
+                              src: local('Arvo'), url(http://fonts.gstatic.com/s/arvo/v8/MViwy4K6e56oHcyeMzjbCQ.ttf) format('truetype');
+                            }
+                            ]]>
+                            </style>
+                             <!--page-break-after:always;-->
+                            <!--<p style="font-family: Arvo;">Test Arvo</p>-->
+                             <!--<p class="text-primary text-right h1"><strong>CARTE VISA SANTE</strong></p>-->
+                             <!--align="center"  style='margin:0px;padding-top:0px;'-->
+                             <div class="row">
+                                 <div class="col-xs-4 mt56">
+                                     <!--<span t-field="assure.structure_id.logo" t-field-options='{"widget":"image"}'/>-->
+                                     <img class="media-object"
+                                          t-att-src="'data:image/png;base64,%s' % assure.structure_id.logo"
+                                          style="height:100px; width:120px;"
+                                          align="center" />
+                                 </div>
+                                 <div class="col-xs-8 mb0 text-right">
+                                     <!--<img t-att-src="'proximas_medical/static/src/img/carte_sante_entete_vert.png'" style='margin:0px;padding-top:0px;'/>-->
+                                     <p class="text-primary text-right h1"><strong>CARTE VISA SANTE</strong></p>
+                                     <img t-att-scr="'proximas_medical/static/src/img/carte_sante_entete_vert.png'"/>
+                                 </div>
+                             </div>
+                             <div class="row text-success text-right">
+                                <h2 class="col-xs-12 bg-success"><span t-field="assure.structure_id.rml_header1"/></h2>
+                            </div>
+                             <div class="row">
+                                 <div class="col-xs-3">
+                                 </div>
+                                 <div class="col-xs-9" style="font-family: Arvo;">
+                                     <h1 class="text-primary"><strong t-field="assure.code_id"/></h1>
+                                 </div>
+                             </div>
+                             <div class="row">
+
+                             </div>
+                             <div class="row">
+                                 <div class="col-xs-3 text-center">
+                                     <!--<span t-field="assure.image" t-field-options='{"widget":"image","class":"img-rounded"}'/>-->
+                                     <img t-att-src="'data:image/png;base64,%s' % assure.image" align="center" height="240" width="180" style='margin:0px;padding-top:0px;'/>
+                                 </div>
+                                 <div class="col-xs-7">
+                                     <p class="h2"><strong t-field="assure.nom"/></p>
+                                     <p class="h2"><strong t-field="assure.prenoms"/></p>
+                                     <p class="h2"><strong t-field="assure.genre"/></p>
+                                     <p class="h2 text-info"><strong t-field="assure.statut_familial"/></p>
+                                     <p class="h2 text-success"><strong t-field="assure.num_contrat"/> - <strong t-field="assure.police_id.name"/></p>
+                                     <div t-if="assure.statut_familial != 'adherent'" class="h3">
+                                         <p class="text-primary">Adhérent : <span t-field="assure.contrat_id.adherent_id.name"/></p>
+                                     </div>
+                                 </div>
+                                 <div class="col-xs-2 text-center">
+                                     <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('QR', assure.code_id, 160, 160)" style="width:160px;height:160px;"/>
+                                 </div>
+                             </div>
+                             <!--<div class="row">
+                                 <div class="col-xs-12 text-center">
+                                     <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Code128', assure.code_id, 240, 60)" style="width:120px;height:40px;"/>
+                                 </div>
+                             </div>-->
+                             <div class="row">
+
+                             </div>
+                             <div class="row" >
+                                 <div class="col-xs-3">
+
+                                 </div>
+                                 <div class="col-xs-9 text-justify h4">
+                                    <p><strong>IMPORTANT: </strong>Cette carte est strictement personnelle et reste
+                                     la propriété exclusive de <strong class="text-success"><span t-field="assure.structure_id.name"/>
+                                        </strong> qui se reserve le droit d'en demander sa restitution.
+                                    </p>
+                                 </div>
+                            </div>
+                         </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>
