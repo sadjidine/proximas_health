@@ -514,7 +514,9 @@
                                                                required="1"
                                                                options='{"no_open": True, "no_create": True}' class="text-primary"
                                                                domain="[('prestataire_id', '=', prestataire_id)]"/>
-                                                        <field name="exercice_id" options='{"no_open": True, "no_create": True}'/>
+                                                        <field name="exercice_id"
+                                                               string="Exercice SAM"
+                                                               options='{"no_open": True, "no_create": True}'/>
                                                     </group>
                                                 </group>
                                                 <hr/>
@@ -817,7 +819,9 @@
                                                            class="h5 text-success"
                                                            domain="[('prestataire_id', '=', prestataire_crs_id),('active', '=', True)]"
                                                     />
-                                                    <field name="exercice_id" options='{"no_open": True, "no_create": True}'/>
+                                                    <field name="exercice_id"
+                                                           string="Exercice SAM"
+                                                           options='{"no_open": True, "no_create": True}'/>
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2">
