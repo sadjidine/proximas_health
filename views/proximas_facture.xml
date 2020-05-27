@@ -373,8 +373,17 @@
             <field name="res_model">proximas.facture</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('state','in',['attente'])]</field>
             <field name="context">{}</field>
-    </record>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_facture_list_all_action">
+            <field name="name">Proximaas: Gestion Factures Prestataires</field>
+            <field name="res_model">proximas.facture</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="proximas_facture_list_all_tree"/>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_prestataire_id':'prestataire_id'}</field>
+        </record>
     </data>
 </odoo>
