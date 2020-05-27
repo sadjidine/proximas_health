@@ -2015,6 +2015,10 @@ class DetailsPec(models.Model):
         required=False,
         readonly=True,
     )
+    age_entier = fields.Integer (
+        string='Age assuré',
+        related='assure_id.age_entier',
+    )
     age_details = fields.Char (
         string="Age",
         related="assure_id.age_details",

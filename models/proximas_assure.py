@@ -242,7 +242,7 @@ class Assure(models.Model):
     age_details = fields.Char(
         compute='_compute_age',
     )
-    age_entier = fields.Char(
+    age_entier = fields.Integer(
         string='Age assuré',
         compute='_compute_age_entier',
         store=True,
