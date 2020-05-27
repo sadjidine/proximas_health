@@ -5,7 +5,7 @@
 
 <odoo>
     <!-- DATAILS PEC TREE -->
-    <record id="proximas_detzils_pec_view_tree" model="ir.ui.view">
+    <record id="proximas_details_pec_view_tree" model="ir.ui.view">
         <field name="name">proximas details pec tree</field>
         <field name="model">proximas.details.pec</field>
         <field name="arch" type="xml">
@@ -80,8 +80,8 @@
             </search>
         </field>
     </record>
-    <!-- DATAILS PEC TREE -->
-    <record id="proximas_detzils_pec_list_view" model="ir.ui.view">
+    <!-- DETAILS PEC TREE -->
+    <record id="proximas_details_pec_list_view" model="ir.ui.view">
         <field name="name">proximas details pec list</field>
         <field name="model">proximas.details.pec</field>
         <field name="arch" type="xml">
@@ -2111,6 +2111,7 @@
         <field name="res_model">proximas.details.pec</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="proximas_details_pec_view_tree"/>
         <field name="domain">[('date_execution','!=',None)]</field>
         <field name="context">{}</field>
     </record>
