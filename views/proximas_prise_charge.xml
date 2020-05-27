@@ -10,8 +10,11 @@
         <field name="model">proximas.details.pec</field>
         <field name="arch" type="xml">
             <tree string="Details PEC">
-                <!--<field name="pec_id"/>-->
+                <field name="num_pec"/>
                 <field name="date_execution"/>
+                <field name="code_id"/>
+                <field name="assure_id"/>
+                <field name="prestataire"/>
                 <field name="details_prestation"/>
                 <field name="quantite" />
                 <field name="cout_unite" />
