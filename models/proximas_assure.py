@@ -1611,6 +1611,11 @@ class JustificatifEnfant(models.Model):
     )
     age = fields.Char(
         string="Age",
+        related='assure_id.age',
+        readonly=True,
+    )
+    age_entier = fields.Integer(
+        string="Age",
         related='assure_id.age_entier',
         readonly=True,
     )
