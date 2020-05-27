@@ -513,10 +513,14 @@
                                                         <field name="prestation_cro_id"
                                                                required="1"
                                                                options='{"no_open": True, "no_create": True}' class="text-primary"
-                                                               domain="[('prestataire_id', '=', prestataire_id)]"/>
+                                                               domain="[('prestataire_id', '=', prestataire_id),('accord_prealable', '=', False),]"/>
+                                                        <field name="date_dernier_acte" string="Date Précédente Prestation "/>
                                                         <field name="exercice_id"
                                                                string="Exercice SAM"
                                                                options='{"no_open": True, "no_create": True}'/>
+                                                    </group>
+                                                    <group col="6" colspan="2" invisible="1">
+                                                         <field name="delai_prestation"/>
                                                     </group>
                                                 </group>
                                                 <hr/>
