@@ -679,6 +679,18 @@ class PriseEnCharge(models.Model):
         default=False,
         help="Indique si la prise en charge est valide (PEC) ou non",
     )
+    info_clinique = fields.Text (
+        string="Infos clinique",
+        halp='Informations cliniques à communiquer (Facultatif)',
+    )
+    doc_info_clinique = fields.Binary (
+        string="Copie de la demande",
+        attachment=True,
+        help='Joindre le document justificatif de la demande.',
+    )
+    doc_filename = fields.Char (
+        "Nom fichier joint",
+    )
     # Using Kanban stages and features
     color = fields.Integer('Color Index')
     priority = fields.Selection(
