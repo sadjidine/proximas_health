@@ -74,6 +74,11 @@ class Facture(models.Model):
         store=True,
         required=False,
     )
+    categorie_id = fields.Many2one(
+        #comodel_name="proximas.categorie.prestataire",
+        string="Catégorie",
+        related='prestataire_id.categorie_id',
+    )
     city = fields.Char(
         string="Ville",
         related='prestataire_id.city',

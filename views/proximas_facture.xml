@@ -23,6 +23,24 @@
                 </tree>
             </field>
         </record>
+        <record id="proximas_facture_list_all_tree" model="ir.ui.view">
+            <field name="name">proximas.facture.list.view</field>
+            <field name="model">proximas.facture</field>
+            <field name="arch" type="xml">
+                <tree string="Factures Prestataires" create="0">
+                    <field name="name"/>
+                    <field name="num_facture"/>
+                    <field name="prestataire"/>
+                    <field name="categorie_id"/>
+                    <field name="date_emission"/>
+                    <field name="date_reception" />
+                    <field name="nbre_prestations" sum="Nbre. Actes"/>
+                    <field name="totaux_exclusions_facture" sum="Exclusions"/>
+                    <field name="net_prestataire_facture" sum="Net à payer"/>
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
         <!-- PFACTURE PRESTATAIRE SEARCH VIEW -->
         <record id="proximas_facture_view_search" model="ir.ui.view">
             <field name="name">proximas.facture.search</field>
