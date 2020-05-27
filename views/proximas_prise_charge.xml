@@ -12,7 +12,7 @@
             <tree string="Details PEC">
                 <!--<field name="pec_id"/>-->
                 <field name="date_execution"/>
-                <field name="prestation_details"/>
+                <field name="details_prestation"/>
                 <field name="quantite" />
                 <field name="cout_unite" />
                 <field name="cout_total" />
