@@ -1765,6 +1765,98 @@
                </form>
            </field>
         </record>
+    <!-- ACCORD PREALABLE ACTES MEDICAUX/PRESTATIONS CRS - LIST-->
+    <record id="accord_details_pec_crs_tree_view" model="ir.ui.view">
+        <field name="name">Accord Actes/Médicaux CRS</field>
+        <field name="model">proximas.details.pec</field>
+        <field name="arch" type="xml">
+            <tree string="Listing Détaillé Acts/Prestations" create="0" edit="1" delete="0">
+                <field name="date_demande"/>
+                <field name="num_pec"/>
+                <field name="code_id" />
+                <field name="name" string="Assuré"/>
+                <field name="age" />
+                <field name="genre" />
+                <field name="statut_familial"/>
+                <field name="prestataire_id"/>
+                <field name="pool_medical_id"/>
+                <field name="prestation_demande_id" string="Prestation/Acte Demandé(e)"/>
+                <field name="accord_prestation_demande"/>
+                <field name="accorde"/>
+                <field name="non_accorde"/>
+            </tree>
+        </field>
+    </record>
+    <!-- ACCORD PREALABLE ACTES MEDICAUX/PRESTATIONS CRS - FORM-->
+    <record id="accord_details_pec_crs_form" model="ir.ui.view">
+       <field name="name">accord actes CRS form view</field>
+       <field name="model">proximas.details.pec</field>
+       <field name="arch" type="xml">
+           <form string="Détails de Prise en charge CRS" create="0" edit="1" delete="0">
+               <header></header>
+               <sheet>
+                    <field name="image"
+                           widget='image'
+                           class="oe_left oe_kanban_avatar"
+                           options="{'preview_image': 'image', 'size': [120, 120]}" />
+                        <!--<field name="image" widget='image' class="oe_avatar oe_left"/>-->
+                    <div class="oe_title oe_left" name="title">
+                        <label for="assure_id" string="Identification Assuré:"/>
+                        <h3><field name="assure_id" class="text-primary" readonly="True"/></h3>
+                        <b><field name="age_details" class="text-muted"/></b>
+                        <h5><field name="statut_familial" class="text-muted"/></h5>
+                        <h5><field name="genre" class="text-muted"/></h5>
+                    </div>
+                    <div class="oe_right">
+                        <label for="pec_id" string="Référence PEC:"/>
+                        <h3><field name="pec_id" class="text-primary" readonly="True"/></h3>
+                        <label for="prestataire_id" string="Prestataire de soins - CRO:"/>
+                        <h4><field name="prestataire_id" class="text-success" readonly="1"
+                                   options='{"no_open": True, "no_create": True}'/></h4>
+                        <!--<label for="pec_state" string="Statut PEC:"/>
+                        <h4><field name="pec_state" class="text-success" readonly="1"/></h4>-->
+                    </div>
+                   <hr/>
+                   <notebook>
+                       <page string="Détails Prestation Médicale Demandée">
+                           <group col="4" colspan="2">
+                               <field name="num_pec"/>
+                               <field name="date_demande" readonly="1"/>
+                               <field name="pool_medical_id" options='{"no_open": True, "no_create": True}' readonly="1"/>
+                               <field name="prestation_demande_id" options='{"no_open": True, "no_create": True}'
+                                      class="text-primary" readonly="1"/>
+                           </group>
+                           <hr/>
+                           <group col="4" colspan="2" class="text-success h4">
+                               <field name="accorde" string="Autorisée"/>
+                               <field name="non_accorde" string="Rejetée"/>
+                           </group>
+                           <hr/>
+                           <group invisible="1">
+                               <field name="police_id"/>
+                               <field name="rubrique_id" readonly="1"/>
+                               <field name="cout_unite"/>
+                               <field name="quantite_exige"/>
+                               <field name="cout_modifiable"/>
+                           </group>
+                       </page>
+                       <page string="Motif de Refus" attrs="{'invisible': [('non_accorde','=',False)]}">
+                           <group>
+                               <field name="motif_non_accord"
+                                      attrs="{'required': [('non_accorde','=',True)]}"
+                               />
+                           </group>
+                       </page>
+                       <page string="Informations Cliniques">
+                           <group>
+                               <field name="info_clinique"/>
+                           </group>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
     <!-- PRISE EN CHARGE CREATION WIZARD FORM -->
     <record id='proximas_pec_create_wizard_form' model='ir.ui.view'>
         <field name='name'>Assistant Création de Prise en charge view</field>
@@ -1977,6 +2069,25 @@
         <field name="view_id" ref="details_pec_user_tree_view"/>
         <field name="domain">[('date_execution','!=',None),('en_cours_exo','=',True),('facture_id','=',None)]</field>
         <field name="context">{'default_user_id':uid}</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_accord_details_pec_crs_action">
+        <field name="name">Proximaas: Gestion Accords Préalables - Demandes Actes/Prestations</field>
+        <field name="res_model">proximas.details.pec</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="accord_details_pec_crs_tree_view"/>
+        <field name="domain">[('date_execution','=',None),('date_demande','!=', None),('facture_id','=',None),
+            ('accorde','=',False),('non_accorde','=',False),('en_cours_exo','=',True),('accord_prestation_demande','=',True),]</field>
+        <field name="context">{'default_user_id':uid,'form_view_ref':'proximas_medical.accord_details_pec_crs_form'}</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_list_accord_details_pec_crs_action">
+        <field name="name">Proximaas: Liste Demandes Accords Actes/Prestations Traitées</field>
+        <field name="res_model">proximas.details.pec</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="accord_details_pec_crs_tree_view"/>
+        <field name="domain">[('date_demande','!=', None),('en_cours_exo','=',True),('accord_prestation_demande','=',True),]</field>
+        <field name="context">{'default_user_id':uid,'form_view_ref':'proximas_medical.accord_details_pec_crs_form'}</field>
     </record>
     <record model="ir.actions.act_window" id="proximas_validation_details_pec_crs_action">
         <field name="name">Proximaas: Validation des Actes/Prestations CRS (Non demandés)</field>
