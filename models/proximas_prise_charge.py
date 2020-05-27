@@ -2298,6 +2298,19 @@ class DetailsPec(models.Model):
     doc_filename = fields.Char(
         "Nom fichier joint",
     )
+    date_dernier_acte = fields.Date (
+        string="Date dernier Acte",
+        compute='_check_delai_attente_prestation',
+        default=fields.Date.today (),
+        help='Date de la dernière fois où le patient a bénéficié de cette prestation.',
+    )
+    delai_prestation = fields.Integer (
+        string="Délai Prestation (En jours)",
+        compute='_check_delai_attente_prestation',
+        default=0,
+        help='Calcul le nombre de jours écoulés entre la dernière prestation liée et aujourd\'hui',
+        readonly=True,
+    )
     cout_modifiable = fields.Boolean(
         string="Coût Prestation Modifiable?",
         related='prestation_id.cout_modifiable',
