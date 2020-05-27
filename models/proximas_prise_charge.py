@@ -783,7 +783,7 @@ class PriseEnCharge(models.Model):
                 Pour plus d'informations, veuillez contactez l'administrateur..."
                 )
             )
-        elif len(self.pathologie_id) == 0:
+        elif not self.pathologie_id:
             raise UserError(_(
                 u"Cette prise en charge ne contient aucune pathologie (affection) diagnostiquée. Il faudra renseigner\
                  au moins un code affection avant de pouvoir orienter le patient vers un autre prestataire de soins. \
@@ -814,7 +814,7 @@ class PriseEnCharge(models.Model):
 
     @api.multi
     def action_dispenser(self):
-        if len(self.pathologie_id) == 0:
+        if not self.pathologie_id:
             raise UserError(_(
                 u"Cette prise en charge ne contient aucune pathologie (affection) diagnostiquée. Il faudra renseigner\
                  au moins un code affection avant de pouvoir transférer la prise ne charge vers une pharmacie pour \
@@ -861,7 +861,7 @@ class PriseEnCharge(models.Model):
                   Pour plus d'informations, veuillez contactez l'administrateur..."
                 )
             )
-        elif len(self.pathologie_id) == 0:
+        elif not self.pathologie_id:
             raise UserError(_(
                 u"Cette prise en charge ne contient aucune pathologie (affection) diagnostiquée. Il faudra renseigner\
                  au moins un code affection avant de pouvoir orienter le patient vers un autre prestataire de soins. \
