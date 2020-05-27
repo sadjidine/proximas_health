@@ -238,7 +238,6 @@ class Assure(models.Model):
     )
     age = fields.Char(
         compute='_compute_age',
-        store=True,
     )
     age_details = fields.Char(
         compute='_compute_age',
