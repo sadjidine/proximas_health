@@ -13,17 +13,17 @@
                 <field name="num_pec"/>
                 <field name="date_execution"/>
                 <field name="code_id"/>
-                <field name="assure_id"/>
+                <field name="assure_id" string="Assuré"/>
                 <field name="prestataire"/>
-                <field name="details_prestation"/>
-                <field name="quantite" />
-                <field name="cout_unite" />
-                <field name="cout_total" />
-                <field name="total_pc" />
-                <field name="total_npc" />
-                <field name="taux_couvert"/>
-                <field name="net_tiers_payeur"/>
-                <field name="ticket_moderateur"/>
+                <field name="details_prestation" string="Désignation"/>
+                <field name="quantite" string="QTE."/>
+                <field name="cout_unite" string="Coût Unit."/>
+                <field name="cout_total" string="S/Total" sum="S/Total"/>
+                <field name="total_pc" sum="Total PC"/>
+                <field name="total_npc" sum="Total NPC"/>
+                <field name="taux_couvert" string="Taux(%)"/>
+                <field name="net_tiers_payeur" sum="Part SAM"/>
+                <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod."/>
                 <field name="net_prestataire" sum="Net Prestataire"/>
             </tree>
         </field>
