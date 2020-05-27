@@ -212,12 +212,13 @@
                            <page string="Détails Facture (Prestations facturées)">
                                <field name="details_pec_ids" options='{"no_create": True}'
                                       required="1"
-                                      class="text-info"
+                                      class="text-primary"
                                       widget="many2many"
-                                      context="{'default_prestataire_id':prestataire_id, 'default_facture_id':id}"
+                                      context="{'default_prestataire_id':prestataire_id, 'default_facture_id':id,
+                                      'tree_view_ref':'proximas_medical.proximas_details_pec_view_tree'}"
                                       domain="[('prestataire','=',prestataire_id),('date_execution','!=',None),
-                                      ('date_execution','!=',None),('facture_id','=',None),('total_pc','>',0),
-                                      ('pec_state','in',['dispense','oriente','termine'])]"
+                                      ('facture_id','=',None),('total_pc','>',0),('pec_state','in',['dispense',
+                                      'oriente','termine'])]"
                                ><!--('facture_id','=',None) '|','&amp;','&amp;','&amp;','&amp;','&amp;',-->
                                 <!--'form_view_ref':'proximas_medical.exclusion_details_pec_soins_form',-->
                                    <form string="Détails de Prise en charge Assuré">
