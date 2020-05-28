@@ -50,6 +50,7 @@
         'views/proximas_facture.xml',
         'reports/remboursement_frais_medicaux_report.xml',
         'views/proximas_remboursement.xml',
+        'reports/report_reglement_periodique_sinistres.xml',
         'views/proximas_menu.xml',
         'views/proximas_dashboard.xml',
         'views/accord_pec_mail_template.xml',
