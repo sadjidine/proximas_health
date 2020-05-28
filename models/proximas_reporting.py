@@ -469,9 +469,9 @@ class ReportPecDetailsRecap(models.AbstractModel):
 
         return report_obj.render('proximas_medical.report_suivi_sinistres_view', docargs)
 
-    class ConfirmDetailsPECReportWizard (models.TransientModel):
-        _name = 'proximas.details.pec.confirmed.wizard'
-        _description = 'Details PEC Confirm Report Wizard'
+    class ReglementSinistresReportWizard (models.TransientModel):
+        _name = 'proximas.reglement.sinistres.report.wizard'
+        _description = 'Règlements Sinistres Report Wizard'
 
         date_debut = fields.Date(
             string="Date Début",
@@ -576,14 +576,14 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 },
             }
 
-            return self.env['report'].get_action(self, 'proximas_medical.report_paiement_sinistres_view', data=data)
+            return self.env['report'].get_action(self, 'proximas_medical.report_reglements_sinistres_view', data=data)
 
-    class ConfirmDetailsPECReport(models.AbstractModel):
+    class ReglementSinistresReport(models.AbstractModel):
         """
             Abstract Model for report template.
             for '_name' model, please use 'report.' as prefix then add 'module_name.report_name'.
         """
-        _name = 'report.proximas_medical.report_paiement_sinistres_view'
+        _name = 'report.proximas_medical.report_reglements_sinistres_view'
 
         @api.multi
         def render_html(self, data=None):
@@ -1437,4 +1437,4 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
                         Veuillez contacter les administrateurs pour plus détails..."
                     ))
-            return report_obj.render('proximas_medical.report_paiement_sinistres_view', docargs)
+            return report_obj.render('proximas_medical.report_reglements_sinistres_view', docargs)

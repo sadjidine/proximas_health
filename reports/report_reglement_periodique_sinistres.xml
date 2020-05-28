@@ -19,16 +19,16 @@
         <field name="header_spacing">30</field>
         <field name="dpi">90</field>
     </record>
-    <report id="report_paiement_sinistres_template"
-            string="Rapport Périodique Sinistres Factures/Remboursements"
-            model="proximas.details.pec.confirmed.wizard"
-            name="proximas_medical.report_paiement_sinistres_view"
+    <report id="report_reglements_sinistres_template"
+            string="Rapport Périodique Règlements Sinistres"
+            model="proximas.reglement.sinistres.report.wizard"
+            name="proximas_medical.report_reglements_sinistres_view"
             report_type="qweb-pdf"
             paperformat="paperformat_report_suivi_sinistres"
             menu="False"
 
     />
-    <template id="report_paiement_sinistres_view">
+    <template id="report_reglements_sinistres_view">
         <t t-call="report.html_container">
             <t t-call="report.external_layout">
                 <div class="page">

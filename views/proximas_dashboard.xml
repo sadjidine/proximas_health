@@ -366,9 +366,9 @@
             </field>
         </record>
         <!-- ETAT SINISTRES CONFIRMES - Details PEC - Form wizard-->
-        <record id="proximas_report_paiement_sinistres_wizard_form" model="ir.ui.view">
-           <field name="name">proximas.details.pec.confirmed.wizard.form</field>
-           <field name="model">proximas.details.pec.confirmed.wizard</field>
+        <record id="proximas_report_reglement_sinistres_wizard_form" model="ir.ui.view">
+           <field name="name">proximas.reglement.sinistres.report.wizard.form</field>
+           <field name="model">proximas.reglement.sinistres.report.wizard</field>
            <field name="type">form</field>
            <field name="arch" type="xml">
                <form string="Details PEC Confirmés (Facture/remboursement)">
@@ -841,12 +841,12 @@
             <field name="domain">[]</field>
             <field name="context">{}</field>
         </record>
-        <record model="ir.actions.act_window" id="proximas_report_paiement_sinistres_wizard_action">
+        <record model="ir.actions.act_window" id="proximas_report_reglement_sinistres_wizard_action">
             <field name="name">Proximaas: Etats: Rapports Suivi Périodique Sinistres en Paiement</field>
-            <field name="res_model">proximas.details.pec.confirmed.wizard</field>
+            <field name="res_model">proximas.reglement.sinistres.report.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>
-            <field name="view_id" ref="proximas_report_paiement_sinistres_wizard_form"/>
+            <field name="view_id" ref="proximas_report_reglement_sinistres_wizard_form"/>
             <field name="target">new</field>
             <field name="domain">[]</field>
             <field name="context">{}</field>
@@ -857,51 +857,39 @@
                   parent="proximas_root"
                   groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_control,proximas_medical.group_medecin"
         />
-        <menuitem id="proximas_stats_dashboard"
+        <menuitem id="proximas_rapport_dashboard"
                   name="1. INDICATEURS DE SUIVI &amp; STATISTIQUES"
                   sequence="2"
                   parent="proximas_dashboard"
         />
         <menuitem  id="sinistres_dashboard_menu"
-                   parent="proximas_stats_dashboard"
+                   parent="proximas_rapport_dashboard"
                    sequence="20"
-                   name=">> Evolution Réelle de la Sinistralité Globale (Paramétrables)"
-                   action="sinistres_parametres_tableau_bord_action"
-        />
-        <!--<menuitem  id="menu_dashboard_contrat"
-                   parent="proximas_stats_dashboard"
-                   sequence="22"
-                   name=">> Evolution des Souscriptions (Contrats)"
-                   action="proximas_dashboard_contrat_action"
+                   name=">> Statistiques - Sinistralité"
+                   action="sinistres_tableau_bord_action"
         />
         <menuitem  id="assure_dashboard_menu"
-                   parent="proximas_stats_dashboard"
-                   sequence="23"
-                   name=">> Evolution des Effectifs Bénéficiaires (Assurés)"
+                   parent="proximas_rapport_dashboard"
+                   sequence="21"
+                   name=">> Statistiques - Assurés"
                    action="assure_tableau_bord_action"
-        />-->
-        <menuitem  id="proximas_dashboard_synthese_menu"
-                   parent="proximas_stats_dashboard"
-                   sequence="24"
-                   name=">> Tableau de bord : Synthèse Globale"
-                   action="proximas_dashboard_action_view"
         />
-        <menuitem id="proximas_rapports_dashboard"
+        <menuitem id="proximas_indicateur_dashboard"
                   name="2. EDITION ETATS &amp; RAPPORTS DIVERS"
                   sequence="3"
                   parent="proximas_dashboard"
         />
         <menuitem  id="sinistre_report_recap_wizard"
-                   parent="proximas_rapports_dashboard"
+                   parent="proximas_indicateur_dashboard"
                    sequence="30"
-                   name=">> Etats: Rapports Périodique sur Sinistres en Cours)"
+                   name=">> Etats: Rapports Suivi Portefeuille de Risques"
                    action="proximas_sinistre_report_wizard_action"
         />
         <menuitem  id="report_confirm_details_pec"
                    parent="proximas_rapports_dashboard"
                    sequence="31"
-                   name=">> Etats: Rapports Périodique sur Factures/Remboursements Emises"
-                   action="proximas_report_paiement_sinistres_wizard_action"
+                   name=">> Etats: Rapports Périodiques Règlements Sinistres"
+                   action="proximas_report_reglement_sinistres_wizard_action"
         />
     </data>
 </odoo>
