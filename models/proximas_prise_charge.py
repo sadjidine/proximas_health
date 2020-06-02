@@ -1698,10 +1698,20 @@ class DetailsPec(models.Model):
         string="ID. Remb. frais médicaux",
         ondelete='restrict',
     )
-    facture_id = fields.Many2one(
+    date_saisie_rfm = fields.Datetime (
+        string="Date Emission Facture",
+        related='rfm_id.date_saisie',
+        # store=True,
+    )
+    facture_id = fields.Many2one (
         comodel_name="proximas.facture",
         string="Réf. Facture",
         ondelete='set null',
+    )
+    date_emission = fields.Date (
+        string="Date Emission Facture",
+        related='facture_id.date_emission',
+        # store=True,
     )
     date_execution = fields.Date(
         string="Date Exécution",
