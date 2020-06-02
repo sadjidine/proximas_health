@@ -871,7 +871,7 @@
         <menuitem  id="sinistres_dashboard_menu"
                    sequence="21"
                    parent="proximas_indicateurs_dashboard"
-                   name=">> Statistiques - Sinistralité"
+                   name=">> Evolution niveau de Sinistralité"
                    action="sinistres_parametres_tableau_bord_action"
         />
         <!--<menuitem  id="assure_dashboard_menu"
@@ -888,13 +888,13 @@
         <menuitem  id="sinistre_report_recap_wizard"
                    sequence="30"
                    parent="proximas_rapports_dashboard"
-                   name=">> Etats: Rapports Suivi Portefeuille de Risques"
+                   name=">> Rapports Evolution Portefeuille de Risques"
                    action="proximas_sinistre_report_wizard_action"
         />
         <menuitem  id="report_reglement_sinistres_report"
                    sequence="31"
                    parent="proximas_rapports_dashboard"
-                   name=">> Etats: Rapports Périodiques Règlements Sinistres"
+                   name=">> Rapports sur Règlements Sinistres"
                    action="proximas_report_reglement_sinistres_wizard_action"
         />
     </data>
