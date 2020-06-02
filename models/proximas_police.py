@@ -932,6 +932,11 @@ class Contrat(models.Model):
         related='adherent_id.age',
         readonly=True,
     )
+    tranche_age = fields.Selection (
+        string="Tranche d'âge",
+        related='adherent_id.tranche_age',
+        store=True,
+    )
     statut_familial = fields.Selection(
         string="Statut Familial",
         related='adherent_id.statut_familial',

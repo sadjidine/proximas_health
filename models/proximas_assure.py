@@ -247,6 +247,24 @@ class Assure(models.Model):
         compute='_compute_age_entier',
         store=True,
     )
+    tranche_age = fields.Selection(
+        string="Tranche d'âge",
+        selection=[
+            ('0', '0'),
+            ('1', '1'),
+            ('2', '2-5'),
+            ('3', '6-10'),
+            ('4', '11-15'),
+            ('5', '16-20'),
+            ('6', '21-30'),
+            ('7', '31-40'),
+            ('8', '41-50'),
+            ('9', '51-60'),
+            ('10', '+60'),
+        ],
+        compute='_check_tranche_age',
+        store=True,
+    )
     est_invalide = fields.Boolean(
         # disponible uniquement pour le statut_familial = Enfant
         string="Enfant invalide?",
@@ -347,6 +365,33 @@ class Assure(models.Model):
         default=0,
         readonly=True,
     )
+
+    @api.depends('date_naissance', 'age')
+    def _check_tranche_age(self):
+        for rec in self:
+            if bool(rec.age):
+                if rec.age <= 0:
+                    rec.tranche_age = '0'
+                elif rec.age == 1:
+                    rec.tranche_age = '1'
+                elif 2 <= rec.age <= 5:
+                    rec.tranche_age = '2'
+                elif 6 <= rec.age <= 10:
+                    rec.tranche_age = '3'
+                elif 11 <= rec.age <= 15:
+                    rec.tranche_age = '4'
+                elif 16 <= rec.age <= 20:
+                    rec.tranche_age = '5'
+                elif 21 <= rec.age <= 30:
+                    rec.tranche_age = '6'
+                elif 31 <= rec.age <= 40:
+                    rec.tranche_age = '7'
+                elif 41 <= rec.age <= 50:
+                    rec.tranche_age = '8'
+                elif 51 <= rec.age <= 60:
+                    rec.tranche_age = '9'
+                elif rec.age > 60:
+                    rec.tranche_age = '10'
 
     @api.multi
     def _check_details_pec(self):

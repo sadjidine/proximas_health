@@ -23,7 +23,7 @@
     "application": True,
     "installable": True,
     # any module necessary for this one to work correctly
-    'depends': ['base','board','mail'],
+    'depends': ['base','board','mail','dashboard'],
 
     # always loaded
     'data': [

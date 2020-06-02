@@ -559,7 +559,7 @@
            </field>
         </record>
         <!-- CONTRAT DASHBOARD VIEW DESIGN-->
-        <record id="contrat_police_genre_graph_view" model="ir.ui.view">
+        <!--<record id="contrat_police_genre_graph_view" model="ir.ui.view">
             <field name="name">contrat.police.genre.graph.view</field>
             <field name="model">proximas.contrat</field>
             <field name="arch" type="xml">
@@ -602,7 +602,7 @@
                     <field name="effectif_contrat" type="measure"/>
                 </pivot>
             </field>
-        </record>
+        </record>-->
         <!-- CONTRAT DASHBOARD ACTIONS DESIGN-->
         <!--<record model="ir.actions.act_window" id="assure_tableau_bord_action">
             <field name="name">Proximaas: Tableau de Bord - Assurés</field>
@@ -654,7 +654,7 @@
             <field name="domain">[('date_execution','!=',None)]</field>
             <field name="context">{}</field>
         </record>
-        <record model="ir.actions.act_window" id="contrat_police_genre_graph_action">
+        <!--<record model="ir.actions.act_window" id="contrat_police_genre_graph_action">
             <field name="name">CONTRATS: Graphique Effectifs/Police &amp; Genre</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">proximas.contrat</field>
@@ -687,7 +687,7 @@
             <field name="view_id" ref="ratio_sinistres_primes_groupe_pivot_view"/>
             <field name="domain">[]</field>
             <field name="context">{}</field>
-        </record>
+        </record>-->
         <!-- CONTRAT DASHBOARD FORM DESIGN-->
         <!--<record id="proximas_dashboard_contrat_form_view" model="ir.ui.view">
               <field name="name">Dashboard Contrat Form</field>
@@ -857,37 +857,43 @@
                   parent="proximas_root"
                   groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_control,proximas_medical.group_medecin"
         />
-        <menuitem id="proximas_rapport_dashboard"
+        <menuitem id="proximas_indicateurs_dashboard"
                   name="1. INDICATEURS DE SUIVI &amp; STATISTIQUES"
                   sequence="2"
                   parent="proximas_dashboard"
         />
-        <menuitem  id="sinistres_dashboard_menu"
-                   parent="proximas_rapport_dashboard"
+        <menuitem  id="proximas_dashboard_synthese_menu"
                    sequence="20"
-                   name=">> Statistiques - Sinistralité"
-                   action="sinistres_tableau_bord_action"
+                   parent="proximas_indicateurs_dashboard"
+                   name=">> Tableau de bord : Evolution Globale"
+                   action="proximas_dashboard_action_view"
         />
-        <menuitem  id="assure_dashboard_menu"
-                   parent="proximas_rapport_dashboard"
+        <menuitem  id="sinistres_dashboard_menu"
                    sequence="21"
+                   parent="proximas_indicateurs_dashboard"
+                   name=">> Statistiques - Sinistralité"
+                   action="sinistres_parametres_tableau_bord_action"
+        />
+        <!--<menuitem  id="assure_dashboard_menu"
+                   sequence="21"
+                   parent="proximas_indicateurs_dashboard"
                    name=">> Statistiques - Assurés"
                    action="assure_tableau_bord_action"
-        />
-        <menuitem id="proximas_indicateur_dashboard"
+        />-->
+        <menuitem id="proximas_rapports_dashboard"
                   name="2. EDITION ETATS &amp; RAPPORTS DIVERS"
                   sequence="3"
                   parent="proximas_dashboard"
         />
         <menuitem  id="sinistre_report_recap_wizard"
-                   parent="proximas_indicateur_dashboard"
                    sequence="30"
+                   parent="proximas_rapports_dashboard"
                    name=">> Etats: Rapports Suivi Portefeuille de Risques"
                    action="proximas_sinistre_report_wizard_action"
         />
-        <menuitem  id="report_confirm_details_pec"
-                   parent="proximas_rapports_dashboard"
+        <menuitem  id="report_reglement_sinistres_report"
                    sequence="31"
+                   parent="proximas_rapports_dashboard"
                    name=">> Etats: Rapports Périodiques Règlements Sinistres"
                    action="proximas_report_reglement_sinistres_wizard_action"
         />
