@@ -374,11 +374,11 @@
                <form string="Details PEC Confirmés (Facture/remboursement)">
                    <sheet>
                        <div class="panel">
-                          <h4 class="panel-header text-primary">Assistant Edition de Rapports de Suivi des Actes
-                              Facturés et/ou Remboursés (Sinistralité) : </h4>
+                          <h4 class="panel-header text-primary">Assistant Edition de Rapports de Suivi des Règlements
+                              Facturés et/ou Remboursés : </h4>
                           <div class="panel-body">
                             <blockquote class="blockquote mb-0">
-                                 <p class="text-muted h5">Veuillez renseigner avec soins, les champs
+                                 <p class="text-info h5">Veuillez renseigner avec soins, les champs
                                      ci-dessous et valider afin que le système génère le rapport au format PDF à
                                      télécharger...
                                 </p>
@@ -387,7 +387,6 @@
                                      à partir d'une date de début et de fin. Vous choisirez ensuite, le type d'indicateur
                                      de suivi concerné par le rapport à éditer. -->
                                 <p class="h5 text-primary">1. Période de Début et Fin</p>
-                                <hr/>
                                 <div class="h5">
                                     <group col="6" colspan="2" >
                                         <field name="date_debut" />
@@ -449,7 +448,7 @@
                    </sheet>
                    <footer>
                         <button name='get_report'
-                            string='Générer le Rapport'
+                            string='Générer Rapport'
                             class='oe_highlight'
                             type='object'/>
                                     /
@@ -470,7 +469,7 @@
                           <h4 class="panel-header text-primary">Assistant Edition de Rapports de Suivi Portefeuille de Risque (Sinistralité) : </h4>
                           <div class="panel-body">
                             <blockquote class="blockquote mb-0">
-                                 <p class="text-muted h5">Cet assistant vous permet de générer des états et rapports
+                                 <p class="text-info h5">Cet assistant vous permet de générer des états et rapports
                                      personnalisés en fonction de vos besoins spécifiques basés une période définie c-à-d
                                      à partir d'une date de début et de fin. Vous choisirez ensuite, le type d'indicateur
                                      de suivi concerné par le rapport à éditer. Veuillez renseigner avec soin, les champs
@@ -478,8 +477,7 @@
                                      téléchargé automatiquement...
                                 </p>
                                 <p class="h5 text-primary">1. Période de Début et Fin</p>
-                                <hr/>
-                                <group col="6" colspan="2" >
+                                <group col="6" colspan="2" class="h5" >
                                     <field name="date_debut" />
                                     <field name="date_fin"/>
                                 </group>
@@ -842,7 +840,7 @@
             <field name="context">{}</field>
         </record>
         <record model="ir.actions.act_window" id="proximas_report_reglement_sinistres_wizard_action">
-            <field name="name">Proximaas: Etats: Rapports Suivi Périodique Sinistres en Paiement</field>
+            <field name="name">Proximaas: Rapports Suivi Règlements Sinistres/Période</field>
             <field name="res_model">proximas.reglement.sinistres.report.wizard</field>
             <field name="view_type">form</field>
             <field name="view_mode">form</field>

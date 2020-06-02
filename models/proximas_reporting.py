@@ -471,7 +471,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
 
     class ReglementSinistresReportWizard (models.TransientModel):
         _name = 'proximas.reglement.sinistres.report.wizard'
-        _description = 'Règlements Sinistres Report Wizard'
+        _description = 'Reglements Sinistres Report Wizard'
 
         date_debut = fields.Date(
             string="Date Début",
