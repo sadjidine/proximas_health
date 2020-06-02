@@ -375,13 +375,14 @@
                    <sheet>
                        <div class="panel">
                           <h4 class="panel-header text-primary">Assistant Edition de Rapports de Suivi des Règlements
-                              Facturés et/ou Remboursés : </h4>
+                              Factures ou Remboursements : </h4>
                           <div class="panel-body">
                             <blockquote class="blockquote mb-0">
                                  <p class="text-info h5">Veuillez renseigner avec soins, les champs
                                      ci-dessous et valider afin que le système génère le rapport au format PDF à
                                      télécharger...
                                 </p>
+                                <hr/>
                                <!-- Cet assistant vous permet de générer des états et rapports
                                      personnalisés en fonction de vos besoins spécifiques basés une période définie c-à-d
                                      à partir d'une date de début et de fin. Vous choisirez ensuite, le type d'indicateur
@@ -448,7 +449,7 @@
                    </sheet>
                    <footer>
                         <button name='get_report'
-                            string='Générer Rapport'
+                            string='Générer le Rapport'
                             class='oe_highlight'
                             type='object'/>
                                     /
@@ -476,6 +477,7 @@
                                      ci-dessous et valider pour que le système génère le rapport au format PDF qui sera
                                      téléchargé automatiquement...
                                 </p>
+                                <hr/>
                                 <p class="h5 text-primary">1. Période de Début et Fin</p>
                                 <group col="6" colspan="2" class="h5" >
                                     <field name="date_debut" />
@@ -863,13 +865,13 @@
         <menuitem  id="proximas_dashboard_synthese_menu"
                    sequence="20"
                    parent="proximas_indicateurs_dashboard"
-                   name=">> Tableau de bord : Evolution Globale"
+                   name=">> Tableau de bord: Evolution Globale"
                    action="proximas_dashboard_action_view"
         />
         <menuitem  id="sinistres_dashboard_menu"
                    sequence="21"
                    parent="proximas_indicateurs_dashboard"
-                   name=">> Evolution niveau de Sinistralité"
+                   name=">>  Tableau de bord: Evolution de la Sinistralité"
                    action="sinistres_parametres_tableau_bord_action"
         />
         <!--<menuitem  id="assure_dashboard_menu"
@@ -886,13 +888,13 @@
         <menuitem  id="sinistre_report_recap_wizard"
                    sequence="30"
                    parent="proximas_rapports_dashboard"
-                   name=">> Rapports Evolution Portefeuille de Risques"
+                   name=">> Evolution Portefeuille de Risques (Sinistralité)"
                    action="proximas_sinistre_report_wizard_action"
         />
         <menuitem  id="report_reglement_sinistres_report"
                    sequence="31"
                    parent="proximas_rapports_dashboard"
-                   name=">> Rapports sur Règlements Sinistres"
+                   name=">> Règlements Factures / Remboursements"
                    action="proximas_report_reglement_sinistres_wizard_action"
         />
     </data>
