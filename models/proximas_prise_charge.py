@@ -3383,7 +3383,7 @@ class DetailsPec(models.Model):
                              d'informations, veuillez contactez l'administrateur..."
                             ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
                         )
-
+    @api.multi
     def _compute_net_a_payer(self):
         for rec in self:
             if rec.pec_id:

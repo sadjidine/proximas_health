@@ -764,36 +764,55 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 # Récuperer la liste complète des rubriques médicales
                 rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
                 police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
-
+                factures = self.env['proximas.facture'].search([
+                    ('date_emission', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                    ('date_emission', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                ])
+                rembousements = self.env['proximas.remboursement.pec'].search([
+                    ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                    ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                ])
                 for rubrique in rubriques:
                     if filter_type == 'pec' and police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('rubrique_id', '=', rubrique.id),
-                            ('date_execution', '!=', None),
-                            ('date_emission', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                            ('date_emission', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            ('facture_id', '!=', None),
-                            ('pec_id', '!=', None),
-                            ('police_id', '=', police_id),
-                        ])
+                        if factures:
+                            for facture in factures:
+                                # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                                details_pec = self.env['proximas.details.pec'].search ([
+                                    ('rubrique_id', '=', rubrique.id),
+                                    ('date_execution', '!=', None),
+                                    ('facture_id', '!=', facture.id),
+                                    ('pec_id', '!=', None),
+                                    ('police_id', '=', police_id),
+                                ])
+                            else:
+                                raise UserError (_ (
+                                    "Proximaas : Edition Rapport de Sinistralité - Actes Confirmés: \n\
+                                    Aucune facture n'a été enregistrée sur la période indiquée.\
+                                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                                    Veuillez contacter les administrateurs pour plus détails..."
+                                ))
                     elif filter_type == 'pec' and not police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        details_pec = self.env['proximas.details.pec'].search ([
-                            ('rubrique_id', '=', rubrique.id),
-                            ('date_execution', '!=', None),
-                            ('date_emission', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                            ('date_emission', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            ('facture_id', '!=', None),
-                            ('pec_id', '!=', None),
-                        ])
+                        if factures:
+                            for facture in factures:
+                                # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                                details_pec = self.env['proximas.details.pec'].search ([
+                                    ('rubrique_id', '=', rubrique.id),
+                                    ('date_execution', '!=', None),
+                                    ('facture_id', '!=', facture.id),
+                                    ('pec_id', '!=', None),
+                                ])
+                            else:
+                                raise UserError (_ (
+                                    "Proximaas : Edition Rapport de Sinistralité - Actes Confirmés: \n\
+                                    Aucune facture n'a été enregistrée sur la période indiquée.\
+                                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                                    Veuillez contacter les administrateurs pour plus détails..."
+                                ))
                     elif filter_type == 'rfm' and police_filter:
                         # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
                         details_pec = self.env['proximas.details.pec'].search ([
                             ('rubrique_id', '=', rubrique.id),
                             ('date_execution', '!=', None),
-                            ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                            ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
                             ('rfm_id', '!=', None),
                             ('police_id', '=', police_id),
                         ])
