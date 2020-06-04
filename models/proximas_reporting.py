@@ -545,10 +545,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
         facture_id = fields.Many2one(
             comodel_name="proximas.facture",
             string="Réf. Facture",
-            domain=lambda self: [
-                ('date_emission', '>=', self.date_debut),
-                ('date_emission', '<=', self.date_fin),
-            ]
         )
         rfm_id = fields.Many2one(
             comodel_name="proximas.remboursement.pec",
