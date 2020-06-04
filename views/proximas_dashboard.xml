@@ -433,7 +433,9 @@
                                                '|',('filter_type','!=','pec'),('report_kpi','=','facture')],
                                                'required': [('report_type','=','detail'),('filter_type','=','pec'),('report_kpi','!=','facture')]}"
                                                domain="[('prestataire_id', '=', prestataire_id)]"
-                                               options ='{"no_open": True, "no_create": True}'/>
+                                               options ='{"no_open": True, "no_create": True}'
+                                        />
+                                       <!--domain="[('prestataire_id', '=', prestataire_id)]"('date_emission', '&amp;gt=',datetime.datetime.strptime(date_debut,'%Y-%m-%d').datetime.datetime.strftime('%Y-%m-%d'))-->
                                         <field name="rfm_id" attrs="{'invisible': ['|',('report_type','!=','detail'),('filter_type','!=','rfm')],
                                                'required': [('report_type','=','detail'),('filter_type','=','rfm')]}"
                                                domain="[('adherent_id', '=', adherent_id)]"
@@ -830,6 +832,14 @@
             <field name="view_id" ref="proximas_dashboard_contrat_form_view"/>
             <field name="type">ir.actions.act_window</field>
             <field name="context">{}</field>
+        </record>-->
+        <!--<record model="ir.actions.server" id="facture_filter_action">
+            <field name="name">Proximaas: Filtre Facture par date d'emission</field>
+            <field name="name">Filtre Facture</field>
+            <field name="model_id" ref="proximas_medical.model_proximas_facture"/>
+            <field name="state">code</field>
+            <field name="code">action = self.facture_filter_function(cr, uid, context=context</field>
+            <field eval="True" name="condition"/>
         </record>-->
         <record model="ir.actions.act_window" id="proximas_sinistre_report_wizard_action">
             <field name="name">Proximaas: Etats: Rapports Suivi Portefeuille de Risques</field>

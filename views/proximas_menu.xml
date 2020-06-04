@@ -129,6 +129,13 @@
               action="proximas_prestataire_pec_list_action"
               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro"
     />
+    <menuitem id="proximas_list_pec"
+              name=">> Liste Complète Prises en Charge"
+              parent="proximas_details_pec"
+              sequence="2015"
+              action="proximas_list_pec_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
     <menuitem id="proximas_facture_remb"
               name="2. Gestion Factures / Remboursements"
               parent="proximas_prise_en_charge_root"
@@ -180,13 +187,6 @@
               parent="proximas_details_pec"
               sequence="2031"
               action="proximas_accord_details_pec_crs_action"
-              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
-    />
-    <menuitem id="proximas_list_pec"
-              name=">> Liste Complète Prises en Charge"
-              parent="proximas_details_pec"
-              sequence="2032"
-              action="proximas_list_pec_action"
               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
     />
     <menuitem id="proximas_validitation_details_pec_crs"
