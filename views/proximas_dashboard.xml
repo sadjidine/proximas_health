@@ -432,7 +432,7 @@
                                         <field name="facture_id" attrs="{'invisible': ['|',('report_type','!=','detail'),
                                                '|',('filter_type','!=','pec'),('report_kpi','=','facture')],
                                                'required': [('report_type','=','detail'),('filter_type','=','pec'),('report_kpi','!=','facture')]}"
-                                               domain="[('prestataire_id', '=', prestataire_id)]"
+                                               domain="[('prestataire_id', '=', prestataire_id),('date_emission','>=',date_debut)]"
                                                options ='{"no_open": True, "no_create": True}'
                                         />
                                        <!--domain="[('prestataire_id', '=', prestataire_id)]"('date_emission', '&amp;gt=',datetime.datetime.strptime(date_debut,'%Y-%m-%d').datetime.datetime.strftime('%Y-%m-%d'))-->
@@ -838,7 +838,7 @@
             <field name="name">Filtre Facture</field>
             <field name="model_id" ref="proximas_medical.model_proximas_facture"/>
             <field name="state">code</field>
-            <field name="code">action = self.facture_filter_function(cr, uid, context=context</field>
+            <field name="code">action = self.facture_filter_function(cr, uid, context=context)</field>
             <field eval="True" name="condition"/>
         </record>-->
         <record model="ir.actions.act_window" id="proximas_sinistre_report_wizard_action">

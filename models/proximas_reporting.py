@@ -551,7 +551,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
             string="Réf. Remb. frais médicaux",
         )
 
-
         @api.multi
         def facture_filter_function(self, cr, uid, context=None):
             prestataire_id = self.prestataire_id.id
@@ -566,6 +565,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 'res_model': 'proximas.facture',
                 'target': 'current',
                 'domain': [
+                    ('prestataire_id', '=', prestataire_id),
                     ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                     ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
                 ],
@@ -601,6 +601,18 @@ class ReportPecDetailsRecap(models.AbstractModel):
             }
 
             return self.env['report'].get_action(self, 'proximas_medical.report_reglements_sinistres_view', data=data)
+
+        # CONTRAINTES
+        _sql_constraints = [
+            ('check_dates',
+             'CHECK (date_debut < date_fin)',
+             '''
+             Erreurs sur les date début et date fin!
+             La date début doit obligatoirement être inférieure (antérieure) à la date de fin...
+             Vérifiez s'il n'y pas d'erreur de saisies sur les dates ou contactez l'administrateur.
+             '''
+             )
+        ]
 
     class ReglementSinistresReport(models.AbstractModel):
         """
@@ -938,7 +950,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     if filter_type == 'pec' and bool(prestataire_id) and bool(facture_id) and police_filter:
                         # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
                         details_pec = self.env['proximas.details.pec'].search([
-                            ('date_execution', '!=', None),
+                            # ('date_execution', '!=', None),
                             # ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                             # ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
                             # ('facture_id', '!=', None),
@@ -1010,7 +1022,13 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
                         net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
                         net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                        net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                        net_a_payer = 0
+                        if net_prestataire:
+                            net_a_payer = int (net_prestataire)
+                        elif net_remboursement:
+                            net_a_payer = int (net_remboursement)
+                        else:
+                            net_a_payer = 0
 
                         docs.append({
                             'prestation_id': prestation_id,
@@ -1173,7 +1191,13 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
                         net_prestataire = sum (item.net_prestataire for item in details_pec) or 0
                         net_remboursement = sum (item.mt_remboursement for item in details_pec) or 0
-                        net_a_payer = sum (item.net_a_payer for item in details_pec) or 0
+                        net_a_payer = 0
+                        if net_prestataire:
+                            net_a_payer = int(net_prestataire)
+                        elif net_remboursement:
+                            net_a_payer = int(net_remboursement)
+                        else:
+                            net_a_payer = 0
 
                         docs.append({
                             'prestation_id': prestation_id,
@@ -1220,30 +1244,23 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
                 adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
                 if filter_type == 'pec' and bool(prestataire):
-                    factures = self.env['proximas.facture'].search([('prestataire_id', '=', prestataire_id)])
+                    factures = self.env['proximas.facture'].search([
+                        ('prestataire_id', '=', prestataire_id),
+                        ('date_emission', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                        ('date_emission', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                    ])
                     for facture in factures:
                         # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
                         date_emission = facture.date_emission
                         date_reception = facture.date_reception
                         if police_id:
-                            details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_emission', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                                ('date_emission', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                                ('facture_id', '!=', None),
-                                ('pec_id', '!=', None),
+                            details_pec = self.env['proximas.details.pec'].search([
                                 ('facture_id', '=', facture.id),
                                 ('prestataire_id', '=', prestataire_id),
                                 ('police_id', '=', police_id),
                             ])
                         else:
-                            details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_emission', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                                ('date_emission', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                                ('facture_id', '!=', None),
-                                ('pec_id', '!=', None),
-                                ('facture_id', '=', facture.id),
+                            details_pec = self.env['proximas.details.pec'].search([
                                 ('prestataire_id', '=', prestataire_id),
                             ])
                         if bool(details_pec):
@@ -1260,7 +1277,14 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
                             net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
                             net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            #net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            net_a_payer = 0
+                            if net_prestataire:
+                                net_a_payer = int (net_prestataire)
+                            elif net_remboursement:
+                                net_a_payer = int (net_remboursement)
+                            else:
+                                net_a_payer = 0
 
                             docs.append({
                                 'facture_id': facture_id,
@@ -1279,28 +1303,22 @@ class ReportPecDetailsRecap(models.AbstractModel):
                                 'net_a_payer': int (net_a_payer),
                             })
                 elif filter_type == 'rfm' and bool(adherent):
-                    rfms = self.env['proximas.remboursement.pec'].search(['adherent_id', '=', adherent.id])
+                    rfms = self.env['proximas.remboursement.pec'].search([
+                        ('adherent_id', '=', adherent.id),
+                        ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                        ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                    ])
                     for remboursement in rfms:
                         date_saisie = remboursement.date_saisie
                         # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
                         if police_id:
                             details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                                ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                                ('rfm_id', '!=', None),
-                                ('pec_id', '=', None),
                                 ('rfm_id', '=', remboursement.id),
                                 ('adherent_id', '=', adherent_id),
                                 ('police_id', '=', police_id),
                             ])
                         else:
                             details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                                ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                                ('rfm_id', '!=', None),
-                                ('pec_id', '=', None),
                                 ('rfm_id', '=', remboursement.id),
                                 ('adherent_id', '=', adherent_id),
                             ])
@@ -1317,7 +1335,14 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
                             net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
                             net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            net_a_payer = 0
+                            if net_prestataire:
+                                net_a_payer = int (net_prestataire)
+                            elif net_remboursement:
+                                net_a_payer = int (net_remboursement)
+                            else:
+                                net_a_payer = 0
 
                             docs.append({
                                 'rfm_id': rfm_id,
@@ -1378,30 +1403,25 @@ class ReportPecDetailsRecap(models.AbstractModel):
 
             # 3.2. ETAT SYNTHESE PAR FACTURE / REMBOURSEMENT
             if report_kpi == 'facture' and report_type == 'groupe':
-                police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
+                police = self.env['proximas.police'].search([
+                    ('id', '=', police_id)
+                ], order='name asc')
                 if filter_type == 'pec':
-                    factures = self.env['proximas.facture'].search([])
+                    factures = self.env['proximas.facture'].search([
+                        ('date_emission', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                        ('date_emission', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                    ])
                     for facture in factures:
                         # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
                         date_emission = facture.date_emission
                         date_reception = facture.date_reception
                         if police_id:
                             details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                                ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                                ('facture_id', '!=', None),
-                                ('pec_id', '!=', None),
                                 ('facture_id', '=', facture.id),
                                 ('police_id', '=', police_id),
                             ])
                         else:
                             details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                                ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                                ('facture_id', '!=', None),
-                                ('pec_id', '!=', None),
                                 ('facture_id', '=', facture.id),
                             ])
                         if bool(details_pec):
@@ -1423,7 +1443,14 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
                             net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
                             net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            net_a_payer = 0
+                            if net_prestataire:
+                                net_a_payer = int (net_prestataire)
+                            elif net_remboursement:
+                                net_a_payer = int (net_remboursement)
+                            else:
+                                net_a_payer = 0
 
                             docs.append({
                                 'facture_id': facture_id,
@@ -1443,29 +1470,23 @@ class ReportPecDetailsRecap(models.AbstractModel):
                                 'net_a_payer': int(net_a_payer),
                             })
                 elif filter_type == 'rfm':
-                    rfms = self.env['proximas.remboursement.pec'].search(['adherent_id', '=', adherent.id])
+                    rfms = self.env['proximas.remboursement.pec'].search([
+                        ('adherent_id', '=', adherent_id),
+                        ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                        ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                    ])
                     for remboursement in rfms:
                         # fields.Datetime.from_string(remboursement.date_saisie)
                         date_saisie = remboursement.date_saisie
                         # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
                         if police_id:
                             details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                                ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                                ('rfm_id', '!=', None),
-                                ('pec_id', '=', None),
                                 ('rfm_id', '=', remboursement.id),
                                 ('adherent_id', '=', adherent_id),
                                 ('police_id', '=', police_id),
                             ])
                         else:
-                            details_pec = self.env['proximas.details.pec'].search ([
-                                ('date_execution', '!=', None),
-                                ('date_saisie_rfm', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                                ('date_saisie_rfm', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                                ('rfm_id', '!=', None),
-                                ('pec_id', '=', None),
+                            details_pec = self.env['proximas.details.pec'].search([
                                 ('rfm_id', '=', remboursement.id),
                                 ('adherent_id', '=', adherent_id),
                             ])
@@ -1487,7 +1508,14 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
                             net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
                             net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                            net_a_payer = 0
+                            if net_prestataire:
+                                net_a_payer = int (net_prestataire)
+                            elif net_remboursement:
+                                net_a_payer = int (net_remboursement)
+                            else:
+                                net_a_payer = 0
 
                             docs.append({
                                 'rfm_id': rfm_id,
