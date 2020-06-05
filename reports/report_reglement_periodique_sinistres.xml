@@ -20,7 +20,7 @@
         <field name="dpi">90</field>
     </record>
     <report id="report_reglements_sinistres_template"
-            string="Rapport Périodique Règlements Sinistres"
+            string="Rapport-Règlements Sinistres"
             model="proximas.reglement.sinistres.report.wizard"
             name="proximas_medical.report_reglements_sinistres_view"
             report_type="qweb-pdf"

@@ -131,7 +131,7 @@
     />
     <menuitem id="proximas_list_pec"
               name=">> Liste Complète Prises en Charge"
-              parent="proximas_details_pec"
+              parent="proximas_pec"
               sequence="2015"
               action="proximas_list_pec_action"
               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"

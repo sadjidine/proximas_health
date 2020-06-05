@@ -133,15 +133,18 @@ class ReportSinistreRecapWizard(models.TransientModel):
         }
 
         return self.env['report'].get_action(self, 'proximas_medical.report_suivi_sinistres_view', data=data)
-        # use module_name.report_id as reference
-        # report_action() will call get_report_values() and pass data automatically
-        # return self.env.ref('proximas_medical.sinistre_recap_report_view').report_action(self, data=data)
-        # return {
-        #     'type':'ir.actions.report',
-        #     'report_name': 'proximas_medical.sinistre_recap_report',
-        #     'report_type': "qweb-pdf",
-        #     'data': data,
-        # }
+
+    # CONTRAINTES
+    _sql_constraints = [
+        ('check_dates',
+         'CHECK (date_debut < date_fin)',
+         '''
+         Erreurs sur les date début et date fin!
+         La date début doit obligatoirement être inférieure (antérieure) à la date de fin...
+         Vérifiez s'il n'y pas d'erreur de saisies sur les dates ou contactez l'administrateur.
+         '''
+         )
+    ]
 
 
 
