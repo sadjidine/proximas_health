@@ -487,19 +487,25 @@
                                 </group>
                                 <hr/>
                                 <p class="h5 text-primary">2. Choix Indicateur de suivi sinistres:</p>
-                                <hr/>
                                 <div class="h5">
-                                    <group col="6" colspan="2">
-                                    <field name="report_kpi"/>
-                                    <field name="report_type"
-                                           widget="radio"
-                                           options="{'horizontal': true}"/>
+                                    <group col="4" colspan="2">
+                                        <field name="report_kpi"/>
+                                        <field name="report_type"
+                                               widget="radio"
+                                               options="{'horizontal': true}"/>
                                     </group>
+                                    <hr/>
+                                    <group col="4" colspan="2">
+                                        <field name="report_data"
+                                               attrs="{'invisible': [('report_type','=','groupe')],
+                                               'required': [('report_type','=','detail')]}"/>
+                                        <field name="police_filter"/>
+                                    </group>
+                                    <hr/>
                                     <group>
                                         <field name="police_id"
-                                               attrs="{'invisible': ['|',('report_kpi','!=','police'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','police'),('report_type','=','detail')]}"
+                                               attrs="{'invisible': [('police_filter','=',False)],
+                                               'required': [('police_filter','=',True)]}"
                                                options ='{"no_open": True, "no_create": True}'/>
                                         <field name="contrat_id"
                                                attrs="{'invisible': ['|',('report_kpi','!=','contrat'),
@@ -516,14 +522,14 @@
                                                ('report_type','!=','detail')],
                                                'required': [('report_kpi','=','medecin'),('report_type','=','detail')]}"
                                                options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="rubrique_id" attrs="{'invisible': ['|',('report_kpi','!=','rubrique'),
+                                        <!--<field name="rubrique_id" attrs="{'invisible': ['|',('report_kpi','!=','rubrique'),
                                                ('report_type','!=','detail')],
                                                'required': [('report_kpi','=','rubrique'),('report_type','=','detail')]}"
                                                options ='{"no_open": True, "no_create": True}'/>
                                         <field name="prestation_id" attrs="{'invisible': ['|',('report_kpi','!=','prestation'),
                                                ('report_type','!=','detail')],
                                                'required': [('report_kpi','=','prestation'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
+                                               options ='{"no_open": True, "no_create": True}'/>-->
                                         <field name="prestataire_id" attrs="{'invisible': ['|',('report_kpi','!=','prestataire'),
                                                ('report_type','!=','detail')],
                                                'required': [('report_kpi','=','prestataire'),('report_type','=','detail')]}"
