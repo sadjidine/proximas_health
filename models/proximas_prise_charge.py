@@ -2062,6 +2062,16 @@ class DetailsPec(models.Model):
         related='assure_id.contrat_id',
         store=True,
     )
+    groupe_id = fields.Many2one(
+        # comodel_name="promimas.groupe",
+        string="Groupe/Organe",
+        related='contrat_id.groupe_id',
+    )
+    localite_id = fields.Many2one (
+        # comodel_name="proximas.localite",
+        string="Localité",
+        related='assure_id.localite_id',
+    )
     num_contrat = fields.Char(
         string="Num. Contrat",
         related='contrat_id.num_contrat',
@@ -5579,461 +5589,461 @@ class RemboursementWizard(models.TransientModel):
             )
 
 
-class ReportSinistreRecapWizard(models.TransientModel):
-    _name = 'proximas.sinistre.report.wizard'
-    _description = 'Details PEC Report Wizard'
-
-    date_debut = fields.Date(
-        string="Date Début",
-        default=fields.Date.today,
-        required=True,
-    )
-    date_fin = fields.Date(
-        string="Date Fin",
-        default=fields.Date.today,
-        required=True,
-    )
-    report_kpi = fields.Selection(
-        string="Indicateur de sinistralité",
-        selection=[
-            ('police', 'Police Couverture(Produit)'),
-            ('contrat', 'Famille (Contrat)'),
-            ('assure', 'Assuré (Bénéficiare)'),
-            ('prestataire', 'Prestataire Soins médicaux'),
-            ('medecin', 'Médecin Traitant'),
-            ('rubrique', 'Rubrique Médicale'),
-            ('prestation', 'Prestation Médicale'),
-            ('groupe', 'Regroupement (Groupe)'),
-            ('localite', 'Localité'),
-            ('zone', 'Zone adminsitrative'),
-        ],
-        default='police',
-        required=True,
-    )
-    report_type = fields.Selection(
-        string="Type de rapport",
-        selection=[
-            ('groupe', 'Regroupement (Récap.)'),
-            ('detail', 'Détaillé (Sinistres)'),
-        ],
-        default='groupe',
-        required=True,
-    )
-    contrat_id = fields.Many2one(
-        comodel_name="proximas.contrat",
-        string="Contrat Adhérent",
-        required=False,
-    )
-    assure_id = fields.Many2one(
-        comodel_name="proximas.assure",
-        string="Assuré (Bénéficiaire)",
-        required=False,
-    )
-    medecin_id = fields.Many2one(
-        comodel_name="proximas.medecin",
-        string="Médecin Traitant",
-        required=False,
-    )
-    rubrique_id = fields.Many2one(
-        comodel_name="proximas.rubrique.medicale",
-        string="Rubrique Médicale",
-        required=False,
-    )
-    prestation_id = fields.Many2one(
-        comodel_name="proximas.code.prestation",
-        string="Prestation médicale",
-        required=False,
-    )
-    police_id = fields.Many2one(
-        comodel_name="proximas.police",
-        string="Police Couverture",
-        required=False,
-    )
-    prestataire_id = fields.Many2one (
-        comodel_name="res.partner",
-        string="Prestataire de soins",
-        domain=[('is_prestataire', '=', True)],
-        required=False,
-    )
-    groupe_id = fields.Many2one(
-        comodel_name="proximas.groupe",
-        string="Groupe",
-        required=False,
-    )
-    zone_id = fields.Many2one(
-        comodel_name="proximas.zone",
-        string="Zone Géographique",
-        required=False,
-    )
-    localite_id = fields.Many2one(
-        comodel_name="proximas.localite",
-        string="Localité",
-        required=False,
-    )
-
-    @api.multi
-    def get_report(self):
-        """"
-            Methode à appeler au clic sur le bouton "Valider" du formulaire Wuzard
-        """
-        data = {
-            'ids': self.ids,
-            'model': self._name,
-            'form': {
-                'date_debut': self.date_debut,
-                'date_fin': self.date_fin,
-                'report_kpi': self.report_kpi,
-                'report_type': self.report_type,
-                'police_id': self.police_id.id,
-                'rubrique_id': self.rubrique_id.id,
-                'contrat_id': self.contrat_id.id,
-                'prestataire_id': self.prestataire_id.id,
-                'prestation_id': self.prestation_id.id,
-                'assure_id': self.assure_id.id,
-                'medecin_id': self.medecin_id.id,
-                'groupe_id': self.groupe_id.id,
-                'localite_id': self.localite_id.id,
-                'zone_id': self.zone_id.id,
-            },
-        }
-
-        return self.env['report'].get_action(self, 'proximas_medical.report_suivi_sinistres_view', data=data)
-        # use module_name.report_id as reference
-        # report_action() will call get_report_values() and pass data automatically
-        # return self.env.ref('proximas_medical.sinistre_recap_report_view').report_action(self, data=data)
-        # return {
-        #     'type':'ir.actions.report',
-        #     'report_name': 'proximas_medical.sinistre_recap_report',
-        #     'report_type': "qweb-pdf",
-        #     'data': data,
-        # }
-
-
-
-from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
-
-
-class ReportPecDetailsRecap(models.AbstractModel):
-    """
-        Abstract Model for report template.
-        for '_name' model, please use 'report.' as prefix then add 'module_name.report_name'.
-    """
-    _name = 'report.proximas_medical.report_suivi_sinistres_view'
-
-    @api.multi
-    def render_html(self, data=None):
-        report_obj = self.env['report']
-        # print'>>>>>>>>>>>>>>>>>......', report_obj
-        report = report_obj._get_report_from_name('proximas_medical.report_suivi_sinistres_view')
-        # print'>>>>>>>>>>>>>>>>>......', report
-        date_debut = data['form']['date_debut']
-        date_fin = data['form']['date_fin']
-        report_kpi = data['form']['report_kpi']
-        report_type = data['form']['report_type']
-        date_debut_obj = datetime.strptime(date_debut, DATE_FORMAT)
-        date_fin_obj = datetime.strptime(date_fin, DATE_FORMAT)
-        date_diff = (date_fin_obj - date_debut_obj).days + 1
-        contrat_id = data['form']['contrat_id']
-        police_id = data['form']['police_id']
-        rubrique_id = data['form']['rubrique_id']
-        assure_id = data['form']['assure_id']
-        prestataire_id = data['form']['prestataire_id']
-        prestation_id = data['form']['prestation_id']
-        medecin_id = data['form']['medecin_id']
-        groupe_id = data['form']['groupe_id']
-        localite_id = data['form']['localite_id']
-        zone_id = data['form']['zone_id']
-
-        docs = []
-        docargs = {}
-
-        # 1.1. Rapport Détaillé par Rubrique
-        if report_kpi == 'rubrique' and report_type == 'detail':
-            # Récupérer les sinistres de la rubrique sélectionnée
-            details_pec = self.env['proximas.details.pec'].search([
-                ('rubrique_id', '=', rubrique_id),
-                ('date_execution', '!=', None),
-                ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-            ])
-            rubrique = self.env['proximas.rubrique.medicale'].search([
-                ('id', '=', rubrique_id),
-            ])
-            if bool(details_pec):
-                for detail in details_pec:
-                    docs.append(detail)
-
-                docs = sorted(docs, key=lambda x: x['date_execution'], reverse=True)
-                docargs = {
-                    'doc_ids': data['ids'],
-                    'doc_model': data['model'],
-                    'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
-                    'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),  # date_fin_obj.strftime(DATETIME_FORMAT),
-                    'date_diff': date_diff,
-                    'rubrique_medicale': rubrique.name,
-                    'report_kpi': report_kpi,
-                    'report_type': report_type,
-                    'docs': docs,
-                }
-            else:
-                raise UserError(_(
-                "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
-                Aucun sinistre n'a été enregistré sur la période indiquée pour la Rubrique médicale : %s.  \
-                Par conséquent, le système ne peut vous fournir un rapport donr le contenu est vide. \
-                Veuillez contacter les administrateurs pour plus détails..."
-                    ) % rubrique.name
-                )
-        # 1.2. Rapport de synthèse par Rubrique
-        elif report_kpi == 'rubrique' and report_type == 'groupe':
-
-            # Récuperer la liste complète des rubriques médicales
-            rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
-
-            for rubrique in rubriques:
-                details_pec = self.env['proximas.details.pec'].search([
-                    ('rubrique_id', '=', rubrique.id),
-                    ('date_execution', '!=', None),
-                    ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                    ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                ], order='date_execution desc')
-
-                if bool(details_pec):
-                    rubrique_id = rubrique.id
-                    rubrique_medicale = rubrique.name
-                    nbre_actes = len(details_pec) or 0
-                    cout_total = sum(item.cout_total for item in details_pec) or 0
-                    total_pc = sum(item.total_pc for item in details_pec) or 0
-                    total_npc = sum(item.total_npc for item in details_pec) or 0
-                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                    net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
-
-                    docs.append({
-                        'rubrique_id': rubrique_id,
-                        'rubrique_medicale': rubrique_medicale,
-                        'nbre_actes': int(nbre_actes),
-                        'cout_total': int(cout_total),
-                        'total_pc': int(total_pc),
-                        'total_npc': int(total_npc),
-                        'total_exclusion': int(total_exclusion),
-                        'ticket_moderateur': int(ticket_moderateur),
-                        'net_tiers_payeur': int(net_tiers_payeur),
-                    })
-            if bool(docs):
-                docs = sorted(docs, key=lambda x: x['net_tiers_payeur'], reverse=True)
-                docargs = {
-                    'doc_ids': data['ids'],
-                    'doc_model': data['model'],
-                    'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
-                    'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),  # date_fin_obj.strftime(DATETIME_FORMAT),
-                    'date_diff': date_diff,
-                    'report_kpi': report_kpi,
-                    'report_type': report_type,
-                    'docs': docs,
-                }
-            else:
-                raise UserError(_(
-                    "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
-                    Aucun sinistre n'a été enregistré sur la période indiquée.\
-                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    Veuillez contacter les administrateurs pour plus détails..."
-                    )
-                )
-        # 2.1. Rapport Détaillé par Contrat
-        if report_kpi == 'contrat' and report_type == 'detail':
-            # Récupérer les sinistres du contrat concerné
-            details_pec = self.env['proximas.details.pec'].search([
-                ('contrat_id', '=', contrat_id),
-                ('date_execution', '!=', None),
-                ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-            ])
-            contrat = self.env['proximas.contrat'].search([
-                ('id', '=', contrat_id),
-            ])
-            if bool(details_pec):
-                for detail in details_pec:
-                    docs.append(detail)
-
-                docs = sorted(docs, key=lambda x: x['date_execution'], reverse=True)
-                docargs = {
-                    'doc_ids': data['ids'],
-                    'doc_model': data['model'],
-                    'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
-                    'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),
-                    'date_diff': date_diff,
-                    'contrat_adherent': '%s - %s' % (contrat.num_contrat, contrat.adherent_id.name),
-                    'police_id': contrat.police_id.libelle,
-                    'report_kpi': report_kpi,
-                    'report_type': report_type,
-                    'docs': docs,
-                }
-            else:
-                raise UserError(_(
-                    "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
-                    Aucun sinistre n'a été enregistré sur la période indiquée pour le contrat : %s.  \
-                    Par conséquent, le système ne peut vous fournir un rapport donr le contenu est vide. \
-                    Veuillez contacter les administrateurs pour plus détails..."
-                    ) % contrat.adherent_id.name
-                )
-        # 2.2. Rapport de synthèse par Contrat Adhérent
-        elif report_kpi == 'contrat' and report_type == 'groupe':
-
-            # Récuperer la liste complète des sinistres par contrat adhérent
-            contrats = self.env['proximas.contrat'].search([], order='name asc')
-
-            for contrat in contrats:
-                details_pec = self.env['proximas.details.pec'].search([
-                    ('contrat_id', '=', contrat.id),
-                    ('date_execution', '!=', None),
-                    ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                    ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                ], order='date_execution desc')
-
-                if bool(details_pec):
-                    contrat_id = contrat.id
-                    contrat_adherent = contrat.adherent_id.name
-                    nbre_actes = len(details_pec) or 0
-                    cout_total = sum(item.cout_total for item in details_pec) or 0
-                    total_pc = sum(item.total_pc for item in details_pec) or 0
-                    total_npc = sum(item.total_npc for item in details_pec) or 0
-                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                    net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
-
-                    docs.append({
-                        'contrat_id': contrat_id,
-                        'contrat_adherent': contrat_adherent,
-                        'nbre_actes': int(nbre_actes),
-                        'cout_total': int(cout_total),
-                        'total_pc': int(total_pc),
-                        'total_npc': int(total_npc),
-                        'total_exclusion': int(total_exclusion),
-                        'ticket_moderateur': int(ticket_moderateur),
-                        'net_tiers_payeur': int(net_tiers_payeur),
-                    })
-            if bool(docs):
-                docs = sorted(docs, key=lambda x: x['net_tiers_payeur'], reverse=True)
-                # docs = docs[:200]
-                docargs = {
-                    'doc_ids': data['ids'],
-                    'doc_model': data['model'],
-                    'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
-                    'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),  # date_fin_obj.strftime(DATETIME_FORMAT),
-                    'date_diff': date_diff,
-                    'report_kpi': report_kpi,
-                    'report_type': report_type,
-                    'docs': docs,
-                }
-            else:
-                raise UserError(_(
-                    "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
-                    Aucun sinistre n'a été enregistré sur la période indiquée. \
-                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    Veuillez contacter les administrateurs pour plus détails..."
-                    )
-                )
-        # 3.1. Rapport Détaillé par Assuré
-        if report_kpi == 'assure' and report_type == 'detail':
-            # Récupérer les sinistres de l'assuré concerné
-            details_pec = self.env['proximas.details.pec'].search([
-                ('assure_id', '=', assure_id),
-                ('date_execution', '!=', None),
-                ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-            ])
-            assure = self.env['proximas.assure'].search([
-                ('id', '=', assure_id),
-            ])
-            if bool(details_pec):
-                for detail in details_pec:
-                    docs.append(detail)
-
-                docs = sorted(docs, key=lambda x: x['date_execution'], reverse=True)
-                docargs = {
-                    'doc_ids': data['ids'],
-                    'doc_model': data['model'],
-                    'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
-                    'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),
-                    'date_diff': date_diff,
-                    'assure': '%s - %s' % (assure.code_id, assure.name),
-                    'police_id': assure.police_id.libelle,
-                    'report_kpi': report_kpi,
-                    'report_type': report_type,
-                    'docs': docs,
-                }
-            else:
-                raise UserError(_(
-                    "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
-                    Aucun sinistre n'a été enregistré sur la période indiquée pour le compte de l'assuré : %s.  \
-                    Par conséquent, le système ne peut vous fournir un rapport donr le contenu est vide. \
-                    Veuillez contacter les administrateurs pour plus détails..."
-                    ) % assure.name
-                )
-        # 3.2. Rapport de synthèse par Assuré
-        elif report_kpi == 'assure' and report_type == 'groupe':
-
-            # Récuperer la liste complète des sinistres assuré
-            assures = self.env['proximas.assure'].search([], order='name asc')
-
-            for assure in assures:
-                details_pec = self.env['proximas.details.pec'].search([
-                    ('assure_id', '=', assure.id),
-                    ('date_execution', '!=', None),
-                    ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                    ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                ], order='date_execution desc')
-
-                if bool(details_pec):
-                    assure_id = assure.id
-                    code_id = assure.code_id
-                    assure_beneficiaire = assure.name
-                    statut_familial = assure.statut_familial
-                    nbre_actes = len (details_pec) or 0
-                    cout_total = sum (item.cout_total for item in details_pec) or 0
-                    total_pc = sum (item.total_pc for item in details_pec) or 0
-                    total_npc = sum (item.total_npc for item in details_pec) or 0
-                    total_exclusion = sum (item.mt_exclusion for item in details_pec) or 0
-                    ticket_moderateur = sum (item.ticket_moderateur for item in details_pec) or 0
-                    net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
-
-                    docs.append({
-                        'assure_id': assure_id,
-                        'assure_beneficiaire': assure_beneficiaire,
-                        'code_id': code_id,
-                        'statut_familial': statut_familial,
-                        'adherent': assure.contrat_id.adherent_id.name,
-                        'nbre_actes': int(nbre_actes),
-                        'cout_total': int(cout_total),
-                        'total_pc': int(total_pc),
-                        'total_npc': int(total_npc),
-                        'total_exclusion': int(total_exclusion),
-                        'ticket_moderateur': int(ticket_moderateur),
-                        'net_tiers_payeur': int(net_tiers_payeur),
-                    })
-            if bool(docs):
-                docs = sorted(docs, key=lambda x: x['net_tiers_payeur'], reverse=True)
-                # docs = docs[:200]
-                docargs = {
-                    'doc_ids': data['ids'],
-                    'doc_model': data['model'],
-                    'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
-                    'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),
-                    'date_diff': date_diff,
-                    'report_kpi': report_kpi,
-                    'report_type': report_type,
-                    'docs': docs,
-                }
-            else:
-                raise UserError(_(
-                    "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
-                    Aucun sinistre n'a été enregistré sur la période indiquée. \
-                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    Veuillez contacter les administrateurs pour plus détails..."
-                    )
-                )
-
-        return report_obj.render('proximas_medical.report_suivi_sinistres_view', docargs)
+# class ReportSinistreRecapWizard(models.TransientModel):
+#     _name = 'proximas.sinistre.report.wizard'
+#     _description = 'Details PEC Report Wizard'
+#
+#     date_debut = fields.Date(
+#         string="Date Début",
+#         default=fields.Date.today,
+#         required=True,
+#     )
+#     date_fin = fields.Date(
+#         string="Date Fin",
+#         default=fields.Date.today,
+#         required=True,
+#     )
+#     report_kpi = fields.Selection(
+#         string="Indicateur de sinistralité",
+#         selection=[
+#             ('police', 'Police Couverture(Produit)'),
+#             ('contrat', 'Famille (Contrat)'),
+#             ('assure', 'Assuré (Bénéficiare)'),
+#             ('prestataire', 'Prestataire Soins médicaux'),
+#             ('medecin', 'Médecin Traitant'),
+#             ('rubrique', 'Rubrique Médicale'),
+#             ('prestation', 'Prestation Médicale'),
+#             ('groupe', 'Regroupement (Groupe)'),
+#             ('localite', 'Localité'),
+#             ('zone', 'Zone adminsitrative'),
+#         ],
+#         default='police',
+#         required=True,
+#     )
+#     report_type = fields.Selection(
+#         string="Type de rapport",
+#         selection=[
+#             ('groupe', 'Regroupement (Récap.)'),
+#             ('detail', 'Détaillé (Sinistres)'),
+#         ],
+#         default='groupe',
+#         required=True,
+#     )
+#     contrat_id = fields.Many2one(
+#         comodel_name="proximas.contrat",
+#         string="Contrat Adhérent",
+#         required=False,
+#     )
+#     assure_id = fields.Many2one(
+#         comodel_name="proximas.assure",
+#         string="Assuré (Bénéficiaire)",
+#         required=False,
+#     )
+#     medecin_id = fields.Many2one(
+#         comodel_name="proximas.medecin",
+#         string="Médecin Traitant",
+#         required=False,
+#     )
+#     rubrique_id = fields.Many2one(
+#         comodel_name="proximas.rubrique.medicale",
+#         string="Rubrique Médicale",
+#         required=False,
+#     )
+#     prestation_id = fields.Many2one(
+#         comodel_name="proximas.code.prestation",
+#         string="Prestation médicale",
+#         required=False,
+#     )
+#     police_id = fields.Many2one(
+#         comodel_name="proximas.police",
+#         string="Police Couverture",
+#         required=False,
+#     )
+#     prestataire_id = fields.Many2one (
+#         comodel_name="res.partner",
+#         string="Prestataire de soins",
+#         domain=[('is_prestataire', '=', True)],
+#         required=False,
+#     )
+#     groupe_id = fields.Many2one(
+#         comodel_name="proximas.groupe",
+#         string="Groupe",
+#         required=False,
+#     )
+#     zone_id = fields.Many2one(
+#         comodel_name="proximas.zone",
+#         string="Zone Géographique",
+#         required=False,
+#     )
+#     localite_id = fields.Many2one(
+#         comodel_name="proximas.localite",
+#         string="Localité",
+#         required=False,
+#     )
+#
+#     @api.multi
+#     def get_report(self):
+#         """"
+#             Methode à appeler au clic sur le bouton "Valider" du formulaire Wuzard
+#         """
+#         data = {
+#             'ids': self.ids,
+#             'model': self._name,
+#             'form': {
+#                 'date_debut': self.date_debut,
+#                 'date_fin': self.date_fin,
+#                 'report_kpi': self.report_kpi,
+#                 'report_type': self.report_type,
+#                 'police_id': self.police_id.id,
+#                 'rubrique_id': self.rubrique_id.id,
+#                 'contrat_id': self.contrat_id.id,
+#                 'prestataire_id': self.prestataire_id.id,
+#                 'prestation_id': self.prestation_id.id,
+#                 'assure_id': self.assure_id.id,
+#                 'medecin_id': self.medecin_id.id,
+#                 'groupe_id': self.groupe_id.id,
+#                 'localite_id': self.localite_id.id,
+#                 'zone_id': self.zone_id.id,
+#             },
+#         }
+#
+#         return self.env['report'].get_action(self, 'proximas_medical.report_suivi_sinistres_view', data=data)
+#         # use module_name.report_id as reference
+#         # report_action() will call get_report_values() and pass data automatically
+#         # return self.env.ref('proximas_medical.sinistre_recap_report_view').report_action(self, data=data)
+#         # return {
+#         #     'type':'ir.actions.report',
+#         #     'report_name': 'proximas_medical.sinistre_recap_report',
+#         #     'report_type': "qweb-pdf",
+#         #     'data': data,
+#         # }
+#
+#
+#
+# from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
+#
+#
+# class ReportPecDetailsRecap(models.AbstractModel):
+#     """
+#         Abstract Model for report template.
+#         for '_name' model, please use 'report.' as prefix then add 'module_name.report_name'.
+#     """
+#     _name = 'report.proximas_medical.report_suivi_sinistres_view'
+#
+#     @api.multi
+#     def render_html(self, data=None):
+#         report_obj = self.env['report']
+#         # print'>>>>>>>>>>>>>>>>>......', report_obj
+#         report = report_obj._get_report_from_name('proximas_medical.report_suivi_sinistres_view')
+#         # print'>>>>>>>>>>>>>>>>>......', report
+#         date_debut = data['form']['date_debut']
+#         date_fin = data['form']['date_fin']
+#         report_kpi = data['form']['report_kpi']
+#         report_type = data['form']['report_type']
+#         date_debut_obj = datetime.strptime(date_debut, DATE_FORMAT)
+#         date_fin_obj = datetime.strptime(date_fin, DATE_FORMAT)
+#         date_diff = (date_fin_obj - date_debut_obj).days + 1
+#         contrat_id = data['form']['contrat_id']
+#         police_id = data['form']['police_id']
+#         rubrique_id = data['form']['rubrique_id']
+#         assure_id = data['form']['assure_id']
+#         prestataire_id = data['form']['prestataire_id']
+#         prestation_id = data['form']['prestation_id']
+#         medecin_id = data['form']['medecin_id']
+#         groupe_id = data['form']['groupe_id']
+#         localite_id = data['form']['localite_id']
+#         zone_id = data['form']['zone_id']
+#
+#         docs = []
+#         docargs = {}
+#
+#         # 1.1. Rapport Détaillé par Rubrique
+#         if report_kpi == 'rubrique' and report_type == 'detail':
+#             # Récupérer les sinistres de la rubrique sélectionnée
+#             details_pec = self.env['proximas.details.pec'].search([
+#                 ('rubrique_id', '=', rubrique_id),
+#                 ('date_execution', '!=', None),
+#                 ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+#                 ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+#             ])
+#             rubrique = self.env['proximas.rubrique.medicale'].search([
+#                 ('id', '=', rubrique_id),
+#             ])
+#             if bool(details_pec):
+#                 for detail in details_pec:
+#                     docs.append(detail)
+#
+#                 docs = sorted(docs, key=lambda x: x['date_execution'], reverse=True)
+#                 docargs = {
+#                     'doc_ids': data['ids'],
+#                     'doc_model': data['model'],
+#                     'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
+#                     'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),  # date_fin_obj.strftime(DATETIME_FORMAT),
+#                     'date_diff': date_diff,
+#                     'rubrique_medicale': rubrique.name,
+#                     'report_kpi': report_kpi,
+#                     'report_type': report_type,
+#                     'docs': docs,
+#                 }
+#             else:
+#                 raise UserError(_(
+#                 "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
+#                 Aucun sinistre n'a été enregistré sur la période indiquée pour la Rubrique médicale : %s.  \
+#                 Par conséquent, le système ne peut vous fournir un rapport donr le contenu est vide. \
+#                 Veuillez contacter les administrateurs pour plus détails..."
+#                     ) % rubrique.name
+#                 )
+#         # 1.2. Rapport de synthèse par Rubrique
+#         elif report_kpi == 'rubrique' and report_type == 'groupe':
+#
+#             # Récuperer la liste complète des rubriques médicales
+#             rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
+#
+#             for rubrique in rubriques:
+#                 details_pec = self.env['proximas.details.pec'].search([
+#                     ('rubrique_id', '=', rubrique.id),
+#                     ('date_execution', '!=', None),
+#                     ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+#                     ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+#                 ], order='date_execution desc')
+#
+#                 if bool(details_pec):
+#                     rubrique_id = rubrique.id
+#                     rubrique_medicale = rubrique.name
+#                     nbre_actes = len(details_pec) or 0
+#                     cout_total = sum(item.cout_total for item in details_pec) or 0
+#                     total_pc = sum(item.total_pc for item in details_pec) or 0
+#                     total_npc = sum(item.total_npc for item in details_pec) or 0
+#                     total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+#                     ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+#                     net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+#
+#                     docs.append({
+#                         'rubrique_id': rubrique_id,
+#                         'rubrique_medicale': rubrique_medicale,
+#                         'nbre_actes': int(nbre_actes),
+#                         'cout_total': int(cout_total),
+#                         'total_pc': int(total_pc),
+#                         'total_npc': int(total_npc),
+#                         'total_exclusion': int(total_exclusion),
+#                         'ticket_moderateur': int(ticket_moderateur),
+#                         'net_tiers_payeur': int(net_tiers_payeur),
+#                     })
+#             if bool(docs):
+#                 docs = sorted(docs, key=lambda x: x['net_tiers_payeur'], reverse=True)
+#                 docargs = {
+#                     'doc_ids': data['ids'],
+#                     'doc_model': data['model'],
+#                     'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
+#                     'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),  # date_fin_obj.strftime(DATETIME_FORMAT),
+#                     'date_diff': date_diff,
+#                     'report_kpi': report_kpi,
+#                     'report_type': report_type,
+#                     'docs': docs,
+#                 }
+#             else:
+#                 raise UserError(_(
+#                     "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
+#                     Aucun sinistre n'a été enregistré sur la période indiquée.\
+#                     Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+#                     Veuillez contacter les administrateurs pour plus détails..."
+#                     )
+#                 )
+#         # 2.1. Rapport Détaillé par Contrat
+#         if report_kpi == 'contrat' and report_type == 'detail':
+#             # Récupérer les sinistres du contrat concerné
+#             details_pec = self.env['proximas.details.pec'].search([
+#                 ('contrat_id', '=', contrat_id),
+#                 ('date_execution', '!=', None),
+#                 ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+#                 ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+#             ])
+#             contrat = self.env['proximas.contrat'].search([
+#                 ('id', '=', contrat_id),
+#             ])
+#             if bool(details_pec):
+#                 for detail in details_pec:
+#                     docs.append(detail)
+#
+#                 docs = sorted(docs, key=lambda x: x['date_execution'], reverse=True)
+#                 docargs = {
+#                     'doc_ids': data['ids'],
+#                     'doc_model': data['model'],
+#                     'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
+#                     'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),
+#                     'date_diff': date_diff,
+#                     'contrat_adherent': '%s - %s' % (contrat.num_contrat, contrat.adherent_id.name),
+#                     'police_id': contrat.police_id.libelle,
+#                     'report_kpi': report_kpi,
+#                     'report_type': report_type,
+#                     'docs': docs,
+#                 }
+#             else:
+#                 raise UserError(_(
+#                     "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
+#                     Aucun sinistre n'a été enregistré sur la période indiquée pour le contrat : %s.  \
+#                     Par conséquent, le système ne peut vous fournir un rapport donr le contenu est vide. \
+#                     Veuillez contacter les administrateurs pour plus détails..."
+#                     ) % contrat.adherent_id.name
+#                 )
+#         # 2.2. Rapport de synthèse par Contrat Adhérent
+#         elif report_kpi == 'contrat' and report_type == 'groupe':
+#
+#             # Récuperer la liste complète des sinistres par contrat adhérent
+#             contrats = self.env['proximas.contrat'].search([], order='name asc')
+#
+#             for contrat in contrats:
+#                 details_pec = self.env['proximas.details.pec'].search([
+#                     ('contrat_id', '=', contrat.id),
+#                     ('date_execution', '!=', None),
+#                     ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+#                     ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+#                 ], order='date_execution desc')
+#
+#                 if bool(details_pec):
+#                     contrat_id = contrat.id
+#                     contrat_adherent = contrat.adherent_id.name
+#                     nbre_actes = len(details_pec) or 0
+#                     cout_total = sum(item.cout_total for item in details_pec) or 0
+#                     total_pc = sum(item.total_pc for item in details_pec) or 0
+#                     total_npc = sum(item.total_npc for item in details_pec) or 0
+#                     total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+#                     ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+#                     net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+#
+#                     docs.append({
+#                         'contrat_id': contrat_id,
+#                         'contrat_adherent': contrat_adherent,
+#                         'nbre_actes': int(nbre_actes),
+#                         'cout_total': int(cout_total),
+#                         'total_pc': int(total_pc),
+#                         'total_npc': int(total_npc),
+#                         'total_exclusion': int(total_exclusion),
+#                         'ticket_moderateur': int(ticket_moderateur),
+#                         'net_tiers_payeur': int(net_tiers_payeur),
+#                     })
+#             if bool(docs):
+#                 docs = sorted(docs, key=lambda x: x['net_tiers_payeur'], reverse=True)
+#                 # docs = docs[:200]
+#                 docargs = {
+#                     'doc_ids': data['ids'],
+#                     'doc_model': data['model'],
+#                     'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
+#                     'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),  # date_fin_obj.strftime(DATETIME_FORMAT),
+#                     'date_diff': date_diff,
+#                     'report_kpi': report_kpi,
+#                     'report_type': report_type,
+#                     'docs': docs,
+#                 }
+#             else:
+#                 raise UserError(_(
+#                     "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
+#                     Aucun sinistre n'a été enregistré sur la période indiquée. \
+#                     Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+#                     Veuillez contacter les administrateurs pour plus détails..."
+#                     )
+#                 )
+#         # 3.1. Rapport Détaillé par Assuré
+#         if report_kpi == 'assure' and report_type == 'detail':
+#             # Récupérer les sinistres de l'assuré concerné
+#             details_pec = self.env['proximas.details.pec'].search([
+#                 ('assure_id', '=', assure_id),
+#                 ('date_execution', '!=', None),
+#                 ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+#                 ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+#             ])
+#             assure = self.env['proximas.assure'].search([
+#                 ('id', '=', assure_id),
+#             ])
+#             if bool(details_pec):
+#                 for detail in details_pec:
+#                     docs.append(detail)
+#
+#                 docs = sorted(docs, key=lambda x: x['date_execution'], reverse=True)
+#                 docargs = {
+#                     'doc_ids': data['ids'],
+#                     'doc_model': data['model'],
+#                     'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
+#                     'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),
+#                     'date_diff': date_diff,
+#                     'assure': '%s - %s' % (assure.code_id, assure.name),
+#                     'police_id': assure.police_id.libelle,
+#                     'report_kpi': report_kpi,
+#                     'report_type': report_type,
+#                     'docs': docs,
+#                 }
+#             else:
+#                 raise UserError(_(
+#                     "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
+#                     Aucun sinistre n'a été enregistré sur la période indiquée pour le compte de l'assuré : %s.  \
+#                     Par conséquent, le système ne peut vous fournir un rapport donr le contenu est vide. \
+#                     Veuillez contacter les administrateurs pour plus détails..."
+#                     ) % assure.name
+#                 )
+#         # 3.2. Rapport de synthèse par Assuré
+#         elif report_kpi == 'assure' and report_type == 'groupe':
+#
+#             # Récuperer la liste complète des sinistres assuré
+#             assures = self.env['proximas.assure'].search([], order='name asc')
+#
+#             for assure in assures:
+#                 details_pec = self.env['proximas.details.pec'].search([
+#                     ('assure_id', '=', assure.id),
+#                     ('date_execution', '!=', None),
+#                     ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+#                     ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+#                 ], order='date_execution desc')
+#
+#                 if bool(details_pec):
+#                     assure_id = assure.id
+#                     code_id = assure.code_id
+#                     assure_beneficiaire = assure.name
+#                     statut_familial = assure.statut_familial
+#                     nbre_actes = len (details_pec) or 0
+#                     cout_total = sum (item.cout_total for item in details_pec) or 0
+#                     total_pc = sum (item.total_pc for item in details_pec) or 0
+#                     total_npc = sum (item.total_npc for item in details_pec) or 0
+#                     total_exclusion = sum (item.mt_exclusion for item in details_pec) or 0
+#                     ticket_moderateur = sum (item.ticket_moderateur for item in details_pec) or 0
+#                     net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
+#
+#                     docs.append({
+#                         'assure_id': assure_id,
+#                         'assure_beneficiaire': assure_beneficiaire,
+#                         'code_id': code_id,
+#                         'statut_familial': statut_familial,
+#                         'adherent': assure.contrat_id.adherent_id.name,
+#                         'nbre_actes': int(nbre_actes),
+#                         'cout_total': int(cout_total),
+#                         'total_pc': int(total_pc),
+#                         'total_npc': int(total_npc),
+#                         'total_exclusion': int(total_exclusion),
+#                         'ticket_moderateur': int(ticket_moderateur),
+#                         'net_tiers_payeur': int(net_tiers_payeur),
+#                     })
+#             if bool(docs):
+#                 docs = sorted(docs, key=lambda x: x['net_tiers_payeur'], reverse=True)
+#                 # docs = docs[:200]
+#                 docargs = {
+#                     'doc_ids': data['ids'],
+#                     'doc_model': data['model'],
+#                     'date_debut': datetime.strftime(date_debut_obj, '%d-%m-%Y'),
+#                     'date_fin': datetime.strftime(date_fin_obj, '%d-%m-%Y'),
+#                     'date_diff': date_diff,
+#                     'report_kpi': report_kpi,
+#                     'report_type': report_type,
+#                     'docs': docs,
+#                 }
+#             else:
+#                 raise UserError(_(
+#                     "Proximaas : Rapport de Suivi Portafeuillz de Risque: \n\
+#                     Aucun sinistre n'a été enregistré sur la période indiquée. \
+#                     Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+#                     Veuillez contacter les administrateurs pour plus détails..."
+#                     )
+#                 )
+#
+#         return report_obj.render('proximas_medical.report_suivi_sinistres_view', docargs)
 
     # @api.multi
     # def check_report(self):
