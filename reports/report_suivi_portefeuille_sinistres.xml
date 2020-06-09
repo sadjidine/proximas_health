@@ -38,7 +38,7 @@
                             <h5 class="bg-primary invisible">...</h5>
                             <h4 class="bg-info text-primary">
                                 <strong>
-                                    RAPPORT PERIODIQUE - EVOLUTION DE LA SINISTRALITE : NIVEAU DE CONSOMMATION CONTRAT / RUBRIQUE MEDICALE
+                                     RAPPORT SUIVI EVOLUTION DE LA SINISTRALITE: NIVEAU DE CONSOMMATION CONTRAT / RUBRIQUE MEDICALE
                                 </strong>
                             </h4>
                             <div class="row">
@@ -210,7 +210,7 @@
                             <h5 class="bg-primary invisible">...</h5>
                             <h4 class="bg-info text-primary">
                                 <strong>
-                                    RAPPORT PERIODIQUE - EVOLUTION DE LA SINISTRALITE : NIVEAU DE CONSOMMATION CONTRAT / PRESTATION MEDICALE
+                                    RAPPORT SUIVI EVOLUTION DE LA SINISTRALITE: NIVEAU DE CONSOMMATION CONTRAT / PRESTATION MEDICALE
                                 </strong>
                             </h4>
                             <div class="row">
@@ -381,7 +381,7 @@
                             <h5 class="bg-primary invisible">...</h5>
                             <h4 class="bg-info text-primary">
                                 <strong>
-                                    RAPPORT PERIODIQUE - EVOLUTION DE LA SINISTRALITE : NIVEAU DE CONSOMMATION CONTRAT / BENEFICIAIRE
+                                     RAPPORT SUIVI EVOLUTION DE LA SINISTRALITE: NIVEAU DE CONSOMMATION CONTRAT / BENEFICIAIRE
                                 </strong>
                             </h4>
                             <div class="row">
@@ -560,7 +560,7 @@
                             <h6 class="bg-primary invisible">...</h6>
                             <h4 class="bg-info text-primary">
                                 <strong>
-                                    RAPPORT PERIODIQUE - EVOLUTION DE LA SINISTRALITE : NIVEAU DE CONSOMMATION PAR CONTRATS (FAMILLE)
+                                     RAPPORT SUIVI EVOLUTION DE LA SINISTRALITE: NIVEAU DE CONSOMMATION PAR CONTRATS (FAMILLE)
                                 </strong>
                             </h4>
                             <div class="row">
@@ -715,29 +715,6 @@
                         </div>
                     </div>
                 </div>
-                <!--<div class="footer">
-                    <div class="row text-center" style="border-top: 2px solid black;margin-top:10px;">
-                        <div class="col-xs-4 text-left">
-                            SIGEM - Proximaas. Tous droits reservés. Copyright © 2018.
-                        </div>
-                        <div class="col-xs-4 text-center">
-                            <t t-set="date" t-value="datetime.datetime.now()"/>
-                            <p>Edité par: <span t-esc="user.name"/> le: <span t-esc="date.strftime('%d-%m-%Y - %H:%M:%S')"/></p>
-                        </div>
-                        <div class="col-xs-4 text-right">
-                            <ul class="list-inline">
-                                <li>Page:</li>
-                                <li>
-                                    <span class="page"/>
-                                </li>
-                                <li>/</li>
-                                <li>
-                                    <span class="topage"/>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>-->
             </t>
         </t>
     </template>
