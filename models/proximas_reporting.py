@@ -650,7 +650,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         else:
                             net_a_payer = 0
 
-                        docs.append ({
+                        docs.append({
                             'rubrique_id': rubrique_id,
                             'rubrique_medicale': rubrique_medicale,
                             'nbre_actes': int (nbre_actes),
@@ -689,7 +689,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'groupe_id': assure.groupe_id,
                         'photo': assure.image,
                         'assure': assure.name,
-                        'date_naissance': assure.date_naissance,
+                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
+                            '%d/%m/%Y'),
                         'age': assure.age,
                         'statut_familial': assure.statut_familial,
                         'genre': assure.genre,
@@ -794,14 +795,15 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'groupe_id': assure.groupe_id,
                         'photo': assure.image,
                         'assure': assure.name,
-                        'date_naissance': assure.date_naissance,
+                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
+                            '%d/%m/%Y'),
                         'age': assure.age,
                         'statut_familial': assure.statut_familial,
                         'genre': assure.genre,
                         'docs': docs,
                     }
                 else:
-                    raise UserError (_ (
+                    raise UserError(_(
                         "Proximaas : Rapport Suivi Evolution Sinistres \n\
                         Après recherche, aucun sinistre ne correspond à la période indiquée.\
                         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
@@ -820,7 +822,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            # ('contrat_id', '=', contrat_id),
+                            ('assure_id', '=', assure_id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
                             ('assure_id', '=', assure.id),
@@ -831,7 +833,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            # ('contrat_id', '=', contrat_id),
+                            ('assure_id', '=', assure_id),
                             ('prestataire', '!=', None),
                             ('assure_id', '=', assure.id),
                         ])
@@ -907,11 +909,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'groupe_id': assure.groupe_id,
                         'photo': assure.image,
                         'assure': assure.name,
-                        'date_naissance': assure.date_naissance,
+                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
+                            '%d/%m/%Y'),
                         'age': assure.age,
                         'statut_familial': assure.statut_familial,
                         'genre': assure.genre,
-                        'nbre_pec': len(assure_pec),
                         'docs': docs,
                     }
                 else:
@@ -984,7 +986,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'code_id': code_id,
                         'beneficiaire': beneficiaire,
                         'code_id_externe': code_id_externe,
-                        'date_naissance': date_naissance,
+                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
+                            '%d/%m/%Y'),
                         'statut_familial': statut_familial,
                         'genre': genre,
                         'num_contrat': num_contrat,
