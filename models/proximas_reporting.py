@@ -1334,11 +1334,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
             prestataires = self.env['res.partner'].search([
                 ('is_prestataire', '=', True),
             ])
-            if police_filter:
-                prestataires = self.env['res.partner'].search([
-                    ('is_prestataire', '=', True),
-                    ('police_id', '=', police_id),
-                ], order='id asc')
             for prestataire in prestataires:
                 # DETAILS PEC TRAITES ET LIES A UN CONTRAT
                 if police_id:
@@ -1362,7 +1357,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         prestataire_name = prestataire.name[:40] + '...'
                     else:
                         prestataire_name = prestataire.name
-                    categorie_name = prestataire.categorie_id.name
+                    categorie = prestataire.categorie_id.name
                     city = prestataire.city
                     phone = prestataire.phone
                     mobile = prestataire.mobile
@@ -1386,7 +1381,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
 
                     docs.append ({
                         'prestataire_name': prestataire_name,
-                        'categorie_name': categorie_name,
+                        'categorie_name': categorie,
                         'city': city,
                         'phone': phone,
                         'mobile': mobile,
