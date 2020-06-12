@@ -103,8 +103,6 @@ class PriseEnCharge(models.Model):
         inverse_name="pec_id",
         domain=[
             ('prestation_demande_id', '!=', None),
-            '|', ('accord_prestation_demande', '=', False),
-            ('accorde', '=', True)
         ],
         # domain=['|',
         #         ('prestation_demande_id', '!=', None),

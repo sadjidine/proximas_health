@@ -735,7 +735,8 @@
                             <field name="details_pec_soins_crs_ids"
                                    widget="one2many"
                                    class="text-info"
-                                   attrs="{'required': [('state','=','oriente')]}"
+                                   attrs="{'required': [('state','in',['oriente'])]}"
+                                   domain="[ '|',('accord_prestation_demande','=',False),('accorde','=',True)]"
                                    context="{'default_prestataire_id':prestataire_id, 'default_assure_id':assure_id,
                                    'default_pool_medical_id':pool_medical_id,'default_prestataire_crs_id':prestataire_crs_id,
                                    'default_police_id':police_id,'default_structure_id':structure_id}">

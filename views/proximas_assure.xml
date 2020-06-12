@@ -87,7 +87,7 @@
                     <field name="image"
                            widget='image'
                            class="oe_left oe_avatar"
-                           options="{'preview_image': 'image_medium', 'size': [120, 90]}" />
+                           options="{'preview_image': 'image_medium', 'size': [160, 120]}" />
                     <div class="oe_left">
                         <h2><field name="nom" placeholder="Nom"/></h2>
                         <h2><field name="prenoms" placeholder="Prénoms"/></h2>
@@ -255,9 +255,9 @@
                     <field name="parent_id" invisible="1"/>
                     <field name="image" widget='image'
                                class="oe_avatar oe_left"
-                               options="{'preview_image': 'image_medium', 'size': [180, 240]}"/>
+                               options="{'preview_image': 'image_medium', 'size': [160, 120]}"/>
                     <div class="oe_left text-primary">
-                        <h2 class="text-info bg-primary"><field name="name" readonly="1"/></h2>
+                        <h2 class="text-primary"><field name="name" readonly="1"/></h2>
                         <h3 class="text-primary">
                             <field name="code_id" string="Code ID."/>
                         </h3>
@@ -265,7 +265,7 @@
                             <field name="statut_familial" string="Lien Parenté"/>
                             <field name="age_details" string="Statut Contrat"/>
                         </h4>
-                        <h3 class="text-success bg-success"><field name="state"/></h3>
+                        <h3 class="text-success"><field name="state"/></h3>
                     </div>
                     <hr/>
                     <notebook>
