@@ -87,34 +87,45 @@
                     <field name="image"
                            widget='image'
                            class="oe_left oe_avatar"
-                           options="{'preview_image': 'image_medium', 'size': [90, 90]}" />
-                    <div class="oe_title" name="title">
+                           options="{'preview_image': 'image_medium', 'size': [120, 90]}" />
+                    <div class="oe_left">
                         <h2><field name="nom" placeholder="Nom"/></h2>
                         <h2><field name="prenoms" placeholder="Prénoms"/></h2>
+                        <h4 class="text-muted"><field name="age_details"/></h4>
                         <h3 class="text-primary"><field name="code_id"/></h3>
+                    </div>
+                    <div class="oe_right">
                         <field name="name" invisible="1"/>
                         <field name="full_name" invisible="1"/>
+                        <label for="state" string="Statut:"/>
+                        <h3 class="bg-info text-primary "><field name="state"/></h3>
                     </div>
-                    <group name="data">
-                        <group name="main">
-                            <!--<field name="code_id" string="Code Identification" class="text-primary h4"/>-->
-                            <field name="code_id_externe"/>
-                            <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
-                            <field name="quartier"/>
-                            <field name="statut" required="1"/>
-                            <field name="date_inscription" />
-                            <field name="date_activation"/>
-                        </group>
-                        <group>
-                            <field name="date_naissance" required="1"/>
-                            <field name="age" />
-                            <field name="genre" widget="radio" options="{'horizontal': true}"
-                                   onchange="_check_genre()" required="1"/>
-                            <field name="groupe_sanguin"/>
-                            <field name="cas_chronique"/>
-                            <field name="decede"/>
-                        </group>
-                    </group>
+                    <newline/>
+                    <hr/>
+                    <notebook>
+                        <page string="Détails Informations Ayant-droit">
+                            <group name="data">
+                                <group name="main">
+                                    <!--<field name="code_id" string="Code Identification" class="text-primary h4"/>-->
+                                    <field name="code_id_externe"/>
+                                    <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                                    <field name="quartier"/>
+                                    <field name="statut" required="1"/>
+                                    <field name="date_inscription" />
+                                    <field name="date_activation"/>
+                                </group>
+                                <group>
+                                    <field name="date_naissance" required="1"/>
+                                    <field name="age" />
+                                    <field name="genre" widget="radio" options="{'horizontal': true}"
+                                           onchange="_check_genre()" required="1"/>
+                                    <field name="groupe_sanguin"/>
+                                    <field name="cas_chronique"/>
+                                    <field name="decede"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
             </field>
@@ -246,21 +257,20 @@
                                class="oe_avatar oe_left"
                                options="{'preview_image': 'image_medium', 'size': [180, 240]}"/>
                     <div class="oe_left text-primary">
-                        <h2><field name="name" readonly="1"/></h2>
-                        <group>
+                        <h2 class="text-info bg-primary"><field name="name" readonly="1"/></h2>
+                        <h3 class="text-primary">
                             <field name="code_id" string="Code ID."/>
-                            <!--<field name="name" default_focus="1"  string="Adhérent" placeholder="Nom &amp; Prénoms"-->
-                                   <!--class="text-primary" readonly="1"/>-->
+                        </h3>
+                        <h4>
                             <field name="statut_familial" string="Lien Parenté"/>
-                            <field name="state" string="Statut Contrat"/>
-                        </group>
+                            <field name="age_details" string="Statut Contrat"/>
+                        </h4>
+                        <h3 class="text-success bg-success"><field name="state"/></h3>
                     </div>
-                    <!--<label for="nom" string="Nom" class="oe_edit_only"/>
-                        <h4><field name="nom" default_focus="1" placeholder="nom de famille" class="text-primary"/></h4>
-                        <label for="prenoms" string="Prénom(s)" class="oe_edit_only"/>
-                        <h4><field name="prenoms"  placeholder="prénoms" class="text-primary"/></h4>-->
                     <hr/>
-                    <group col="6" colspan="2">
+                    <notebook>
+                        <page string="Identification Adhérent">
+                             <group col="6" colspan="2">
                        <field name="nom"/>
                        <field name="prenoms"/>
                        <field name="code_id_externe" class="text-primary"/>
@@ -271,21 +281,18 @@
                        <field name="groupe_sanguin"/>
                        <field name="date_inscription" />
                        <field name="date_activation"/>
-                        <field name="quartier"/>
-                       <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
-                       <field name="groupe_id" options='{"no_open": True, "no_create": True}'/>
+                       <field name="quartier"/>
+                       <field name="localite_id"
+                              options='{"no_open": True, "no_create": True}'
+                              required="1"
+                       />
+                       <field name="groupe_id"
+                              options='{"no_open": True, "no_create": True}'
+                              required="1"
+                       />
                        <field name="cas_chronique" string="Malade chronique?"/>
                     </group>
-                    <!--<div class="oe_left">
-                        <label for="code_id" string="Code Identification:"/>
-                        <h3><field name="code_id" string="Code ID." class="text-primary"/></h3>
-                    </div>
-                    <div class="oe_right">
-                        <label for="stete" string="Statut Activation:"/>
-                        <h3><field name="state" string="Statut" class="text-muted text-right"/></h3>
-                    </div>-->
-                    <hr/>
-                    <notebook>
+                        </page>
                         <page string="Adresse &amp; Contacts :">
                             <group>
                                 <group>
@@ -311,8 +318,6 @@
                                     <field name="mobile_2"/>
                                     <field name="user_ids" invisible="1"/>
                                     <field name="email" widget="email" attrs="{'required': [('user_ids','!=', [])]}"/>
-                                    <!--<field name="lang"/>
-                                    <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>-->
                                 </group>
                             </group>
                         </page>

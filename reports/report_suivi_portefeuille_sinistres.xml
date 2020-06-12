@@ -579,8 +579,8 @@
                             <t t-if="contrat_limit">
                                 <div class="row">
                                     <div class="col-xs-12">
-                                        <h4 class="bg-primary">
-                                            <strong>Listing des 20 Contrats (Familles) avec les coûts de sinistralité les plus elevés.</strong>
+                                        <h4 class="bg-primary text-center">
+                                            <strong>20 GROS CONTRATS SINISTRES - NIVEAU DE CONSOMMATION PAR ORDRE DECROISSANT </strong>
                                         </h4>
                                     </div>
                                 </div>
@@ -1331,8 +1331,8 @@
                             <t t-if="assure_limit">
                                 <div class="row">
                                     <div class="col-xs-12">
-                                        <h4 class="bg-primary">
-                                            <strong>Listing des 20 Assurés (Bénéficiaires) avec les coûts de sinistralité les plus elevés.</strong>
+                                        <h4 class="bg-primary text-center">
+                                            <strong>20 GROS ASSURES (BENEFICIAIRES) SINISTRES - NIVEAU DE CONSOMMATION PAR ORDRE DECROISSANT </strong>
                                         </h4>
                                     </div>
                                 </div>
