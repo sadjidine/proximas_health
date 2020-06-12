@@ -1336,14 +1336,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
         elif report_kpi == 'prestataire' and report_type == 'groupe':
             prestataires = self.env['res.partner'].search([
                 ('is_prestataire', '=', True),
-            ])
-<<<<<<< Updated upstream
-=======
-            if police_filter:
-                prestataires = self.env['res.partner'].search([
-                    ('is_prestataire', '=', True),
-                ], order='id asc')
->>>>>>> Stashed changes
+            ], order='id asc')
             for prestataire in prestataires:
                 # DETAILS PEC TRAITES ET LIES A UN CONTRAT
                 if police_id:
@@ -1389,14 +1382,9 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     else:
                         net_a_payer = 0
 
-                    docs.append ({
-<<<<<<< Updated upstream
-                        'prestataire_name': prestataire_name,
-                        'categorie_name': categorie,
-=======
+                    docs.append({
                         'prestataire': prestataire_name,
                         'categorie': categorie,
->>>>>>> Stashed changes
                         'city': city,
                         'phone': phone,
                         'mobile': mobile,
