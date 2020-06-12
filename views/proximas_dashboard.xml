@@ -496,9 +496,20 @@
                                     <hr/>
                                     <group col="4" colspan="2">
                                         <field name="report_data"
+                                               string="Info détail"
                                                attrs="{'invisible': [('report_type','=','groupe')],
                                                'required': [('report_type','=','detail')]}"/>
                                         <field name="police_filter"/>
+                                    </group>
+                                    <hr/>
+                                    <group col="4" colspan="2">
+                                        <field name="contrat_limit"
+                                               attrs="{'invisible': ['|','|',('report_type','!=','groupe'),('report_kpi','!=','contrat'),
+                                               ('assure_limit','=',True)],}"
+                                        />
+                                        <field name="assure_limit"
+                                               attrs="{'invisible': ['|','|',('report_type','!=','groupe'),('report_kpi','!=','assure'),
+                                               ('contrat_limit','=',True)],}"/>
                                     </group>
                                     <hr/>
                                     <group>

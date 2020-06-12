@@ -35,10 +35,10 @@ class ReportSinistreRecapWizard(models.TransientModel):
             ('assure', 'Assuré (Bénéficiare)'),
             ('prestataire', 'Prestataire Soins médicaux'),
             ('medecin', 'Médecin Traitant'),
-            ('rubrique', 'Rubrique médicale'),
             ('groupe', 'Groupe (Organe)'),
             ('localite', 'Localité'),
             # ('zone', 'Zone adminsitrative'),
+            ('rubrique', 'Rubrique médicale'),
         ],
         default='contrat',
         required=True,
@@ -57,8 +57,14 @@ class ReportSinistreRecapWizard(models.TransientModel):
         selection=[
             ('rubrique', 'Rubrique Médicale'),
             ('prestation', 'Prestation Médicale'),
-            ('assure', 'Bénéficiaire (assuré)'),
+            ('assure', 'Assuré (Bénéficiaire)'),
         ],
+    )
+    contrat_limit = fields.Boolean(
+        string="20 plus gros contrats sinistrés",
+    )
+    assure_limit = fields.Boolean(
+        string="20 plus gros bénéficiaires sinistrés",
     )
     police_filter = fields.Boolean(
         string="Filtre/Police",
@@ -133,6 +139,8 @@ class ReportSinistreRecapWizard(models.TransientModel):
                 'medecin_id': self.medecin_id.id,
                 'groupe_id': self.groupe_id.id,
                 'localite_id': self.localite_id.id,
+                'contrat_limit': self.contrat_limit,
+                'assure_limit': self.assure_limit,
                 # 'zone_id': self.zone_id.id,
             },
         }
@@ -181,11 +189,13 @@ class ReportPecDetailsRecap(models.AbstractModel):
         medecin_id = data['form']['medecin_id']
         groupe_id = data['form']['groupe_id']
         localite_id = data['form']['localite_id']
+        contrat_limit = data['form']['contrat_limit']
+        assure_limit = data['form']['assure_limit']
         # zone_id = data['form']['zone_id']
 
         docs = []
         docargs = {}
-        police = self.env['proximas.police'].search ([
+        police = self.env['proximas.police'].search([
             ('id', '=', police_id)
         ], order='name asc')
         # 1.1. RAPPORT SINISTRALITE DETAILLE PAR CONTRAT (FAMILLE)
@@ -259,7 +269,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -363,7 +373,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int (net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted (docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted (docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -474,7 +484,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int (net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted (docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted (docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -572,7 +582,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'net_a_payer': int(net_a_payer),
                     })
                 if bool(docs):
-                    docs = sorted (docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -582,9 +592,10 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'report_kpi': report_kpi,
                         'report_type': report_type,
                         'police_filter': police_filter,
+                        'contrat_limit': contrat_limit,
                         'police_id': police_id,
                         'police': police.name,
-                        'docs': docs,
+                        'docs': docs[0:20] if contrat_limit else docs,
                     }
                 else:
                     raise UserError(_(
@@ -665,7 +676,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int (net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -771,7 +782,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int (net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -811,81 +822,80 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     ))
             # PRESENTATION PAR PATIENT (ASSURE)
             elif report_data == 'assure':
-                assures = self.env['proximas.assure'].search([])
-                for assure in assures:
-                    assure_pec = self.env['proximas.prise.charge'].search([
-                        ('assure_id', '=', assure.id),
+                assure_pec = self.env['proximas.prise.charge'].search([
+                    ('assure_id', '=', assure_id),
+                ])
+                if bool(assure_id) and police_filter:
+                    # ETAILS PEC TRAITES ET LIES A l'ASSURE ET LA POLICE
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '!=', None),
+                        ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                        ('assure_id', '=', assure_id),
+                        ('prestataire', '!=', None),
+                        ('police_id', '=', police_id),
                     ])
-                    if bool(assure_id) and police_filter:
-                        # ETAILS PEC TRAITES ET LIES AU CONTRAT ET LA POLICE
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('date_execution', '!=', None),
-                            ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                            ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            ('assure_id', '=', assure_id),
-                            ('prestataire', '!=', None),
-                            ('police_id', '=', police_id),
-                            ('assure_id', '=', assure.id),
-                        ])
-                    elif bool(assure_id) and not police_filter:
-                        # ETAILS PEC TRAITES ET LIES AU CONTRAT
-                        details_pec = self.env['proximas.details.pec'].search ([
-                            ('date_execution', '!=', None),
-                            ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                            ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            ('assure_id', '=', assure_id),
-                            ('prestataire', '!=', None),
-                            ('assure_id', '=', assure.id),
-                        ])
+                elif bool(assure_id) and not police_filter:
+                    # ETAILS PEC TRAITES ET LIES AU CONTRAT
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '!=', None),
+                        ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                        ('assure_id', '=', assure_id),
+                        ('prestataire', '!=', None),
+                    ])
+                else:
+                    raise UserError (_ (
+                        "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
+                        Après recherche, aucun sinistre ne correspond à la période indiquée pour l'assuré indiqué. \
+                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                        Veuillez contacter les administrateurs pour plus détails..."
+                    )
+                    )
+                if bool(details_pec):
+                    # details_pec_assure = details_pec
+                    assure_pec = len(assure_pec)
+                    assure_id = assure.id
+                    assure_name = assure.name
+                    nbre_actes = len (details_pec) or 0
+                    cout_total = sum (item.cout_total for item in details_pec) or 0
+                    total_pc = sum (item.total_pc for item in details_pec) or 0
+                    total_npc = sum (item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum (item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum (item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum (item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum (item.mt_remboursement for item in details_pec) or 0
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int (net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int (net_remboursement)
                     else:
-                        raise UserError(_(
-                            "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                            Après recherche, aucun sinistre ne correspond à la période indiquée pour l'assuré indiqué. \
-                            Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                            Veuillez contacter les administrateurs pour plus détails..."
-                        )
-                        )
-                    if bool(details_pec):
-                        assure_id = assure.id
-                        assure_name = assure.name
-                        nbre_actes = len(details_pec) or 0
-                        cout_total = sum(item.cout_total for item in details_pec) or 0
-                        total_pc = sum(item.total_pc for item in details_pec) or 0
-                        total_npc = sum(item.total_npc for item in details_pec) or 0
-                        total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                        ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                        net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
-                        net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                        net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
                         net_a_payer = 0
-                        if net_prestataire:
-                            net_a_payer = int(net_prestataire)
-                        elif net_remboursement:
-                            net_a_payer = int(net_remboursement)
-                        else:
-                            net_a_payer = 0
 
-                        docs.append({
-                            'assure_id': assure_id,
-                            'code_id': assure.code_id,
-                            'assure_name': assure_name,
-                            'statut_familial': assure.statut_familial,
-                            'age': assure.age,
-                            'genre': assure.genre,
-                            'nbre_pec': len(assure_pec),
-                            'nbre_actes': int(nbre_actes),
-                            'cout_total': int(cout_total),
-                            'total_pc': int(total_pc),
-                            'total_npc': int(total_npc),
-                            'total_exclusion': int(total_exclusion),
-                            'ticket_moderateur': int(ticket_moderateur),
-                            'net_tiers_payeur': int(net_tiers_payeur),
-                            'net_prestataire': int(net_prestataire),
-                            'net_remboursement': int(net_remboursement),
-                            'net_a_payer': int(net_a_payer),
-                        })
+                    docs.append({
+                        'assure_id': assure_id,
+                        'code_id': assure.code_id,
+                        'assure_name': assure_name,
+                        'statut_familial': assure.statut_familial,
+                        'age': assure.age,
+                        'genre': assure.genre,
+                        'nbre_pec': assure_pec,
+                        'nbre_actes': int (nbre_actes),
+                        'cout_total': int (cout_total),
+                        'total_pc': int (total_pc),
+                        'total_npc': int (total_npc),
+                        'total_exclusion': int (total_exclusion),
+                        'ticket_moderateur': int (ticket_moderateur),
+                        'net_tiers_payeur': int (net_tiers_payeur),
+                        'net_prestataire': int (net_prestataire),
+                        'net_remboursement': int (net_remboursement),
+                        'net_a_payer': int (net_a_payer),
+                    })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    details_pec = sorted(details_pec, key=lambda x: x['date_execution'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -914,6 +924,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'age': assure.age,
                         'statut_familial': assure.statut_familial,
                         'genre': assure.genre,
+                        'details_pec_assure': details_pec,
                         'docs': docs,
                     }
                 else:
@@ -932,21 +943,12 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 ], order='id asc')
             for assure in assures:
                 # DETAILS PEC TRAITES ET LIES A UN CONTRAT
-                if police_id:
-                    details_pec = self.env['proximas.details.pec'].search ([
-                        ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                        ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                        ('prestataire', '!=', None),
-                        ('assure_id', '=', assure.id),
-                        ('police_id', '=', police_id),
-                    ])
-                else:
-                    details_pec = self.env['proximas.details.pec'].search ([
-                        ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                        ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                        ('prestataire', '!=', None),
-                        ('assure_id', '=', assure.id),
-                    ])
+                details_pec = self.env['proximas.details.pec'].search ([
+                    ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                    ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                    ('prestataire', '!=', None),
+                    ('assure_id', '=', assure.id),
+                ])
                 if bool(details_pec):
                     name_length = len(assure.name)
                     if int(name_length) > 60:
@@ -1007,7 +1009,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'net_a_payer': int (net_a_payer),
                     })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1017,9 +1019,10 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'report_kpi': report_kpi,
                         'report_type': report_type,
                         'police_filter': police_filter,
+                        'assure_limit': assure_limit,
                         'police_id': police_id,
                         'police': police.name,
-                        'docs': docs,
+                        'docs': docs[0:20] if assure_limit else docs,
                     }
                 else:
                     raise UserError(_(
@@ -1101,7 +1104,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1115,11 +1118,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'prestataire_id': prestataire_id,
-                        'prestataire_name': prestataire_id.name,
-                        'categorie_id': prestataire_id.categorie_id.name,
-                        'city': prestataire_id.city,
-                        'phone': prestataire_id.phone,
-                        'mobile': prestataire_id.mobile,
+                        'prestataire': prestataire.name,
+                        'categorie': prestataire.categorie_id.name,
+                        'city': prestataire.city,
+                        'phone': prestataire.phone,
+                        'mobile': prestataire.mobile,
                         'docs': docs,
                     }
                 else:
@@ -1197,7 +1200,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted (docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted (docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1211,11 +1214,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'prestataire_id': prestataire_id,
-                        'prestataire_name': prestataire_id.name,
-                        'categorie_id': prestataire_id.categorie_id.name,
-                        'city': prestataire_id.city,
-                        'phone': prestataire_id.phone,
-                        'mobile': prestataire_id.mobile,
+                        'prestataire': prestataire.name,
+                        'categorie': prestataire.categorie_id.name,
+                        'city': prestataire.city,
+                        'phone': prestataire.phone,
+                        'mobile': prestataire.mobile,
                         'docs': docs,
                     }
                 else:
@@ -1301,7 +1304,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1315,11 +1318,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'prestataire_id': prestataire_id,
-                        'prestataire_name': prestataire_id.name,
-                        'categorie_id': prestataire_id.categorie_id.name,
-                        'city': prestataire_id.city,
-                        'phone': prestataire_id.phone,
-                        'mobile': prestataire_id.mobile,
+                        'prestataire': prestataire.name,
+                        'categorie': prestataire.categorie_id.name,
+                        'city': prestataire.city,
+                        'phone': prestataire.phone,
+                        'mobile': prestataire.mobile,
                         'docs': docs,
                     }
                 else:
@@ -1334,6 +1337,13 @@ class ReportPecDetailsRecap(models.AbstractModel):
             prestataires = self.env['res.partner'].search([
                 ('is_prestataire', '=', True),
             ])
+<<<<<<< Updated upstream
+=======
+            if police_filter:
+                prestataires = self.env['res.partner'].search([
+                    ('is_prestataire', '=', True),
+                ], order='id asc')
+>>>>>>> Stashed changes
             for prestataire in prestataires:
                 # DETAILS PEC TRAITES ET LIES A UN CONTRAT
                 if police_id:
@@ -1380,8 +1390,13 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         net_a_payer = 0
 
                     docs.append ({
+<<<<<<< Updated upstream
                         'prestataire_name': prestataire_name,
                         'categorie_name': categorie,
+=======
+                        'prestataire': prestataire_name,
+                        'categorie': categorie,
+>>>>>>> Stashed changes
                         'city': city,
                         'phone': phone,
                         'mobile': mobile,
@@ -1397,7 +1412,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'net_a_payer': int(net_a_payer),
                     })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1491,7 +1506,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1505,11 +1520,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'medecin_id': medecin_id,
-                        'medecin_name': medecin_id.name,
-                        'grade': medecin_id.grade_id.name,
-                        'city': medecin_id.city,
-                        'phone': medecin_id.phone,
-                        'mobile': medecin_id.mobile,
+                        'medecin': medecin.name,
+                        'grade': medecin.grade_id.name,
+                        'city': medecin.city,
+                        'phone': medecin.phone,
+                        'mobile': medecin.mobile,
                         'docs': docs,
                     }
                 else:
@@ -1587,7 +1602,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int (net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1601,11 +1616,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'medecin_id': medecin_id,
-                        'medecin_name': medecin_id.name,
-                        'grade': medecin_id.grade_id.name,
-                        'city': medecin_id.city,
-                        'phone': medecin_id.phone,
-                        'mobile': medecin_id.mobile,
+                        'medecin': medecin.name,
+                        'grade': medecin.grade_id.name,
+                        'city': medecin.city,
+                        'phone': medecin.phone,
+                        'mobile': medecin.mobile,
                         'docs': docs,
                     }
                 else:
@@ -1691,7 +1706,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int (net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted (docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted (docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1705,11 +1720,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'medecin_id': medecin_id,
-                        'medecin_name': medecin_id.name,
-                        'grade': medecin_id.grade_id.name,
-                        'city': medecin_id.city,
-                        'phone': medecin_id.phone,
-                        'mobile': medecin_id.mobile,
+                        'medecin': medecin.name,
+                        'grade': medecin.grade_id.name,
+                        'city': medecin.city,
+                        'phone': medecin.phone,
+                        'mobile': medecin.mobile,
                         'docs': docs,
                     }
                 else:
@@ -1736,7 +1751,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         medecin_name = medecin.name[:40] + '...'
                     else:
                         medecin_name = medecin.name
-                    grade_name = medecin.grade_id.name
+                    grade = medecin.grade_id.name
                     city = medecin.city
                     phone = medecin.phone
                     mobile = medecin.mobile
@@ -1759,8 +1774,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         net_a_payer = 0
 
                     docs.append({
-                        'medecin_name': medecin_name,
-                        'grade_name': grade_name,
+                        'medecin': medecin_name,
+                        'grade': grade,
                         'city': city,
                         'phone': phone,
                         'mobile': mobile,
@@ -1776,7 +1791,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'net_a_payer': int(net_a_payer),
                     })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -1814,7 +1829,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            ('groupe_id', '=', groupe.id),
+                            ('groupe_id', '=', groupe_id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
                             ('rubrique_id', '=', rubrique.id),
@@ -1825,7 +1840,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            ('groupe_id', '=', groupe.id),
+                            ('groupe_id', '=', groupe_id),
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
@@ -1887,6 +1902,9 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police': police.name,
                         'groupe_id': groupe_id,
                         'groupe_name': groupe.name,
+                        'city': groupe.city,
+                        'phone': groupe.phone,
+                        'mobile': groupe.mobile,
                         'docs': docs,
                     }
                 else:
@@ -1906,7 +1924,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            ('groupe_id', '=', groupe.id),
+                            ('groupe_id', '=', groupe_id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
                             ('prestation_id', '=', prestation.id),
@@ -1917,7 +1935,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            ('groupe_id', '=', groupe.id),
+                            ('groupe_id', '=', groupe_id),
                             ('prestataire', '!=', None),
                             ('prestation_id', '=', prestation.id),
                         ])
@@ -1979,6 +1997,9 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police': police.name,
                         'groupe_id': groupe_id,
                         'groupe_name': groupe.name,
+                        'city': groupe.city,
+                        'phone': groupe.phone,
+                        'mobile': groupe.mobile,
                         'docs': docs,
                     }
                 else:
@@ -2079,6 +2100,9 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police': police.name,
                         'groupe_id': groupe_id,
                         'groupe_name': groupe.name,
+                        'city': groupe.city,
+                        'phone': groupe.phone,
+                        'mobile': groupe.mobile,
                         'docs': docs,
                     }
                 else:
@@ -2098,7 +2122,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                         ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
                         ('prestataire', '!=', None),
-                        ('groupe_id', '=', groupe_id),
+                        ('groupe_id', '=', groupe.id),
                         ('police_id', '=', police_id)
                     ])
                 else:
@@ -2106,9 +2130,10 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                         ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
                         ('prestataire', '!=', None),
-                        ('groupe_id', '=', groupe_id),
+                        ('groupe_id', '=', groupe.id),
                     ])
                 if bool(details_pec):
+                    groupe_id = groupe.id
                     groupe_name = groupe.name
                     nbre_actes = len (details_pec) or 0
                     cout_total = sum (item.cout_total for item in details_pec) or 0
@@ -2129,6 +2154,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         net_a_payer = 0
 
                     docs.append({
+                        'groue_id': groupe_id,
                         'groupe_name': groupe_name,
                         'nbre_actes': int(nbre_actes),
                         'cout_total': int(cout_total),
@@ -2179,7 +2205,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            ('localite_id', '=', localite.id),
+                            ('localite_id', '=', localite_id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
                             ('rubrique_id', '=', rubrique.id),
@@ -2190,7 +2216,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            ('localite_id', '=', localite.id),
+                            ('localite_id', '=', localite_id),
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
@@ -2271,7 +2297,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            ('localite_id', '=', localite.id),
+                            ('localite_id', '=', localite_id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
                             ('prestation_id', '=', prestation.id),
@@ -2282,7 +2308,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            ('localite_id', '=', localite.id),
+                            ('localite_id', '=', localite_id),
                             ('prestataire', '!=', None),
                             ('prestation_id', '=', prestation.id),
                         ])
@@ -2366,7 +2392,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
-                            # ('contrat_id', '=', contrat_id),
+                            ('assure_id', '=', assure.id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
                             ('localite_id', '=', localite_id),
@@ -2377,7 +2403,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '!=', None),
                             ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            # ('contrat_id', '=', contrat_id),
+                            ('assure_id', '=', assure.id),
                             ('prestataire', '!=', None),
                             ('localite_id', '=', localite_id),
                         ])
@@ -2443,7 +2469,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'localite_id': localite_id,
-                        'localite': localite_id.name,
+                        'localite': localite.name,
                         'docs': docs,
                     }
                 else:
@@ -2530,9 +2556,9 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     ))
         # 7.1. RAPPORT SINISTRALITE DETAILLE PAR RUBRIQUE MEDICALE
         if report_kpi == 'rubrique' and report_type == 'detail':
-            rubrique_select = self.env['proximas.rubrique.medicale'].search([
-                ('id', '=', rubrique_id),
-            ])
+            # rubrique_select = self.env['proximas.rubrique.medicale'].search([
+            #     ('id', '=', rubrique_id),
+            # ])
             # PRESENTATION PAR RUBRIQUE
             if report_data == 'rubrique':
                 rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
@@ -2568,7 +2594,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                                          )
                     if bool(details_pec):
                         rubrique_id = rubrique_id
-                        rubrique_medicale = rubrique_select.name
+                        rubrique_medicale = rubrique.name
                         nbre_actes = len (details_pec) or 0
                         cout_total = sum (item.cout_total for item in details_pec) or 0
                         total_pc = sum (item.total_pc for item in details_pec) or 0
@@ -2615,7 +2641,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'rubrique_id': rubrique_id,
-                        'rubriquee_name': rubrique_select.name,
+                        'rubriquee_name': rubrique_medicale,
                         'docs': docs,
                     }
                 else:
@@ -2707,7 +2733,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'rubrique_id': rubrique_id,
-                        'rubrique_medicale': rubrique_select.name,
+                        'rubrique_medicale': rubrique_medicale,
                         'docs': docs,
                     }
                 else:
@@ -2807,7 +2833,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'rubrique_id': rubrique_id,
-                        'rubrique_medicale': rubrique_select.name,
+                        'rubrique_medicale': rubrique_medicale,
                         'docs': docs,
                     }
                 else:
@@ -3168,7 +3194,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -3334,7 +3360,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -3472,7 +3498,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -3641,7 +3667,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_a_payer': int(net_a_payer),
                         })
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -3794,7 +3820,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         Veuillez contacter les administrateurs pour plus détails..."
                     ))
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
@@ -3967,7 +3993,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         Veuillez contacter les administrateurs pour plus détails..."
                     ))
                 if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['cout_total'], reverse=True)
+                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],

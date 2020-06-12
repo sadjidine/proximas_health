@@ -1775,11 +1775,11 @@ class DetailsPec(models.Model):
         comodel_name="proximas.medecin",
         string="Médecin traitant",
         compute='_get_medecin_id',
+        store=True,
     )
     medecin_traitant = fields.Char(
         string="Medecin traitant",
         related='medecin_id.full_name',
-        store=True,
         required=False,
     )
     pool_medical_crs_id = fields.Many2one(
@@ -2015,13 +2015,13 @@ class DetailsPec(models.Model):
     statut_familial = fields.Selection(
         string="Statut Familial",
         related='assure_id.statut_familial',
-        # store=True,
+        store=True,
         readonly=True,
     )
     genre = fields.Selection(
         string="Genre",
         related='assure_id.genre',
-        # store=True,
+        store=True,
         readonly=True,
     )
     date_naissance = fields.Date(
@@ -2037,16 +2037,20 @@ class DetailsPec(models.Model):
         required=False,
         readonly=True,
     )
-    age_entier = fields.Integer (
+    tranche_age = fields.Selection(
+        string="Tranche d'âge",
+        related='assure_id.tranche_age',
+    )
+    age_entier = fields.Integer(
         string='Age assuré',
         related='assure_id.age_entier',
     )
-    age_details = fields.Char (
+    age_details = fields.Char(
         string="Age",
         related="assure_id.age_details",
         readonly=True,
     )
-    date_activation = fields.Date (
+    date_activation = fields.Date(
         string="Date Activation",
         related="assure_id.date_activation",
         readonly=True,
@@ -2066,11 +2070,19 @@ class DetailsPec(models.Model):
         # comodel_name="promimas.groupe",
         string="Groupe/Organe",
         related='contrat_id.groupe_id',
+        store=True,
     )
     localite_id = fields.Many2one (
         # comodel_name="proximas.localite",
         string="Localité",
         related='assure_id.localite_id',
+        store=True,
+    )
+    zone_id = fields.Many2one (
+        # comodel_name="proximas.zone",
+        string="Localité",
+        related='localite_id.zone_id',
+        store=True,
     )
     num_contrat = fields.Char(
         string="Num. Contrat",
@@ -2616,7 +2628,7 @@ class DetailsPec(models.Model):
 
 
     # @api.one
-    @api.depends('medecin_id')
+    @api.depends('pool_medical')
     def _get_medecin_id(self):
         for rec in self:
             medecin_id = rec.pool_medical.medecin_id.id
