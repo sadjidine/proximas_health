@@ -580,7 +580,7 @@
                                 <div class="row">
                                     <div class="col-xs-12">
                                         <h4 class="bg-primary">
-                                            <strong>Listing des 20 Contrats (Famille) avec les coûts de sinistralité les plus elevés.</strong>
+                                            <strong>Listing des 20 Contrats (Familles) avec les coûts de sinistralité les plus elevés.</strong>
                                         </h4>
                                     </div>
                                 </div>
@@ -642,7 +642,7 @@
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
                                             <!--<td><span t-esc="doc['matricule']"/></td>-->
                                             <td><span t-esc="doc['code_id']"/></td>
-                                            <td class="bg-info"><strong><span t-esc="doc['adherent']"/></strong></td>
+                                            <td class="bg-info"><span t-esc="doc['adherent']"/></td>
                                             <!--<td><span t-esc="doc['num_contrat']"/></td>-->
                                             <td><span t-esc="doc['date_activation']"/></td>
                                             <td><span t-esc="doc['groupe_name']"/></td>
@@ -3229,7 +3229,7 @@
                             <h6 class="bg-primary invisible">...</h6>
                             <h4 class="bg-info text-primary">
                                 <strong>
-                                     RAPPORT SUIVI EVOLUTION DE LA SINISTRALITE: SYNTHESE SINISTRES / GROUPE ADHERENTS
+                                     RAPPORT SUIVI EVOLUTION DE LA SINISTRALITE: SYNTHESE SINISTRES / GROUPE - UNITE D'ORGANISATION
                                 </strong>
                             </h4>
                             <div class="row">
@@ -3256,11 +3256,6 @@
                                 </caption>
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
-                                    <!--<th class="text-left"><strong>Matricule</strong></th>-->
-                                    <!--<th class="text-left"><strong>Code ID.</strong></th>-->
-                                    <th class="text-left"><strong>ID.</strong></th>
-                                    <!--<th class="text-right"><strong>N° Contrat</strong></th>-->
-                                    <!--<th class="text-left"><strong>grade</strong></th>-->
                                     <th class="text-left"><strong>Groupe</strong></th>
                                     <th class="text-right"><strong>Coût moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
@@ -3300,12 +3295,7 @@
                                         <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
                                         <tr>
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
-                                            <!--<td><span t-esc="doc['matricule']"/></td>-->
-                                            <!--<td><span t-esc="doc['code_id']"/></td>-->
-                                            <td class="bg-info"><span t-esc="doc['groupe_id']"/></td>
-                                            <!--<td><span t-esc="doc['num_contrat']"/></td>-->
-                                            <!--<td><span t-esc="doc['grade']"/></td>-->
-                                            <td><span t-esc="doc['groupe']"/></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['groupe_name']"/></strong></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
                                             <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
@@ -3320,7 +3310,7 @@
                                 </tbody>
                                 <tfoot>
                                     <tr class="text-right bg-info" style="border-top: 2px solid black;">
-                                        <td colspan="4"><strong> TOTAUX GENERAUX</strong></td>
+                                        <td colspan="3"><strong> TOTAUX GENERAUX</strong></td>
                                         <td><strong><span t-esc="'{:,}'.format(tot_nbre_actes).replace(',',' ')"/></strong></td>
                                         <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
                                         <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>

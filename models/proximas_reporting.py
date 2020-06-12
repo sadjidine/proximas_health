@@ -1404,8 +1404,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
-                        'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                        'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
+                        'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
                         'date_diff': date_diff,
                         'report_kpi': report_kpi,
                         'report_type': report_type,
@@ -1434,8 +1434,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         # DETAILS PEC TRAITES ET LIES AU CONTRAT ET LA POLICE
                         details_pec = self.env['proximas.details.pec'].search([
                             ('date_execution', '!=', None),
-                            ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                            ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                            ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                            ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
                             ('medecin_id', '=', medecin.id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
@@ -1889,7 +1889,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'groupe_id': groupe_id,
-                        'groupe_name': groupe.name,
+                        'groupe': groupe.name,
                         'city': groupe.city,
                         'phone': groupe.phone,
                         'mobile': groupe.mobile,
@@ -1935,7 +1935,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             Veuillez contacter les administrateurs pour plus détails..."
                         ) % prestation.name
                                          )
-                    if bool (details_pec):
+                    if bool(details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
                         nbre_actes = len (details_pec) or 0
@@ -1984,7 +1984,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'groupe_id': groupe_id,
-                        'groupe_name': groupe.name,
+                        'groupe': groupe.name,
                         'city': groupe.city,
                         'phone': groupe.phone,
                         'mobile': groupe.mobile,
@@ -2087,7 +2087,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police_id': police_id,
                         'police': police.name,
                         'groupe_id': groupe_id,
-                        'groupe_name': groupe.name,
+                        'groupe': groupe.name,
                         'city': groupe.city,
                         'phone': groupe.phone,
                         'mobile': groupe.mobile,
@@ -2142,7 +2142,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         net_a_payer = 0
 
                     docs.append({
-                        'groue_id': groupe_id,
+                        'groupe_id': groupe_id,
                         'groupe_name': groupe_name,
                         'nbre_actes': int(nbre_actes),
                         'cout_total': int(cout_total),
@@ -2160,8 +2160,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     docargs = {
                         'doc_ids': data['ids'],
                         'doc_model': data['model'],
-                        'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                        'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
+                        'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
                         'date_diff': date_diff,
                         'report_kpi': report_kpi,
                         'report_type': report_type,
@@ -2171,13 +2171,12 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'docs': docs,
                     }
                 else:
-                    raise UserError (_ (
+                    raise UserError(_(
                         "Proximaas : Rapport Suivi Evolution Sinistres \n\
                         Après recherche, aucun sinistre ne correspond à la période indiquée.\
                         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
                         Veuillez contacter les administrateurs pour plus détails..."
                     ))
-
         # 6.1. RAPPORT SINISTRALITE DETAILLE PAR LOCALITE
         if report_kpi == 'localite' and report_type == 'detail':
             localite = self.env['proximas.localite'].search([
@@ -2907,7 +2906,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
                         Veuillez contacter les administrateurs pour plus détails..."
                     ))
-
         return report_obj.render('proximas_medical.report_suivi_sinistres_view', docargs)
 
     class ReglementSinistresReportWizard (models.TransientModel):
