@@ -3371,6 +3371,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     )
             # 2.1. ETAT DETAILLE PAR PRESTATION MEDICALE
             if report_kpi == 'prestation' and report_type == 'detail':
+                now = datetime.now()
                 prestations = self.env['proximas.code.prestation'].search([])
                 police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
                 facture = self.env['proximas.facture'].search([('id', '=', facture_id)])
@@ -3378,11 +3379,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
                 prestataire = self.env['res.partner'].search([
                     ('id', '=', prestataire_id), ('is_prestataire', '=', True)], order='name asc')
-                date_emission = fields.Datetime.from_string(facture.date_emission)
-                date_reception = fields.Datetime.from_string(facture.date_reception)
+                date_emission = fields.Datetime.from_string(facture.date_emission) or now
+                date_reception = fields.Datetime.from_string(facture.date_reception) or now
                 montant_facture = facture.montant_en_text()
-                date_saisie = fields.Datetime.from_string(rfm.date_saisie)
-                date_depot = fields.Datetime.from_string(rfm.date_depot)
+                date_saisie = fields.Datetime.from_string(rfm.date_saisie) or now
+                date_depot = fields.Datetime.from_string(rfm.date_depot) or now
                 montant_facture_rfm = rfm.montant_en_text()
 
                 for prestation in prestations:
