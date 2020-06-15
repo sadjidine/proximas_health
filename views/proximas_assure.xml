@@ -81,13 +81,12 @@
             <field name="model">proximas.ayant.droit</field>
             <field name="arch" type="xml">
             <form string="Ayant-droit">
-                <!--<header />-->
                 <sheet>
                     <div class="oe_right oe_button_box" name="buttons" />
                     <field name="image"
                            widget='image'
                            class="oe_left oe_avatar"
-                           options="{'preview_image': 'image_medium', 'size': [160, 120]}" />
+                           options="{'preview_image': 'image_medium', 'size': [180, 120]}" />
                     <div class="oe_left">
                         <h2><field name="nom" placeholder="Nom"/></h2>
                         <h2><field name="prenoms" placeholder="Prénoms"/></h2>
@@ -103,25 +102,24 @@
                     <newline/>
                     <hr/>
                     <notebook>
-                        <page string="Détails Informations Ayant-droit">
+                        <page string="DETAILS INFOS - AYANT-DROIT">
                             <group name="data">
                                 <group name="main">
-                                    <!--<field name="code_id" string="Code Identification" class="text-primary h4"/>-->
-                                    <field name="code_id_externe"/>
-                                    <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
-                                    <field name="quartier"/>
                                     <field name="statut" required="1"/>
-                                    <field name="date_inscription" />
-                                    <field name="date_activation"/>
-                                </group>
-                                <group>
                                     <field name="date_naissance" required="1"/>
                                     <field name="age" />
                                     <field name="genre" widget="radio" options="{'horizontal': true}"
                                            onchange="_check_genre()" required="1"/>
                                     <field name="groupe_sanguin"/>
                                     <field name="cas_chronique"/>
-                                    <field name="decede"/>
+                                </group>
+                                <group>
+                                    <field name="code_id_externe"/>
+                                    <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                                    <field name="quartier"/>
+                                    <field name="date_inscription" />
+                                    <field name="date_activation"/>
+                                     <field name="decede"/>
                                 </group>
                             </group>
                         </page>
@@ -253,29 +251,36 @@
                     <field name="is_company" invisible="1"/>
                     <field name="name" invisible="1"/>
                     <field name="parent_id" invisible="1"/>
-                    <field name="image" widget='image'
-                               class="oe_avatar oe_left"
-                               options="{'preview_image': 'image_medium', 'size': [160, 120]}"/>
-                    <div class="oe_left text-primary">
-                        <h2 class="text-primary"><field name="name" readonly="1"/></h2>
-                        <h3 class="text-primary">
-                            <field name="code_id" string="Code ID."/>
-                        </h3>
-                        <h4>
-                            <field name="statut_familial" string="Lien Parenté"/>
-                            <field name="age_details" string="Statut Contrat"/>
-                        </h4>
-                        <h3 class="text-success"><field name="state"/></h3>
+                    <field name="image"
+                           widget='image'
+                           class="oe_left oe_kanban_avatar thumbnail"
+                           options="{'preview_image': 'image', 'size': [180, 120]}" />
+                       <div class="oe_title oe_left">
+                           <label for="nom" string="Identification Bénéficiaire"  class="oe_edit_only"/>
+                           <h2 class="text-primary"><field name="nom" placeholder="Nom"/></h2>
+                           <h2 class="text-primary"><field name="prenoms" placeholder="Prénoms"/></h2>
+                           <h4 class="text_muted"><field name="age_details" /></h4>
+                           <h3 class="bg-info">
+                               <field name="police_id" options ='{"no_open": True, "no_create": True}'/>
+                           </h3>
+                           <group>
+                               <field name="full_name" invisible="1"/>
+                               <field name="name" invisible="1"/>
+                           </group>
+                       </div>
+                    <div class="oe_right">
+                        <h2 class="bg-info text-primary text-center"><field name="code_id"/></h2>
+                        <h3 class="bg-info text-center"><field name="statut_familial"/></h3>
+                        <h3 class="bg-primary text-center"><field name="state"/></h3>
                     </div>
+                    <newline/>
                     <hr/>
                     <notebook>
-                        <page string="Identification Adhérent">
+                        <page string="INFOS DETAILS ADHERENT">
                              <group col="6" colspan="2">
-                       <field name="nom"/>
-                       <field name="prenoms"/>
                        <field name="code_id_externe" class="text-primary"/>
                        <field name="matricule"/>
-                       <field name="date_naissance" />
+                       <field name="date_naissance"/>
                        <field name="age" />
                        <field name="genre" required="1" widget="radio" options="{'horizontal': true}"/>
                        <field name="groupe_sanguin"/>
@@ -293,7 +298,7 @@
                        <field name="cas_chronique" string="Malade chronique?"/>
                     </group>
                         </page>
-                        <page string="Adresse &amp; Contacts :">
+                        <page string="ADRESSES &amp; CONTACTS:">
                             <group>
                                 <group>
                                     <field name="type" invisible="1"/>
@@ -321,7 +326,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Notes / Observations :">
+                        <page string="NOTES / OBSERVATION :">
                                 <field name="note"/>
                         </page>
                     </notebook>
@@ -479,52 +484,62 @@
                 </header>
                 <sheet>
                     <div class="oe_right oe_button_box" name="buttons" />
+                    <field name="image"
+                           widget='image'
+                           class="oe_left oe_kanban_avatar thumbnail"
+                           options="{'preview_image': 'image', 'size': [180, 120]}" />
+                       <div class="oe_title oe_left">
+                           <label for="nom" string="Identification Bénéficiaire"  class="oe_edit_only"/>
+                           <h2 class="text-primary"><field name="nom" placeholder="Nom"/></h2>
+                           <h2 class="text-primary"><field name="prenoms" placeholder="Prénoms"/></h2>
+                           <h4 class="text_muted"><field name="age_details" /></h4>
+                           <h3 class="bg-info">
+                               <field name="police_id" options ='{"no_open": True, "no_create": True}'/>
+                           </h3>
+                           <group>
+                               <field name="full_name" invisible="1"/>
+                               <field name="name" invisible="1"/>
+                           </group>
+                       </div>
+                    <div class="oe_right">
+                        <h2 class="bg-info text-primary text-center"><field name="code_id"/></h2>
+                        <h3 class="bg-info text-center"><field name="statut_familial"/></h3>
+                        <h3 class="bg-primary text-center"><field name="state"/></h3>
+                    </div>
+                       <newline/>
+                       <hr/>
                     <notebook>
-                        <page string="Identification Assuré">
-                            <field name="image"
-                                   widget='image'
-                                   class="oe_left oe_avatar"
-                                   options="{'preview_image': 'image', 'size': [90, 160]}" />
-                            <div class="oe_title oe_left" name="title">
-                                <label for="nom" string="Nom/Prénoms"  class="oe_edit_only"/>
-                                <h3><field name="nom" placeholder="Nom"/></h3>
-                                <!--<label for="prenoms" string="Prénom(s)"  class="oe_edit_only"/>-->
-                                <h3><field name="prenoms" placeholder="Prénoms"/></h3>
-                                <field name="full_name" invisible="1"/>
-                                <field name="name" invisible="1"/>
-                                <h4 class="text-muted"><field name="code_id"/></h4>
-                                <h4 class="text-muted"><field name="statut_familial" /></h4>
-                            </div>
-                            <newline/>
-                            <hr/>
-                            <group string="Informations Assuré" col="6" colspan="2">
-                                <field name="code_id_externe"/>
-                                <field name="date_naissance"/>
-                                <field name="age"/>
-                                <field name="genre"/>
-                                <field name="groupe_sanguin"/>
-                                <field name="quartier"/>
-                                <field name="localite_id" options ='{"no_open": True, "no_create": True}'/>
-                                <field name="state" />
-                                <field name="date_deces"/>
-                                <field name="date_activation"/>
-                                <field name="decede"/>
-                                <field name="matricule"/>
-                                <field name="contrat_id" readonly="1"/>
-                                <field name="police_id" options ='{"no_open": True, "no_create": True}'/>
-                                <field name="date_inscription"/>
-                                <!--<field name="delai_carence"/>
-                                <field name="jours_activation_assure"/>
-                                <field name="sous_totaux_assure"/>
-                                <field name="nbre_actes_assure"/>
-                                <field name="sous_totaux_contrat"/>-->
-                            </group>
+                        <page string="INFOS DETAILS ASSURE">
+                            <group col="6" colspan="2">
+                               <field name="date_naissance"/>
+                               <field name="age"/>
+                               <field name="genre" widget="radio" options="{'horizontal': true}"/>
+                               <field name="groupe_sanguin"/>
+                               <field name="quartier"/>
+                               <field name="localite_id" options ='{"no_open": True, "no_create": True}'/>
+                               <field name="date_inscription"/>
+                               <field name="date_deces"/>
+                               <field name="date_activation"/>
+                               <field name="decede"/>
+                               <field name="matricule"/>
+                               <field name="code_id_externe"/>
+                               <field name="contrat_id" readonly="1"/>
+                               <field name="num_contrat"/>
+                               <field name="tranche_age"/>
+                               <!--<field name="compteur_maj_assure" readonly="1"/>-->
+                                <!--<field name="date_maj_assure" readonly="1"/>-->
+                               <!--<field name="delai_carence"/>
+                               <field name="jours_activation_assure"/>
+                               <field name="sous_totaux_assure"/>
+                               <field name="nbre_actes_assure"/>
+                               <field name="sous_totaux_contrat"/>-->
+                           </group>
                         </page>
                         <!--<page string="Informations Principales">
                         </page>-->
-                        <page string="Adresses &amp; Contacts"
+                        <page string="ADRESSES &amp; CONTACTS"
                               >
-                            <group string="Adresses">
+                            <group string="Adresses Détaillées du Bénéficiaire">
                                 <group>
                                     <label for="street" string="Adresse" />
                                     <div>
@@ -580,13 +595,121 @@
                                     string="I don't want to receive commercial messages" />
                             </group>-->
                         </page>
-                        <page string="Contrôle Code Sécurité">
+                        <page string="CONTROLES SECURITE">
                             <group col="4" colspan="2">
                                     <field name="code_perso"/>
                                     <field name="code_pass" invisible="True"/>
                                 </group>
                         </page>
                     </notebook>
+                    <!--<notebook>
+                        <page string="Identification Assuré">
+                            <field name="image"
+                                   widget='image'
+                                   class="oe_left oe_avatar"
+                                   options="{'preview_image': 'image', 'size': [90, 160]}" />
+                            <div class="oe_title oe_left" name="title">
+                                <label for="nom" string="Nom/Prénoms"  class="oe_edit_only"/>
+                                <h3><field name="nom" placeholder="Nom"/></h3>
+                                &lt;!&ndash;<label for="prenoms" string="Prénom(s)"  class="oe_edit_only"/>&ndash;&gt;
+                                <h3><field name="prenoms" placeholder="Prénoms"/></h3>
+                                <field name="full_name" invisible="1"/>
+                                <field name="name" invisible="1"/>
+                                <h4 class="text-muted"><field name="code_id"/></h4>
+                                <h4 class="text-muted"><field name="statut_familial" /></h4>
+                            </div>
+                            <newline/>
+                            <hr/>
+                            <group string="Informations Assuré" col="6" colspan="2">
+                                <field name="code_id_externe"/>
+                                <field name="date_naissance"/>
+                                <field name="age"/>
+                                <field name="genre"/>
+                                <field name="groupe_sanguin"/>
+                                <field name="quartier"/>
+                                <field name="localite_id" options ='{"no_open": True, "no_create": True}'/>
+                                <field name="state" />
+                                <field name="date_deces"/>
+                                <field name="date_activation"/>
+                                <field name="decede"/>
+                                <field name="matricule"/>
+                                <field name="contrat_id" readonly="1"/>
+                                <field name="police_id" options ='{"no_open": True, "no_create": True}'/>
+                                <field name="date_inscription"/>
+                                &lt;!&ndash;<field name="delai_carence"/>
+                                <field name="jours_activation_assure"/>
+                                <field name="sous_totaux_assure"/>
+                                <field name="nbre_actes_assure"/>
+                                <field name="sous_totaux_contrat"/>&ndash;&gt;
+                            </group>
+                        </page>
+                        &lt;!&ndash;<page string="Informations Principales">
+                        </page>&ndash;&gt;
+                        <page string="Adresses &amp; Contacts"
+                              >
+                            <group string="Adresses">
+                                <group>
+                                    <label for="street" string="Adresse" />
+                                    <div>
+                                        <field name="use_parent_address"
+                                                class="edit_only inline"
+                                                invisible="1" />
+                                        <label for="use_parent_address"
+                                                class="edit_only"
+                                                invisible="1" />
+                                        <field name="street"
+                                                placeholder="Street..." />
+                                        <field name="street2" />
+                                        <div class="address_format">
+                                            <field name="city"
+                                                    placeholder="City"
+                                                    style="width: 40%" />
+                                            <field name="state_id"
+                                                    class="no_button"
+                                                    placeholder="State"
+                                                    style="width: 37%"
+                                                    options='{"no_open": True}' />
+                                            <field name="zip"
+                                                    placeholder="ZIP"
+                                                    style="width: 20%" />
+                                        </div>
+                                        <field name="country_id"
+                                                placeholder="Country"
+                                                class="no_button"
+                                                options='{"no_open": True}' />
+                                    </div>
+                                    <field name="website"
+                                            widget="url"
+                                            placeholder="e.g. https://sigemci.net" />
+                                </group>
+                                <group>
+                                    <field name="phone"
+                                            placeholder="e.g. +1 (888) 678-6313" />
+                                    <field name="mobile" />
+                                    <field name="fax" />
+                                    <field name="email"
+                                           widget="email" />
+                                </group>
+                            </group>
+                            <group>
+                                <field name="parent_id"
+                                        colspan="2"
+                                        string="Adhérent Principal"
+                                         />
+                            </group>
+                            &lt;!&ndash;<group>
+                                <field name="lang" />
+                                <field name="opt_out"
+                                    string="I don't want to receive commercial messages" />
+                            </group>&ndash;&gt;
+                        </page>
+                        <page string="Contrôle Code Sécurité">
+                            <group col="4" colspan="2">
+                                    <field name="code_perso"/>
+                                    <field name="code_pass" invisible="True"/>
+                                </group>
+                        </page>
+                    </notebook>-->
                 </sheet>
                 </form>
             </field>
