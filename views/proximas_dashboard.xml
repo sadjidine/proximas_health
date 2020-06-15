@@ -920,7 +920,7 @@
         <menuitem  id="report_reglement_sinistres_report"
                    sequence="31"
                    parent="proximas_rapports_dashboard"
-                   name=">> Règlements Factures / Remboursements"
+                   name=">> Etat Règlements Factures/Remboursements"
                    action="proximas_report_reglement_sinistres_wizard_action"
         />
     </data>
