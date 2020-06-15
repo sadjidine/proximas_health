@@ -110,7 +110,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Rubrique Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -282,7 +282,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -457,7 +457,7 @@
                                     <th class="text-left"><strong>Lien Parenté</strong></th>
                                     <th class="text-left"><strong>Genre</strong></th>
                                     <th class="text-center"><strong>Âge</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -600,7 +600,7 @@
                                     <th class="text-left"><strong>Code ID.</strong></th>
                                     <th class="text-left"><strong>Nom &amp; Prénoms - Adhérent</strong></th>
                                     <!--<th class="text-right"><strong>N° Contrat</strong></th>-->
-                                    <th class="text-left"><strong>Adhésion</strong></th>
+                                    <th class="text-right"><strong>Adhésion</strong></th>
                                     <th class="text-left"><strong>Groupe</strong></th>
                                     <th class="text-right"><strong>Coût moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
@@ -644,7 +644,7 @@
                                             <td><span t-esc="doc['code_id']"/></td>
                                             <td class="bg-info"><span t-esc="doc['adherent']"/></td>
                                             <!--<td><span t-esc="doc['num_contrat']"/></td>-->
-                                            <td><span t-esc="doc['date_activation']"/></td>
+                                            <td class="text-right"><span t-esc="doc['date_activation']"/></td>
                                             <td><span t-esc="doc['groupe_name']"/></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
@@ -778,7 +778,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Rubrique Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -950,7 +950,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -1125,7 +1125,7 @@
                                     <th class="text-left"><strong>Lien Parenté</strong></th>
                                     <th class="text-left"><strong>Genre</strong></th>
                                     <th class="text-center"><strong>Âge</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -1202,7 +1202,7 @@
                                     <th class="text-left"><strong>Date </strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
                                     <th class="text-left"><strong>Qté.</strong></th>
-                                    <th class="text-center"><strong>Coût Unit.</strong></th>
+                                    <th class="text-right"><strong>Coût Unit.</strong></th>
                                     <!--<th class="text-right"><strong>Coût Moyen/Acte</strong></th>-->
                                     <!--<th class="text-right"><strong>Nbre. Actes</strong></th>-->
                                     <th class="text-right"><strong>Totaux</strong></th>
@@ -1513,7 +1513,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Rubrique Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -1668,7 +1668,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -1826,7 +1826,7 @@
                                     <th class="text-left"><strong>Lien Parenté</strong></th>
                                     <th class="text-left"><strong>Genre</strong></th>
                                     <th class="text-center"><strong>Âge</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -2205,7 +2205,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Rubrique Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -2243,7 +2243,7 @@
                                         <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
                                         <tr>
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
-                                            <td class="bg-info"><span t-esc="doc['rubrique_medicale']"/></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['rubrique_medicale']"/></strong></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
                                             <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
@@ -2360,7 +2360,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -2398,7 +2398,7 @@
                                         <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
                                         <tr>
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
-                                            <td class="bg-info"><span t-esc="doc['prestation_medicale']"/></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['prestation_medicale']"/></strong></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
                                             <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
@@ -2518,7 +2518,7 @@
                                     <th class="text-left"><strong>Lien Parenté</strong></th>
                                     <th class="text-left"><strong>Genre</strong></th>
                                     <th class="text-center"><strong>Âge</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -2813,7 +2813,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Rubrique Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -2968,7 +2968,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -3126,7 +3126,7 @@
                                     <th class="text-left"><strong>Lien Parenté</strong></th>
                                     <th class="text-left"><strong>Genre</strong></th>
                                     <th class="text-center"><strong>Âge</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -3411,7 +3411,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Rubrique Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -3566,7 +3566,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -3724,7 +3724,7 @@
                                     <th class="text-left"><strong>Lien Parenté</strong></th>
                                     <th class="text-left"><strong>Genre</strong></th>
                                     <th class="text-center"><strong>Âge</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -4009,7 +4009,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Rubrique Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -4164,7 +4164,7 @@
                                 <thead class="bg-primary" >
                                     <th class="text-right"><strong>N°</strong></th>
                                     <th class="text-left"><strong>Prestation Médicale</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -4322,7 +4322,7 @@
                                     <th class="text-left"><strong>Lien Parenté</strong></th>
                                     <th class="text-left"><strong>Genre</strong></th>
                                     <th class="text-center"><strong>Âge</strong></th>
-                                    <th class="text-right"><strong>Coût Moyen/Acte</strong></th>
+                                    <th class="text-right"><strong>Coût Moyen</strong></th>
                                     <th class="text-right"><strong>Nbre. Actes</strong></th>
                                     <th class="text-right"><strong>Totaux</strong></th>
                                     <th class="text-right"><strong>Totaux PC</strong></th>
@@ -4491,7 +4491,7 @@
                                         <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
                                         <tr>
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
-                                            <td><span t-esc="doc['rubrique_medicale']"/></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['rubrique_medicale']"/></strong></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
                                             <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>

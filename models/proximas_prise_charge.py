@@ -4958,6 +4958,11 @@ class RemboursementPEC(models.Model):
         related='contrat_id.structure_id',
         readonly=True,
     )
+    groupe_id = fields.Many2one (
+        string="Organisation(SAM)",
+        related='contrat_id.groupe_id',
+        readonly=True,
+    )
     matricule = fields.Char (
         string="Matricule",
         related='adherent_id.matricule',
