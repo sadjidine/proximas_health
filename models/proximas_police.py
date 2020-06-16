@@ -2170,7 +2170,7 @@ class Contrat(models.Model):
 
     #@api.multi
     @api.depends('date_activation', 'date_resiliation', 'delai_carence', 'date_resiliation', 'retard_cotisation',
-                 'mt_reste_payable')
+                 'groupe_suspendu', 'mt_reste_payable')
     def _get_etat_contrat(self):
         """
         Vérifie l'état du contrat Actif ou non en fonction du délai de carence, date de résiliation ou plafond/famille.
@@ -2200,7 +2200,7 @@ class Contrat(models.Model):
             elif delai >= rec_id.jours_contrat:
                 rec_id.actif = False
             # Verifie le groupe
-            elif bool(rec_id.groupe_id) and bool (rec_id.groupe_suspendu):
+            elif bool(rec_id.groupe_id) and bool(rec_id.groupe_suspendu):
                 rec_id.is_active = False
             # Verifie le niveau de consommation (Plafond/Famille)
             else:
