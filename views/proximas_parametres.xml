@@ -300,6 +300,7 @@
                <field name="name"/>
                <field name="parent_id"/>
                <field name="ref"/>
+               <field name="est_suspendu"/>
                <field name="note"/>
            </tree>
        </field>
@@ -312,6 +313,11 @@
        <field name="arch" type="xml">
            <form>
                <sheet>
+                   <div class="oe_button_box" name="button_box">
+                       <button name="toggle_suspension" type="object" class="oe_stat_button" icon="fa-check">
+                           <field name="est_suspendu" widget="boolean_button" options='{"terminology": "active"}'/>
+                       </button>
+                   </div>
                    <div class="oe_right oe_button_box" name="buttons" />
                             <field name="is_groupe" invisible="1"/>
                             <field name="is_company" invisible="1"/>
