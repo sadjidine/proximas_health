@@ -82,7 +82,7 @@ class Groupe(models.Model):
     )
     est_suspendu = fields.Boolean(
         string="Suspendu?",
-        default=False,
+        default=True,
         help="Indique si le groupe concerné est actif ou non."
     )
     general_info = fields.Text(
