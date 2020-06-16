@@ -92,8 +92,6 @@ class PriseEnCharge(models.Model):
         inverse_name="pec_id",
         domain=[
             ('prestation_demande_id', '!=', None),
-            '|', ('accord_prestation_demande', '=', False),
-            ('accorde', '=', True)
             # ('arret_prestation', '=', False),
         ],
         # ondelete='cascade',
@@ -105,6 +103,8 @@ class PriseEnCharge(models.Model):
         inverse_name="pec_id",
         domain=[
             ('prestation_demande_id', '!=', None),
+            '|', ('accord_prestation_demande', '=', False),
+            ('accorde', '=', True)
         ],
         # domain=['|',
         #         ('prestation_demande_id', '!=', None),
@@ -3418,7 +3418,7 @@ class DetailsPec(models.Model):
     @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
                  'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire', 'ticket_exigible',
-                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre', 'cout_unite')
+                 'pool_medical_crs_id', 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre', 'cout_unite')
     # @api.onchange('prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id', 'mt_exclusion',
     #               'substitut_phcie_id', 'mt_exclusion', 'cout_unit', 'quantite', 'quantite_livre', 'code_id_rfm',
     #               'cout_unite', 'prestataire_public', 'zone_couverte', 'prestataire')

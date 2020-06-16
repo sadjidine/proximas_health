@@ -732,6 +732,9 @@
                                                     <field name="non_accorde"/>
                                                 </group>
                                                 <group>
+                                                    <field name="accord_prestation_demande"
+                                                           invisible="1"
+                                                    />
                                                     <field name="motif_non_accord"
                                                            attrs="{'invisible': [('accorde','=',True)],'required': [('non_accorde','=',True)]}"
                                                     />
