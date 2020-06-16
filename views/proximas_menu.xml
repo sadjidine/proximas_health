@@ -175,18 +175,18 @@
               sequence="203"
     />
     <!--groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"-->
-    <menuitem id="proximas_list_accord_details_pec_crs"
-              name=">> Demandes Traitées - Accords Préalables"
-              parent="proximas_details_pec"
-              sequence="2030"
-              action="proximas_list_accord_details_pec_crs_action"
-              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
-    />
     <menuitem id="proximas_accord_details_pec_crs"
               name=">> Traitement Accords Préalables Actes/Prestations"
               parent="proximas_details_pec"
-              sequence="2031"
+              sequence="2030"
               action="proximas_accord_details_pec_crs_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
+    <menuitem id="proximas_list_accord_details_pec_crs"
+              name=">> Demandes Traitées - Accords Préalables"
+              parent="proximas_details_pec"
+              sequence="2031"
+              action="proximas_list_accord_details_pec_crs_action"
               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
     />
     <menuitem id="proximas_validitation_details_pec_crs"
