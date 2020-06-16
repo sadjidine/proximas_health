@@ -51,7 +51,7 @@
                         class='btn btn-primary'
                         type='object'/>
                         /
-                        <button string='Cancel'
+                        <button string='Annuler'
                         class='btn btn-default'
                         special='cancel'/>
                     </footer>
@@ -256,18 +256,20 @@
                           <field name="photo"
                                  widget='image'
                                  class="oe_left oe_kanban_avatar"
-                                 options="{'preview_image': 'photo', 'size': [90,120]}"
+                                 options="{'preview_image': 'photo', 'size': [120,120]}"
                                  readonly="1"/>
                           <!--options="{'preview_image': 'image_medium', 'size': [90,120]}" -->
-                          <div class="oe_left text-primary">
-                              <h3><field name="name_adherent" readonly="1"/></h3>
+                          <div class="oe_left">
+                              <h3 class="text-primary"><field name="name_adherent" readonly="1"/></h3>
+                              <div>
+                                 <h3 class="bg-info text-primary">
+                                    <field name="police_id"  string="Police"
+                                           options='{"no_open": True, "no_create": True}'/>
+                                 </h3>
+                                  <h3 class="text-primary"><field name="code_id" string="Code ID."/></h3>
+                                  <h4 class="text-primary"><field name="num_contrat" string="Contrat N°"/></h4>
+                              </div>
                               <group>
-                                  <field name="code_id" string="Code ID."/>
-                                  <field name="police_id" options='{"no_open": True, "no_create": True}'/>
-                                  <field name="num_contrat" string="Num. Contrat"/>
-                              </group>
-                              <group>
-                                  <field name="is_assure" invisible="1"/>
                                   <field name="is_company" invisible="1"/>
                                   <field name="name" invisible="1"/>
                                   <field name="adherent_id" invisible="1"/>
@@ -275,58 +277,49 @@
                           </div>
                           <hr/>
                         <notebook>
-                            <page string="DETAILS ADHERENT">
+                            <page string="INFOS ADHERENT">
                                 <group col="6" colspan="2">
                                   <field name="code_id_externe"
-                                     class="text-danger"
+                                     class="text-primary"
                                    />
                                    <field name="matricule"/>
-                                   <field name="ref"/>
+                                   <field name="quartier"/>
                                    <field name="statut_familial"/>
                                    <field name="date_naissance" required="1"/>
                                    <field name="age" />
                                    <field name="genre" required="1" widget="radio" options="{'horizontal': true}"/>
-                                   <field name="date_inscription" />
+                                   <field name="groupe_sanguin" />
                                    <field name="date_activation_adherent"/>
                                    <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
                                    <field name="groupe_id" options='{"no_open": True, "no_create": True}'/>
+                                   <field name="groupe_suspendu"/>
                                    <field name="cas_chronique" string="Malade chronique?"/>
+                                   <field name="duree_activation"/>
+                                    <!--<field name="est_suspendu"/>-->
                               </group>
                             </page>
-                            <page string="CONDITIONS GENERALES">
-                                <group col="8" colspan="2">
-                                    <field name="age_limite_adherent"/>
-                                    <field name="nbre_conjoint"/>
-                                    <field name="nbre_conjoint_supp"/>
-                                    <field name="nbre_enfant"/>
-                                    <field name="nbre_enfant_supp"/>
-                                    <field name="nbre_cas_chronique"/>
-                                    <field name="date_activation"/>
-                                    <field name="validite_contrat"/>
-                                    <field name="date_echeance_police"/>
-                                    <field name="nbre_renouvellement_contrat"/>
-                                    <field name="delai_carence"/>
-                                    <field name="mt_annuel"/>
-                                    <field name="date_debut_contrat"/>
-                                    <field name="date_fin_prevue" string="Date Fin Contrat"/>
-                                    <field name="date_resiliation"/>
-                                    <field name="effectif_contrat"/>
-                                    <field name="retard_cotisation"/>
-                                    <field name="mt_reste_payable"/>
-                                    <field name="nbre_versmt_cotisation"/>
-                                    <field name="mt_totaux_versmt_cotisation"/>
-                                    <field name="nbre_maxi_conjoint"/>
-                                    <field name="nbre_maxi_enfant"/>
-                                    <field name="nbre_maxi_ascendant"/>
-                                    <field name="nbre_maxi_parent"/>
-                                    <field name="jours_contrat"/>
-                                    <field name="actif"/>
-                                    <field name="totaux_prime_police"/>
-                                    <field name="totaux_prime_contrat"/>
-                                    <field name="totaux_prime"/>
-                                    <field name="totaux_net_payable_police"/>
-                                    <field name="totaux_net_payable_contrat"/>
-                                    <field name="totaux_net_payable"/>
+                            <page string="ADRESSE &amp; CONTACTS:">
+                                <group>
+                                    <group>
+                                        <field name="type" invisible="1"/>
+                                        <label for="street" string="Adresse :"/>
+                                        <div class="o_address_format">
+                                            <field name="street" placeholder="Commune..." class="o_address_street"/>
+                                            <field name="street2" placeholder="Quartier..." class="o_address_street"/>
+                                            <field name="city" placeholder="Ville" class="o_address_city"/>
+                                            <field name="zip" placeholder="Boîte Postale" class="o_address_zip"/>
+                                            <field name="country_id" placeholder="Pays" class="o_address_country"
+                                                   options='{"no_open": True, "no_create": True}'/>
+                                        </div>
+                                    </group>
+                                     <group>
+                                        <field name="phone" widget="phone" placeholder="Ex.: 01 01 01 01"/>
+                                        <field name="mobile" widget="phone"/>
+                                        <field name="mobile_2" widget="phone"/>
+                                        <field name="email" widget="email"/>
+                                        <!--<field name="lang"/>
+                                        <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>-->
+                                    </group>
                                 </group>
                             </page>
                             <page string="AYANT-DROITS DECLARES">
@@ -462,111 +455,31 @@
                                             <group name="data">
                                                 <group name="main">
                                                     <field name="code_id_externe"/>
-                                                    <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                                                    <field name="localite_id"
+                                                           options='{"no_open": True, "no_create": True}'
+                                                           required="1"
+                                                    />
                                                     <field name="statut" required="1"/>
-                                                    <field name="date_inscription" />
+                                                    <field name="groupe_id" required="1"/>
                                                     <field name="date_activation"/>
+                                                    <field name="mobile" string="Tél. mobile"/>
                                                 </group>
                                                 <group>
                                                     <field name="date_naissance" required="1"/>
+                                                    <field name="quartier"/>
                                                     <field name="age" />
                                                     <field name="genre" widget="radio" options="{'horizontal': true}"
                                                            onchange="_check_genre()" required="1"/>
+                                                    <field name="groupe_sanguin"/>
                                                     <field name="cas_chronique"/>
                                                     <field name="decede"/>
                                                 </group>
                                             </group>
                                         </sheet>
-                                        <!--<sheet>
-                                            <field name="image"
-                                                    widget='image'
-                                                    class="avatar left"
-                                                    options='{"preview_image": "image_medium"}' />
-                                            <div class="title oe_right">
-                                                    <label for="name" string="Nom et Prénoms" class="edit_only" />
-                                                    <h2>
-                                                        <field name="nom"
-                                                                style="width: 90%%"
-                                                                placeholder="Nom de famille"
-                                                                 />
-                                                        <field name="prenoms"
-                                                                style="width: 90%%"
-                                                                placeholder="Prénom(s)"
-                                                                 />
-                                                    </h2>
-                                            </div>
-                                            <group name="data">
-                                            <group name="main">
-                                                <field name="ref" />
-                                                <field name="code_id" />
-                                                <field name="est_invalide"/>
-                                            </group>
-                                            <group>
-                                                <field name="date_naissance" />
-                                                <field name="age" />
-                                                <field name="statut_familial" />
-                                                <field name="date_inscription" />
-                                                <field name="genre" />
-                                            </group>
-                                            </group>
-                                            <group col="2" colspan="2">
-                                                <field name="customer" invisible="True" />
-                                                <field name="use_parent_address" invisible="False"/>
-                                                <field class="inline" name="type" invisible="True"/>
-                                                <label for="street" string="Address" />
-                                                <div name="div_address" class="o_address_format">
-                                                    <field name="street"
-                                                            placeholder="Quartier..."
-                                                            class="o_address_street" />
-                                                    <field name="street2"
-                                                            placeholder="Rue..."
-                                                            class="o_address_street" />
-                                                    <field name="city"
-                                                            placeholder="Ville"
-                                                            class="o_address_city" />
-                                                    &lt;!&ndash;<field name="state_id"
-                                                            class="o_address_state"
-                                                            placeholder="State"
-                                                            options='{"no_open": True}'
-                                                            context="{'country_id': country_id, 'zip': zip}" />
-                                                    <field name="zip"
-                                                            placeholder="ZIP"
-                                                            class="o_address_zip" />&ndash;&gt;
-                                                    <field name="country_id"
-                                                            placeholder="Pays"
-                                                            class="o_address_country"
-                                                            options='{"no_open": True, "no_create": True}' />
-                                                </div>
-                                            </group>
-                                        </sheet>-->
                                     </form>
                                 </field>
                             </page>
-                            <page string="Adresse &amp; Contacts :">
-                                <group>
-                                    <group>
-                                        <field name="type" invisible="1"/>
-                                        <label for="street" string="Adresse :"/>
-                                        <div class="o_address_format">
-                                            <field name="street" placeholder="Commune..." class="o_address_street"/>
-                                            <field name="street2" placeholder="Quartier..." class="o_address_street"/>
-                                            <field name="city" placeholder="Ville" class="o_address_city"/>
-                                            <field name="zip" placeholder="Boîte Postale" class="o_address_zip"/>
-                                            <field name="country_id" placeholder="Pays" class="o_address_country"
-                                                   options='{"no_open": True, "no_create": True}'/>
-                                        </div>
-                                    </group>
-                                     <group>
-                                        <field name="phone" widget="phone" placeholder="Ex.: 01 01 01 01"/>
-                                        <field name="mobile" widget="phone"/>
-                                        <field name="mobile_2" widget="phone"/>
-                                        <field name="email" widget="email"/>
-                                        <!--<field name="lang"/>
-                                        <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>-->
-                                    </group>
-                                </group>
-                            </page>
-                            <page string="Prime(s) Contrat">
+                            <page string="PRIMES CONTRAT">
                                 <field name="prime_contrat_ids">
                                     <tree class="text-primary" editable="bottom">
                                         <field name="name"/>
@@ -578,7 +491,7 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Règlements Prime(s)">
+                            <page string="REGLEMENTS PRIMES">
                                 <field name="cotisation_ids">
                                     <tree class="text-primary" editable="bottom">
                                         <field name="date_versement"/>
@@ -589,9 +502,48 @@
                                     </tree>
                                 </field>
                             </page>
-                            <page string="Notes / Observation :">
-                              <field name="note"/>
+                            <page string="CONDITIONS GENERALES">
+                                <group col="8" colspan="2">
+                                    <field name="age_limite_adherent"/>
+                                    <field name="nbre_conjoint"/>
+                                    <field name="nbre_conjoint_supp"/>
+                                    <field name="nbre_enfant"/>
+                                    <field name="nbre_enfant_supp"/>
+                                    <field name="nbre_cas_chronique"/>
+                                    <field name="date_activation"/>
+                                    <field name="validite_contrat"/>
+                                    <!--<field name="date_echeance_police"/>-->
+                                    <field name="nbre_renouvellement_contrat"/>
+                                    <field name="delai_carence"/>
+                                    <field name="mt_annuel"/>
+                                    <field name="date_debut_contrat"/>
+                                    <field name="date_fin_prevue" string="Date Fin Contrat"/>
+                                    <field name="date_resiliation"/>
+                                    <field name="effectif_contrat"/>
+                                    <field name="retard_cotisation"/>
+                                    <field name="mt_reste_payable"/>
+                                    <field name="nbre_versmt_cotisation"/>
+                                    <field name="mt_totaux_versmt_cotisation"/>
+                                    <field name="nbre_maxi_conjoint"/>
+                                    <field name="nbre_maxi_enfant"/>
+                                    <field name="nbre_maxi_ascendant"/>
+                                    <field name="nbre_maxi_parent"/>
+                                    <field name="jours_contrat"/>
+                                    <!--<field name="is_active"/>-->
+                                    <field name="totaux_prime_police"/>
+                                    <field name="totaux_prime_contrat"/>
+                                    <field name="totaux_prime"/>
+                                    <field name="totaux_net_payable_police"/>
+                                    <field name="totaux_net_payable_contrat"/>
+                                    <field name="totaux_net_payable"/>
+                                    <!--<field name="ratio_sinistres_prime"/>-->
+                                    <!--<field name="compteur_maj_contrat" readonly="1"/>-->
+                                    <!--<field name="date_maj_contrat" readonly="1"/>-->
+                                </group>
                             </page>
+                            <!--<page string="NOTES / OBSERVATION :">
+                              <field name="note"/>
+                            </page>-->
                         </notebook>
                       </sheet>
                   </form>

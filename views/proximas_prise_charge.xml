@@ -349,7 +349,7 @@
                     </div>
                     <hr/>-->
                     <notebook>
-                        <page string="Détails Prise en charge :">
+                        <page string="DETAILS PRISE EN CHARGE:">
                              <group>
                                 <group>
                                     <field name="code_saisi" invisible="1" readonly="1"/>
@@ -415,7 +415,7 @@
                                  </group>
                              </group>
                         </page>
-                        <page string="Détails Assuré &amp; Contrat :">
+                        <page string="DETAILS ASSURE &amp; CONTRAT:">
                             <group col="6" colspan="2">
                                 <group>
                                     <field name="code_id_externe"
@@ -460,7 +460,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Contrôle Niveau Sinistralité / Plafond"
+                        <page string="CONTRÔLE NIVEAU SINISTRALITE / PLAFOND"
                               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,
                               proximas_medical.group_operator" >
                             <div class="oe_left">
@@ -479,7 +479,7 @@
                     </notebook>
                     <hr/>
                     <notebook>
-                        <page string="Actes Médicaux &amp; Paramédicaux - (CRO)"
+                        <page string="ACTES MEDICAUX &amp; PARAMEDICAUX - (CRO)"
                               states="cours,termine">
                             <field name="details_pec_soins_ids"
                                    class="text-info"
@@ -511,7 +511,7 @@
                                           </div>
                                         </div>-->
                                         <notebook>
-                                            <page string="Détails Prestation Médiacle - CRO">
+                                            <page string="DETAILS PRESTATION MEDICALE - CRO">
                                                 <group invisible="1">
                                                     <field name="zone_couverte"/>
                                                 </group>
@@ -665,7 +665,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Demande Actes Médicaux &amp; Paramédicaux -(CRS)"
+                        <page string="DEMANDE ACTES MEDICAUX &amp; PARAMEDICAUX -(CRS)"
                               states="cours">
                             <!--&gt;states="cours,oriente,termine"-->
                             <!--attrs="{'invisible': ['|',('state','=','dispense'),'|',('nbre_prestations_fournies','=',0),
@@ -681,7 +681,7 @@
                                 <form string="Détails de Prise en charge Assuré">
                                     <sheet>
                                         <notebook>
-                                            <page string="Demande Prestation Médicale-CRS">
+                                            <page string="DEMANDE PRESTATION MEDECALE-CRS">
                                                 <group invisible="1">
                                                     <field name="zone_couverte"/>
                                                 </group>
@@ -711,7 +711,7 @@
                                                     <field name="accord_prealable"/>
                                                 </group>
                                             </page>
-                                            <page string="Infos Cliniques - Demande Accord Préalable / Médecin Conseils">
+                                            <page string="INFOS CLINIQUES - DEMANDE ACCORD PREALABLE">
                                                 <group>
                                                     <field name="info_clinique" widget="html"/>
                                                     <field name="doc_info_clinique"
@@ -723,7 +723,7 @@
                                                     />
                                                 </group>
                                             </page>
-                                            <page string="Accord Préalable/Médecin Conseil"
+                                            <page string="ACCORD PREALABLE/MEDECIN CONSEIL"
                                                   groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,
                                                         proximas_medical.group_medecin"
                                                   attrs="{'invisible': [('accord_prestation_demande','=',False)]}">
@@ -777,7 +777,7 @@
                                 <form string="Détails de Prise en charge Assuré">
                                     <sheet>
                                         <notebook>
-                                            <page string="Prestation Médicale-CRS">
+                                            <page string="PRESTATION MEDICALE-CRS">
                                                 <group invisible="1">
                                                     <field name="zone_couverte"/>
                                                 </group>
@@ -821,7 +821,7 @@
                                                     <field name="accord_prealable"/>
                                                 </group>
                                             </page>
-                                            <page string="Détails Coûts - Prestation CRS"
+                                            <page string="DETAILS COÛTS - PRESTATION MEDICALE (CRS)"
                                                    attrs="{'invisible': [('prestataire_crs_id','=', False)]}">
                                                 <div class="oe_title" name="title">
                                                     <label for="prestataire" string="Centre d'Orientation :"
@@ -913,7 +913,7 @@
                                                     <field name="ticket_exigible" string="Ticket Exigible?"/>
                                                 </group>
                                             </page>
-                                            <page string="Accord Préalable/Médecin Conseil"
+                                            <page string="ACCORD PREALABLE/MEDECIN CONSEIL"
                                                   groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,
                                                         proximas_medical.group_conseil"
                                                   attrs="{'invisible': [('accord_prealable','=',False)]}"
@@ -965,7 +965,7 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="Presciptions / Dispensation Médicaments"
+                        <page string="PRESCRIPTION / DISPENSATION DE MEDICAMENTS"
                               attrs="{'invisible':[('state','=','cours'),'|',('nbre_prestations_demandes','!=',0),
                               ('prestataire_crs_id','=',None),'|',('state','=','oriente'),('nbre_prestations_fournies','=',0)]}">
                             <field name="details_pec_phcie_ids"
@@ -1004,7 +1004,7 @@
                                                        domain="[('prestataire_id', '=', prestataire_crs_id)]"
                                                        readonly="0"/>
                                             </group>
-                                            <page string="1. Prescription Médicamenteuse"
+                                            <page string="1. PRESCRIPTION MEDICAMENTS"
                                                    attrs="{'readonly': [('date_demande','!=',False),
                                                    ('produit_phcie_id','!=',False),('quantite','>',0)]}"
                                             >
@@ -1021,7 +1021,7 @@
                                                     <field name="nbre_produit_phcie" invisible="1"/>
                                                 </group>
                                             </page>
-                                            <page string="2. Dispensation Médicament - Pharmacie"
+                                            <page string="2. DISPENSATION MEDICAMENTS - PHARMACIE"
                                                    attrs="{'invisible': [('prestataire_phcie_id','=',False)]}"
                                             >
                                                 <div class="oe_title" name="title">
@@ -1131,537 +1131,6 @@
             </form>
         </field>
     </record>
-    <!-- EXCLUSION - DETAILS PRISE EN CHARGE FORM -->
-     <!--<record id='exclusion_details_pec_soins_form' model='ir.ui.view'>
-        <field name='name'>Exlusion sur Détails de Prise en Charge view</field>
-        <field name='model'>proximas.details.pec</field>
-        <field name='arch' type='xml'>
-            <form string="Détails de Prise en charge Assuré">
-                <sheet>
-                    <div class="panel">
-                      <h4 class="panel-header text-primary">Traitement des Exclusions </h4>
-                      <div class="panel-body">
-                        <blockquote class="blockquote mb-0">
-                          <p class="text-info h5">
-                            Ce formulaire vous permet de traiter les exclusion sur une ligne donnée sur la prise en charge.
-                              Le montant que vous renseigner sera automatiquement déduit du montant net à devoir au
-                              prestataire concerné...
-                          </p>
-                          <p class="text-primary h5">
-                            <strong class="fa fa-exclamation-triangle"> N.B.: S'il y a lieu, veuillez prendre soins de
-                              renseigner le montant du ticket modérateur et valider votre saisie avec la touche "Entrée"
-                              du clavier.
-                          </strong>
-                          </p>
-                          <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
-                              <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
-                          </footer>
-                        </blockquote>
-                      </div>
-                    </div>
-                    <notebook>
-                        &lt;!&ndash;EXCLUSION PRESTATION CRO&ndash;&gt;
-                        <page string="1. Détails Prestation Médiacle - CRO">
-                            <group>
-                                <field name="assure_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="prestataire_id" required="1"
-                                       options='{"no_open": True, "no_create": True}'
-                                       context="{'default_prestataire_id':prestataire_id}"
-                                       readonly="1"
-                                />
-                                <field name="pool_medical_id" string="Médecin Prescripteur"
-                                       options='{"no_open": True, "no_create": True}'
-                                       ontext="{'default_pool_medical_id':pool_medical_id}"
-                                       domain="[('prestataire_id', '=', prestataire_id)]"
-                                       required="1"
-                                />
-                                &lt;!&ndash;groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"&ndash;&gt;
-                                &lt;!&ndash;context="{'default_pool_medical_id':pool_medical_id}"&ndash;&gt;
-                                <field name="date_execution" required="1"/>
-                                <field name="exercice_id" invisible="0"/>
-                                <field name="prestation_cro_id"
-                                       required="1"
-                                       options='{"no_open": True, "no_create": True}' class="text-primary"
-                                       domain="[('prestataire_id', '=', prestataire_id)]"/>
-                                <field name="code_medical_id"
-                                       options='{"no_open": True, "no_create": True}'/>
-                                <field name="rubrique_id"
-                                       options='{"no_open": True, "no_create": True}'/>
-                            </group>
-                            <hr/>
-                            <group col="6" colspan="2">
-                                <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
-                                <field name="accord_prealable"/>
-                                <field name="ticket_exigible" string="Ticket Exigible?"/>
-                            </group>
-                        </page>
-                        <page string="2. Détails Coûts - Prestation CRO">
-                            <group>
-                                <group>
-                                    <field name="prestation_id"
-                                           options='{"no_open": True, "no_create": True}'
-                                           class="text-primary"
-                                           invisible="1"
-                                    />
-                                    &lt;!&ndash;domain="[('prestataire_id', '=', prestataire_id),('active', '=', True)]"&ndash;&gt;
-                                    &lt;!&ndash;<field name="quantite"/>&ndash;&gt;
-                                </group>
-                                <group col="6" colspan="2" >
-                                    &lt;!&ndash;<separator string="Calculs Coûts:" />&ndash;&gt;
-                                    <field name="cout_unit"
-                                           attrs="{'required': [('cout_modifiable','=',True)],'invisible': [('cout_modifiable','=',False)]}"
-                                    />
-                                    <field name="quantite_livre"
-                                           attrs="{'required': [('quantite_exige','=',True)],'invisible': [('quantite_exige','=',False)]}"
-                                    />
-                                    <newline/>
-                                    <field name="cout_unitaire" string="Coût Unitaire"
-                                           attrs="{'invisible': [('cout_unit','=',True)]}"/>
-                                    <field name="coefficient"
-                                           attrs="{'invisible': [('quantite_exige','=',True)]}"
-                                    />
-                                    <field name="cout_total" string="Totaux Prestation"/>
-                                    <field name="remise_prestation"/>
-                                    <field name="mt_rabais"/>
-                                    <field name="forfait_sam" string="Forfait SAM"/>
-                                    <field name="forfait_ticket"/>
-                                    &lt;!&ndash;<field name="mt_plafond"/>&ndash;&gt;
-                                    <field name="total_pc" string="S/Total PC"/>
-                                    <field name="total_npc" string="S/Total Hors PC"/>
-                                    <field name="ticket_moderateur" string="Ticket Modérateur"/>
-                                    <field name="taux_couvert" string="Taux Couverture"/>
-                                    <field name="net_tiers_payeur" string="Tiers Payeur(SAM)"/>
-                                    <field name="mt_paye_assure"
-                                           required="1" string="Montant Encaissé"
-                                    />
-                                    &lt;!&ndash;attrs="{'readonly': [('ticket_exigible','=',True)]}"&ndash;&gt;
-                                    <field name="net_prestataire" string="Net Prestataire"/>
-                                    <field name="debit_ticket"/>
-                                    <field name="cout_modifiable" invisible="1"/>
-                                    <field name="quantite_exige" invisible="1"/>
-                                    <field name="arret_prestation" invisible="1"/>
-                                 </group>
-                            </group>
-                        </page>
-                        <page string="3. Traitement des exclusions sur prestation "
-                              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,proximas_medical.group_medical"
-                        >
-                            <group>
-                                <field name="mt_exclusion"/>
-                                <field name="motif_exclusion"
-                                       attrs="{'required': [('mt_exclusion','!=',0)]}"
-                                />
-                            </group>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
-    &lt;!&ndash; DETAILS PRISE EN CHARGE - CRO (SOINS MEDICAUX-PARA) FORM &ndash;&gt;
-     <record id='proximas_medical.details_pec_soins_form' model='ir.ui.view'>
-        <field name='name'>Détails de Prise en Charge view</field>
-        <field name='model'>proximas.details.pec</field>
-        <field name='arch' type='xml'>
-            <form string="Détails de Prise en charge Assuré">
-                <sheet>
-                    &lt;!&ndash;<div class="panel">
-                      <h4 class="panel-header text-primary">Etape 1 : Accueil au Centre de Référence Obligatoire (CRO) </h4>
-                      <div class="panel-body">
-                        <blockquote class="blockquote mb-0">
-                          <p class="text-info h5">
-                            Ce formulaire permet la saisie des informations sur la prestaion médicale exécutée dans
-                            le cadre de la prise en charge médicale de l'assuré concerné. Le calcul des coûts de la
-                            prestation et leur répartition sont faits selon le taux de couverture, forfaits et autres
-                            paramètres de remise, rabais applicables en fonction des paramètres prédéfinis...
-                          </p>
-                          <p class="text-primary h5">
-                            <strong class="fa fa-exclamation-triangle"> N.B.: S'il y a lieu, veuillez prendre soins de
-                              renseigner le montant du ticket modérateur et valider votre saisie avec la touche "Entrée"
-                              du clavier.
-                          </strong>
-                          </p>
-                          <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
-                              <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
-                          </footer>
-                        </blockquote>
-                      </div>
-                    </div>&ndash;&gt;
-                    <notebook>
-                        <page string="1. Détails Prestation Médiacle - CRO">
-                            <group>
-                                <field name="assure_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="prestataire_id" required="1"
-                                       options='{"no_open": True, "no_create": True}'
-                                       context="{'default_prestataire_id':prestataire_id}"
-                                       readonly="1"
-                                />
-                                <field name="pool_medical_id" string="Médecin Prescripteur"
-                                       options='{"no_open": True, "no_create": True}'
-                                       ontext="{'default_pool_medical_id':pool_medical_id}"
-                                       domain="[('prestataire_id', '=', prestataire_id)]"
-                                       required="1"
-                                />
-                                &lt;!&ndash;groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"&ndash;&gt;
-                                &lt;!&ndash;context="{'default_pool_medical_id':pool_medical_id}"&ndash;&gt;
-                                <field name="date_execution" required="1"/>
-                                <field name="exercice_id" invisible="0"/>
-                                <field name="prestation_cro_id"
-                                       required="1"
-                                       options='{"no_open": True, "no_create": True}' class="text-primary"
-                                       domain="[('prestataire_id', '=', prestataire_id)]"/>
-                                <field name="code_medical_id"
-                                       options='{"no_open": True, "no_create": True}'/>
-                                <field name="rubrique_id"
-                                       options='{"no_open": True, "no_create": True}'/>
-                            </group>
-                            <hr/>
-                            <group col="6" colspan="2">
-                                <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
-                                <field name="accord_prealable"/>
-                                <field name="ticket_exigible" string="Ticket Exigible?"/>
-                            </group>
-                        </page>
-                        <page string="2. Détails Coûts - Prestation CRO">
-                            <group>
-                                <group>
-                                    <field name="prestation_id"
-                                           options='{"no_open": True, "no_create": True}'
-                                           class="text-primary"
-                                           invisible="1"
-                                    />
-                                    &lt;!&ndash;domain="[('prestataire_id', '=', prestataire_id),('active', '=', True)]"&ndash;&gt;
-                                    &lt;!&ndash;<field name="quantite"/>&ndash;&gt;
-                                </group>
-                                <group col="6" colspan="2" >
-                                    &lt;!&ndash;<separator string="Calculs Coûts:" />&ndash;&gt;
-                                    <field name="cout_unit"
-                                           attrs="{'required': [('cout_modifiable','=',True)],'invisible': [('cout_modifiable','=',False)]}"
-                                    />
-                                    <field name="quantite_livre"
-                                           attrs="{'required': [('quantite_exige','=',True)],'invisible': [('quantite_exige','=',False)]}"
-                                    />
-                                    <newline/>
-                                    <field name="cout_unitaire" string="Coût Unitaire"
-                                           attrs="{'invisible': [('cout_unit','=',True)]}"/>
-                                    <field name="coefficient"
-                                           attrs="{'invisible': [('quantite_exige','=',True)]}"
-                                    />
-                                    <field name="cout_total" string="Totaux Prestation"/>
-                                    <field name="remise_prestation"/>
-                                    <field name="mt_rabais"/>
-                                    <field name="forfait_sam" string="Forfait SAM"/>
-                                    <field name="forfait_ticket"/>
-                                    &lt;!&ndash;<field name="mt_plafond"/>&ndash;&gt;
-                                    <field name="total_pc" string="S/Total PC"/>
-                                    <field name="total_npc" string="S/Total Hors PC"/>
-                                    <field name="ticket_moderateur" string="Ticket Modérateur"/>
-                                    <field name="taux_couvert" string="Taux Couverture"/>
-                                    <field name="net_tiers_payeur" string="Tiers Payeur(SAM)"/>
-                                    <field name="mt_paye_assure"
-                                           required="1" string="Montant Encaissé"
-                                    />
-                                    &lt;!&ndash;attrs="{'readonly': [('ticket_exigible','=',True)]}"&ndash;&gt;
-                                    <field name="net_prestataire" string="Net Prestataire"/>
-                                    <field name="debit_ticket"/>
-                                    <field name="cout_modifiable" invisible="1"/>
-                                    <field name="quantite_exige" invisible="1"/>
-                                    <field name="arret_prestation" invisible="1"/>
-                                 </group>
-                            </group>
-                        </page>
-                        <page string="3. Traitement des exclusions sur prestation "
-                              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,proximas_medical.group_medical"
-                        >
-                            <group>
-                                <field name="mt_exclusion"/>
-                                <field name="motif_exclusion"
-                                       attrs="{'required': [('mt_exclusion','!=',0)]}"
-                                />
-                            </group>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
-    &lt;!&ndash; DETAILS PRISE EN CHARGE - CRS (SOINS MEDICAUX-PARA) FORM &ndash;&gt;
-     <record id='proximas_medical.details_pec_crs_soins_form' model='ir.ui.view'>
-        <field name='name'>Détails Prise en Charge view</field>
-        <field name='model'>proximas.details.pec</field>
-        <field name='arch' type='xml'>
-            <form string="Détails de Prise en charge Assuré">
-                <sheet>
-                    &lt;!&ndash;<div class="panel">
-                      <h4 class="panel-header text-primary">Etape 2 : Orientation du patient -> Centre de Référence Standard(CRS) </h4>
-                      <div class="panel-body">
-                        <blockquote class="blockquote mb-0">
-                          <p class="text-info h5">
-                            Ce formulaire permet la saisie des informations sur la prestaion médicale demandée et/ou
-                            exécutée dans le cadre de la prise en charge médicale de l'assuré concerné. Le calcul des
-                            coûts de la prestation et leur répartition sont faits selon le taux de couverture, forfaits
-                            et autres paramètres de remise, rabais applicables en fonction des paramètres prédéfinis...
-                          </p>
-                          <p class="text-primary h5">
-                            <strong class="fa fa-exclamation-triangle"> N.B.: S'il y a lieu, veuillez prendre soins de
-                              renseigner le montant du ticket modérateur et valider votre saisie avec la touche "Entrée"
-                              du clavier.
-                          </strong>
-                          </p>
-                          <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
-                              <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
-                          </footer>
-                        </blockquote>
-                      </div>
-                    </div>&ndash;&gt;
-                    <notebook>
-                        <page string="Demande Prestation Médicale-CRS">
-                            <group>
-                                <field name="assure_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="date_demande" required="1"/>
-                                <field name="prestataire_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="pool_medical_id" string="Médecin Prescripteur"
-                                       options='{"no_open": True, "no_create": True}'
-                                       attrs="{'readonly': [('prestataire_crs_id','!=',False)]}"
-                                       required="1"/>
-                                &lt;!&ndash;attrs="{'readonly': [('prestataire_crs_id','!=',False)]}"&ndash;&gt;
-                                <field name="prestation_demande_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       attrs="{'readonly': [('prestataire_crs_id','!=',False)]}"
-                                       required="1"/>
-                                <field name="prestataire_crs_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"
-                                       attrs="{'invisible': [('prestataire_crs_id','=',False)],
-                                       'required': [('date_execution','!=', False)]}"
-                                       />
-                                <field name="pool_medical_crs_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       domain="[('prestataire_id', '=', prestataire_crs_id)]"
-                                       attrs="{'required': [('prestataire_crs_id','!=', False)],
-                                       'invisible': [('prestataire_crs_id','=', False)]}"
-                                       />
-                                &lt;!&ndash;<field name="prestation_crs_id"
-                                   options='{"no_open": True, "no_create": True}' class="text-primary"
-                                   domain="[('prestataire_id', '=', prestataire_id),('active', '=', True)]"/>&ndash;&gt;
-                            </group>
-                            <hr/>
-                            <group col="6" colspan="2">
-                                <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
-                                <field name="accord_prealable"/>
-                                <field name="ticket_exigible" string="Ticket Exigible?"/>
-                            </group>
-                        </page>
-                        <page string="Détails Coûts - Prestation CRS"
-                              attrs="{'invisible': [('prestataire_crs_id','=', False)]}">
-                            <group>
-                                <field name="date_execution"
-                                   attrs="{'required': [('pool_medical_crs_id','!=', False)]}"
-                                />
-                                <field name="prestation_id"
-                                       string="Prestation médicale"
-                                       options='{"no_open": True, "no_create": True}' readonly="1"
-                                       class="h5"
-                                       domain="[('prestataire_id', '=', prestataire_crs_id),('active', '=', True)]"
-                                />
-                                <field name="code_medical_id"
-                                       options='{"no_open": True, "no_create": True}'/>
-                                <field name="rubrique_id"
-                                       options='{"no_open": True, "no_create": True}'/>
-                             </group>
-                            <hr/>
-                            <group col="6" colspan="2">
-                                <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
-                                <field name="accord_prealable"/>
-                                <field name="ticket_exigible" string="Ticket Exigible?"/>
-                            </group>
-                            <hr/>
-                             <group col="6" colspan="2">
-                                     <field name="cout_unit"
-                                        attrs="{'required': [('cout_modifiable','=',True)],'invisible': [('cout_modifiable','=',False)]}"
-                                     />
-                                     <field name="quantite_livre"
-                                            attrs="{'required': [('quantite_exige','=',True)],'invisible': [('quantite_exige','=',False)]}"
-                                     />
-                                     <field name="cout_unitaire"
-                                            string="Coût Unitaire"
-                                            attrs="{'invisible': [('cout_unit','=',True)]}"
-                                     />
-                                     <field name="coefficient"
-                                            string="Coefficient"
-                                            attrs="{'invisible': [('quantite_exige','=',True)]}"
-                                     />
-                                     <field name="cout_total"/>
-                                     <field name="forfait_sam"/>
-                                     <field name="forfait_ticket"/>
-                                     <field name="remise_prestation"/>
-                                     <field name="mt_rabais"/>
-                                     &lt;!&ndash;<field name="mt_plafond"/>&ndash;&gt;
-                                     <field name="rubrique_id"
-                                            options='{"no_open": True, "no_create": True}'/>
-                                     <field name="ticket_exigible"/>
-                                     <field name="code_medical_id"
-                                            options='{"no_open": True, "no_create": True}'/>
-                                     <field name="cout_modifiable" invisible="1"/>
-                                     <field name="quantite_exige" invisible="1"/>
-                                     <field name="arret_prestation" invisible="1"/>
-                                     <field name="total_pc"/>
-                                     <field name="total_npc"/>
-                                     <field name="taux_couvert"/>
-                                     <field name="net_tiers_payeur"/>
-                                     <field name="ticket_moderateur"/>
-                                     <field name="ticket_exigible"/>
-                                     <field name="mt_paye_assure" required="1"/>
-                                     <field name="net_prestataire"/>
-                                     <field name="debit_ticket"/>
-                             </group>
-                        </page>
-                        <page string="Accord Préalable/Médecin Conseil"
-                              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,
-                                    proximas_medical.group_conseil"
-                              attrs="{'invisible': [('accord_prealable','=',False)]}"
-                        >
-                        &lt;!&ndash;&gt; attrs="{'invisible': [('accord_prealable','=',False)]}"&ndash;&gt;
-                            <group>
-                                <field name="accord_prealable"/>
-                                <field name="accorde"/>
-                                <field name="motif_non_accord"
-                                       attrs="{'invisible': [('accorde','=',True)]}"
-                                />
-                                <field name="info_clinique"/>
-                            </group>
-                        </page>
-                        <page string="Traitement Exclusions"
-                              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,proximas_medical.group_medical"
-                        >
-                            <group>
-                                <field name="mt_exclusion"/>
-                                <field name="motif_exclusion"
-                                       attrs="{'required': [('mt_exclusion','!=',0)]}"
-                                />
-                            </group>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>
-    &lt;!&ndash; DETAILS PRISE EN CHARGE (PHARMACIE) FORM &ndash;&gt;
-     <record id='proximas_medical.details_pec_phcie_form' model='ir.ui.view'>
-        <field name='name'>Détails de Prise en Charge view</field>
-        <field name='model'>proximas.details.pec</field>
-        <field name='arch' type='xml'>
-            <form string="Détails de Prise en charge Assuré">
-                <sheet>
-                    <notebook>
-                        <page string="1. Prescription Médicamenteuse">
-                            <group invisible="1">
-                                <field name="assure_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="prestataire_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="pool_medical_id" string="Médecin Prescripteur"
-                                       options='{"no_open": True, "no_create": True}'
-                                       domain="[('prestataire_id', '=', prestataire_id)]"/>
-                                <field name="prestataire_crs_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="pool_medical_crs_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       domain="[('prestataire_id', '=', prestataire_crs_id)]"
-                                       readonly="0"/>
-                            </group>
-                            <group>
-                                <field name="date_demande" required="1"/>
-                                <field name="produit_phcie_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       attrs="{'required': ['|',('date_demande','!=',False),('prestataire_phcie_id','!=',False)]}"
-                                       />
-                                <field name="quantite" required="1"
-                                       string="Quantité Prescrite"
-                                />
-                                <field name="posologie" onchange="_valid_quantite_prescription()"/>
-                                <field name="nbre_produit_phcie" invisible="1"/>
-                            </group>
-                            <hr/>
-                            <group col="6" colspan="2">
-                                <field name="delai_attente_produit" string="Délai (jours)"/>
-                                <field name="ticket_exigible" string="Ticket Exigible?"/>
-                                <field name="arret_produit" string="Médicament en arrêt?"/>
-                            </group>
-                        </page>
-                        <page string="2. Dispensation Médicaments - Pharmacie"
-                              attrs="{'invisible': [('prestataire_phcie_id','=',False)]}">
-                            <group>
-                                <field name="prestataire_phcie_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                       readonly="1"/>
-                                <field name="date_execution"
-                                       attrs="{'required': [('prestataire_phcie_id','!=',False)]}"/>
-                                <field name="produit_phcie" class="text-success"/>
-                                <field name="substitut_phcie_id"
-                                       options='{"no_open": True, "no_create": True}'
-                                      />
-                            </group>
-                            <group invisible="1">
-                                <field name="prestation_id" readonly="1"/>
-                                <field name="rubrique_id" readonly="1"/>
-                            </group>
-                            <separator/>
-                            <group col="6" colspan="2">
-                                <field name="quantite_livre"
-                                       required="1"
-                                />
-                                <field name="cout_unit"
-                                       required="1"
-                                />
-                                <field name="cout_total"/>
-                                &lt;!&ndash;<field name="total_pc"/>
-                                <field name="total_npc"/>
-                                <field name="taux_couvert"/>
-                                <field name="ticket_moderateur"/>
-                                <field name="net_tiers_payeur"/>
-                                <field name="ticket_exigible" string="Ticket Exigible?"/>
-                                <field name="mt_paye_assure"
-                                       required="1"
-                                       string="Montant Encaissé"
-                                />
-                                <field name="net_prestataire"/>
-                                <field name="debit_ticket"/>&ndash;&gt;
-                            </group>
-                            <hr/>
-                            <group col="6" colspan="2" invisible="0">
-                                <field name="prestation_id"/>
-                                <field name="code_medical_id"/>
-                                <field name="police_id"/>
-                                <field name="zone_couverte"/>
-                            </group>
-                        </page>
-                        <page string="3. Traitement des exclusions Médicament "
-                              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,
-                              proximas_medical.group_medical">
-                            <group>
-                                <field name="mt_exclusion"/>
-                                <field name="motif_exclusion"
-                                       attrs="{'required': [('mt_exclusion','!=',0)]}"
-                                />
-                            </group>
-                        </page>
-                    </notebook>
-                </sheet>
-            </form>
-        </field>
-    </record>-->
     <!-- RAPPORT DETAILLE PRISE EN CHARGE PAR USER PRESTATAIRE -->
     <record id="details_pec_user_tree_view" model="ir.ui.view">
         <field name="name">Détails PEC Traitées/Utilisateur</field>
@@ -1757,7 +1226,7 @@
                             </div>
                         </div>
                        <notebook>
-                           <page string=" Validation Prestation Médicale - CRS">
+                           <page string="VALIDATION PRESTATIONS MEDICALES - CRS">
                                <group col="6" colspan="2">
                                    <!--<field name="assure_id"
                                           options='{"no_open": True, "no_create": True}'
@@ -1864,7 +1333,7 @@
                     </div>
                    <hr/>
                    <notebook>
-                       <page string="Détails Prestation Médicale Demandée">
+                       <page string="PRESTATIONS MEDICALES DEMANDEES">
                            <group col="4" colspan="2">
                                <field name="num_pec"/>
                                <field name="date_demande" readonly="1"/>
@@ -1886,14 +1355,15 @@
                                <field name="cout_modifiable"/>
                            </group>
                        </page>
-                       <page string="Motif de Refus" attrs="{'invisible': [('non_accorde','=',False)]}">
+                       <page string="MOTIF DE REFUS - ACCORD PREALABLE"
+                             attrs="{'invisible': [('non_accorde','=',False)]}">
                            <group>
                                <field name="motif_non_accord"
                                       attrs="{'required': [('non_accorde','=',True)]}"
                                />
                            </group>
                        </page>
-                       <page string="Informations Cliniques">
+                       <page string="INFORMATIONS CLINIQUES">
                            <group>
                                <field name="info_clinique"/>
                            </group>
@@ -1911,11 +1381,11 @@
             <form string="Création Prise en charge Assuré">
                 <sheet>
                     <div class="panel">
-                        <h3 class="panel-header text-primary">
+                        <h4 class="panel-header text-primary">
                           Création de Prise en charge médicale (Centre de Référence Obligatoire):
-                      </h3>
+                      </h4>
                       <div class="panel-body">
-                        <blockquote class="blockquote mb-0">
+                        <blockquote class="blockquote mb-0 h5">
                             <!--<separator class="text-success fa fa-plus-square"/>-->
                           <p class="text-primary h5">Cet assistant vous permet de démarrer la procédure de traitement d'une
                               prise en charge pour le compte d'un assuré sur présentation de sa carte d'accès aux soins.
@@ -1943,7 +1413,7 @@
                                      placeholder="Ex.: 01234567AB"/>
                               </group>
                           </p>-->
-                          <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                          <footer class="blockquote-footer h5"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
                               <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
                           </footer>
                         </blockquote>
@@ -1971,11 +1441,11 @@
             <form string="Mise à jour Prise en charge Assuré">
                 <sheet>
                     <div class="panel">
-                      <h3 class="panel-header text-primary">
+                      <h4 class="panel-header text-primary">
                           Assistant Dispensation Médicaments (Pharmacies/Officines):
-                      </h3>
+                      </h4>
                       <div class="panel-body">
-                        <blockquote class="blockquote mb-0">
+                        <blockquote class="blockquote mb-0 h5">
                             <!--<separator class="text-success fa fa-plus-square"/>-->
                           <p class="text-primary h5">Cet assistant vous permet de démarrer la procédure de traitement d'une
                               prise en charge en vue de dispenser des médicaments à l'assuré sur présentation de son bon
@@ -1990,7 +1460,7 @@
                           </p>
                               <!--<label for="code_pec" string="Code PEC:" />-->
 
-                          <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                          <footer class="blockquote-footer h5"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
                               <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
                           </footer>
                         </blockquote>
@@ -2018,7 +1488,7 @@
             <form string="Mise à jour Prise en charge Assuré">
                 <sheet>
                     <div class="panel">
-                      <h3 class="panel-header text-primary">Assistant Mise à jour (Poursuite) de Prise en charge : </h3>
+                      <h4 class="panel-header text-primary">Assistant Mise à jour (Poursuite) de Prise en charge : </h4>
                       <div class="panel-body">
                         <blockquote class="blockquote mb-0">
                           <p class="text-primary h5">Cet assistant vous permet de poursuivre une prise en charge pour un assuré. Pour commencer
@@ -2033,7 +1503,7 @@
                                      default_focus="1"
                                      placeholder="Ex.: 0001234567"/>
                           </p>
-                          <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                          <footer class="blockquote-footer h5"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
                               <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
                           </footer>
                         </blockquote>

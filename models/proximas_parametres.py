@@ -80,12 +80,21 @@ class Groupe(models.Model):
         string="Est Groupe?",
         default=True
     )
+    est_suspendu = fields.Boolean(
+        string="Suspendu?",
+        default=False,
+        help="Indique si le groupe concerné est actif ou non."
+    )
     general_info = fields.Text(
         string='Information General',
     )
     note = fields.Text(
         string="Notes et Observations",
     )
+
+    @api.multi
+    def toggle_suspension(self):
+        self.est_suspendu = not self.est_suspendu
 
     # @api.one
     @api.depends('parent_id', 'name')

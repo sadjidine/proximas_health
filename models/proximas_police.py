@@ -895,6 +895,12 @@ class Contrat(models.Model):
         related="adherent_id.groupe_id",
         required=False,
     )
+    groupe_suspendu = fields.Boolean(
+        string="Groupe Actif?",
+        related='groupe_id.est_suspendu',
+        readonly=True,
+        help="Indique si le groupe concerné est actif ou non."
+    )
     photo = fields.Binary(
         string="Photo",
         attachment=True,
@@ -1292,12 +1298,30 @@ class Contrat(models.Model):
         compute='_sinistre_details_pec',
         default=0,
     )
+    duree_activation = fields.Char (
+        string="Durée Activation (Details)",
+        compute='_get_duree_activation',
+    )
 
     @api.multi
     def _get_assure(self):
         for rec in self:
             assure = self.env['proximas.assure'].search ([('code_id', 'ilike', self.code_id)])
             rec.assure_id = assure.id
+
+    @api.depends ('date_activation', 'date_inscription')
+    def _get_duree_activation(self):
+        now = datetime.now()
+        for rec in self:
+            if bool(rec.date_activation):
+                activation = fields.Datetime.from_string (rec.date_activation)
+                delta = relativedelta (now, activation)
+                annees_mois_jours = '%s %s - %s %s - %s %s' % (
+                    delta.years, _ ('an(s)'),
+                    delta.months, _ ('mois'),
+                    delta.days, _ ('jours')
+                )
+                rec.duree_activation = annees_mois_jours
 
     @api.one
     @api.depends('date_resiliation', 'date_activation', 'validite_contrat', 'validite_contrat_police', 'jours_contrat',
@@ -2175,6 +2199,9 @@ class Contrat(models.Model):
             # Verifie le délai de carence
             elif delai >= rec_id.jours_contrat:
                 rec_id.actif = False
+            # Verifie le groupe
+            elif bool(rec_id.groupe_id) and bool (rec_id.groupe_suspendu):
+                rec_id.is_active = False
             # Verifie le niveau de consommation (Plafond/Famille)
             else:
                 rec_id.actif = True
