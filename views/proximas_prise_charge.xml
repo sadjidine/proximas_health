@@ -766,7 +766,7 @@
                                    widget="one2many"
                                    class="text-info"
                                    attrs="{'required': [('state','in',['oriente'])]}"
-                                   domain="[ '|',('accord_prestation_demande','=',False),('accorde','=',True)]"
+                                   domain="[]"
                                    context="{'default_prestataire_id':prestataire_id, 'default_assure_id':assure_id,
                                    'default_pool_medical_id':pool_medical_id,'default_prestataire_crs_id':prestataire_crs_id,
                                    'default_police_id':police_id,'default_structure_id':structure_id}">
