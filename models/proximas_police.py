@@ -946,6 +946,17 @@ class Contrat(models.Model):
         string="Genre",
         related='adherent_id.genre',
     )
+    groupe_sanguin = fields.Selection (
+        string="Groupe Sanguin",
+        related='adherent_id.groupe_sanguin',
+        help="Sélectionner un groupe sanguin dans la liste.",
+    )
+    quartier = fields.Char(
+        size=64,
+        string='Quartier/Secteur',
+        related='adherent_id.quartier',
+        help='Indiquer le secteur ou le quartier de résidence',
+    )
     date_inscription = fields.Date(
         string="Date Inscription",
         related='adherent_id.date_inscription',
@@ -2421,6 +2432,26 @@ class ContratWizard(models.TransientModel):
             ('feminin', 'Feminin'),
         ],
         required=True,
+    )
+    groupe_sanguin = fields.Selection (
+        [
+            ('a+', 'A+'),
+            ('a-', 'A-'),
+            ('b+', 'B+'),
+            ('b-', 'B-'),
+            ('ab+', 'AB+'),
+            ('ab-', 'AB-'),
+            ('o+', 'O+'),
+            ('o-', 'O-'),
+
+        ],
+        string="Groupe Sanguin",
+        help="Sélectionner un groupe sanguin dans la liste.",
+    )
+    quartier = fields.Char(
+        size=64,
+        string='Quartier/Secteur',
+        help='Indiquer le secteur ou le quartier de résidence',
     )
     age_limite_adherent = fields.Integer(
         string="Age limite police",

@@ -2013,25 +2013,21 @@ class DetailsPec(models.Model):
     statut_familial = fields.Selection(
         string="Statut Familial",
         related='assure_id.statut_familial',
-        store=True,
         readonly=True,
     )
     genre = fields.Selection(
         string="Genre",
         related='assure_id.genre',
-        store=True,
         readonly=True,
     )
     date_naissance = fields.Date(
         string="Date Naissance",
         related="assure_id.date_naissance",
-        # store=True,
         readonly=True,
     )
     age = fields.Char(
         string="Age",
         related='assure_id.age',
-        # store=True,
         required=False,
         readonly=True,
     )
@@ -2263,9 +2259,7 @@ class DetailsPec(models.Model):
     )
     code_medical_id = fields.Many2one(
         string="Code Médical",
-        # compute='_check_prestation_id',
         related='prestation_id.code_medical_id',
-        store=True,
         readonly=True,
     )
     rubrique_id = fields.Many2one(
@@ -3422,7 +3416,7 @@ class DetailsPec(models.Model):
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
-                 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire','ticket_exigible',
+                 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire', 'ticket_exigible',
                  'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre', 'cout_unite')
     # @api.onchange('prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id', 'mt_exclusion',
     #               'substitut_phcie_id', 'mt_exclusion', 'cout_unit', 'quantite', 'quantite_livre', 'code_id_rfm',
@@ -3441,7 +3435,7 @@ class DetailsPec(models.Model):
                 ('code_medical_id', '=', self.code_medical_id.id)
             ])
 
-            ticket_exigible = bool (controle_rubrique.ticket_exigible)
+            ticket_exigible = bool(controle_rubrique.ticket_exigible)
             self.ticket_exigible = ticket_exigible
             ############################################################################################################
             # Sinon, traitement de prise en charge normal : appliquer le taux de couverture selon les cas.             #
@@ -3459,7 +3453,7 @@ class DetailsPec(models.Model):
                     self.taux_couvert = int (self.police_id.tx_couv_prive_couvert)
                 elif not bool (self.zone_couverte) and not bool (self.prestataire.is_public):
                     self.taux_couvert = int (self.police_id.tx_couv_prive)
-            elif bool (code_medical_police):
+            elif bool(code_medical_police):
                 if bool (self.prestataire.is_public) or bool (self.prestataire_public):
                     self.taux_couvert = int (code_medical_police.tx_public)
                 elif not bool (self.prestataire.is_public) or not bool (self.prestataire_public):

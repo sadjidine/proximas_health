@@ -1628,8 +1628,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         # ETAILS PEC TRAITES ET LIES AU CONTRAT ET LA POLICE
                         details_pec = self.env['proximas.details.pec'].search([
                             ('date_execution', '!=', None),
-                            ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                            ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                            ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                            ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
                             # ('contrat_id', '=', contrat_id),
                             ('prestataire', '!=', None),
                             ('police_id', '=', police_id),
@@ -1637,10 +1637,10 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         ])
                     elif bool(medecin_id) and not police_filter:
                         # ETAILS PEC TRAITES ET LIES AU CONTRAT
-                        details_pec = self.env['proximas.details.pec'].search ([
+                        details_pec = self.env['proximas.details.pec'].search([
                             ('date_execution', '!=', None),
-                            ('date_execution', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                            ('date_execution', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                            ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                            ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
                             # ('contrat_id', '=', contrat_id),
                             ('prestataire', '!=', None),
                             ('medecin_id', '=', medecin.id),

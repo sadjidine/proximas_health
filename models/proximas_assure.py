@@ -12,6 +12,7 @@ from openerp.exceptions import ValidationError, UserError
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from random import randint
+from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
 
 class Assure(models.Model):
     _name = 'proximas.assure'

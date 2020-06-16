@@ -13,14 +13,16 @@
                 <form string="Contrat Adhérent">
                     <sheet>
                         <div class="panel">
-                          <h2 class="panel-header text-primary">Proximas : Assistant Création Contrat : </h2>
+                          <h4 class="panel-header text-primary">Proximas : Assistant Création Contrat - Adhésion : </h4>
                           <div class="panel-body">
                             <blockquote class="blockquote mb-0">
-                              <p class="text-primary">Cet assistant vous permet de saisir les informations essentielles
-                                sur le souscripteur Adhérent afin de vous permettre d'évaluer si celui-ci remplit
-                                les conditions d'adhésion..
+                              <p class="text-primary text-justify h5">Cet assistant vous permet de saisir les
+                                  informations essentielles sur un nouveau souscripteur (Adhérent) afin de vous
+                                  permettre d'évaluer si celui-ci remplit les conditions d'adhésion. Si tel est
+                                  le cas, les données seront validées et un contrat sera créé vous permettant de
+                                  compléter les informations supplémentaires sur celui-ci.
                               </p>
-                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                              <footer class="blockquote-footer h5"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
                                   <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
                               </footer>
                             </blockquote>
@@ -33,11 +35,13 @@
                                 <field name='nom'/>
                                 <field name="prenoms"/>
                                 <field name="matricule"/>
-                                <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
-                                <field name="groupe_id" options='{"no_open": True, "no_create": True}'/>
                                 <field name="date_naissance"/>
                                 <field name="genre" widget="radio" options="{'horizontal': true}"/>
                                 <field name="age"/>
+                                <field name="groupe_sanguin"/>
+                                <field name="localite_id" options='{"no_open": True, "no_create": True}'/>
+                                <field name="quartier"/>
+                                <field name="groupe_id" options='{"no_open": True, "no_create": True}'/>
                             </group>
                         </group>
                     </sheet>
@@ -271,7 +275,7 @@
                           </div>
                           <hr/>
                         <notebook>
-                            <page string="Infos Adhérent">
+                            <page string="DETAILS ADHERENT">
                                 <group col="6" colspan="2">
                                   <field name="code_id_externe"
                                      class="text-danger"
@@ -289,7 +293,7 @@
                                    <field name="cas_chronique" string="Malade chronique?"/>
                               </group>
                             </page>
-                            <page string="Conditions Générales">
+                            <page string="CONDITIONS GENERALES">
                                 <group col="8" colspan="2">
                                     <field name="age_limite_adherent"/>
                                     <field name="nbre_conjoint"/>
@@ -325,14 +329,20 @@
                                     <field name="totaux_net_payable"/>
                                 </group>
                             </page>
-                            <page string="Ayants-droit Déclarés">
+                            <page string="AYANT-DROITS DECLARES">
                                 <field name="ayant_droit_ids"
                                         mode="kanban"
                                         domain="[('is_assure', '=', True)]"
                                         context="{'default_contact_id': active_id,
-                                                    'default_use_parent_address': True,
-                                                    'default_is_assure': True,
-                                                    'default_customer': True}}">
+                                                  'default_use_parent_address': True,
+                                                  'default_is_assure': True,
+                                                  'default_customer': True,
+                                                  'default_groupe_id': groupe_id,
+                                                  'default_localite_id': localite_id,
+                                                  'default_quartier': quartier,
+                                                  'default_mobile': mobile,
+                                                  }"
+                                >
                                     <kanban>
                                         <field name="color" />
                                         <field name="name" />

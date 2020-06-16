@@ -86,7 +86,7 @@
                     <field name="image"
                            widget='image'
                            class="oe_left oe_avatar"
-                           options="{'preview_image': 'image_medium', 'size': [180, 120]}" />
+                           options="{'preview_image': 'image_medium', 'size': [90, 120]}" />
                     <div class="oe_left">
                         <h2><field name="nom" placeholder="Nom"/></h2>
                         <h2><field name="prenoms" placeholder="Prénoms"/></h2>
@@ -254,7 +254,7 @@
                     <field name="image"
                            widget='image'
                            class="oe_left oe_kanban_avatar thumbnail"
-                           options="{'preview_image': 'image', 'size': [180, 120]}" />
+                           options="{'preview_image': 'image', 'size': [90, 120]}" />
                        <div class="oe_title oe_left">
                            <label for="nom" string="Identification Bénéficiaire"  class="oe_edit_only"/>
                            <h2 class="text-primary"><field name="nom" placeholder="Nom"/></h2>
@@ -278,25 +278,25 @@
                     <notebook>
                         <page string="INFOS DETAILS ADHERENT">
                              <group col="6" colspan="2">
-                       <field name="code_id_externe" class="text-primary"/>
-                       <field name="matricule"/>
-                       <field name="date_naissance"/>
-                       <field name="age" />
-                       <field name="genre" required="1" widget="radio" options="{'horizontal': true}"/>
-                       <field name="groupe_sanguin"/>
-                       <field name="date_inscription" />
-                       <field name="date_activation"/>
-                       <field name="quartier"/>
-                       <field name="localite_id"
-                              options='{"no_open": True, "no_create": True}'
-                              required="1"
-                       />
-                       <field name="groupe_id"
-                              options='{"no_open": True, "no_create": True}'
-                              required="1"
-                       />
-                       <field name="cas_chronique" string="Malade chronique?"/>
-                    </group>
+                               <field name="code_id_externe" class="text-primary"/>
+                               <field name="matricule"/>
+                               <field name="date_naissance"/>
+                               <field name="age" />
+                               <field name="genre" required="1" widget="radio" options="{'horizontal': true}"/>
+                               <field name="groupe_sanguin"/>
+                               <field name="date_inscription" />
+                               <field name="date_activation"/>
+                               <field name="quartier"/>
+                               <field name="localite_id"
+                                      options='{"no_open": True, "no_create": True}'
+                                      required="1"
+                               />
+                               <field name="groupe_id"
+                                      options='{"no_open": True, "no_create": True}'
+                                      required="1"
+                               />
+                               <field name="cas_chronique" string="Malade chronique?"/>
+                            </group>
                         </page>
                         <page string="ADRESSES &amp; CONTACTS:">
                             <group>
@@ -487,7 +487,7 @@
                     <field name="image"
                            widget='image'
                            class="oe_left oe_kanban_avatar thumbnail"
-                           options="{'preview_image': 'image', 'size': [180, 120]}" />
+                           options="{'preview_image': 'image', 'size': [90, 120]}" />
                        <div class="oe_title oe_left">
                            <label for="nom" string="Identification Bénéficiaire"  class="oe_edit_only"/>
                            <h2 class="text-primary"><field name="nom" placeholder="Nom"/></h2>
