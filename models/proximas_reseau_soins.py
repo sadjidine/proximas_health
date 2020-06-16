@@ -526,6 +526,23 @@ class Prestation(models.Model):
     )
     active = fields.Boolean(default=True)
 
+    @api.depends('mt_cout_unit', 'forfait_sam', 'forfait_ticket')
+    @api.constrains ('mt_cout_unit', 'forfait_sam', 'forfait_ticket')
+    def check_and_validate_prestation(self):
+        for rec in self:
+            if rec.forfait_sam > 0 or rec.forfait_ticket > 0:
+                forfait = int(rec.forfait_sam + rec.forfait_ticket)
+                if forfait != int(rec.forfait_sam + rec.forfait_ticket):
+                    raise ValidationError (_ (
+                        "Proximaas : Contrôle de Règles de Gestion.\n\
+                        Le montant du coût unitaire doit être egal à la somme du forfait SAM et du forfait assure.\
+                        Par conséquent, veuillez modifier les montants concernés pour que la règle soit respectée. \
+                        Veuiller contactez l'administrateur en cas de besoin."
+                    )
+                    )
+
+
+
     # CONTRAINTES
     _sql_constraints = [
         ('prestation_prestataire_uniq',

@@ -2618,7 +2618,6 @@ class DetailsPec(models.Model):
                 pool_medical_id = rec.pec_id.pool_medical_id.id
                 rec.pool_medical = pool_medical_id
 
-
     # @api.one
     @api.depends('pool_medical')
     def _get_medecin_id(self):
