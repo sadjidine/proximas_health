@@ -760,7 +760,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Exécution Actes Médicaux &amp; Paramédicaux - (CRS)"
+                        <page string="EXECUTION ACTES MEDICAUX &amp; PARAMEDICAUX- CRS)"
                               states="oriente,termine">
                             <!--&gt;states="cours,oriente,termine"-->
                             <!--attrs="{'invisible': ['|',('state','=','dispense'),'|',('nbre_prestations_fournies','=',0),

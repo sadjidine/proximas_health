@@ -2298,7 +2298,7 @@ class DetailsPec(models.Model):
         store=True,
         readonly=True,
     )
-    accorde = fields.Boolean (
+    accorde = fields.Boolean(
         string="Accord?",
         default=False,
         help='Reservé au Médecin Conseil pour accorder l\'exécution d\'une prestation par orientation',
