@@ -292,32 +292,62 @@
                         <field name="image"
                            widget='image'
                            class="oe_left oe_kanban_avatar"
-                           options="{'preview_image': 'image', 'size': [90, 120]}"
+                           options="{'preview_image': 'image', 'size': [120, 120]}"
                            readonly="1"/>
                         <!--<field name="image" widget='image' class="oe_avatar oe_left"/>-->
                     <div class="oe_title oe_left" name="title">
+                        <label for="name" string="Identification Patient / Bénéficiaire:"/>
+                        <h2><field name="name" class="bg-info text-primary" readonly="True"/></h2>
+                        <!--<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>-->
+                        <b><field name="age_details" class="text-info"/></b>
+                        <h3><field name="statut_familial" class="text-info" string="Lien Parenté :"/></h3>
+                        <!--<field name="taux_plafond_sinistres_assure" widget="progressbar"/>-->
+                        <!--<field name="maximum_rate" invisible="1"/>-->
+                    </div>
+                    <newline/>
+                    <div class="oe_right text-center">
+                        <!--<div class="oe_left">-->
+                            <field name="code_pec" invisible="1"/>
+                            <!--<label for="code_pc" string="Code PEC :"/>-->
+                            <h2 class="bg-primary"><field name="code_pc"/></h2>
+                        <!--</div>-->
+                            <label for="totaux_phcie_estimation" string="Estimation Prescriptions:"/>
+                            <h2 class="text-success">
+                                <field name="totaux_phcie_estimation" widget="monetary"
+                                       options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
+                            </h2>
+                    </div>
+                    <hr/>
+                    <!--</div>
+                        <field name="image"
+                           widget='image'
+                           class="oe_left oe_kanban_avatar"
+                           options="{'preview_image': 'image', 'size': [90, 120]}"
+                           readonly="1"/>
+                        &lt;!&ndash;<field name="image" widget='image' class="oe_avatar oe_left"/>&ndash;&gt;
+                    <div class="oe_title oe_left" name="title">
                         <label for="name" string="Assuré Bénéficiaire:"/>
                         <h2><field name="name" class="text-primary" readonly="True"/></h2>
-                        <!--<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>-->
+                        &lt;!&ndash;<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>&ndash;&gt;
                         <b><field name="age_details" class="text-muted"/></b>
                         <h4><field name="statut_familial" class="text-muted" string="Lien Parenté :"/></h4>
                     </div>
                     <newline/>
                     <div class="oe_right">
-                        <!--<div class="oe_left">-->
+                        &lt;!&ndash;<div class="oe_left">&ndash;&gt;
                             <field name="code_pec" invisible="1"/>
                             <label for="code_pc" string="Code PEC :"/>
                             <h2 class="text-center bg-primary"><field name="code_pc"/></h2>
-                        <!--</div>-->
-                        <!--<div class="oe_right text-right">-->
+                        &lt;!&ndash;</div>&ndash;&gt;
+                        &lt;!&ndash;<div class="oe_right text-right">&ndash;&gt;
                             <label for="totaux_phcie_estimation" string="Estimation Prescriptions:"/>
                             <h2 class="text-center">
                                 <field name="totaux_phcie_estimation" widget="monetary"
                                        options='{"widget": "monetary", "display_currency": "res_company.currency_id"}' />
                             </h2>
-                        <!--</div>-->
+                        &lt;!&ndash;</div>&ndash;&gt;
                     </div>
-                    <hr/>
+                    <hr/>-->
                     <notebook>
                         <page string="Détails Prise en charge :">
                              <group>
