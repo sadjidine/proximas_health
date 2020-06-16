@@ -2132,7 +2132,7 @@
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="accord_details_pec_crs_tree_view"/>
-        <field name="domain">[('date_demande','!=', None),('en_cours_exo','=',True),('accord_prestation_demande','=',True),]</field>
+        <field name="domain">[('date_demande','!=', None),('en_cours_exo','=',True),('accord_prestation_demande','=',True),'|',('accorde','=',True),('non_accorde','=',True)]</field>
         <field name="context">{'default_user_id':uid,'form_view_ref':'proximas_medical.accord_details_pec_crs_form'}</field>
     </record>
     <record model="ir.actions.act_window" id="proximas_validation_details_pec_crs_action">
