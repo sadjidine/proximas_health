@@ -3415,7 +3415,7 @@ class DetailsPec(models.Model):
         #     self.net_a_payer = 0
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
-    # @api.one
+    @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
                  'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire', 'ticket_exigible',
                  'pool_medical', 'pool_medical_crs_id', 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre',
@@ -3425,7 +3425,7 @@ class DetailsPec(models.Model):
     #               'cout_unite', 'prestataire_public', 'zone_couverte', 'prestataire')
     @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
-        # self.ensure_one()
+        self.ensure_one()
         for rec in self:
             if bool(rec.prestation_id):
                 # Vérifier si la prestation est identifiée
