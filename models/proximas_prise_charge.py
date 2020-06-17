@@ -4376,7 +4376,7 @@ class DetailsPec(models.Model):
 
 
     # CONTROLE DELAI ATTENTE
-    # @api.one
+    @api.one
     @api.depends('date_execution', 'prestation_id', 'prestation_cro_id', 'prestation_crs_id',
                   'prestation_demande_id',
                   'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
@@ -4390,7 +4390,7 @@ class DetailsPec(models.Model):
         '''
         # Contrôle du délai d'attente Substitut Médicament
         # 1. Vérifier s'il s'agit d'une substitution de médicament?
-        # self.ensure_one()
+        self.ensure_one()
         if bool(self.substitut_phcie_id):
             # Récupère la date du jour
             now = datetime.now ()
