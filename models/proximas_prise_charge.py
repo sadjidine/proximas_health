@@ -3398,15 +3398,15 @@ class DetailsPec(models.Model):
                              d'informations, veuillez contactez l'administrateur..."
                             ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
                         )
-    @api.multi
+
     def _compute_net_a_payer(self):
         for rec in self:
-            if rec.pec_id:
-                rec.net_a_payer = rec.net_prestataire
-            elif rec.rfm_id:
-                rec.net_a_payer = rec.mt_remboursement
+            if rec.pec_id and rec.net_prestataire:
+                rec.net_a_payer = int(rec.net_prestataire)
+            elif rec.rfm_id and rec.mt_remboursement:
+                rec.net_a_payer = int(rec.mt_remboursement)
             else:
-                rec.net_a_payer = 0
+                pass
         # if bool (self.rfm_id):
         #     self.net_a_payer = self.mt_remboursement
         # elif bool (self.net_prestataire):
@@ -3418,12 +3418,13 @@ class DetailsPec(models.Model):
     @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
                  'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire', 'ticket_exigible',
-                 'pool_medical', 'pool_medical_crs_id', 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre',
-                 'cout_unite')
+                 'pool_medical', 'pool_medical_crs_id', 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
     # @api.onchange('prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id', 'mt_exclusion',
     #               'substitut_phcie_id', 'mt_exclusion', 'cout_unit', 'quantite', 'quantite_livre', 'code_id_rfm',
     #               'cout_unite', 'prestataire_public', 'zone_couverte', 'prestataire')
-    @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+    @api.constrains('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
+                 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire', 'ticket_exigible',
+                 'cout_unit', 'quantite', 'quantite_livre')
     def _calcul_couts_details_pec(self):
         # self.ensure_one()
         for rec in self:
