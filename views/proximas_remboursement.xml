@@ -41,7 +41,7 @@
                                help="Permet de remettre le statut du remboursement de frais médicaux =>(En cours)."/>
                        <button name="Validation" type="workflow"
                                string="Validation" icon="fa-hand-o-right"
-                               states="create"
+                               states="create,boucle"
                                help="VALIDATION: Transmettre le remboursement des frais médicaux pour règlement."
                                class="oe_highlight"
                                confirm="VALIDATION: Vous êtes sur le point de transmettre le dossier de remboursement à
@@ -49,7 +49,7 @@
                                confirmer la clôture?"
                        />
                        <button name="Termine" type="workflow"
-                               string="Termine" icon="fa-lock"
+                               string="Terminé" icon="fa-lock"
                                states="valide"
                                help="TERMINE: Terminer le processus de traitement du dossier de remboursement de frais
                                médicaux pour règlement."
