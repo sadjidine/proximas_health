@@ -5497,7 +5497,7 @@ class RemboursementPEC(models.Model):
                 Désolé! Vous essayez de modifier des données de la fiche de ramboursement : %s. \n \
                 Cette fiche a été déjà traitée et terminée. Par conséquent, aucune modification n'est autorisée.\n \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % self.num_fiche
+                ) % self.code_rfm
             )
 
     _sql_constraints = [
