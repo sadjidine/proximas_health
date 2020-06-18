@@ -228,20 +228,24 @@
                                 <div class="col-xs-1">
                                     <t t-if="filter_type in ['pec'] and prestataire and ref_facture">
                                         <table class="table table-condensed">
-                                           <!--<caption>Notes / Observations:</caption>-->
+                                           <caption class="invisible"> QR CODE </caption>
                                             <tr>
                                                 <td class="text-center">
-                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Standard93', num_facture, 340,  60)" style="width:340;height:60;"/>
+                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+                                                    % ('QR', num_facture, 120, 120)" style="width:120px;h+eight:120px;"
+                                                    />
                                                 </td>
                                             </tr>
                                         </table>
                                     </t>
                                     <t t-if="filter_type in ['rfm'] and adherent and num_rfm">
                                         <table class="table table-condensed">
-                                           <!--<caption>Notes / Observations:</caption>-->
+                                           <caption class="invisible">QR CODE:</caption>
                                             <tr>
                                                 <td class="text-center">
-                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Standard93', num_rfm, 340,  60)" style="width:340;height:60;"/>
+                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+                                                    % ('QR', num_rfm, 120, 120)" style="width:120px;h+eight:120px;"
+                                                    />
                                                 </td>
                                             </tr>
                                         </table>
