@@ -5312,7 +5312,7 @@ class RemboursementPEC(models.Model):
 
     @api.multi
     def action_boucler(self):
-        self.state = 'termine'
+        self.state = 'boucle'
 
 
     @api.multi
