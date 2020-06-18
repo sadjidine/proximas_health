@@ -169,7 +169,7 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-xs-6">
+                                <div class="col-xs-4">
                                     <t t-if="filter_type in ['pec'] and prestataire and ref_facture">
                                         <table class="table table-condensed" style="border:1px solid black;">
                                            <caption>1. Détails Facture Prestataire:</caption>
@@ -197,7 +197,7 @@
                                         </table>
                                     </t>
                                 </div>
-                                <div class="col-xs-5">
+                                <div class="col-xs-6">
                                     <t t-if="filter_type in ['pec'] and prestataire and ref_facture">
                                         <table class="table table-condensed bg-info" style="border:1px solid black;">
                                            <caption>2. DOIT - Prestataire:</caption>
@@ -225,9 +225,9 @@
                                         </table>
                                     </t>
                                 </div>
-                                <div class="col-xs-1">
+                                <div class="col-xs-2">
                                     <t t-if="filter_type in ['pec'] and prestataire and ref_facture">
-                                        <table class="table table-condensed">
+                                        <table class="table table-condensed text-center">
                                            <caption class="invisible"> QR CODE </caption>
                                             <tr>
                                                 <td class="text-center">
@@ -239,7 +239,7 @@
                                         </table>
                                     </t>
                                     <t t-if="filter_type in ['rfm'] and adherent and num_rfm">
-                                        <table class="table table-condensed">
+                                        <table class="table table-condensed text-center">
                                            <caption class="invisible">QR CODE:</caption>
                                             <tr>
                                                 <td class="text-center">
