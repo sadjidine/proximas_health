@@ -144,14 +144,14 @@
                             <t t-if="filter_type in ['pec'] and prestataire and ref_facture">
                                 <h4 class="bg-info text-primary">
                                     <strong>
-                                        RAPPORT - FACTURE PRESTATAIRE DE SOINS / PRESTATION MEDICALE
+                                        RAPPORT - FACTURE PRESTATAIRE DE SOINS / RUBRIQUE MEDICALE
                                     </strong>
                                 </h4>
                             </t>
                             <t t-if="filter_type in ['rfm'] and adherent and num_rfm">
                                 <h4 class="bg-info text-primary">
                                     <strong>
-                                        RAPPORT - REMBOURSEMENT DE FRAIS MEDICAUX - ADHERENT / PRESTATION MEDICALE
+                                        RAPPORT - REMBOURSEMENT DE FRAIS MEDICAUX - ADHERENT / RUBRIQUE MEDICALE
                                     </strong>
                                 </h4>
                             </t>
@@ -301,9 +301,16 @@
                                         <td><strong><span t-esc="'{:,}'.format(tot_net_a_payer).replace(',',' ')"/></strong></td>
                                     </tr>
                                     <tr class="text-right">
-                                        <td colspan="11">
-                                            <span>Arrêtée la présente facture, à la somme de :</span> <strong><t t-esc="montant_facture"/> </strong>
-                                        </td>
+                                        <t t-if="filter_type in ['pec'] and prestataire and ref_facture">
+                                            <td colspan="11">
+                                                <span>Arrêtée la présente facture, à la somme de :</span> <strong><t t-esc="montant_facture"/> </strong>
+                                            </td>
+                                        </t>
+                                        <t t-if="filter_type in ['rfm'] and adherent and num_rfm">
+                                            <td colspan="11">
+                                                <span>Arrêté le présent remboursement, à la somme de :</span> <strong><t t-esc="montant_rfm"/> </strong>
+                                            </td>
+                                        </t>
                                     </tr>
                                 </tfoot>
                             </table>
@@ -611,9 +618,16 @@
                                         <td><strong><span t-esc="'{:,}'.format(tot_net_a_payer).replace(',',' ')"/></strong></td>
                                     </tr>
                                     <tr class="text-right">
-                                        <td colspan="11">
-                                            <span>Arrêtée la présente facture, à la somme de :</span> <strong><t t-esc="montant_facture"/> </strong>
-                                        </td>
+                                        <t t-if="filter_type in ['pec'] and prestataire and ref_facture">
+                                            <td colspan="11">
+                                                <span>Arrêtée la présente facture, à la somme de :</span> <strong><t t-esc="montant_facture"/> </strong>
+                                            </td>
+                                        </t>
+                                        <t t-if="filter_type in ['rfm'] and adherent and num_rfm">
+                                            <td colspan="11">
+                                                <span>Arrêté le présent remboursement, à la somme de :</span> <strong><t t-esc="montant_rfm"/> </strong>
+                                            </td>
+                                        </t>
                                     </tr>
                                 </tfoot>
                             </table>

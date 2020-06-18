@@ -2015,27 +2015,33 @@ class DetailsPec(models.Model):
     statut_familial = fields.Selection(
         string="Statut Familial",
         related='assure_id.statut_familial',
+        store=True,
         readonly=True,
     )
     genre = fields.Selection(
         string="Genre",
         related='assure_id.genre',
+        store=True,
         readonly=True,
     )
     date_naissance = fields.Date(
         string="Date Naissance",
         related="assure_id.date_naissance",
+        # store=True,
         readonly=True,
     )
     age = fields.Char(
         string="Age",
         related='assure_id.age',
+        # store=True,
         required=False,
         readonly=True,
     )
     tranche_age = fields.Selection(
         string="Tranche d'âge",
         related='assure_id.tranche_age',
+        store=True,
+        readonly=True,
     )
     age_entier = fields.Integer(
         string='Age assuré',
@@ -2261,7 +2267,9 @@ class DetailsPec(models.Model):
     )
     code_medical_id = fields.Many2one(
         string="Code Médical",
+        # compute='_check_prestation_id',
         related='prestation_id.code_medical_id',
+        store=True,
         readonly=True,
     )
     rubrique_id = fields.Many2one(
@@ -2298,7 +2306,7 @@ class DetailsPec(models.Model):
         store=True,
         readonly=True,
     )
-    accorde = fields.Boolean(
+    accorde = fields.Boolean (
         string="Accord?",
         default=False,
         help='Reservé au Médecin Conseil pour accorder l\'exécution d\'une prestation par orientation',
@@ -2619,6 +2627,7 @@ class DetailsPec(models.Model):
             else:
                 pool_medical_id = rec.pec_id.pool_medical_id.id
                 rec.pool_medical = pool_medical_id
+
 
     # @api.one
     @api.depends('pool_medical')
@@ -3398,15 +3407,15 @@ class DetailsPec(models.Model):
                              d'informations, veuillez contactez l'administrateur..."
                             ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
                         )
-
+    @api.multi
     def _compute_net_a_payer(self):
         for rec in self:
-            if rec.pec_id and rec.net_prestataire:
-                rec.net_a_payer = int(rec.net_prestataire)
-            elif rec.rfm_id and rec.mt_remboursement:
-                rec.net_a_payer = int(rec.mt_remboursement)
+            if rec.pec_id:
+                rec.net_a_payer = rec.net_prestataire
+            elif rec.rfm_id:
+                rec.net_a_payer = rec.mt_remboursement
             else:
-                pass
+                rec.net_a_payer = 0
         # if bool (self.rfm_id):
         #     self.net_a_payer = self.mt_remboursement
         # elif bool (self.net_prestataire):
@@ -3417,12 +3426,12 @@ class DetailsPec(models.Model):
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
-                 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire', 'ticket_exigible',
-                 'pool_medical', 'pool_medical_crs_id', 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
-    # @api.constrains('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
-    #              'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire', 'ticket_exigible',
-    #              'cout_unit', 'quantite', 'quantite_livre')
-    @api.constrains ('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+                 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire','ticket_exigible',
+                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre', 'cout_unite')
+    # @api.onchange('prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id', 'mt_exclusion',
+    #               'substitut_phcie_id', 'mt_exclusion', 'cout_unit', 'quantite', 'quantite_livre', 'code_id_rfm',
+    #               'cout_unite', 'prestataire_public', 'zone_couverte', 'prestataire')
+    @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         self.ensure_one()
         if bool(self.prestation_id):
@@ -3436,7 +3445,7 @@ class DetailsPec(models.Model):
                 ('code_medical_id', '=', self.code_medical_id.id)
             ])
 
-            ticket_exigible = bool(controle_rubrique.ticket_exigible)
+            ticket_exigible = bool (controle_rubrique.ticket_exigible)
             self.ticket_exigible = ticket_exigible
             ############################################################################################################
             # Sinon, traitement de prise en charge normal : appliquer le taux de couverture selon les cas.             #
@@ -3454,7 +3463,7 @@ class DetailsPec(models.Model):
                     self.taux_couvert = int (self.police_id.tx_couv_prive_couvert)
                 elif not bool (self.zone_couverte) and not bool (self.prestataire.is_public):
                     self.taux_couvert = int (self.police_id.tx_couv_prive)
-            elif bool(code_medical_police):
+            elif bool (code_medical_police):
                 if bool (self.prestataire.is_public) or bool (self.prestataire_public):
                     self.taux_couvert = int (code_medical_police.tx_public)
                 elif not bool (self.prestataire.is_public) or not bool (self.prestataire_public):
@@ -3858,441 +3867,6 @@ class DetailsPec(models.Model):
             else:
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.net_prestataire -= self.mt_exclusion
-        # for rec in self:
-            # if bool(rec.prestation_id):
-            #     # Vérifier si la prestation est identifiée
-            #     controle_rubrique = self.env['proximas.controle.rubrique'].search([
-            #         ('rubrique_id', '=', rec.rubrique_id.id),
-            #         ('police_id', '=', rec.police_id.id)
-            #     ])
-            #     code_medical_police = self.env['proximas.code.medical.police'].search([
-            #         ('police_id', '=', rec.police_id.id),
-            #         ('code_medical_id', '=', rec.code_medical_id.id)
-            #     ])
-            #
-            #     ticket_exigible = bool (controle_rubrique.ticket_exigible)
-            #     rec.ticket_exigible = ticket_exigible
-            #     ############################################################################################################
-            #     # Sinon, traitement de prise en charge normal : appliquer le taux de couverture selon les cas.             #
-            #     ############################################################################################################
-            #     ############################################################################################################
-            #     # Taux de couverture PEC Ou Temboursement
-            #     if bool (rec.rfm_id):
-            #         if bool (rec.zone_couverte) and bool (rec.prestataire_public):
-            #             rec.taux_couvert = int (rec.police_id.tx_couv_public_couvert)
-            #         # Taux Couverture (Remboursement) Zone Non Couverte et prestataire public
-            #         elif not bool (rec.zone_couverte) and bool (rec.prestataire_public):
-            #             rec.taux_couvert = int (rec.police_id.tx_couv_public)
-            #         # Taux Couverture (Remboursement) Zone Couverte et prestataire privé
-            #         elif bool (rec.zone_couverte) and not bool (rec.prestataire_public):
-            #             rec.taux_couvert = int (rec.police_id.tx_couv_prive_couvert)
-            #         elif not bool (rec.zone_couverte) and not bool (rec.prestataire.is_public):
-            #             rec.taux_couvert = int (rec.police_id.tx_couv_prive)
-            #     elif bool (code_medical_police):
-            #         if bool (rec.prestataire.is_public) or bool (rec.prestataire_public):
-            #             rec.taux_couvert = int (code_medical_police.tx_public)
-            #         elif not bool (rec.prestataire.is_public) or not bool (rec.prestataire_public):
-            #             rec.taux_couvert = int (code_medical_police.tx_prive)
-            #     elif bool (rec.prestataire.is_public):
-            #         rec.taux_couvert = int (rec.police_id.tx_couv_public)
-            #     else:
-            #         rec.taux_couvert = int (rec.police_id.tx_couv_prive)
-            #     ##################################################################
-            #     # Récupérer le coût unitaire
-            #     if bool (rec.cout_unit):
-            #         rec.cout_unite = rec.cout_unit
-            #     elif bool (rec.cout_unitaire):
-            #         rec.cout_unite = rec.cout_unitaire
-            #     else:
-            #         rec.cout_unite = 0
-            #     ####################################################################
-            #     taux_couvert = rec.taux_couvert
-            #     plafond = 0
-            #     forfait = 0
-            #     if bool (code_medical_police):
-            #         plafond = int (code_medical_police.mt_plafond)
-            #     rec.mt_plafond = plafond
-            #
-            #     if bool (rec.substitut_phcie_id):
-            #         # Cas de substitution de produit pharmacie (médicaments)
-            #         prix_substitut = int (rec.prix_indicatif_substitut)
-            #         prix_produit = int (rec.prix_indicatif_produit)
-            #         if prix_substitut > prix_produit:
-            #             # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
-            #             raise UserError (_ (
-            #                 u"Proximaas : Contrôle de Règles de Gestion.\n \
-            #                 Le prix indicatif du médicament prescrit est de: (%d Fcfa). Cependant, vous vous ne pouvez pas\
-            #                 le substituer à un autre dont le prix indicatif est supérieur : (%d Fcfa). Pour plus \
-            #                 d'informations, veuillez contactez l'administrateur..."
-            #             ) % (prix_produit, prix_substitut)
-            #                              )
-            #         cout_produit = int (rec.cout_unite)
-            #         quantite_prescrite = int (rec.quantite)
-            #         quantite = int (rec.quantite_livre)
-            #         quantite_reste = int (quantite_prescrite) - int (quantite)
-            #         marge_police = int (rec.marge_medicament_police)
-            #         marge_substitut = int (rec.marge_medicament_substitut)
-            #         prix_majore = 0
-            #         if 0 < marge_substitut:
-            #             prix_majore = int (prix_substitut + marge_substitut)
-            #         elif 0 < marge_police:
-            #             prix_majore = int (prix_substitut + marge_police)
-            #         if 0 < prix_majore < cout_produit:
-            #             if quantite_prescrite > quantite:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = (prix_majore * quantite)  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif quantite_prescrite < quantite:
-            #                 raise UserError (_ (
-            #                     u"Proximaas : Contrôle de Règles de Gestion.\n \
-            #                      Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-            #                      (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-            #                      veuillez contactez l'administrateur..."
-            #                 ) % (quantite, quantite_prescrite)
-            #                                  )
-            #             else:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = (prix_majore * quantite)  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             if quantite_prescrite > quantite:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = rec.cout_total  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif quantite_prescrite < quantite:
-            #                 raise UserError (_ (
-            #                     u"Proximaas : Contrôle de Règles de Gestion.\n \
-            #                     Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-            #                     (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-            #                     veuillez contactez l'administrateur..."
-            #                 ) % (quantite, quantite_prescrite)
-            #                                  )
-            #             else:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = rec.cout_total  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #     elif bool (rec.produit_phcie_id):
-            #         # Cas de produit pharmacie (médicaments)
-            #         cout_produit = int (rec.cout_unite)
-            #         prix_produit = int (rec.prix_indicatif_produit)
-            #         quantite_prescrite = int (rec.quantite)
-            #         quantite = int (rec.quantite_livre)
-            #         quantite_reste = int (quantite_prescrite) - int (quantite)
-            #         marge_police = int (rec.marge_medicament_police)
-            #         marge_produit = int (rec.marge_medicament_produit)
-            #         prix_majore = 0
-            #         if 0 < marge_produit:
-            #             prix_majore = int (prix_produit + marge_produit)
-            #         elif 0 < marge_police:
-            #             prix_majore = int (prix_produit + marge_police)
-            #         if 0 < prix_majore < cout_produit:
-            #             if quantite_prescrite > quantite:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = (prix_majore * quantite)  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif quantite_prescrite < quantite:
-            #                 raise UserError (_ (
-            #                     u"Proximaas : Contrôle de Règles de Gestion.\n \
-            #                     Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-            #                     (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-            #                     veuillez contactez l'administrateur..."
-            #                 ) % (quantite, quantite_prescrite)
-            #                                  )
-            #             else:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = (prix_majore * quantite)  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             if quantite_prescrite > quantite:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = rec.cout_total  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif quantite_prescrite < quantite:
-            #                 raise UserError (_ (
-            #                     "Proximaas : Contrôle de Règles de Gestion.\n \
-            #                     Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-            #                     (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-            #                     veuillez contactez l'administrateur..."
-            #                 ) % (quantite, quantite_prescrite)
-            #                                  )
-            #             else:
-            #                 rec.cout_total = cout_produit * quantite
-            #                 rec.total_pc = rec.cout_total  # - rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #     # 1. Prestation Cas de cout modifiable et quantité exigé
-            #     elif bool (rec.cout_modifiable) and bool (rec.quantite_exige):
-            #         quantite = rec.quantite_livre
-            #         cout_unitaire = rec.cout_unite
-            #         code_non_controle = rec.code_non_controle
-            #         # 1. Si oui, alors vérifier si le coût de la prestation est modifiable
-            #
-            #         if 0 < plafond < cout_unitaire and not code_non_controle:
-            #             # Si OUI, alors vérifier le montant plafond n'est pas nulle et est inférieur au cout unitaire
-            #             # donné par l'utilisateur
-            #             if rec.mt_rabais > 0:
-            #                 # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient * quantite) - int (rec.mt_rabais)
-            #                 rec.total_pc = int (plafond * rec.coefficient * quantite) - int (
-            #                     rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif rec.remise_prestation > 0:
-            #                 # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
-            #                 cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise = cout_total - int (cout_total * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise
-            #                 rec.total_pc = int (rec.plafond * rec.coefficient * quantite) - int (
-            #                     remise)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 # Sinon, alors il y a ni rabais, ni remise
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 rec.total_pc = int (plafond * rec.coefficient * quantite)  # - int(rec.mt_exclusion)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             # Sinon, il n'y pas de plafond applicable
-            #             if rec.mt_rabais > 0:
-            #                 # Si OUI, il y a t-il un montant de rabais prédéfini et non nulle?
-            #                 rec.cout_total = int (
-            #                     cout_unitaire * rec.coefficient * quantite) - int (rec.mt_rabais)
-            #                 rec.total_pc = int (
-            #                     cout_unitaire * rec.coefficient * quantite) - int (
-            #                     rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #
-            #             elif rec.remise_prestation > 0:
-            #                 # Sinon, alors s'il y a t-il un taux de remise prédéfini non nulle?
-            #                 cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise = cout_total - int (cout_total * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise
-            #                 rec.total_pc = cout_total - int (remise)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 # Sinon, alors il y a ni rabais, ni remise
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 rec.total_pc = int (
-            #                     cout_unitaire * rec.coefficient * quantite)  # - int(rec.mt_exclusion)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #     #########################################
-            #     # 2. Prestation Cas de cout modifiable et non Quantité exigée
-            #     elif bool (rec.cout_modifiable) and not bool (rec.quantite_exige):
-            #         cout_unitaire = rec.cout_unite
-            #         code_non_controle = rec.code_non_controle
-            #         # 1. Si oui, alors vérifier si le coût de la prestation est modifiable
-            #         if 0 < plafond < cout_unitaire and not code_non_controle:
-            #             # Si OUI, alors vérifier le montant plafond n'est pas nulle et est inférieur au cout unitaire
-            #             # donné par l'utilisateur
-            #             if rec.mt_rabais > 0:
-            #                 # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient) - int (rec.mt_rabais)
-            #                 rec.total_pc = int (plafond * rec.coefficient) - int (
-            #                     rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif rec.remise_prestation > 0:
-            #                 # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
-            #                 cout_total = int (cout_unitaire * rec.coefficient)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise = cout_total - int (cout_total * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise
-            #                 rec.total_pc = int (rec.plafond * rec.coefficient) - int (
-            #                     remise)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 # Sinon, alors il y a ni rabais, ni remise
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient)
-            #                 rec.total_pc = int (plafond * rec.coefficient)  # - int(rec.mt_exclusion)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             # Sinon, il n'y pas de plafond applicable
-            #             if rec.mt_rabais > 0:
-            #                 # Si OUI, il y a t-il un montant de rabais prédéfini et non nulle?
-            #                 rec.cout_total = int (
-            #                     cout_unitaire * rec.coefficient) - rec.mt_rabais
-            #                 rec.total_pc = int (
-            #                     cout_unitaire * rec.coefficient) - int (
-            #                     rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #
-            #             elif rec.remise_prestation > 0:
-            #                 # Sinon, alors s'il y a t-il un taux de remise prédéfini non nulle?
-            #                 cout_total = int (cout_unitaire * rec.coefficient)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise = cout_total - int (cout_total * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise
-            #                 rec.total_pc = cout_total - int (remise)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 # Sinon, alors il y a ni rabais, ni remise
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient)
-            #                 rec.total_pc = int (
-            #                     cout_unitaire * rec.coefficient)  # - int(rec.mt_exclusion)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #     #########################################################
-            #     # 3. Prestation Cas de quantité exigée et non cout modifiable
-            #     elif bool (rec.quantite_exige) and not bool (rec.cout_modifiable):
-            #         quantite = rec.quantite_livre
-            #         cout_unitaire = rec.cout_unite
-            #         code_non_controle = rec.code_non_controle
-            #         # 1. Si oui, alors vérifier si le coût de la prestation est modifiable
-            #         if 0 < plafond < cout_unitaire and code_non_controle:
-            #             # Si OUI, alors vérifier le montant plafond n'est pas nulle et est inférieur au cout unitaire
-            #             # donné par l'utilisateur
-            #             if rec.mt_rabais > 0:
-            #                 # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient * quantite) - int (
-            #                     rec.mt_rabais)
-            #                 rec.total_pc = int (plafond * rec.coefficient * quantite) - int (
-            #                     rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif rec.remise_prestation > 0:
-            #                 # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
-            #                 cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise = cout_total - int (cout_total * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise
-            #                 rec.total_pc = int (rec.plafond * rec.coefficient * quantite) - int (
-            #                     remise)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 # Sinon, alors il y a ni rabais, ni remise
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 rec.total_pc = int (plafond * rec.coefficient * quantite)  # - int(rec.mt_exclusion)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             # Sinon, il n'y pas de plafond applicable
-            #             if rec.mt_rabais > 0:
-            #                 # Si OUI, il y a t-il un montant de rabais prédéfini et non nulle?
-            #                 rec.cout_total = int (
-            #                     cout_unitaire * rec.coefficient * quantite) - rec.mt_rabais
-            #                 rec.total_pc = int (
-            #                     cout_unitaire * rec.coefficient * quantite) - int (
-            #                     rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #
-            #             elif rec.remise_prestation > 0:
-            #                 # Sinon, alors s'il y a t-il un taux de remise prédéfini non nulle?
-            #                 cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise = cout_total - int (cout_total * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise
-            #                 rec.total_pc = cout_total - int (remise)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 # Sinon, alors il y a ni rabais, ni remise
-            #                 rec.cout_total = int (cout_unitaire * rec.coefficient * quantite)
-            #                 rec.total_pc = int (
-            #                     cout_unitaire * rec.coefficient * quantite)  # - int(rec.mt_exclusion)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #     # Forfait éclaté ( forfait SAM + Forfait Assuré)
-            #     elif 0 < int (rec.forfait_sam + rec.forfait_ticket) and int (
-            #             rec.forfait_sam + rec.forfait_ticket) <= int (rec.cout_unite):
-            #         forfait = int (rec.forfait_sam + rec.forfait_ticket)
-            #         rec.mt_forfait = forfait
-            #         # Sinon, si le coût de la prestation n'est pas modifiable, il y a t-il un forfait SAM et forfait Ticket
-            #         if 0 < int (plafond * rec.coefficient) < forfait:
-            #             # s'il y a t-il un plafond pour la prestation
-            #             if rec.mt_rabais:
-            #                 # S'il y a t-il un Rabais
-            #                 rec.cout_total = int (forfait) - int (rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_pc = int (plafond * rec.coefficient) - int (rec.mt_rabais)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif rec.remise_prestation:
-            #                 # S'il y a t-il une Remise
-            #                 cout_total = int (forfait)
-            #                 total_pc = int (plafond * rec.coefficient)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise_cout_total = cout_total - int (cout_total * taux_remise / 100)
-            #                 remise_total_pc = total_pc - int (total_pc * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise_cout_total
-            #                 rec.total_pc = total_pc - remise_total_pc  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 rec.cout_total = int (forfait)  # - int(rec.mt_exclusion)
-            #                 rec.total_pc = int (plafond * rec.coefficient)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             forfait = int (rec.forfait_sam + rec.forfait_ticket)
-            #             rec.mt_forfait = forfait
-            #             if rec.mt_rabais:
-            #                 rec.cout_total = int (forfait) - int (rec.mt_rabais)
-            #                 rec.total_pc = int (forfait) - int (rec.mt_rabais)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             elif rec.remise_prestation:
-            #                 # S'il y a t-il une Remise
-            #                 cout_total = int (forfait)
-            #                 total_pc = int (forfait)
-            #                 taux_remise = int (rec.remise_prestation)
-            #                 remise = cout_total - int (cout_total * taux_remise / 100)
-            #                 rec.cout_total = cout_total - remise
-            #                 rec.total_pc = total_pc - int (remise)  # + rec.mt_exclusion
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #             else:
-            #                 rec.cout_total = int (forfait)
-            #                 rec.total_pc = int (forfait)  # - int(rec.mt_exclusion)
-            #                 rec.total_npc = rec.cout_total - rec.total_pc
-            #     elif 0 < plafond < rec.cout_unite and not rec.code_non_controle:
-            #         if rec.mt_rabais:
-            #             rec.cout_total = int (rec.cout_unite * rec.coefficient) - int (rec.mt_rabais)
-            #             rec.total_pc = int (plafond * rec.coefficient) - int (rec.mt_rabais)  # + rec.mt_exclusion
-            #             rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             rec.cout_total = int (rec.cout_unite * rec.coefficient)
-            #             rec.total_pc = int (plafond * rec.coefficient)  # - int(rec.mt_exclusion)
-            #             rec.total_npc = rec.cout_total - rec.total_pc
-            #     elif plafond == 0:
-            #         if rec.mt_rabais:
-            #             rec.cout_total = int (rec.cout_unite * rec.coefficient) - int (rec.mt_rabais)
-            #             rec.total_pc = int (rec.cout_unite * rec.coefficient) - int (
-            #                 rec.mt_rabais)  # + rec.mt_exclusion
-            #             rec.total_npc = rec.cout_total - rec.total_pc
-            #         else:
-            #             rec.cout_total = int (rec.cout_unite * rec.coefficient)
-            #             rec.total_pc = int (rec.cout_unite * rec.coefficient)  # - int(rec.mt_exclusion)
-            #             rec.total_npc = rec.cout_total - rec.total_pc
-            #     else:
-            #         rec.total_pc = int (rec.cout_unite * rec.coefficient) - int (rec.mt_rabais)
-            #         rec.cout_total = int (rec.cout_unite * rec.coefficient) - int (
-            #             rec.mt_rabais)  # + rec.mt_exclusion
-            #         rec.total_npc = rec.cout_total - rec.total_pc
-            #     rec.total_npc = int (rec.cout_total) - int (rec.total_pc)
-            #     total_pc = int (rec.total_pc)
-            #     total_npc = int (rec.total_npc)
-            #     diff_ticket_mt_paye = 0
-            #     if bool (forfait):
-            #         rec.net_tiers_payeur = int (rec.forfait_sam)
-            #         rec.ticket_moderateur = int (rec.forfait_ticket)
-            #         # rec.ticket_exigible = bool (controle_rubrique.ticket_exigible)
-            #         diff_ticket_mt_paye = int (rec.mt_paye_assure) - int (rec.ticket_moderateur)
-            #         # Calculs détails pour le remboursements
-            #         if bool (rec.rfm_id):
-            #             rec.mt_remboursement = rec.net_tiers_payeur
-            #             rec.net_prestataire = 0
-            #             rec.debit_ticket = 0
-            #     else:
-            #         rec.net_tiers_payeur = total_pc * int (taux_couvert) / 100
-            #         taux_ticket = 100 - int (taux_couvert)
-            #         rec.ticket_moderateur = total_pc * int (taux_ticket) / 100
-            #         # rec.ticket_exigible = bool (controle_rubrique.ticket_exigible)
-            #         diff_ticket_mt_paye = int (rec.mt_paye_assure) - int (rec.ticket_moderateur)
-            #
-            #     if bool (ticket_exigible):
-            #         rec.net_prestataire = int (rec.net_tiers_payeur)
-            #         rec.debit_ticket = int (rec.ticket_moderateur + rec.total_npc) - int (rec.mt_paye_assure)
-            #     elif not bool (rec.ticket_exigible) and (diff_ticket_mt_paye >= 0):
-            #         rec.net_prestataire = total_pc - int (rec.ticket_moderateur)
-            #         rec.debit_ticket = int (rec.ticket_moderateur + rec.total_npc) - int (rec.mt_paye_assure)
-            #
-            #     # Calculs détails pour le remboursements
-            #     if bool (rec.rfm_id):
-            #         rec.mt_remboursement = rec.net_tiers_payeur
-            #         rec.net_prestataire = 0
-            #         rec.debit_ticket = 0
-            #         rec.mt_remboursement -= rec.mt_exclusion
-            #     else:
-            #         rec.net_prestataire = int (rec.net_tiers_payeur)
-            #         rec.net_prestataire -= rec.mt_exclusion
-
 
 
     # @api.multi
@@ -4377,10 +3951,12 @@ class DetailsPec(models.Model):
 
     # CONTROLE DELAI ATTENTE
     # @api.one
-    @api.depends('date_execution', 'prestation_id', 'prestation_cro_id', 'prestation_crs_id',
-                  'prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
-    @api.onchange('date_execution', 'prestation_id', 'prestation_cro_id', 'prestation_crs_id',
-                   'prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+    @api.depends ('date_execution', 'prestation_id', 'prestation_cro_id', 'prestation_crs_id',
+                  'prestation_demande_id',
+                  'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+    @api.onchange ('date_execution', 'prestation_id', 'prestation_cro_id', 'prestation_crs_id',
+                   'prestation_demande_id',
+                   'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _check_delai_attente_prestation(self):
         '''
         Contrôle à affecuer sur la prestation, médicament fournis pour vérifier le délai d'attente à observer
@@ -4395,7 +3971,7 @@ class DetailsPec(models.Model):
                 now = datetime.now ()
                 substitut_phcie = rec.substitut_phcie
                 # Si OUI, y a-t-il un délai d'attente à observer pour le substitut?
-                if 0 < int(rec.delai_attente_substitut):
+                if 0 < int (rec.delai_attente_substitut):
                     # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
                     pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
                         [
@@ -5358,6 +4934,11 @@ class RemboursementPEC(models.Model):
         # store=True,
         readonly=True,
     )
+    groupe_id = fields.Many2one(
+        string="Organisation(SAM)",
+        related='contrat_id.groupe_id',
+        readonly=True,
+    )
     contrat_actif = fields.Boolean(
         string="Contrat Activé?",
         related='contrat_id.actif',
@@ -5384,11 +4965,6 @@ class RemboursementPEC(models.Model):
         omodel_name="res.company",
         string="Organisation(SAM)",
         related='contrat_id.structure_id',
-        readonly=True,
-    )
-    groupe_id = fields.Many2one (
-        string="Organisation(SAM)",
-        related='contrat_id.groupe_id',
         readonly=True,
     )
     matricule = fields.Char (

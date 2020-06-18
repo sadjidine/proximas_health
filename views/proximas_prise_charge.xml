@@ -547,7 +547,7 @@
                                                                required="1"
                                                                options='{"no_open": True, "no_create": True}' class="text-primary"
                                                                domain="[('prestataire_id', '=', prestataire_id),('accord_prealable', '=', False),]"/>
-                                                        <field name="date_dernier_acte" string="Date Précédente Prestation "/>
+                                                        <!--<field name="date_dernier_acte" string="Date Précédente Prestation "/>-->
                                                         <field name="exercice_id"
                                                                string="Exercice SAM"
                                                                options='{"no_open": True, "no_create": True}'/>
@@ -703,7 +703,7 @@
                                                            options='{"no_open": True, "no_create": True}'
                                                            required="1"
                                                     />
-                                                    <field name="date_dernier_acte" string="Date Précédente Prestation "/>
+                                                    <!--<field name="date_dernier_acte" string="Date Précédente Prestation "/>-->
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2" invisible="1">

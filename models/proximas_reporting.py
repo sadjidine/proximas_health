@@ -3197,7 +3197,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'prestataire': prestataire.name,
                         'adherent': adherent.name,
                         'code_id': adherent.code_id,
-                        'groupe': rfm.groupe_id.name,
+                        'groupe': adherent.groupe_id.name,
                         'ref_facture': facture.name,
                         'ref_interne': facture.ref_interne,
                         'num_facture': facture.num_facture,
