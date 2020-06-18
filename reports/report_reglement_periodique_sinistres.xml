@@ -231,7 +231,7 @@
                                            <!--<caption>Notes / Observations:</caption>-->
                                             <tr>
                                                 <td class="text-center">
-                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Standard93', o.num_facture, 340,  60)" style="width:340;height:60;"/>
+                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Standard93', num_facture, 340,  60)" style="width:340;height:60;"/>
                                                 </td>
                                             </tr>
                                         </table>
@@ -241,7 +241,7 @@
                                            <!--<caption>Notes / Observations:</caption>-->
                                             <tr>
                                                 <td class="text-center">
-                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Standard93', o.num_rfm, 340,  60)" style="width:340;height:60;"/>
+                                                    <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s' % ('Standard93', num_rfm, 340,  60)" style="width:340;height:60;"/>
                                                 </td>
                                             </tr>
                                         </table>
