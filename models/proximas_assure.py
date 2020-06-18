@@ -9,7 +9,7 @@ from openerp import tools
 from openerp.tools.translate import _
 from openerp import _, api, fields, models
 from openerp.exceptions import ValidationError, UserError
-from datetime import datetime
+from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from random import randint
 from openerp.tools import DEFAULT_SERVER_DATE_FORMAT as DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT as DATETIME_FORMAT
@@ -154,11 +154,6 @@ class Assure(models.Model):
         string="Date Activation",
         default=fields.Date.today (),
         help='Indiquer la date à laquelle l\'assuré sera actif',
-    )
-    date_fin_prevue = fields.Date (
-        string="Date Fin Prévue",
-        default=fields.Date.today (),
-        help='Indique la date de validité l\'assuré.',
     )
     date_edition_carte = fields.Date(
     	string="Date Edition Carte", 
@@ -360,12 +355,59 @@ class Assure(models.Model):
         store=True,
         # related='assure_id.nbre_actes_pec',
     )
-    jours_activation_assure = fields.Integer(
+    jours_activation_contrat = fields.Integer(
         string="Nbre. jours Contrat",
         # compute='_get_jours_activation',
         default=0,
         readonly=True,
     )
+    validite_contrat = fields.Integer(
+        string="Délai Validité contrat (jours)",
+        related='contrat_id.validite_contrat',
+        readonly=True,
+    )
+    duree_activation = fields.Char (
+        string="Durée Activation (Details)",
+        compute='_get_duree_activation',
+    )
+    jours_activation = fields.Integer(
+        string="Durée Activation (Nbre. Jours)",
+        compute='_get_duree_activation',
+    )
+    date_fin_prevue = fields.Date(
+        string="Date Fin Contrat",
+        compute='_compute_date_fin_prevue',
+        help="Date de fin prévue de la couverture en rapport avec le délai de validité de la police."
+    )
+    date_maj_assure = fields.Datetime(
+        string="Dernière mise à jour",
+        required=False,
+        help='Date de la dernière mise à jour effectuée',
+    )
+    compteur_maj_assure = fields.Integer(
+        string="Compteur MAJ",
+        default=0,
+        help="Le nombre de fois que le système a mise à jour les données de l'assuré...",
+    )
+
+
+    def _compute_date_fin_prevue(self):
+        if bool(self.contrat_id):
+            now = fields.Datetime.from_string (fields.Date.today ())
+            activation_assure = fields.Datetime.from_string (self.date_activation)
+            date_deces = fields.Datetime.from_string (self.date_deces)
+            date_fin_prevue = fields.Datetime.from_string (self.date_fin_prevue)
+            nbre_jours_validite_contrat = int (self.validite_contrat) or 366
+            nbre_renouvellement = int (self.jours_activation / nbre_jours_validite_contrat) + 1
+            # Calcul de la date de fin prévue du contrat Adherent
+            # datetime.now () + timedelta (days=2, hours=4, minutes=3, seconds=12)
+            if bool (date_deces):
+                self.date_fin_prevue = date_deces
+            elif bool (date_fin_prevue) and date_fin_prevue <= now:
+                self.date_fin_prevue += timedelta (days=int (self.validite_contrat))
+            else:
+                self.date_fin_prevue = activation_assure + timedelta (
+                    days=int (self.validite_contrat) * nbre_renouvellement)
 
     @api.depends('date_naissance', 'age')
     def _check_tranche_age(self):
