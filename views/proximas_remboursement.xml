@@ -48,7 +48,7 @@
                                la validation et en vous risquez de ne plus pouvoir acceder au dossier.Voulez-vous
                                confirmer la clôture?"
                        />
-                       <button name="Terminé" type="workflow"
+                       <button name="Boucler" type="workflow"
                                string="Terminé" icon="fa-hand-o-right"
                                states="valide"
                                help="TERMINE: Terminer le processus de traitement du dossier de remboursement de frais
