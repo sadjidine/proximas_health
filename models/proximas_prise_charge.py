@@ -2015,13 +2015,11 @@ class DetailsPec(models.Model):
     statut_familial = fields.Selection(
         string="Statut Familial",
         related='assure_id.statut_familial',
-        store=True,
         readonly=True,
     )
     genre = fields.Selection(
         string="Genre",
         related='assure_id.genre',
-        store=True,
         readonly=True,
     )
     date_naissance = fields.Date(

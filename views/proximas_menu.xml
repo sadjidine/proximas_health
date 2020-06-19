@@ -107,14 +107,14 @@
               parent="proximas_pec"
               sequence="2011"
               action="proximas_crea_pec_action"
-              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro,proximas_medical.group_medecin"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro"
     />
      <menuitem id="proximas_maj_crs_pec"
               name=">> Poursuivre Prise en Charge"
               parent="proximas_pec"
               sequence="2012"
               action="proximas_maj_crs_pec_action"
-              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro,proximas_medical.group_crs,proximas_medical.group_medecin"/>
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro,proximas_medical.group_crs"/>
     <menuitem id="proximas_maj_phcie_pec"
               name=">> Dispensation Médicaments (Pharmacie)"
               parent="proximas_pec"
@@ -134,7 +134,7 @@
               parent="proximas_pec"
               sequence="2015"
               action="proximas_list_pec_action"
-              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator"
     />
     <menuitem id="proximas_facture_remb"
               name="2. Gestion Factures / Remboursements"
@@ -155,7 +155,7 @@
               parent="proximas_facture_remb"
               sequence="2022"
               action="proximas_facture_list_all_action"
-              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"
     />
     <menuitem id="proximas_create_rfm_pec"
               name=">> Nouvelle Fiche Remboursement Adhérent"
@@ -173,6 +173,7 @@
               name="3. Suivi &amp; Contrôles Prestations/Actes"
               parent="proximas_prise_en_charge_root"
               sequence="203"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
     />
     <!--groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"-->
     <menuitem id="proximas_accord_details_pec_crs"
