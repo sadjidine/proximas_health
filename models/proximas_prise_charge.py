@@ -2070,24 +2070,20 @@ class DetailsPec(models.Model):
         # comodel_name="promimas.groupe",
         string="Groupe/Organe",
         related='contrat_id.groupe_id',
-        store=True,
     )
     localite_id = fields.Many2one (
         # comodel_name="proximas.localite",
         string="Localité",
         related='assure_id.localite_id',
-        store=True,
     )
     zone_id = fields.Many2one (
         # comodel_name="proximas.zone",
         string="Localité",
         related='localite_id.zone_id',
-        store=True,
     )
     num_contrat = fields.Char(
         string="Num. Contrat",
         related='contrat_id.num_contrat',
-        #store=True,
         readonly=True,
     )
     adherent_id = fields.Many2one(
@@ -2100,7 +2096,6 @@ class DetailsPec(models.Model):
     adherent = fields.Char(
         string="Adhérent",
         related='adherent_id.name',
-        # store=True,
         required=False,
         readonly=True,
     )
@@ -2186,24 +2181,6 @@ class DetailsPec(models.Model):
         store=True,
         readonly=True,
     )
-    # prestataire = fields.Char(
-    #     string="Prestataire Soins",
-    #     compute='_get_prestataire',
-    #     required=False,
-    # )
-
-    # prestataire_phcie_1_id = fields.Many2one(
-    #     comodel_name="res.partner",
-    #     related='pec_id.prestataire_phcie_ 1_id',
-    #     string="Prestataire Phcie 1",
-    #     required=False,
-    # )
-    # prestataire_phcie_2_id = fields.Many2one(
-    #     comodel_name="res.partner",
-    #     related='pec_id.prestataire_phcie_2_id',
-    #     string="Prestataire Phcie 2",
-    #     required=False,
-    # )
     # Champs relatifs Prestation
     code_prestation_id = fields.Many2one(
         comodel_name="proximas.code.prestation",
@@ -3405,7 +3382,7 @@ class DetailsPec(models.Model):
                              d'informations, veuillez contactez l'administrateur..."
                             ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
                         )
-    @api.multi
+    # @api.multi
     def _compute_net_a_payer(self):
         for rec in self:
             if rec.pec_id:
@@ -3414,21 +3391,12 @@ class DetailsPec(models.Model):
                 rec.net_a_payer = rec.mt_remboursement
             else:
                 rec.net_a_payer = 0
-        # if bool (self.rfm_id):
-        #     self.net_a_payer = self.mt_remboursement
-        # elif bool (self.net_prestataire):
-        #     self.net_a_payer = self.net_prestataire
-        # else:
-        #     self.net_a_payer = 0
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
                  'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire','ticket_exigible',
-                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre', 'cout_unite')
-    # @api.onchange('prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id', 'mt_exclusion',
-    #               'substitut_phcie_id', 'mt_exclusion', 'cout_unit', 'quantite', 'quantite_livre', 'code_id_rfm',
-    #               'cout_unite', 'prestataire_public', 'zone_couverte', 'prestataire')
+                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
     @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         self.ensure_one()

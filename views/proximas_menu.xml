@@ -36,12 +36,16 @@
               name=">> Contrats Adhésion (Souscripteurs)"
               parent="proximas_souscription"
               sequence="130"
-              action="contrat_adherent_action"/>
+              action="contrat_adherent_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
     <menuitem id="proximas_adherent"
               name=">> Adhérents Souscripteurs"
               parent="proximas_souscription"
               sequence="140"
-              action="proximas_adherent_action"/>
+              action="proximas_adherent_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
     <menuitem id="proximas_ayant_droit"
               name=">> Ayant-droits Déclarés"
               parent="proximas_souscription"
@@ -51,7 +55,9 @@
               name=">> Assurés bénéficiaires(Adhérents et Ayant-droit)"
               parent="proximas_souscription"
               sequence="160"
-              action="proximas_assure_action"/>
+              action="proximas_assure_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
     <menuitem id="proximas_suivi_beneficiaire"
               name="2. Suivi Bénéficiaires"
               parent="proximas_souscription_root"
