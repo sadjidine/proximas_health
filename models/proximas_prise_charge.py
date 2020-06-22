@@ -2824,7 +2824,7 @@ class DetailsPec(models.Model):
     def send_accord_pec_mail(self):
         # self.ensure_one()
         for rec in self:
-            if bool(rec.accord_prealable) and not bool (rec.accorde):
+            if bool(rec.accord_prealable) and not bool(rec.accorde):
                 # Find the e-mail template
                 template = rec.env.ref ('proximas_medical.accord_pec_mail_template')
                 # You can also find the e-mail template like this:

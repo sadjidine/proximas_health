@@ -169,7 +169,7 @@ class Facture(models.Model):
         compute='_compute_facture_details',
         default=0,
     )
-    totaux_exclusions_facture = fields.Float (
+    totaux_exclusions_facture = fields.Float(
         string="Totaux Exclusions",
         digits=(9, 0),
         compute='_compute_facture_details',
@@ -226,22 +226,23 @@ class Facture(models.Model):
         return action
 
     # @api.one
-    @api.depends('details_pec_ids')
+    @api.depends('details_pec_ids', 'mt_total_facture', 'totaux_actes_facture', 'totaux_exclusions_facture', 'totaux_actes_pc_facture')
     def _compute_facture_details(self):
         for rec in self:
             if bool(rec.details_pec_ids):
                 # Calculs détails Actes médicaux et paramédicaux - Facture
                 details_actes_facture = rec.details_pec_ids
                 rec.nbre_actes_facture = len(details_actes_facture)
-                rec.totaux_actes_facture = sum (item.cout_total for item in details_actes_facture) or 0
-                rec.totaux_actes_pc_facture = sum (item.total_pc for item in details_actes_facture) or 0
-                rec.totaux_actes_npc_facture = sum (item.total_npc for item in details_actes_facture) or 0
-                rec.totaux_part_sam_facture = sum (item.net_tiers_payeur for item in details_actes_facture) or 0
-                rec.totaux_ticket_moderateur_facture = sum (
+                rec.totaux_actes_facture = sum(item.cout_total for item in details_actes_facture) or 0
+                rec.totaux_actes_pc_facture = sum(item.total_pc for item in details_actes_facture) or 0
+                rec.totaux_actes_npc_facture = sum(item.total_npc for item in details_actes_facture) or 0
+                rec.totaux_part_sam_facture = sum(item.net_tiers_payeur for item in details_actes_facture) or 0
+                rec.totaux_ticket_moderateur_facture = sum(
                     item.ticket_moderateur for item in details_actes_facture) or 0
                 rec.totaux_exclusions_facture = sum(item.mt_exclusion for item in details_actes_facture) or 0
                 rec.net_prestataire_facture = int(rec.totaux_part_sam_facture - rec.totaux_exclusions_facture)
                 rec.nbre_prestations = len(rec.details_pec_ids)
+                rec.mt_total_facture = int(rec.net_prestataire_facture)
 
     @api.depends('mt_total_facture', 'num_facture')
     def montant_en_text(self):
