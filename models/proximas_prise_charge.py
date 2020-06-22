@@ -3394,10 +3394,10 @@ class DetailsPec(models.Model):
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
-    @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
-                 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire','ticket_exigible',
-                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
-    @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+    @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
+                 'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
+                 'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
+    # @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         self.ensure_one()
         if bool(self.prestation_id):
