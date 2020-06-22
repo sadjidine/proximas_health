@@ -3411,7 +3411,7 @@ class DetailsPec(models.Model):
                 ('code_medical_id', '=', self.code_medical_id.id)
             ])
 
-            ticket_exigible = bool (controle_rubrique.ticket_exigible)
+            ticket_exigible = bool(controle_rubrique.ticket_exigible)
             self.ticket_exigible = ticket_exigible
             ############################################################################################################
             # Sinon, traitement de prise en charge normal : appliquer le taux de couverture selon les cas.             #

@@ -26,7 +26,7 @@ class Facture(models.Model):
         store=True,
         help="Numéro automatique unique de la facture fourni par le système.!",
     )
-    code_facture = fields.Char (
+    code_facture = fields.Char(
         string="Code Facture",
         compute="_get_code_facture",
         require=False,
@@ -226,7 +226,9 @@ class Facture(models.Model):
         return action
 
     # @api.one
-    @api.depends('details_pec_ids', 'mt_total_facture', 'totaux_actes_facture', 'totaux_exclusions_facture', 'totaux_actes_pc_facture')
+    @api.depends('details_pec_ids', 'mt_total_facture', 'totaux_actes_facture',  'totaux_actes_pc_facture',
+                 'totaux_actes_npc_facture',  'totaux_part_sam_facture', 'totaux_exclusions_facture',
+                 'net_prestataire_facture')
     def _compute_facture_details(self):
         for rec in self:
             if bool(rec.details_pec_ids):
@@ -257,7 +259,7 @@ class Facture(models.Model):
         return montant_text.upper()
 
     @api.one
-    @api.depends('date_emission')
+    @api.depends('date_traitement')
     def _get_num_facture(self):
         """Généré un code unique pour la facture"""
         self.ensure_one()
@@ -267,7 +269,7 @@ class Facture(models.Model):
         facture_id = u'F%s%06d' % (annee_format, code_regenere,)
         check_num_facture = self.search_count([('num_facture', '=', facture_id)])
         while check_num_facture >= 1:
-            code_regenere = randint (1, 1e6)
+            code_regenere = randint(1, 1e6)
             facture_id = u'F%s%06d' % (annee_format, code_regenere,)
             self.num_facture = facture_id
         self.num_facture = facture_id
