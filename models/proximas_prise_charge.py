@@ -2244,7 +2244,7 @@ class DetailsPec(models.Model):
         string="Code Médical",
         # compute='_check_prestation_id',
         related='prestation_id.code_medical_id',
-        store=True,
+        # store=True,
         readonly=True,
     )
     rubrique_id = fields.Many2one(
@@ -4586,7 +4586,7 @@ class DetailsPec(models.Model):
                             rec.exercice_id = exo.id
                 if rec.date_execution and not bool(rec.exercice_id):
                     date_execution = fields.Datetime.from_string (self.date_execution)
-                    date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
+                    date_execution_format = datetime.strftime(date_execution, '%d-%m-%Y')
                     raise ValidationError (_ (
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
