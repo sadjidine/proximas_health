@@ -1636,11 +1636,11 @@ class PecMajWizard(models.TransientModel):
         elif bool(pec) and (0 < validite_pec < delai_pec):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
             raise ValidationError(_(
-                u"PROXIMAS : Contrôle du Statut PEC >> : " + str(pec.code_pec) + ' (' + str(info_assure) + ').\n' +
-                "Le code PEC concerné est bien enregistré en tant que prise en charge. Cependant, ne peut faire \
-                l'objet d'un traitement à cause de son délai de validité qui a expiré.\n \
-                Veuillez contacter au besoin, les administrateurs pour plus détails..."
-            )
+                u"PROXIMAS : Contrôle du Statut PEC >> :\n Le code PEC concerné : %s est bien enregistré \
+                en tant que prise en charge de %s. Cependant, ne peut faire l'objet d'un traitement à cause \
+                de son délai de validité qui a expiré. Veuillez contacter au besoin, les administrateurs \
+                pour plus détails..."
+            ) % (str(pec.code_pec), str(info_assure))
             )
         elif bool(pec_id) and pec.state == 'dispense':
             # Rediriger vers le formulaire de prise en charge pour Dispensation Médicaments
