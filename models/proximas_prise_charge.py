@@ -2968,12 +2968,12 @@ class DetailsPec(models.Model):
                          'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
                          'prestataire_rembourse_id')
         def _valide_prestation_id(rec):
-            rec.ensure_one ()
-            if bool (rec.prestation_demande_id) and bool (rec.prestataire_crs_id) and bool (rec.pool_medical_crs_id):
+            self.ensure_one ()
+            if bool (self.prestation_demande_id) and bool (self.prestataire_crs_id) and bool (self.pool_medical_crs_id):
                 # Récupérer la prestation médicale du CRS
-                code_prestation_id = rec.prestation_demande_id.id
-                prestataire_id = rec.prestataire_crs_id.id
-                prestation = rec.env['proximas.prestation'].search (
+                code_prestation_id = self.prestation_demande_id.id
+                prestataire_id = self.prestataire_crs_id.id
+                prestation = self.env['proximas.prestation'].search (
                     [
                         ('code_prestation_id', '=', code_prestation_id),
                         ('prestataire_id', '=', prestataire_id)
@@ -2986,15 +2986,15 @@ class DetailsPec(models.Model):
                         prestataire: %s. Par conséquent, cette prestation ne peut être prise en compte dans le cadre \
                         de la convention signée avec le prestataire concernée. Pour plus d'informations, \
                         veuillez contactez l'administrateur..."
-                    ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
+                    ) % (self.prestation_demande_id.name, self.prestataire_crs_id.name)
                                      )
-            # rec.code_medical_id = rec.prestation_crs_id.code_medical_id.id
+            # self.code_medical_id = self.prestation_crs_id.code_medical_id.id
             # REMBOURSEMENT - PHARMACIE
-            elif bool (rec.code_id_rfm) and bool (rec.prestataire_rembourse_id) and bool (rec.produit_phcie_id):
+            elif bool (self.code_id_rfm) and bool (self.prestataire_rembourse_id) and bool (self.produit_phcie_id):
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
-                pharmacie_rembourse_id = rec.prestataire_rembourse_id.id
+                pharmacie_rembourse_id = self.prestataire_rembourse_id.id
                 if bool (pharmacie_rembourse_id):
-                    prestation = rec.env['proximas.prestation'].search (
+                    prestation = self.env['proximas.prestation'].search (
                         [
                             ('prestataire_id', '=', pharmacie_rembourse_id),
                             ('rubrique', '=', 'PHARMACIE')
@@ -3006,7 +3006,7 @@ class DetailsPec(models.Model):
                             Le prestataire concerné : %s n'a pas été parametré pour fournir les médicaments (Pharmacie).\
                             Par conséquent, vous ne pourrez dispenser de médicament(s) pour le compte de celui-ci. \
                             Pour plus d'informations, veuillez contactez l'administrateur..."
-                        ) % rec.prestataire_rembourse_id.name
+                        ) % self.prestataire_rembourse_id.name
                                          )
                 else:
                     raise UserError (_ (
@@ -3017,13 +3017,13 @@ class DetailsPec(models.Model):
                     )
                     )
             # PHARMACIE PEC
-            elif (bool (rec.prestataire_phcie_id) or bool (rec.produit_phcie_id)) or bool (
-                    rec.substitut_phcie_id) and rec.date_execution:
+            elif (bool (self.prestataire_phcie_id) or bool (self.produit_phcie_id)) or bool (
+                    self.substitut_phcie_id) and self.date_execution:
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
-                pharmacie_id = rec.prestataire_phcie_id.id
+                pharmacie_id = self.prestataire_phcie_id.id
                 if bool (pharmacie_id):
-                    pharmacie = rec.prestataire_phcie_id.name
-                    prestation = rec.env['proximas.prestation'].search (
+                    pharmacie = self.prestataire_phcie_id.name
+                    prestation = self.env['proximas.prestation'].search (
                         [
                             ('prestataire_id', '=', pharmacie_id),
                             ('rubrique', 'ilike', 'PHARMACIE')
