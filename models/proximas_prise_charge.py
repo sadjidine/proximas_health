@@ -2418,7 +2418,6 @@ class DetailsPec(models.Model):
         string="Net A Payer",
         digits=(6, 0),
         compute='_compute_net_a_payer',
-        default=0,
         store=True
     )
     nbre_produit_phcie = fields.Integer(
@@ -3382,17 +3381,28 @@ class DetailsPec(models.Model):
                                  d'informations, veuillez contactez l'administrateur..."
                             ) % (rec.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
                                              )
-        
 
     # @api.multi
+    # def write(self, values):
+    #     if self.prestation_id:
+    #         # Récupérer le coût unitaire
+    #         if bool(self.net_prestataire):
+    #             values['net_a_payer'] = self.net_prestataire
+    #         elif bool(self.mt_remboursement):
+    #             values['net_a_payer'] = self.mt_remboursement
+    #         else:
+    #             values['net_a_payer'] = 0
+    #     res = super(DetailsPec, self).write(values)
+    #     return res
+
+    @api.multi
     def _compute_net_a_payer(self):
-        for rec in self:
-            if rec.pec_id:
-                rec.net_a_payer = rec.net_prestataire
-            elif rec.rfm_id:
-                rec.net_a_payer = rec.mt_remboursement
-            else:
-                rec.net_a_payer = 0
+        if self.pec_id:
+            self.net_a_payer = self.net_prestataire
+        elif self.rfm_id:
+            self.net_a_payer = self.mt_remboursement
+        else:
+            self.net_a_payer = 0
 
     # @api.model
     # def create(self, values):
@@ -3414,7 +3424,7 @@ class DetailsPec(models.Model):
     # def write(self, values):
     #     if self.prestation_id:
     #         # Récupérer le coût unitaire
-    #         if bool (self.cout_unit):
+    #         if bool(self.cout_unit):
     #             values['cout_unite'] = self.cout_unit
     #         elif bool (self.cout_unitaire):
     #             values['cout_unite'] = self.cout_unitaire
