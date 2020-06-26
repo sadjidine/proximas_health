@@ -2245,7 +2245,7 @@ class DetailsPec(models.Model):
         string="Code Médical",
         # compute='_check_prestation_id',
         related='prestation_id.code_medical_id',
-        store=True,
+        # store=True,
         readonly=True,
     )
     rubrique_id = fields.Many2one(
@@ -2963,7 +2963,7 @@ class DetailsPec(models.Model):
     #@api.one
     @api.onchange('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
                    'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
-                   'prestataire_rembourse_id')
+                   'pool_medical_crs_id', 'prestataire_rembourse_id')
     @api.constrains('produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'code_id_rfm', 'prestation_crs_id',
                     'pool_medical_crs_id', 'prestation_rembourse_id')
     def _valide_prestation_id(self):
@@ -3425,19 +3425,20 @@ class DetailsPec(models.Model):
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
-                 'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
-                 'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
+                 'pool_medical_crs_id', 'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public',
+                 'zone_couverte', 'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite',
+                 'quantite_livre')
     @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         # Methode de calcul des couts de prestations médicale & produits pharmacie
         for rec in self:
-            if bool (rec.prestation_id):
+            if bool(rec.prestation_id):
                 # Vérifier si la prestation est identifiée
                 controle_rubrique = self.env['proximas.controle.rubrique'].search ([
                     ('rubrique_id', '=', rec.rubrique_id.id),
                     ('police_id', '=', rec.police_id.id)
                 ])
-                code_medical_police = self.env['proximas.code.medical.police'].search ([
+                code_medical_police = self.env['proximas.code.medical.police'].search([
                     ('police_id', '=', rec.police_id.id),
                     ('code_medical_id', '=', rec.code_medical_id.id)
                 ])
@@ -3460,7 +3461,7 @@ class DetailsPec(models.Model):
                         rec.taux_couvert = int (rec.police_id.tx_couv_prive_couvert)
                     elif not bool (rec.zone_couverte) and not bool (rec.prestataire.is_public):
                         rec.taux_couvert = int (rec.police_id.tx_couv_prive)
-                elif bool (code_medical_police):
+                elif bool(code_medical_police):
                     if bool (rec.prestataire.is_public) or bool (rec.prestataire_public):
                         rec.taux_couvert = int (code_medical_police.tx_public)
                     elif not bool (rec.prestataire.is_public) or not bool (rec.prestataire_public):
