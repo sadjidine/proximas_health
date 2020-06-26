@@ -28,6 +28,7 @@
     # always loaded
     'data': [
         'security/proximas_medical_security.xml',
+        'views/proximas_cron_server_actions.xml',
         'views/proximas_reseau_soins.xml',
         'views/proximas_parametres.xml',
         'views/proximas_medical.xml',

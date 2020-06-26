@@ -2408,17 +2408,17 @@ class DetailsPec(models.Model):
         default=0,
         store=True,
     )   # = ticket_moderateur - paye_assure
-    mt_plafond = fields.Float (
+    mt_plafond = fields.Float(
         string="Mt. PLafond",
         digits=(6, 0),
         compute='_calcul_couts_details_pec',
         default=0,
     )
-    net_a_payer = fields.Float (
+    net_a_payer = fields.Float(
         string="Net A Payer",
         digits=(6, 0),
-        compute='_compute_net_a_payer',
-        store=True
+        # compute='_calcul_couts_details_pec',
+        # store=True
     )
     nbre_produit_phcie = fields.Integer(
         string="Nbre. Produits Pharmacie",
@@ -3385,7 +3385,7 @@ class DetailsPec(models.Model):
     # @api.multi
     # def write(self, values):
     #     if self.prestation_id:
-    #         # Récupérer le coût unitaire
+    #         # Récupérer le montant net à payer
     #         if bool(self.net_prestataire):
     #             values['net_a_payer'] = self.net_prestataire
     #         elif bool(self.mt_remboursement):
@@ -3872,9 +3872,11 @@ class DetailsPec(models.Model):
                     rec.net_prestataire = 0
                     rec.debit_ticket = 0
                     rec.mt_remboursement -= rec.mt_exclusion
+                    rec.net_a_payer = rec.mt_remboursement
                 else:
                     rec.net_prestataire = int (rec.net_tiers_payeur)
                     rec.net_prestataire -= rec.mt_exclusion
+                    rec.net_a_payer = rec.net_prestataire
 
 
     # @api.multi
