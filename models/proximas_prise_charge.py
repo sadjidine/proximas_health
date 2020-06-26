@@ -2509,6 +2509,25 @@ class DetailsPec(models.Model):
         readonly=True,
     )
 
+    def _compute_net_a_payer(self, cr, uid, context=None):
+        scheduler_line_obj = self.pool.get('proximas.details.pec')
+        # Contient tous les enregistrements (ids) de la table contrat
+        scheduler_line_ids = self.pool.get('proximas.details.pec').search(cr, uid, [])
+        # Parcours sur chaque enregistrement de la table contrat
+        for scheduler_line_id in scheduler_line_ids:
+            net_a_payer = 0
+            # Contient tous les détails de l'enregistrement dans la variable shaduller_line
+            scheduller_line = scheduler_line_obj.browse(cr, uid, scheduler_line_id, context=context)
+            if scheduller_line.pec_id:
+                # Mettre à jour le champ net_a_payer
+                net_a_payer = int(scheduller_line.net_prestataire)
+            if scheduller_line.rfm_id:
+                # Mettre à jour le champ net_a_payer
+                net_a_payer = int(scheduller_line.mt_remboursement)
+            scheduler_line_obj.write(cr, uid, scheduler_line_id,{
+                'net_a_payer': net_a_payer,
+            }, context=context)
+
     # @api.multi
     # def write(self, values):
     #     user_id = self.env.context.get('uid')
@@ -3381,28 +3400,6 @@ class DetailsPec(models.Model):
                                  d'informations, veuillez contactez l'administrateur..."
                             ) % (rec.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
                                              )
-
-    # @api.multi
-    # def write(self, values):
-    #     if self.prestation_id:
-    #         # Récupérer le montant net à payer
-    #         if bool(self.net_prestataire):
-    #             values['net_a_payer'] = self.net_prestataire
-    #         elif bool(self.mt_remboursement):
-    #             values['net_a_payer'] = self.mt_remboursement
-    #         else:
-    #             values['net_a_payer'] = 0
-    #     res = super(DetailsPec, self).write(values)
-    #     return res
-
-    @api.multi
-    def _compute_net_a_payer(self):
-        if self.pec_id:
-            self.net_a_payer = self.net_prestataire
-        elif self.rfm_id:
-            self.net_a_payer = self.mt_remboursement
-        else:
-            self.net_a_payer = 0
 
     # @api.model
     # def create(self, values):
