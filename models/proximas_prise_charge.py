@@ -4377,27 +4377,28 @@ class DetailsPec(models.Model):
 
     @api.onchange('date_execution', 'date_demande')
     def _check_exo_sam(self):
-        if bool (self.date_execution) and not bool(self.exercice_id):
-            date_execution = fields.Datetime.from_string (self.date_execution)
-            date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
-            raise UserError (_ (
-                u"Proximaas : Contrôle de Règles de Gestion:\n \
-                La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
-                paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
-                offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-                Pour plus d'informations, veuillez contactez l'administrateur..."
-            ) % date_execution_format
-                             )
-        elif bool(self.date_demande) and not bool(self.exercice_id):
-            date_demande = fields.Datetime.from_string (self.date_demande)
-            date_demande_format = datetime.strftime (date_demande, '%d/%m/%Y')
-            raise UserError (_ (
-                u"Proximaas : Contrôle de Règles de Gestion:\n \
-                La date de la demande renseignée ici: %s n'est conforme à aucun des exercices \
-                paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
-                offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-                Pour plus d'informations, veuillez contactez l'administrateur..."
-            ) % date_demande_format
+        for rec in self:
+            if bool(rec.date_execution) and not bool(rec.exercice_id):
+                date_execution = fields.Datetime.from_string(rec.date_execution)
+                date_execution_format = datetime.strftime(date_execution, '%d-%m-%Y')
+                raise UserError(_(
+                    u"Proximaas : Contrôle de Règles de Gestion:\n \
+                    La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
+                    paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
+                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % date_execution_format
+                                 )
+            elif bool(rec.date_demande) and not bool(rec.exercice_id):
+                date_demande = fields.Datetime.from_string(rec.date_demande)
+                date_demande_format = datetime.strftime(date_demande, '%d/%m/%Y')
+                raise UserError(_(
+                    u"Proximaas : Contrôle de Règles de Gestion:\n \
+                    La date de la demande renseignée ici: %s n'est conforme à aucun des exercices \
+                    paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
+                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % date_demande_format
                              )
 
     # @api.constrains('date_demande', 'date_execution')
@@ -4478,36 +4479,6 @@ class DetailsPec(models.Model):
             '''
         ),
     ]
-
-# from openerp.osv import osv, fields
-# import logging
-#
-# class proximas_details_pec(osv.osv):
-#     _inherit = 'proximas.details.pec'
-#     _columns = {}
-#
-#     issue = ''
-#     templtate = ''
-#
-#     def create(self, cr, uid, vals, context=None):
-#         res = super(proximas_details_pec, self).create(cr, uid, vals, context=context)
-#
-#         self.issue = self.pool.get('proximas.details.pec').browse(cr, uid, res, context=context)
-#
-#         manager = self.issue.project_id.user_id.partner_id.id
-#         #
-#         # assignTo = self.issue.user_id.partner_id.id
-#
-#         post_vars = {
-#             'subject': ("Issue {} has been created".format(self.issue.name)),
-#             'body': ("PEC {} has been created".format(self.issue.name)),
-#             'partner_ids': [(4, manager)],
-#         }
-#         thread_pool = self.pool.get('mail.thread')
-#         thread_pool.message_post(cr, uid, False,
-#                                  context=context,
-#                                  **post_vars)
-#         return res
 
 ########################################################################################################################
 #                                    GESTION REMBOURSEMENT FRAIS MEDICAUX                                              #
