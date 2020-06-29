@@ -1264,12 +1264,12 @@ class PriseEnCharge(models.Model):
                 ) % (rec.ticket_exigible_phcie, rec.mt_encaisse_phcie)
                                        )
 
-    @api.one
-    @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',)
-    def _stuff_note(self):
-        note = u"Ajout d'une prestation par %s." % self.user_id.name
-        stuff_to_notes = str(note)
-        self.note = stuff_to_notes
+    # @api.one
+    # @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',)
+    # def _stuff_note(self):
+    #     note = u"Ajout d'une prestation par %s." % self.user_id.name
+    #     stuff_to_notes = str(note)
+    #     self.note = stuff_to_notes
 
     @api.one
     @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
