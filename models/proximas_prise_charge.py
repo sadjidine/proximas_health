@@ -723,7 +723,6 @@ class PriseEnCharge(models.Model):
             else:
                 rec.is_termine = False
 
-
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids','details_pec_phcie_ids')
     @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids','details_pec_phcie_ids')
@@ -1235,34 +1234,34 @@ class PriseEnCharge(models.Model):
     def _validate_ticket_exigible_and_encaissement(self):
         for rec in self:
             # 1. Controle cas de CRO
-            if self.state == 'cours' and 0 < int (self.ticket_exigible_cro) > int (self.mt_encaisse_cro):
+            if rec.state == 'cours' and 0 < int(rec.ticket_exigible_cro) > int(rec.mt_encaisse_cro):
                 raise ValidationError (_ (
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
                     Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
-                ) % (self.ticket_exigible_cro, self.mt_encaisse_cro)
+                ) % (rec.ticket_exigible_cro, rec.mt_encaisse_cro)
                                        )
             # 2. Controle cas de CRS
-            if self.state == 'oriente' and 0 < int (self.ticket_exigible_crs) > int (self.mt_encaisse_crs):
+            if rec.state == 'oriente' and 0 < int (rec.ticket_exigible_crs) > int (rec.mt_encaisse_crs):
                 raise ValidationError (_ (
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
                     Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
-                ) % (self.ticket_exigible_crs, self.mt_encaisse_crs)
+                ) % (rec.ticket_exigible_crs, rec.mt_encaisse_crs)
                                        )
             # 3. Controle cas de PHARMACIE
-            if self.state == 'dispense' and 0 < int (self.ticket_exigible_phcie) > int (self.mt_encaisse_phcie):
+            if rec.state == 'dispense' and 0 < int (rec.ticket_exigible_phcie) > int (rec.mt_encaisse_phcie):
                 raise ValidationError (_ (
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
                     Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
-                ) % (self.ticket_exigible_phcie, self.mt_encaisse_phcie)
+                ) % (rec.ticket_exigible_phcie, rec.mt_encaisse_phcie)
                                        )
 
     @api.one
@@ -1402,19 +1401,18 @@ class PriseEnCharge(models.Model):
         self.ensure_one()
         self.code_pc = self.code_pec
 
-
-
     @api.constrains('code_pec')
     def validate_code_pec(self):
-        check_code_pec = self.search_count([('code_pec', '=', self.code_pec)])
-        if check_code_pec > 1:
-            raise ValidationError(_(
-                u"Proximaas : Contrôle Contrôle Règles de Gestion ; \n \
-                Risque de doublon pour le Code PEC : %s. Le code PEC généré par le système existe déjà pour une autre \
-                prise en charge. Cependant, ce code doit être unique par prise en charge.\n \
-                Veuillez contactez les administrateurs pour plus détails..."
-                ) % self.code_pec
-            )
+        for rec in self:
+            check_code_pec = self.search_count([('code_pec', '=', rec.code_pec)])
+            if check_code_pec > 1:
+                raise ValidationError (_ (
+                    u"Proximaas : Contrôle Contrôle Règles de Gestion ; \n \
+                    Risque de doublon pour le Code PEC : %s. Le code PEC généré par le système existe déjà pour une autre \
+                    prise en charge. Cependant, ce code doit être unique par prise en charge.\n \
+                    Veuillez contactez les administrateurs pour plus détails..."
+                ) % rec.code_pec
+                                       )
 
 
 class PecWizard(models.TransientModel):
@@ -2818,7 +2816,6 @@ class DetailsPec(models.Model):
                                                  rec.produit_phcie_id.forme_galenique_id.name or '',
                                                  rec.produit_phcie_id.dosage or '')
                 rec.medicament = rec.produit_phcie
-
 
     @api.multi
     def _get_current_user(self):
@@ -4479,11 +4476,9 @@ class DetailsPec(models.Model):
             '''
         ),
     ]
-
 ########################################################################################################################
 #                                    GESTION REMBOURSEMENT FRAIS MEDICAUX                                              #
 ########################################################################################################################
-
 class RemboursementPEC(models.Model):
     _name = 'proximas.remboursement.pec'
     _description = 'Remboursement Frais Medicaux'
