@@ -849,7 +849,7 @@ class PriseEnCharge(models.Model):
                   Pour plus d'informations, veuillez contactez l'administrateur..."
                 )
             )
-        elif not self.pathologie_ids:
+        elif not self.pathologie_id:
             raise UserError(_(
                 u"Cette prise en charge ne contient aucune pathologie (affection) diagnostiquée. Il faudra renseigner\
                  au moins un code affection avant de pouvoir orienter le patient vers un autre prestataire de soins. \
