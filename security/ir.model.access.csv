@@ -84,7 +84,7 @@ access_proximas_organe_admin,proximas.organe.admin,model_proximas_organe,base.gr
 access_proximas_organe_exercice_user,proximas.organe.exercice.user,model_proximas_organe_exercice,proximas_medical.group_user,1,0,0,0
 access_proximas_organe_exercice_admin,proximas.organe.exercice.admin,model_proximas_organe_exercice,base.group_system,1,1,1,1
 acces_proximas_prestation_cro,proximas.prestation.cro,model_proximas_prestation,proximas_medical.group_cro,1,0,0,0
-acces_proximas_prestation_crs,proximas.prestation.crs,model_proximas_prestation,proximas_medical.group_crs,1,0,0,1
+acces_proximas_prestation_crs,proximas.prestation.crs,model_proximas_prestation,proximas_medical.group_crs,1,0,0,0
 access_proximas_assure_cro,proximas.assure.cro,model_proximas_assure,proximas_medical.group_cro,1,1,0,0
 access_proximas_assure_crs,proximas.assure.crs,model_proximas_assure,proximas_medical.group_crs,1,0,0,0
 acces_proximas_sanction_cro,proximas.sanction.cro,model_proximas_sanction,proximas_medical.group_cro,1,0,0,0
@@ -101,6 +101,8 @@ acces_proximas_controle_rubrique_cro,proximas.controle.rubrique.cro,model_proxim
 acces_proximas_controle_rubrique_crs,proximas.controle.rubrique.crs,model_proximas_controle_rubrique,proximas_medical.group_crs,1,0,0,0
 acces_proximas_pool_medical_cro,proximas.pool.medical.cro,model_proximas_pool_medical,proximas_medical.group_cro,1,0,0,0
 acces_proximas_pool_medical_crs,proximas.pool.medical.crs,model_proximas_pool_medical,proximas_medical.group_crs,1,0,0,0
+acces_proximas_code_medical_cro,proximas.code.medical.cro,model_proximas_code_medical,proximas_medical.group_cro,1,0,0,0
+acces_proximas_code_medical_crs,proximas.code.medical.crs,model_proximas_code_medical,proximas_medical.group_crs,1,0,0,0
 acces_proximas_code_medicale_police_cro,proximas.code.medical.police.cro,model_proximas_code_medical_police,proximas_medical.group_cro,1,0,0,0
 acces_proximas_code_medicale_police_crs,proximas.code.medical.police.crs,model_proximas_code_medical_police,proximas_medical.group_crs,1,0,0,0
 acces_proximas_police_cro,proximas.police.cro,model_proximas_police,proximas_medical.group_cro,1,1,0,0
@@ -128,6 +130,7 @@ acces_proximas_adherent_pharmacie,proximas.adherent.pharmacie,model_proximas_adh
 acces_proximas_ayant_droit_pharmacie,proximas.ayant.droit.pharmacie,model_proximas_ayant_droit,proximas_medical.group_pharmacy,1,0,0,0
 acces_proximas_controle_rubrique_pharmacie,proximas.controle.rubrique.pharmacie,model_proximas_controle_rubrique,proximas_medical.group_pharmacy,1,0,0,0
 acces_proximas_pool_medical_pharmacie,proximas.pool.medical.pharmacie,model_proximas_pool_medical,proximas_medical.group_pharmacy,1,0,0,0
+acces_proximas_code_medical_pharmacy,proximas.code.medical.pharmacy,model_proximas_code_medical,proximas_medical.group_pharmacy,1,0,0,0
 acces_proximas_code_medicale_police_pharmacie,proximas.code.medical.police.pharmacie,model_proximas_code_medical_police,proximas_medical.group_pharmacy,1,0,0,0
 acces_proximas_police_pharmacie,proximas.police.pharmacie,model_proximas_police,proximas_medical.group_pharmacy,1,1,0,0
 acces_proximas_pathologie_pharmacie,proximas.pathologie.pharmacie,model_proximas_pathologie,proximas_medical.group_pharmacy,1,0,0,0

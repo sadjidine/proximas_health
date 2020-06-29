@@ -1524,8 +1524,8 @@ class JustificatifEnfantWizard(models.TransientModel):
         # prestataire = self.env['res.partner'].search ([('id', '=', user.partner_id.id)])
         # prestations = self.env['proximas.prestation'].search ([('prestataire_id', '=', user.partner_id.id)])
         assure = self.env['proximas.assure'].search([
-            '|', ('code_id_externe', '=', self.code_saisi),
-            ('code_id', '=', self.code_saisi)
+            '|', ('code_id_externe', '=ilike', self.code_saisi),
+            ('code_id', '=ilike', self.code_saisi)
         ])
         info_assure = str(assure.name)
         statut_familial = assure.statut
