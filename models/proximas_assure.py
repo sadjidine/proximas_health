@@ -274,13 +274,14 @@ class Assure(models.Model):
         comodel_name="proximas.contrat",
         string="Contrat",
         compute='_get_contrat_id',
+        store=True,
         # related='police_id.contrat_id',
 
     )
     num_contrat = fields.Char (
         string="N° Contrat",
         related='contrat_id.num_contrat',
-        store=True,
+        # store=True,
     )
     contrat_actif = fields.Boolean(
         string="Contrat Activé?",
@@ -291,8 +292,8 @@ class Assure(models.Model):
         comodel_name="proximas.police",
         string="Police Couverture",
         related='contrat_id.police_id',
-        # store=True,
-        readonly=True,
+        store=True,
+        # readonly=True,
     )
     libelle_police = fields.Char(
         string="Police Couverture",

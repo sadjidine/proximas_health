@@ -1748,16 +1748,18 @@ class DetailsPec(models.Model):
         comodel_name="proximas.pool.medical",
         string="Médecin Pool Médical",
         compute='_get_pool_medical',
+        store=True,
     )
     medecin_id = fields.Many2one(
         comodel_name="proximas.medecin",
         string="Médecin traitant",
-        compute='_get_medecin_id',
+        related='pool_medical.medecin_id'
+        # compute='_get_medecin_id',
     )
     medecin_traitant = fields.Char(
         string="Medecin traitant",
         related='medecin_id.full_name',
-        store=True,
+        # store=True,
         required=False,
     )
     pool_medical_crs_id = fields.Many2one(
@@ -2289,7 +2291,7 @@ class DetailsPec(models.Model):
     date_dernier_acte = fields.Date (
         string="Date dernier Acte",
         compute='_check_delai_attente_prestation',
-        default=fields.Date.today (),
+        default=fields.Date.today(),
         help='Date de la dernière fois où le patient a bénéficié de cette prestation.',
     )
     delai_prestation = fields.Integer (
@@ -2488,6 +2490,7 @@ class DetailsPec(models.Model):
         readonly=True,
     )
 
+
     @api.multi
     def action_valider(self):
         for rec in self:
@@ -2573,42 +2576,41 @@ class DetailsPec(models.Model):
 
 
     # @api.one
-    @api.depends('medecin_id')
-    def _get_medecin_id(self):
-        for rec in self:
-            medecin_id = rec.pool_medical.medecin_id.id
-            rec.medecin_id = medecin_id
+    # @api.depends('pool_medical')
+    # def _get_medecin_id(self):
+    #     for rec in self:
+    #         medecin_id = rec.pool_medical.medecin_id.id
+    #         rec.medecin_id = medecin_id
 
 
     # @api.multi
     @api.onchange('date_execution', 'date_demande')
     def _check_date_details_pec(self):
-        for rec in self:
-            now = datetime.now()
-            date_execution = fields.Datetime.from_string (rec.date_execution)
-            date_demande = fields.Datetime.from_string (rec.date_demande)
-            if bool(date_execution) and date_execution > now:
-                # date = rec.date_execution.strftime('%d-%m-%Y')
-                date = datetime.strftime(date_execution, '%d-%m-%Y')
-                warning = {
-                    'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
-                    'message': _(u"Vous avez fourni des informations sur la date d'exécution de la prestation: %s. \
-                                  Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
-                                  antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus \
-                                  d'informations, veuillez contactez l'administrateur...") % date
-                }
-                return {'warning': warning}
-            if bool(date_demande) and date_demande > now:
-                # date = rec.date_execution.strftime('%d-%m-%Y')
-                date = datetime.strftime (date_demande, '%d-%m-%Y')
-                warning = {
-                    'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
-                    'message': _(u"Vous avez fourni des informations sur la date de demande de la prestation: %s. \
-                                  Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
-                                  antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus \
-                                  d'informations, veuillez contactez l'administrateur...") % date
-                }
-                return {'warning': warning}
+        now = datetime.now ()
+        date_execution = fields.Datetime.from_string (self.date_execution)
+        date_demande = fields.Datetime.from_string (self.date_demande)
+        if bool(date_execution) and date_execution > now:
+            # date = self.date_execution.strftime('%d-%m-%Y')
+            date = datetime.strftime (date_execution, '%d-%m-%Y')
+            warning = {
+                'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
+                'message': _ (u"Vous avez fourni des informations sur la date d'exécution de la prestation: %s. \
+                                          Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
+                                          antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus \
+                                          d'informations, veuillez contactez l'administrateur...") % date
+            }
+            return {'warning': warning}
+        if bool(date_demande) and date_demande > now:
+            # date = self.date_execution.strftime('%d-%m-%Y')
+            date = datetime.strftime(date_demande, '%d-%m-%Y')
+            warning = {
+                'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
+                'message': _ (u"Vous avez fourni des informations sur la date de demande de la prestation: %s. \
+                                          Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
+                                          antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus \
+                                          d'informations, veuillez contactez l'administrateur...") % date
+            }
+            return {'warning': warning}
 
     # @api.one
     @api.constrains('date_execution', 'date_demande')
@@ -2638,62 +2640,60 @@ class DetailsPec(models.Model):
                     ) % date
                 )
 
-    @api.multi
+    # @api.multi
     @api.onchange('produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'prestation_crs_id',
-                   'prestation_demande_id')
-    # @api.depends('produit_phcie_id')
+                  'prestation_demande_id')
     def _check_nbre_prestations(self):
-        for rec in self:
-            if bool(rec.produit_phcie_id):
-                nbre_produit_phcie = self.env['proximas.details.pec'].search_count([
-                    ('pec_id', '=', rec.pec_id.id),
-                    ('produit_phcie_id', '=', rec.produit_phcie_id.id),
-                ])
-                rec.nbre_produit_phcie = int(nbre_produit_phcie)
-                if int(nbre_produit_phcie) >= 1:
-                    # produit_phcie = '%s %s %s' %(rec.produit_phcie_id.name, rec.produit_phcie_id.forme_galenique_id.name or '',
-                    #        rec.produit_phcie_id.dosage)
-                    return {'value': {},
-                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                        'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
-                                         cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
-                                         médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                         ou contactez l'administrateur." % rec.produit_phcie
-                                        }
-                            }
-            elif bool(rec.substitut_phcie_id):
-                nbre_substitut_phcie = self.search_count([
-                    ('pec_id', '=', rec.pec_id.id),
-                    ('assure', '=', rec.assure.id),
-                    '|', ('substitut_phcie_id', '=', rec.substitut_phcie_id.id),
-                    ('produit_phcie_id', '=', rec.substitut_phcie_id.id),
-                ])
-                if int (nbre_substitut_phcie) >= 1:
-                    substitut_phcie = rec.substitut_phcie
-                    return {'value': {},
-                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                        'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
-                                        cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
-                                        médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                        ou contactez l'administrateur." % substitut_phcie
-                                        }
-                            }
-            elif bool(rec.prestation_id):
-                nbre_prestation = self.search_count ([
-                    ('pec_id', '=', rec.pec_id.id),
-                    ('assure', '=', rec.assure.id),
-                    ('produit_phcie_id', '=', None),
-                    ('prestation_id', '=', rec.prestation_id.id),
-                ])
-                if int (nbre_prestation) >= 1:
-                    return {'value': {},
-                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                        'message': u"Il semble que la prestation : (%s) ait déjà été fournie pour cette \
-                                        prise en charge. Par conséquent, il ne peut y avoir plus d'une fois la même \
-                                        prestation offerte sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                        ou contactez l'administrateur." % rec.prestation_id.name
-                                        }
-                            }
+        if bool (self.produit_phcie_id):
+            nbre_produit_phcie = self.env['proximas.details.pec'].search_count ([
+                ('pec_id', '=', self.pec_id.id),
+                ('produit_phcie_id', '=', self.produit_phcie_id.id),
+            ])
+            self.nbre_produit_phcie = int (nbre_produit_phcie)
+            if int (nbre_produit_phcie) >= 1:
+                # produit_phcie = '%s %s %s' %(self.produit_phcie_id.name, self.produit_phcie_id.forme_galenique_id.name or '',
+                #        self.produit_phcie_id.dosage)
+                return {'value': {},
+                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                    'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
+                                     cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
+                                     médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                     ou contactez l'administrateur." % self.produit_phcie
+                                    }
+                        }
+        elif bool (self.substitut_phcie_id):
+            nbre_substitut_phcie = self.search_count ([
+                ('pec_id', '=', self.pec_id.id),
+                ('assure', '=', self.assure.id),
+                '|', ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
+                ('produit_phcie_id', '=', self.substitut_phcie_id.id),
+            ])
+            if int (nbre_substitut_phcie) >= 1:
+                substitut_phcie = self.substitut_phcie
+                return {'value': {},
+                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                    'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
+                                    cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
+                                    médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                    ou contactez l'administrateur." % substitut_phcie
+                                    }
+                        }
+        elif bool (self.prestation_id):
+            nbre_prestation = self.search_count ([
+                ('pec_id', '=', self.pec_id.id),
+                ('assure', '=', self.assure.id),
+                ('produit_phcie_id', '=', None),
+                ('prestation_id', '=', self.prestation_id.id),
+            ])
+            if int (nbre_prestation) >= 1:
+                return {'value': {},
+                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                    'message': u"Il semble que la prestation : (%s) ait déjà été fournie pour cette \
+                                    prise en charge. Par conséquent, il ne peut y avoir plus d'une fois la même \
+                                    prestation offerte sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                    ou contactez l'administrateur." % self.prestation_id.name
+                                    }
+                        }
 
     # @api.one
     @api.constrains('prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id', 'produit_phcie_id',
