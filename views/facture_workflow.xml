@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+-->
+<odoo>
+    <data>
+        <!-- Facture workflow -->
+        <record model="workflow" id="wkf_facture_prestataire">
+            <field name="name">Proximas Facture workflow</field>
+            <field name="osv">proximas.facture</field>
+            <field name="on_create">True</field>
+        </record>
+        <!-- Facture Activities -->
+        <record model="workflow.activity" id="attente">
+            <field name="name">En attente</field>
+            <field name="wkf_id" ref="wkf_facture_prestataire"/>
+            <field name="flow_start" eval="True"/>
+            <field name="kind">function</field>
+            <field name="action">action_en_attente()</field>
+        </record>
+        <record model="workflow.activity" id="traite">
+            <field name="name">Traitement</field>
+            <field name="wkf_id" ref="wkf_facture_prestataire"/>
+            <field name="kind">function</field>
+            <field name="action">action_traiter()</field>
+        </record>
+        <record model="workflow.activity" id="cloture">
+            <field name="name">Clôture</field>
+            <field name="wkf_id" ref="wkf_facture_prestataire"/>
+            <field name="kind">function</field>
+            <field name="action">action_cloturer()</field>
+        </record>
+        <!-- Facture Transitions -->
+        <record model="workflow.transition" id="facture_attente_to_traite">
+            <field name="act_from" ref="attente"/>
+            <field name="act_to" ref="traite"/>
+            <field name="signal">Traitement</field>
+            <field name="group_id" ref="base.group_user"/>
+        </record>
+        <record model="workflow.transition" id="facture_traite_to_cloture">
+            <field name="act_from" ref="traite"/>
+            <field name="act_to" ref="cloture"/>
+            <field name="signal">Clôture</field>
+            <field name="group_id" ref="proximas_medical.group_manager"/>
+        </record>
+        <record model="workflow.transition" id="facture_traite_to_attente">
+            <field name="act_from" ref="traite"/>
+            <field name="act_to" ref="attente"/>
+            <field name="signal">Enattente</field>
+            <field name="group_id" ref="proximas_medical.group_manager"/>
+        </record>
+        <record model="workflow.transition" id="facture_cloture_to_attente">
+            <field name="act_from" ref="cloture"/>
+            <field name="act_to" ref="attente"/>
+            <field name="signal">Enattente</field>
+            <field name="group_id" ref="proximas_medical.group_manager"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+
+<odoo>
+    <report id="action_facture_prestataire_report"
+            string="Facture Prestataire Conventionné"
+            model="proximas.facture"
+            report_type="qweb-pdf"
+            name="proximas_medical.report_facture_prestataire_template"
+    />
+    <!--file="proximas_medical.bulletin_prise_charge"
+            attachment_use="True"
+            attachment="(object.state in ('cours','oriente','termine','valide')) and
+                ('PEC'+(object.code_pec or '').replace('/', '')+'.pdf')"-->
+    <template id="report_facture_prestataire_template">
+        <t t-call="report.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="report.external_layout">
+                    <div class="page">
+                        <!-- Report page content -->
+                        <!--<div class="row bg-primary">
+                            &lt;!&ndash;<div class="col-xs-3">
+                                <span class="glyphicon glyphicon-pushpin" />
+                                What
+                            </div>
+                            <div class="col-xs-2">Who</div>
+                            <div class="col-xs-1">When</div>
+                            <div class="col-xs-3">Where</div>
+                            <div class="col-xs-3">Watchers</div>&ndash;&gt;
+                            <div class="col-xs-12">1. INFORMATION SYSTEME DE COUVERTURE MALADIE</div>
+                        </div>
+                            <h4>Code PC: <span t-field="o.code_pec"/></h4>
+                        <div class="row bg-primary">
+                            <div class="col-xs-12">2. IDENTIFICATION ASSURE / DROITS D'ACCES AUX SOINS</div>
+                            <div class="row bg-info">
+                            </div>
+                            <div class="row bg-primary">
+                                    <div class="col-xs-12">4. IDENTIFICATION ASSURE / DROITS D'ACCES AUX SOINS</div>
+                                <div class="row bg-info">
+                                    <div class="col-xs-2">DATE</div>
+                                    <div class="col-xs-1">CODE</div>
+                                    <div class="col-xs-4">DESIGNATION (Actes Médicaux et Paramédicaux)</div>
+                                    <div class="col-xs-1">COEF.</div>
+                                    <div class="col-xs-1">TAUX</div>
+                                    <div class="col-xs-3">S/TOTAUX</div>
+                                </div>
+                            &lt;!&ndash; Data Row Content &ndash;&gt;
+                            </div>
+                        </div>-->
+<!--                        <div class="row">
+                            <h2 class="text-muted text-right"><span t-field="o.code_pec"/></h2>
+                        </div>-->
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <h4 class="text-muted text-left">FACTURE N°: <span t-field="o.name"/></h4>
+                            </div>
+                            <div class="col-xs-2">
+                                <h5 class="text-muted text-right">Date Emission: <span t-field="o.date_emission"/></h5>
+                            </div>
+                            <div class="col-xs-6 text-right">
+                                <h5>DOIT :<span>---------------------------------------</span> </h5>
+                                <h4 class="text-primary "><strong><span t-field="o.prestataire"/></strong></h4>
+                                <h6>Ville : <span t-field="o.city"/></h6>
+                                <h6>Tél. : <span t-field="o.phone"/></h6>
+                                <h6>Mobile : <span t-field="o.mobile"/></h6>
+                                <h5><span>--------------------------------------------</span> </h5>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-12 bg-muted">
+                                <h5 class="text-left">Notes/Observation:</h5>
+                            </div>
+                        </div>
+                        <table class="table table-striped table-bordered table-xs h6">
+                           <thead class="bg-primary">
+                               <!--<tr>
+                                   <th colspan="12">Cette facture a été générée par Proximaas. Sauf erreurs ou
+                                       omissions ci-dessous, liste détaillée des prestations médicales fournies.
+                                   </th>
+                               </tr>-->
+                           </thead>
+                           <thody>
+                               <tr>
+                                   <th class="col-xs-1 text-center">N°</th>
+                                   <th class="col-xs-1">Date</th>
+                                   <th class="col-xs-1">N°PEC</th>
+                                   <th class="col-xs-1">Code ID</th>
+                                   <th class="col-xs-2">Infos Assuré</th>
+                                   <th class="col-xs-1">Prestation/Méd.</th>
+                                   <th class="col-xs-1 text-right">S/Total</th>
+                                   <th class="col-xs-1 text-center">Taux(%)</th>
+                                   <th class="col-xs-1 text-right">Ticket</th>
+                                   <th class="col-xs-1 text-right">Mt. Exclu</th>
+                                   <th class="col-xs-1 text-right">SAM</th>
+                               </tr>
+                               <tr>
+                                   <t t-set="num" t-value="0"></t>
+                                   <t t-foreach="o.details_pec_ids" t-as="item">
+                                       <t t-if="o.nbre_prestations">
+                                           <t t-set="num" t-value="num + 1"></t>
+                                           <tr>
+                                               <td class="col-xs-1 text-center"><span t-esc="num"/></td>
+                                               <td class="col-xs-1"><span t-field="item.date_execution"/></td>
+                                               <td class="col-xs-1"><span t-field="item.num_pec"/></td>
+                                               <td class="col-xs-1 text-center"><span t-field="item.code_id"/></td>
+                                               <td class="col-xs-2"><span t-field="item.assure_id"/></td>
+                                               <td class="col-xs-1"><span t-field="item.details_prestation"/></td>
+                                               <td class="col-xs-1 text-right"><span t-field="item.total_pc"/></td>
+                                               <td class="col-xs-1 text-center"><span t-field="item.taux_couvert"/></td>
+                                               <td class="col-xs-1 text-right"><span t-field="item.ticket_moderateur"/></td>
+                                               <td class="col-xs-1 text-right"><span t-field="item.mt_exclusion"/></td>
+                                               <td class="col-xs-1 text-right"><span t-field="item.net_prestataire"/></td>
+                                           </tr>
+                                       </t>
+                                   </t>
+                               </tr>
+                               <tr>
+                                   <td colspan="10" class="bg-info text-right">
+                                       <b> TOTAUX NET A PAYER :</b><br/>
+                                   </td>
+                                   <td class="col-xs-2 text-right">
+                                       <b><span t-field="o.mt_total_facture"/></b>
+                                   </td>
+                               </tr>
+                               <tr>
+                                   <td colspan="11">
+                                       <span>Arrêtée la présente facture à la somme de :</span> <br/>
+                                       <b><span t-esc="o.montant_en_text()"/>.</b>
+                                   </td>
+                               </tr>
+                               <tr rowspan="3">
+                                   <td colspan="8" class="text-center">Signature &amp; Cachet <br/> Centre de Soins Médicaux et Paramédicaux</td>
+                                   <td colspan="4" class="text-center">Visa Système d'Assurance Maladie (SAM)</td>
+                               </tr>
+                               <tr></tr><tr></tr><tr></tr>
+                           </thody>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

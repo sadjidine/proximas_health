@@ -1,0 +1,418 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+
+<odoo>
+    <record id="view_res_company_form" model="ir.ui.view">
+        <field name="name">res.company.form</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <!--<xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="proximas.medical_assure_action"
+                    type="action" class="oe_stat_button" icon="fa-list"
+                    context="{'search_default_parent_id': active_id}"
+                    string="Partner">
+                </button>
+            </xpath>-->
+            <notebook position="inside">
+                <page name="Exo_sam_page" string="Exercices Couverture Maladie">
+                    <field name="exercice_ids">
+                       <tree editable="bottom" >
+                           <field name="name"/>
+                           <field name="date_debut"/>
+                           <field name="date_fin"/>
+                           <field name="en_cours"/>
+                           <field name="cloture"/>
+                       </tree>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+    </record>
+    <!-- EXERCICE List view -->
+    <record id="proximas_exercice_view_list" model="ir.ui.view">
+       <field name="name">exercice list view</field>
+       <field name="model">proximas.exercice</field>
+       <field name="arch" type="xml">
+           <tree>
+               <field name="name"/>
+               <field name="res_company_id"/>
+               <field name="date_debut"/>
+               <field name="date_fin"/>
+               <field name="en_cours"/>
+               <field name="cloture"/>
+               <field name="note"/>
+           </tree>
+       </field>
+    </record>
+    <!-- EXERCICE Form view-->
+    <record id="proximas_exercice_view_form" model="ir.ui.view">
+       <field name="name">exercice form view</field>
+       <field name="model">proximas.exercice</field>
+       <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+       <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <div class="oe_title oe_left" name="title">
+                       <label for="name" string="Libellé" class="oe_edit_only"/>
+                       <h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé de l'exercice"/></h2>
+                       <label for="res_company_id" string="Structure" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="res_company_id"
+                                  placeholder="Structure/Organisation"
+                                  options='{"no_open": True, "no_create": True}'/></h3>
+                   </div>
+                   <div col="6" colspan="2" class="oe_right">
+                       <group col="6" colspan="2" >
+                           <field name="date_debut"/>
+                           <field name="date_fin"/>
+                           <field name="cloture"/>
+                           <field name="validite_pec"/>
+                           <field name="marge_medicament"/>
+                           <field name="en_cours"/>
+                       </group>
+                   </div>
+                   <newline/>
+                   <notebook>
+                       <page string="NOTES / OBSERVATION:">
+                           <field name="note"/>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
+    <!-- DISTRICT List view -->
+    <record id="proximas_district_view_list" model="ir.ui.view">
+       <field name="name">district list view</field>
+       <field name="model">proximas.district</field>
+       <field name="arch" type="xml">
+           <tree>
+               <field name="id"/>
+               <field name="name"/>
+               <field name="country_id"/>
+               <field name="note"/>
+           </tree>
+       </field>
+    </record>
+    <!-- DISTRICT Form view-->
+    <record id="proximas_district_view_form" model="ir.ui.view">
+       <field name="name">district form view</field>
+       <field name="model">proximas.district</field>
+       <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <div class="oe_title oe_left" name="title">
+                       <label for="name" string="District :" class="oe_edit_only"/>
+                       <h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé du district"/></h2>
+                       <label for="chef_lieu" string="Chef-lieu :" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="chef_lieu" default_focus="1" placeholder="chef-lieu de district"/></h3>
+                       <label for="country_id" string="Pays :" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="country_id"
+                                  placeholder="Pays de rattachement de la zone"
+                                  options='{"no_open": True, "no_create": True}'/></h3>
+                   </div>
+                   <separator/>
+                   <notebook>
+                       <page string="NOTES / OBSERVATION:">
+                           <field name="note"/>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
+    <!-- REGION List view -->
+    <record id="proximas_region_view_list" model="ir.ui.view">
+       <field name="name">region list view</field>
+       <field name="model">proximas.region</field>
+       <field name="arch" type="xml">
+           <tree>
+               <field name="id"/>
+               <field name="name"/>
+               <field name="district_id"/>
+               <field name="country_id"/>
+               <field name="note"/>
+           </tree>
+       </field>
+    </record>
+    <!-- REGION Form view-->
+    <record id="proximas_region_view_form" model="ir.ui.view">
+       <field name="name">region form view</field>
+       <field name="model">proximas.region</field>
+       <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <div class="oe_title oe_left" name="title">
+                       <label for="name" string="Région :" class="oe_edit_only"/>
+                       <h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé de la région "/></h2>
+                       <label for="chef_lieu" string="Chef-lieu :" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="chef_lieu" default_focus="1" placeholder="chef-lieu de région"/></h3>
+                       <label for="district_id" string="District :" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="district_id"
+                                  placeholder="District de rattachement de la zone"
+                                  options='{"no_open": True, "no_create": True}'/></h3>
+                       <label for="country_id" string="Pays :" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="country_id"
+                                  placeholder="Pays de rattachement de la zone"
+                                  options='{"no_open": True, "no_create": True}'/></h3>
+                   </div>
+                   <separator/>
+                   <notebook>
+                       <page string="NOTES / OBSERVATION:">
+                           <field name="note"/>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
+    <!-- ZONE List view -->
+    <record id="proximas_zonee_view_list" model="ir.ui.view">
+       <field name="name">zone list view</field>
+       <field name="model">proximas.zone</field>
+       <field name="arch" type="xml">
+           <tree>
+               <field name="id"/>
+               <field name="name"/>
+               <field name="region_id"/>
+               <field name="country_id"/>
+               <field name="note"/>
+           </tree>
+       </field>
+    </record>
+    <!-- ZONE Form view-->
+    <record id="proximas_zone_view_form" model="ir.ui.view">
+       <field name="name">zone form view</field>
+       <field name="model">proximas.zone</field>
+       <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+       <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <div class="oe_title oe_left" name="title">
+                       <label for="name" string="Zone :" class="oe_edit_only"/>
+                       <h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé de la zone"/></h2>
+                       <label for="region_id" string="Région :" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="region_id"
+                                  placeholder="Région de rattachement de la zone"
+                                  options='{"no_open": True, "no_create": True}'/></h3>
+                       <label for="country_id" string="Pays :" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="country_id"
+                                  placeholder="Pays de rattachement de la zone"
+                                  options='{"no_open": True, "no_create": True}'/></h3>
+                   </div>
+                   <separator/>
+                   <notebook>
+                       <page string="NOTES / OBSERVATION:">
+                           <field name="note"/>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
+    <!-- LOCALITE List view -->
+    <record id="proximas_localite_view_list" model="ir.ui.view">
+       <field name="name">localité list view</field>
+       <field name="model">proximas.localite</field>
+       <field name="arch" type="xml">
+           <tree>
+               <field name="id"/>
+               <field name="name"/>
+               <field name="zone_id"/>
+               <field name="region_id"/>
+               <field name="district_id"/>
+               <field name="country_id"/>
+               <field name="note"/>
+           </tree>
+       </field>
+    </record>
+    <!-- LOCALITE Form view-->
+    <record id="proximas_localite_view_form" model="ir.ui.view">
+       <field name="name">localité form view</field>
+       <field name="model">proximas.localite</field>
+       <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+       <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <div class="oe_title oe_left" name="title">
+                       <label for="name" string="Localité" class="oe_edit_only"/>
+                       <h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé de la localité"/></h2>
+                       <label for="zone_id" string="Zone" class="oe_edit_only"/>
+                       <h3 class="text-primary"><field name="zone_id" placeholder="Zone de rattachement de la localité"
+                                  options='{"no_open": True, "no_create": True}'/></h3>
+                   </div>
+                   <separator/>
+                   <notebook>
+                       <page string="NOTES / OBSERVATION:">
+                           <field name="note"/>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
+    <!-- CATEGORIE PRESTATAIRE List view -->
+    <record id="proximas_standing_view_list" model="ir.ui.view">
+       <field name="name">standing list view</field>
+       <field name="model">proximas.standing</field>
+       <field name="arch" type="xml">
+           <tree>
+               <field name="name"/>
+               <field name="libelle"/>
+               <field name="note"/>
+           </tree>
+       </field>
+    </record>
+    <!-- CATEGORIE PRESTATAIRE Form view-->
+    <record id="proximas_standing_view_form" model="ir.ui.view">
+       <field name="name">standing form view</field>
+       <field name="model">proximas.standing</field>
+       <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+       <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <div class="oe_title oe_left" name="title">
+                       <label for="name" string="Standing" class="oe_edit_only"/>
+                       <h2 class="text-success"><field name="name" default_focus="1" placeholder="Nbre. d'étolies (ex.: 5 ==> Etoiles)"/></h2>
+                       <label for="libelle" string="Libellé" class="oe_edit_only"/>
+                       <h3 class="text-info"><field name="libelle" placeholder="libellé du standing" /></h3>
+                   </div>
+                   <separator/>
+                   <notebook>
+                       <page string="NOTES / OBSERVATION:">
+                           <field name="note"/>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
+    <!-- GROUPE ASSURES List view -->
+    <record id="proximas_groupe_view_list" model="ir.ui.view">
+       <field name="name">groupe list view</field>
+       <field name="model">proximas.groupe</field>
+       <field name="arch" type="xml">
+           <tree>
+               <field name="id"/>
+               <field name="name"/>
+               <field name="parent_id"/>
+               <field name="ref"/>
+               <field name="est_suspendu"/>
+               <field name="note"/>
+           </tree>
+       </field>
+    </record>
+    <!-- GROUPE ASSURES Form view-->
+    <record id="proximas_groupe_view_form" model="ir.ui.view">
+       <field name="name">groupe form view</field>
+       <field name="model">proximas.groupe</field>
+       <!--<field name="inherit_id" ref="base.view_partner_form"/>-->
+       <field name="arch" type="xml">
+           <form>
+               <sheet>
+                   <div class="oe_button_box" name="button_box">
+                       <button name="toggle_suspension" type="object" class="oe_stat_button" icon="fa-check">
+                           <field name="est_suspendu" widget="boolean_button" options='{"terminology": "active"}'/>
+                       </button>
+                   </div>
+                   <div class="oe_right oe_button_box" name="buttons" />
+                            <field name="is_groupe" invisible="1"/>
+                            <field name="is_company" invisible="1"/>
+                            <field name="name" invisible="1"/>
+                            <!--<field name="parent_id" invisible="1"/>-->
+                   <div class="oe_title" name="title">
+                       <div class="oe_left">
+                           <label for="name" string="Groupe:" class="oe_edit_only"/>
+                           <h2 class="text-primary"><field name="name" default_focus="1" placeholder="Nom du groupe" /></h2>
+                           <group class="text-info"><field name="ref"  string="Description du groupe" placeholder="Texte descriptif du groupe"/></group>
+                       </div>
+                       <div class="oe_right">
+                           <label for="parent_id" string="Groupe rattachement" class="oe_edit_only"/>
+                           <h3 class="text-info"><field name="parent_id" placeholder="Groupe Ascendant"/></h3>
+                       </div>
+                   </div>
+                   <separator/>
+                   <notebook>
+                       <page string="ADRESSES &amp; CONTACTS">
+                           <group>
+                               <group>
+                                   <field name="type" attrs="{'invisible': [('parent_id','=', False)]}" groups="base.group_no_one"/>
+                                   <label for="street" string="Address"/>
+                                   <div class="o_address_format">
+                                       <field name="street" placeholder="Commune..." class="o_address_street"
+                                           attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                       <field name="street2" placeholder="Quartier..." class="o_address_street"
+                                           attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                       <field name="city" placeholder="Ville" class="o_address_city"
+                                           attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                       <field name="zip" placeholder="Boîte Postale" class="o_address_zip"
+                                           attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"/>
+                                       <field name="country_id" placeholder="Pays" class="o_address_country" options='{"no_open": True, "no_create": True}'
+                                           attrs="{'readonly': [('type', '=', 'contact'),('parent_id', '!=', False)]}"
+                                           context="{'default_country_id':'CI'}"/>
+                                   </div>
+                                   <field name="website" widget="url" placeholder="e.g. www.proximas.net"/>
+                               </group>
+                            <group>
+                                   <field name="phone" widget="phone"/>
+                                   <field name="mobile" widget="phone"/>
+                                   <field name="fax"/>
+                                   <field name="user_ids" invisible="1"/>
+                                   <field name="email" widget="email" attrs="{'required': [('user_ids','!=', [])]}"/>
+                                   <!--<field name="lang"/>
+                                   <field name="category_id" widget="many2many_tags" placeholder="Tags..."/>-->
+                               </group>
+                           </group>
+                       </page>
+                       <page string="NOTES / OBSERVATION:">
+                                <field name="note"/>
+                       </page>
+                   </notebook>
+               </sheet>
+           </form>
+       </field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_organisation_action">
+        <field name="name">Proximaas: Structure / Oraganisation</field>
+        <field name="res_model">res.company</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_exercice_action">
+        <field name="name">Proximaas: Paramètrage Exercice</field>
+        <field name="res_model">proximas.exercice</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_district_action">
+        <field name="name">Proximaas: Paramétrage District</field>
+        <field name="res_model">proximas.district</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_region_action">
+        <field name="name">Proximaas: Paramétrage Région</field>
+        <field name="res_model">proximas.region</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_zone_action">
+        <field name="name">Proximaas: Paramétrage Zone</field>
+        <field name="res_model">proximas.zone</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_localite_action">
+        <field name="name">Proximaas: Paramétrage Localité</field>
+        <field name="res_model">proximas.localite</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_standing_action">
+        <field name="name">Proximaas: Paramétrage Standing</field>
+        <field name="res_model">proximas.standing</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_groupe_action">
+        <field name="name">Proximaas: Paramétrage Groupes</field>
+        <field name="res_model">proximas.groupe</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

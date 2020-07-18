@@ -1,0 +1,587 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+<odoo>
+    <data>
+        <!-- FICHE REMBOURSEMENT LIST VIEW  -->
+        <record id="proximas_remboursement_list_view" model="ir.ui.view">
+            <field name="name">proximas.remboursement.tree.view</field>
+            <field name="model">proximas.remboursement.pec</field>
+            <field name="arch" type="xml">
+                <tree string="Remboursement pec" create="0">
+                    <!--<field name="id"/>-->
+                    <field name="num_fiche"/>
+                    <field name="code_rfm" />
+                    <field name="date_saisie"/>
+                    <field name="name" />
+                    <field name="net_totaux_rfm"/>
+                    <!--<field name="sous_totaux_npc_remb"/>-->
+                    <field name="net_part_sam_rfm"/>
+                    <field name="net_ticket_moderateur_rfm"/>
+                    <field name="net_exclusions_rfm"/>
+                    <field name="net_remboursement_rfm"/>
+                </tree>
+            </field>
+        </record>
+        <!-- REMBOURSEMENT Form view-->
+        <record id="proximas_remboursement_form_view" model="ir.ui.view">
+           <field name="name">Remboursement form view</field>
+           <field name="model">proximas.remboursement.pec</field>
+           <field name="arch" type="xml">
+               <form>
+                   <header>
+                       <button name="%(action_remboursement_fais_medicaux_report)d" string="Facture Remboursement"
+                               type="action" icon="gtk-print" class="oe_highlight"
+                               help="Edition Facture Remboursement de Frais Médicaux."
+                               />
+                       <button name="Création" type="workflow" icon="fa-hospital-o"
+                               string="Revenir à Création" states="valide" class="oe_highlight"
+                               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                               help="Permet de remettre le statut du remboursement de frais médicaux =>(En cours)."/>
+                       <button name="Validation" type="workflow"
+                               string="Validation" icon="fa-hand-o-right"
+                               states="create,boucle"
+                               help="VALIDATION: Transmettre le remboursement des frais médicaux pour règlement."
+                               class="oe_highlight"
+                               confirm="VALIDATION: Vous êtes sur le point de transmettre le dossier de remboursement à
+                               la validation et en vous risquez de ne plus pouvoir acceder au dossier.Voulez-vous
+                               confirmer la clôture?"
+                       />
+                       <button name="Termine" type="workflow"
+                               string="Terminé" icon="fa-lock"
+                               states="valide"
+                               help="TERMINE: Terminer le processus de traitement du dossier de remboursement de frais
+                               médicaux pour règlement."
+                               class="oe_highlight"
+                               confirm="TERMINE: Vous êtes sur le point de mettre fin au processus de traitement du
+                               dossier de remboursement des frais médicaux. Par conséquent, Vous risquez de ne plus
+                               pouvoir acceder au dossier concerné. Voulez-vous confirmer la clôture/terminer?"
+                       />
+                               <!--states="cours,valide"-->
+                       <!--<button name="Cloture" type="workflow" icon="fa-check-circle"
+                               string="Terminer" class="oe_highlight"
+                               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                               states="valide"
+                               help="Permet de clôturer/terminer le remboursement et confirmer le règlement des frais médicaux."
+                       />-->
+                       <field name="state" widget="statusbar"/>
+                       <!-- statusbar_visible="cours,oriente,termine,expire,valide"-->
+                   </header>
+                   <sheet>
+                       <div class="oe_right oe_button_box" name="buttons">
+                           <button name="proximas_medical.sinistres_filtre_action" class="oe_stat_button"
+                                   icon="fa-list"
+                                   type="action"
+                                   context="{'search_default_adherent_id': adherent_id}">
+                               <field name="nbre_actes_remb" widget="statinfo" string="Nbre.Actes" />
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-archive"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="net_totaux_rfm" widget="statinfo" string="S/Totaux"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-bank"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="net_part_sam_rfm" widget="statinfo" string="Part SAM"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-user"
+                                   context="{'search_default_num_contrat: num_contrat}">
+                               <field name="net_ticket_moderateur_rfm" widget="statinfo" string="Ticket Mod."/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-scissors"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="net_exclusions_rfm" widget="statinfo" string="Totaux Exclus"/>
+                           </button>
+                           <button class="oe_stat_button" name="proximas_medical.sinistres_filtre_action"
+                                   type="action"
+                                   icon="fa-gift"
+                                   context="{'search_default_num_contrat': num_contrat}">
+                               <field name="net_remboursement_rfm" widget="statinfo" string="Net Remb."/>
+                           </button>
+                       </div>
+                       <field name="image"
+                           widget='image'
+                           class="oe_left oe_kanban_avatar"
+                           options="{'preview_image': 'image', 'size': [120, 120]}"
+                           readonly="1"/>
+                        <!--<field name="image" widget='image' class="oe_avatar oe_left"/>-->
+                       <div class="oe_title oe_left" name="title">
+                           <!--<label for="name" string="Adhérent/Police:"/>-->
+                           <h2><field name="name" class="text-primary" readonly="True"/></h2>
+                           <!--<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>-->
+                           <strong class="text-primary"><field name="code_saisi" readonly="1"/></strong>
+                           <h4>
+                               <field name="police_id" class="text-info"
+                                      options ='{"no_open": True, "no_create": True}'/>
+                           </h4>
+                           <h4 class="test-primary">
+                               <field name="groupe_id" class="text-info"
+                                      options ='{"no_open": True, "no_create": True}'/>
+                           </h4>
+                       </div>
+                       <newline/>
+                       <div class="oe_right text-center">
+                           <field name="code_rfm" invisible="1"/>
+                           <label for="code_remb" string="CODE REMBOURSEMENT - RFM:"/>
+                           <h2 class="bg-primary"><field name="code_remb"/></h2>
+                       </div>
+                       <hr/>
+                       <!--field name="image"
+                               widget='image'
+                               class="oe_left oe_avatar thumbnail"
+                               options="{'preview_image': 'image', 'size': [90, 140]}" />
+                            &lt;!&ndash;<field name="image" widget='image' class="oe_avatar oe_left"/>&ndash;&gt;
+                       <div class="oe_title" name="title">
+                           <label for="name" string="Adhérent/Police:"/>
+                           <h3><field name="name" class="text-primary" readonly="True"/></h3>
+                           &lt;!&ndash;<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>&ndash;&gt;
+                           <strong class="text-muted"><field name="code_saisi" readonly="1"/></strong>
+                           <h4>
+                               <field name="police_id" class="text-info"
+                                      options ='{"no_open": True, "no_create": True}'/>
+                           </h4>
+                       </div>
+                       <div class="oe_left text-muted">
+                           <field name="code_rfm" invisible="1"/>
+                            <label for="code_remb" string="Remboursement Frais Médicaux / Code RFM:"/>
+                            <h2><field name="code_remb"/></h2>
+                       </div>
+                       <div class="oe_right text-right text-info">
+                       </div>
+                       <hr/>-->
+                       <notebook>
+                           <page string="FICHE REMBOURSEMENT">
+                               <groupe name="data">
+                                   <group name="main">
+                                       <field name="num_fiche"/>
+                                       <field name="date_depot" required="1"/>
+                                       <field name="date_transmis"
+                                              attrs="{'required': [('state','=','valide')]}"
+                                       />
+                                   </group>
+                                   <group>
+                                       <field name="prestataire_id"
+                                              options='{"no_open": True, "no_create": True}'
+                                              required="1"/>
+                                       <field name="doc_joint"
+                                              states="valide"
+                                              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                                              attrs="{'required': [('state','in',['valide'])]}"
+                                              widget='binary'
+                                              filename="doc_filename"
+                                       />
+                                       <field name="doc_filename"
+                                              invisible="1"
+                                              states="valide"
+                                              attrs="{'required': [('state','in',['valide'])]}"
+                                              groups="base.group_system,proximas_medical.group_operator,proximas_medical.group_manager,proximas_medical.group_admin"
+                                       />
+                                       <field name="contrat_id" options ='{"no_open": True, "no_create": True}' invisible="1"/>
+                                   </group>
+                               </groupe>
+                           </page>
+                           <page string="FRAIS MEDICAUX &amp; PARAMEDICAUX">
+                               <field name="details_rfm_soins_ids"
+                                      class="text-info"
+                                      widget="one2many_list"
+                                      context="{'default_prestataire_rembourse_id':prestataire_id,'default_contrat_id':contrat_id,
+                                      'default_num_contrat':num_contrat,'default_police_id':police_id,
+                                      'default_structure_id':structure_id}"
+                                      domain="[('prestataire_rembourse_id', '=', prestataire_id)]"
+                                      attrs="{'required': [('state','=','create')]}">
+                                   <!--'form_view_ref': 'proximas_medical.details_pec_soins_form',-->
+                                   <!--attrs="{'required': [('state','=','cours')]}"-->
+                                   <!--'default_pool_medical_id':pool_medical_id-->
+                                   <form string="Détails de Frais médicaux Assuré">
+                                       <sheet>
+                                           <!--<blockquote class="blockquote pt-0">
+                                              <p class="text-primary h5">Vous êtes sur le point d'enregistrer les actes
+                                                  médicaux et prescriptions de médicaments et procéder ainsi au
+                                                  remboursement des frais engagés pour le compte de l'adhérent concerné.
+                                              </p>
+                                               <strong class="text-info h5">Veuillez vous référer aux pièces et
+                                                   documents fournis et justifiant les dépenses engagées par l'adhérent pour
+                                                   renseigner les champs ci-dessous.
+                                               </strong>
+                                              <footer class="blockquote-footer"><strong>IMPORTANT:</strong> Veuillez
+                                                  prendre soins de renseigner tous les champs :
+                                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                                              </footer>
+                                           </blockquote>-->
+                                           <notebook>
+                                               <page string="Détails Prestation Médicale">
+                                                   <!--<div class="oe_title" name="title">
+                                                       <label for="code_id_rfm" string="Code Id. Assuré:"
+                                                              class="oe_edit_only"/>
+                                                       <h3 class="text-success">
+                                                           <field name="code_id_rfm"/>
+                                                       </h3>
+                                                   </div>-->
+                                                   <group>
+                                                       <field name="prestataire_rembourse_id" readonly="0"
+                                                           string="Ets. Non Conventionné"
+                                                           options='{"no_open": True, "no_create": True}'
+                                                           />
+                                                       <!--context="{'default_prestataire_rembourse_id':prestataire_id}"-->
+                                                       <field name="date_execution" required="1"/>
+                                                       <!--<field name="exercice_id" invisible="0"/>-->
+                                                       <field name="prestation_rembourse_id"
+                                                              required="1"
+                                                              options='{"no_open": True, "no_create": True}'
+                                                              class="text-primary"
+                                                              domain="[('prestataire_id', '=', prestataire_rembourse_id),
+                                                              ('active', '=', True)]"/>
+                                                       <field name="code_id_rfm" required="1"/>
+                                                       <field name="name" readonly="1"/>
+                                                       <field name="genre"/>
+                                                       <field name="date_naissance"/>
+                                                       <field name="age"/>
+                                                       <field name="statut_familial"/>
+                                                   </group>
+                                                   <group>
+                                                       <field name="adherent_id" invisible="1"/>
+                                                   </group>
+                                                   <group col="6" colspan="2" invisible="1">
+                                                       <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
+                                                       <field name="accord_prealable"/>
+                                                   </group>
+                                               </page>
+                                               <page string="Détails Coûts - Prestation à Rembourser">
+                                                   <group>
+                                                       <group>
+                                                           <field name="details_prestation"
+                                                                  options='{"no_open": True, "no_create": True}'
+                                                                  class="text-primary"
+                                                                  invisible="0"
+                                                           />
+                                                           <!--domain="[('prestataire_id', '=', prestataire_id),('active', '=', True)]"-->
+                                                           <!--<field name="quantite"/>-->
+                                                       </group>
+                                                       <group col="6" colspan="2" >
+                                                           <!--<separator string="Calculs Coûts:" />-->
+                                                           <field name="cout_unit"
+                                                                  attrs="{'required': [('cout_modifiable','=',True)]}"
+                                                           />
+                                                           <field name="quantite_livre"
+                                                                  attrs="{'required': [('quantite_exige','=',True)],'invisible': [('quantite_exige','=',False)]}"
+                                                           />
+                                                           <newline/>
+                                                           <field name="cout_unitaire" string="Coût Unitaire"
+                                                                  invisible="1"/>
+                                                           <field name="coefficient"
+                                                           />
+                                                           <field name="cout_total" string="Total Acte" class="text-primary"/>
+                                                           <field name="taux_couvert" string="Taux Couverture"/>
+                                                           <field name="ticket_moderateur" string="Ticket Modérateur"/>
+                                                           <field name="net_tiers_payeur" string="Tiers Payeur(SAM)"/>
+                                                           <field name="mt_remboursement"/>
+                                                       </group>
+                                                       <group invisible="1">
+                                                           <field name="cout_unite"/>
+                                                           <field name="remise_prestation"/>
+                                                           <field name="mt_rabais"/>
+                                                           <field name="forfait_sam" string="Forfait SAM"/>
+                                                           <field name="forfait_ticket"/>
+                                                           <!--<field name="mt_plafond"/>-->
+                                                           <field name="total_pc" string="S/Total PC"/>
+                                                           <field name="total_npc" string="S/Total Hors PC"/>
+                                                           <field name="mt_paye_assure" string="Montant Encaissé"/>
+                                                           <!--attrs="{'readonly': [('ticket_exigible','=',True)]}"-->
+                                                           <field name="net_prestataire" string="Net Prestataire"/>
+                                                           <field name="debit_ticket"/>
+                                                           <field name="cout_modifiable"/>
+                                                           <field name="quantite_exige"/>
+                                                           <field name="arret_prestation" />
+                                                       </group>
+                                                   </group>
+                                                   <hr/>
+                                                    <group col="8" colspan="2" invisible="0">
+                                                        <field name="zone_couverte"/>
+                                                        <field name="prestataire_public"/>
+                                                        <field name="code_medical_id"
+                                                              options='{"no_open": True, "no_create": True}'/>
+                                                        <field name="rubrique_id" string="Rubrisue médicale"
+                                                              options='{"no_open": True, "no_create": True}'/>
+                                                    </group>
+                                               </page>
+                                               <page string="Traitement des exclusions sur prestation "
+                                                     groups="base.group_system,proximas_medical.group_manager,
+                                                     proximas_medical.group_admin,proximas_medical.group_medical"
+                                               >
+                                                   <group>
+                                                       <field name="mt_exclusion"/>
+                                                       <field name="motif_exclusion"
+                                                              attrs="{'required': [('mt_exclusion','!=',0)]}"
+                                                       />
+                                                   </group>
+                                               </page>
+                                           </notebook>
+                                       </sheet>
+                                   </form>
+                                   <tree default_order="date_execution asc">
+                                       <!--<field name="pec_id"/>-->
+                                       <field name="date_execution"/>
+                                       <!--<field name="pool_medical_id"/>-->
+                                       <!--<field name="prestataire"/>-->
+                                       <field name="prestation_rembourse_id" string="Prestation Médicale"/>
+                                       <field name="coefficient" string="Coef." />
+                                       <field name="cout_unite" string="Coût Unit."/>
+                                       <field name="cout_total" string="S/Total" sum="S/Total"/>
+                                       <field name="total_pc" sum="S/Total PC"/>
+                                       <field name="total_npc" sum="S/Total NPC"/>
+                                       <field name="taux_couvert" string="Taux(%)"/>
+                                       <field name="net_tiers_payeur" sum="Part SAM"/>
+                                       <field name="ticket_moderateur" string="Ticket mod." sum="Ticket mod."/>
+                                       <!--<field name="mt_paye_assure" sum="Totaux Payé:"/>-->
+                                       <field name="mt_remboursement" string="S/Total Remb. " sum="Net à payer"/>
+                                       <!--<field name="debit_ticket" sum="Débit Ticket:"/>-->
+                                   </tree>
+                               </field>
+                           </page>
+                           <page string="INFOS ADHERENT">
+                               <group>
+                                   <group>
+                                       <field name="date_saisie" readonly="1"/>
+                                       <field name="matricule"/>
+                                       <field name="num_contrat"/>
+                                       <field name="adherent_id" options ='{"no_open": True, "no_create": True}'/>
+                                       <field name="structure_id" string="SAM"
+                                              options='{"no_open": True, "no_create": True}'
+                                              invisible="0"/>
+                                       <field name="date_last_rfm"/>
+                                   </group>
+                               </group>
+                           </page>
+                           <!--<page string="Remboursement - Achats Médicaments">
+                               &lt;!&ndash;attrs="{'invisible':[('state','=','cours'),'|',('nbre_prestations_demandes','!=',0),
+                                 ('prestataire_crs_id','=',None),'|',('state','=','oriente'),('nbre_prestations_fournies','=',0)]}"&ndash;&gt;
+                               <field name="details_rfm_phcie_ids"
+                                      widget="one2many"
+                                      class="text-info"
+                                      domain="[('prestataire_rembourse_id', '!=', None)]"
+                                      context="{'default_prestataire_rembourse_id':prestataire_id,'default_police_id':police_id,
+                                      'default_structure_id':structure_id,'default_user':uid}">
+                                   &lt;!&ndash;'form_view_ref': 'proximas_medical.details_pec_phcie_form',&ndash;&gt;
+                                   <form string="Détails Médicaments à rembourser">
+                                       <sheet>
+                                           <notebook>
+                                               <page string="Identification Assuré/Bénéficiaire">
+                                                   <group invisible="1">
+                                                       <field name="create_uid"/>
+                                                       <field name="write_uid"/>
+                                                       <field name="current_user"/>
+                                                       <field name="prestataire_rembourse_id"/>
+                                                       &lt;!&ndash;<field name="assure_id"
+                                                              options='{"no_open": True, "no_create": True}'
+                                                              readonly="1"/>&ndash;&gt;
+                                                   </group>
+                                                   <group class="text-primary h5">
+                                                       <field name="prestataire_rembourse_id"
+                                                                  options='{"no_open": True, "no_create": True}'
+                                                                  readonly="1" string="Ets. Non conventionné"/>
+                                                       <field name="code_id_rfm" required="1"/>
+                                                       <field name="name" readonly="1"/>
+                                                   </group>
+                                                   <hr/>
+                                                   <group col="6" colspan="2">
+                                                       <field name="zone_couverte"/>
+                                                       <field name="prestataire_public"/>
+                                                   </group>
+                                                   <hr/>
+                                                   <group col="6" colspan="2" invisible="1">
+                                                       <field name="delai_attente_produit" string="Délai (jours)"/>
+                                                       <field name="ticket_exigible" string="Ticket Exigible?"/>
+                                                       <field name="arret_produit" string="Médicament en arrêt?"/>
+                                                   </group>
+                                                   <group col="6" colspan="2" invisible="1">
+                                                       <field name="prestation_id" readonly="1"/>
+                                                       <field name="code_medical_id"/>
+                                                       <field name="rubrique_id" readonly="1"/>
+                                                       <field name="police_id"/>
+                                                       <field name="structure_id"/>
+                                                   </group>
+                                               </page>
+                                               <page string="Remboursement Médicaments">
+                                                   <group attrs="{'readonly': [('date_demande','!=',False),
+                                                          ('produit_rembourse_id','!=',False),('quantite','>',0)]}"
+                                                   >
+                                                       <field name="date_execution" string="Date livraison (Méd.)"
+                                                              attrs="{'required': [('prestataire_rembourse_id','!=',False)]}"
+                                                       />
+                                                       <field name="produit_phcie_id" string="Produit/Médicament"
+                                                          options='{"no_open": True, "no_create": True}'
+                                                          required="1"
+                                                          />
+                                                       &lt;!&ndash;<field name="produit_phcie" class="text-primary"
+                                                              string="Médicament Prescrit"/>&ndash;&gt;
+                                                       <field name="quantite" required="1"
+                                                          string="Quantité Prescrite"
+                                                       />
+                                                       <field name="quantite_livre" required="1"
+                                                              attrs="{'required': [('prestataire_rembourse_id','!=',False)]}"/>
+                                                       &lt;!&ndash;<field name="substitut_phcie_id"
+                                                              options='{"no_open": True, "no_create": True}'
+                                                       />&ndash;&gt;
+                                                       &lt;!&ndash;<field name="date_demande" required="1" string="Date Prescription"/>&ndash;&gt;
+                                                       &lt;!&ndash;<field name="posologie"/>&ndash;&gt;
+                                                       <field name="nbre_produit_phcie" invisible="1"/>
+                                                   </group>
+                                                   <hr/>
+                                                   <group col="6" colspan="2">
+                                                       <field name="cout_unit"
+                                                              required="1"
+                                                       />
+                                                       <field name="cout_total"/>
+                                                       <field name="taux_couvert"/>
+                                                       <field name="ticket_moderateur"/>
+                                                       <field name="net_tiers_payeur"/>
+                                                       <field name="mt_remboursement"/>
+                                                       &lt;!&ndash;<field name="total_pc"/>
+                                                       <field name="total_npc"/>
+                                                       <field name="taux_couvert"/>
+                                                       <field name="ticket_moderateur"/>
+                                                       <field name="net_tiers_payeur"/>
+                                                       <field name="ticket_exigible" string="Ticket Exigible?"/>
+                                                       <field name="mt_paye_assure"
+                                                              required="1"
+                                                              string="Montant Encaissé"
+                                                       />
+                                                       <field name="net_prestataire"/>
+                                                       <field name="debit_ticket"/>&ndash;&gt;
+                                                   </group>
+                                               </page>
+                                               <page string="Traitement des exclusions Médicament "
+                                                     groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,
+                                                     proximas_medical.group_medical">
+                                                   <group>
+                                                       <field name="mt_exclusion"/>
+                                                       <field name="motif_exclusion"
+                                                              attrs="{'required': [('mt_exclusion','!=',0)]}"
+                                                       />
+                                                   </group>
+                                               </page>
+                                           </notebook>
+                                       </sheet>
+                                   </form>
+                                   <tree default_order="date_execution asc">
+                                       &lt;!&ndash;<field name="pec_id"/>&ndash;&gt;
+                                       <field name="date_execution" string="Date Achat"/>
+                                       &lt;!&ndash;<field name="pool_medical_id"/>&ndash;&gt;
+                                       <field name="medicament"
+                                              string="Médicament(s) Acheté(s) / Pharmacie"/>
+                                       <field name="quantite_livre" string="Qté."/>
+                                       <field name="cout_unit" string="Coût Unit."/>
+                                       &lt;!&ndash;<field name="quantite" string="Qté."/>&ndash;&gt;
+                                       <field name="cout_total" sum="S/Totaux"/>
+                                       &lt;!&ndash;<field name="total_pc" sum="Totaux PC:"/>&ndash;&gt;
+                                       <field name="taux_couvert"/>
+                                       <field name="net_tiers_payeur"  sum="Part SAM:"/>
+                                       <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod.:"/>
+                                       &lt;!&ndash;<field name="mt_paye_assure" sum="Totaux Payé:"/>&ndash;&gt;
+                                       <field name="mt_remboursement" string="S/Total(Remb.)"
+                                              sum="Totaux Dû (Adhérent):"/>
+                                       &lt;!&ndash;<field name="debit_ticket" sum="Débit Ticket:"/>&ndash;&gt;
+                                   </tree>
+                               </field>
+                               &lt;!&ndash;<group>
+                                   <group class="oe_subtotal_footer oe_right text-primary">
+                                      <field name="part_sam_phcie"/>
+                                      <field name="ticket_moderateur_phcie"/>
+                                      <field name="mt_totaux_phcie" class="oe_subtotal_footer_separator"/>
+                                      <field name="ticket_exigible_phcie"/>
+                                      <field name="mt_encaisse_phcie" string="Montant Perçu (Ticket Modérateur)"/>
+                                      <field name="net_prestataire_phcie" class="oe_subtotal_footer_separator"/>
+                                   </group>
+                               </group>&ndash;&gt;
+                           </page>-->
+                           <page string="NOTES">
+                               <field name="note"/>
+                           </page>
+                       </notebook>
+                   </sheet>
+                   <sheet position="after">
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"
+                        widget="mail_followers" />
+                        <field name="message_ids" widget="mail_thread" />
+                    </div>
+                </sheet>
+               </form>
+           </field>
+        </record>
+        <!--FICHE REMBOURSEMENT CREATION WIZARD FORM-->
+        <record id='proximas_rfm_create_wizard_form' model='ir.ui.view'>
+            <field name='name'>Assistant Remboursement Frais Médicaux view</field>
+            <field name='model'>proximas.remboursement.wizard</field>
+            <field name='arch' type='xml'>
+                <form string="Création Fiche Remboursement Adhérent">
+                    <sheet>
+                        <div class="panel">
+                            <h4 class="panel-header text-primary">
+                              Création Fiche Remboursement de Frais Médicaux - Adhérent:
+                          </h4>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0 h5">
+                              <p class="text-primary">Cet assistant vous permet de démarrer la procédure de traitement
+                                  du remboursement de frais médicaux pour le compte d'un adhérent sur présentation des
+                                  justificatifs de frais de soins médicaux engagés au profit de l'adhérent et/ou de ses
+                                  ayant-droits, en dehors du réseau de soins médicaux et paramédicaux.
+                              </p>
+                              <p class="text-primary">Pour commencer le traitement des frais médicaux à rembourser, vous
+                                  allez renseigner les champs ci-dessous :
+                              </p>
+                              <hr/>
+                              <group col="4" colspan="2" class="text-primary">
+                                  <field name='code_saisi' default_focus="1" string="Code Adhérent"
+                                         placeholder="Ex.: 01234567AB"/>
+                                  <field name="num_fiche" required="1"/>
+                                  <field name="date_depot" required="1"/>
+                              </group>
+                              <footer class="blockquote-footer h5"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                              </footer>
+                            </blockquote>
+                          </div>
+                        </div>
+                    </sheet>
+                    <footer>
+                        <button name='open_popup'
+                            string='Valider'
+                            class='btn-primary'
+                            type='object'/>
+                                    --
+                        <button string='Annuler'
+                            class='btn-default'
+                            special='cancel'/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_list_rfm_action">
+            <field name="name">Proximaas: Gestion Remboursements Frais Médicaux</field>
+            <field name="res_model">proximas.remboursement.pec</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_create_rfm_action">
+            <field name="name">Proximaas: Assistant Remboursement frais médicaux</field>
+            <field name="res_model">proximas.remboursement.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="proximas_rfm_create_wizard_form"/>
+            <field name="target">new</field>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+    </data>
+</odoo>

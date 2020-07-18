@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+<odoo>
+    <data>
+        <!-- ASSURE VIEW TREE, FORM, KANBAN -->
+        <!--<record id="assure_dashboard_tree_view" model="ir.ui.view">
+            <field name="name">assure.dashboard.tree.view</field>
+            <field name="model">proximas.assure.dashboard</field>
+            <field name="arch" type="xml">
+                <tree string="Assurés dashboard" >
+                    <field name="name" />
+                </tree>
+            </field>
+        </record>-->
+        <!-- ASSURE VIEW TREE, FORM, KANBAN -->
+        <record id="assure_tree_view" model="ir.ui.view">
+            <field name="name">assure.dashboard.tree</field>
+            <field name="model">proximas.assure</field>
+            <field name="arch" type="xml">
+                <tree string="Liste Assurés" colors="blue:state=='attente';green:state=='actif';red:state!='actif';"
+                      create="0" edit="0" delete="1">
+                    <field name="code_id" />
+                    <field name="code_id_externe"/>
+                    <field name="name" string="Nom et Prénoms"/>
+                    <field name="genre" />
+                    <field name="date_naissance"/>
+                    <field name="age" />
+                    <field name="statut_familial"/>
+                    <field name="date_activation"/>
+                    <field name="num_contrat"/>
+                    <field name="police_id"/>
+                    <field name="groupe_id"/>
+                    <field name="localite_id"/>
+                    <field name="sous_totaux_assure"/>
+                    <field name="state"/>
+                </tree>
+            </field>
+        </record>
+        <record id="assure_graph_view" model="ir.ui.view">
+            <field name="name">assure.graph.view</field>
+            <field name="model">proximas.assure</field>
+            <field name="arch" type="xml">
+                <graph string="Assurés">
+                    <field name="statut_familial" type="row"/>
+                    <field name="date_activation" type="col"/>
+                </graph>
+            </field>
+        </record>
+        <record id="assure_pivot_view" model="ir.ui.view">
+            <field name="name">Assure.pivot.view</field>
+            <field name="model">proximas.assure</field>
+            <field name="arch" type="xml">
+                <pivot string="Assurés">
+                    <field name="statut_familial" type="row"/>
+                    <field name="genre"/>
+                    <field name="date_activation" type="col"/>
+                </pivot>
+            </field>
+        </record>
+        <record id="assure_calendar_view" model="ir.ui.view">
+           <field name="name">assure.calendar.view</field>
+           <field name="model">proximas.assure</field>
+           <field eval="2" name="priority"/>
+           <field name="arch" type="xml">
+               <calendar color="statut_familial" date_start="date_activation" string="Activation" mode="month">
+                   <field name="name"/>
+                   <field name="localite_id"/>
+               </calendar>
+           </field>
+        </record>
+       <!-- ASSURE KANBAN VIEW -->
+        <record model="ir.ui.view" id="proximas_assure_kanban_view">
+            <field name="name">proximas.assure.kanban</field>
+            <field name="model">proximas.assure</field>
+            <field name="type">kanban</field>
+            <field name="arch" type="xml">
+                <kanban class="background_grey o_res_partner_kanban" string="Bénéficiaire">
+                    <field name="name" />
+                    <field name="age" />
+                    <field name="genre" />
+                    <field name="ref" />
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_global_click o_res_partner_kanban">
+                                <div class="o_kanban_tags_section oe_kanban_partner_categories" />
+                                <div class="o_kanban_image">
+                                    <img t-att-src="kanban_image('proximas.assure', 'image', record.id.value)"
+                                            width="70"
+                                            height="90"
+                                            class="employee_picture" />
+                                </div>
+                                <div class="oe_kanban_details">
+                                    <div class="o_kanban_title">
+                                        <strong class="text-primary"><field name="display_name"/></strong>
+                                    </div>
+                                    <ul>
+                                        <li t-if="record.code_id.raw_value">
+                                            <strong>Code ID.:</strong>
+                                            <strong class="text-danger"><field name="code_id"/></strong>
+                                        </li>
+                                        <li t-if="record.age.raw_value">
+                                            <strong>Age:</strong>
+                                            <field name="age" />
+                                        </li>
+                                        <li t-if="record.genre.raw_value">
+                                            <strong>Genre:</strong>
+                                            <field name="genre" />
+                                        </li>
+                                        <li t-if="record.matricule.raw_value">
+                                            <strong>Matricule N°:</strong>
+                                            <field name="matricule" />
+                                        </li>
+                                        <li t-if="record.statut_familial.raw_value">
+                                            <strong>Statut:</strong>
+                                            <strong class="text-success"><field name="statut_familial" /></strong>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+        <!-- SINISTRES VIEW TREE, FORM, KANBAN -->
+        <record id="sinistralite_pec_tree_view" model="ir.ui.view">
+            <field name="name">sinistres_list_view</field>
+            <field name="model">proximas.details.pec</field>
+            <field name="arch" type="xml">
+                <tree string="Listing Sinistres"
+                      create="false"
+                      edit="false"
+                      delete="false"
+                      default_order="cout_total desc"
+                >
+                    <field name="num_pec"/>
+                    <field name="exercice_id"/>
+                    <field name="police_id"/>
+                    <field name="date_execution"/>
+                    <field name="code_id"/>
+                    <field name="assure_id"/>
+                    <field name="num_contrat"/>
+                    <!--<field name="name"/>-->
+                    <field name="age" />
+                    <field name="genre" />
+                    <field name="statut_familial"/>
+                    <field name="prestataire"/>
+                    <field name="medecin_traitant"/>
+                    <field name="details_prestation"/>
+                    <field name="rubrique_id"/>
+                    <!--<field name="rubrique_id"/>-->
+                    <!--<field name="code_medical_id"/>-->
+                    <!--<field name="create_uid"/>-->
+                    <field name="cout_total" sum="Cout Total"/>
+                    <field name="total_pc" sum="S/Total PC"/>
+                    <field name="total_npc" sum="S/Total NPC"/>
+                    <field name="ticket_moderateur" sum="Ticket Mod."/>
+                    <field name="net_tiers_payeur" sum="Part SAM"/>
+                    <!--<field name="write_uid"/>-->
+                </tree>
+            </field>
+        </record>
+        <!-- SINISTRES SEARCH VIEW -->
+        <record id="sinistralite_pec_search_view" model="ir.ui.view">
+            <field name="name">sinistres_search_view</field>
+            <field name="model">proximas.details.pec</field>
+            <field name="arch" type="xml">
+                <search >
+                    <field name="code_id"/>
+                    <field name="assure_id"/>
+                    <field name="age" />
+                    <field name="genre" />
+                    <field name="statut_familial"/>
+                    <field name="num_contrat"/>
+                    <field name="adherent"/>
+                    <field name="police_id"/>
+                    <field name="num_pec"/>
+                    <field name="date_execution"/>
+                    <field name="exo_name"/>
+                    <field name="prestataire"/>
+                    <field name="medecin_traitant"/>
+                    <field name="prestation_id"/>
+                    <field name="rubrique_id"/>
+                    <filter string="Assuré (Individu)"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'assure_id'}"
+                    />
+                    <filter string="Date Exécution"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'date_execution'}"
+                    />
+                    <filter string="Processus PEC"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'pec_state'}"
+                    />
+                    <filter string="Prestataire"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'prestataire'}"
+                    />
+                    <filter string="Médecin Traitant"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'medecin_traitant'}"
+                    />
+                    <filter string="Genre"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'genre'}"
+                    />
+                    <filter string="Statut familial"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'statut_familial'}"
+                    />
+                    <filter string="Adhérent (Famille)"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'adherent'}"
+                    />
+                    <filter string="Police (Regime)"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'police_id'}"
+                    />
+                    <filter string="Exercice"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'exo_name'}"
+                    />
+                    <filter string="Prestation"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'prestation_id'}"
+                    />
+                    <filter string="Rubrique"
+                            icon="terp-partner"
+                            domain="[]"
+                            context="{'group_by':'rubrique_id'}"
+                    />
+                </search>
+            </field>
+        </record>
+        <record id="portefeuille_pec_graph_view" model="ir.ui.view">
+            <field name="name">portefeuille_graph_view.graph.view</field>
+            <field name="model">proximas.details.pec</field>
+            <field name="arch" type="xml">
+                <graph string="Indicateurs de Prestations fournies" type="bar" stacked="False">
+                    <field name="date_execution" type="row" interval="month"/>
+                    <field name="prestation_id" type="row"/>
+                    <field name="net_tiers_payeur" type="measure"/>
+                    <field name="ticket_moderateur" type="measure"/>
+                    <field name="total_pc" type="measure"/>
+                </graph>
+            </field>
+        </record>
+        <record id="portefeuille_pec_pivot_view" model="ir.ui.view">
+            <field name="name">portefeuille_pivot_view</field>
+            <field name="model">proximas.details.pec</field>
+            <field name="arch" type="xml">
+                <pivot string="Indicateurs de Prestations fournies"  count="True">
+                    <field name="date_execution" type="row" interval="month"/>
+                    <field name="prestation_id" type="row"/>
+                    <field name="net_tiers_payeur" type="measure"/>
+                    <field name="ticket_moderateur" type="measure"/>
+                    <field name="total_pc" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+        <record id="portefeuille_pec_calendar_view" model="ir.ui.view">
+           <field name="name">portefeuille_calendar_view</field>
+           <field name="model">proximas.details.pec</field>
+           <field eval="2" name="priority"/>
+           <field name="arch" type="xml">
+               <calendar color="pec_state" date_start="create_date" string="Date saisie" mode="month">
+                   <field name="details_prestation"/>
+                   <!--<field name="produit_phcie"/>-->
+                   <field name="total_pc" widget="monetary"/>
+                   <!--<field name="net_tiers_payeur" widget="monetary"/>
+                   <field name="ticket_moderateur" widget="monetary"/>-->
+               </calendar>
+           </field>
+        </record>
+        <record id="sinistralite_pec_graph_view" model="ir.ui.view">
+            <field name="name">sinistres_graph_view.graph.view</field>
+            <field name="model">proximas.details.pec</field>
+            <field name="arch" type="xml">
+                <graph string="Indicateurs de Sinistralité mensuelle" type="bar" stacked="False">
+                    <field name="date_execution" interval="month" type="row"/>
+                    <field name="rubrique_id" type="row"/>
+                    <field name="total_pc" type="measure"/>
+                </graph>
+            </field>
+        </record>
+        <record id="sinistralite_pec_graph_view_pivot_view" model="ir.ui.view">
+            <field name="name">sinistres.pivot.view</field>
+            <field name="model">proximas.details.pec</field>
+            <field name="arch" type="xml">
+                <pivot string="Indicateurs de Sinistralité mensuelle">
+                    <field name="date_execution" type="row"/>
+                    <field name="rubrique_id" type="row"/>
+                    <field name="total_pc" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+        <record id="sinistralite_pec_calendar_view" model="ir.ui.view">
+           <field name="name">sinistres.calendar.view</field>
+           <field name="model">proximas.details.pec</field>
+           <field eval="2" name="priority"/>
+           <field name="arch" type="xml">
+               <calendar color="pec_id" date_start="date_execution" string="Date Exécution Acte" mode="week">
+                   <field name="rubrique_id"/>
+                   <field name="total_pc" widget="monetary"/>
+               </calendar>
+           </field>
+        </record>
+        <record id="sinistralite_pec_kanban_view" model="ir.ui.view">
+            <field name="model">proximas.details.pec</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="pec_state">
+                    <field name="num_pec" />
+                    <field name="police_id"/>
+                    <field name="name" />
+                    <field name="genre" />
+                    <field name="age" />
+                    <field name="statut_familial"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_details">
+                                <div class="oe_kanban_title">
+                                    <field name="name" />
+                                </div>
+                                <ul>
+                                    <li t-if="record.code_id.raw_value">
+                                        <strong>Code ID.:</strong>
+                                        <field name="code_id" />
+                                    </li>
+                                    <li t-if="record.age.raw_value">
+                                        <strong>Age:</strong>
+                                        <field name="age" />
+                                    </li>
+                                    <li t-if="record.genre.raw_value">
+                                        <strong>Genre:</strong>
+                                        <field name="genre" />
+                                    </li>
+
+                                    <li t-if="record.statut_familial.raw_value">
+                                        <strong>Statut:</strong>
+                                        <field name="statut_familial" />
+                                    </li>
+                                </ul>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+        <!-- Rapport Sinistralité Details PEC - RUBRIQUE Form wizard-->
+        <record id="proximas_sinistre_report_wizard_form" model="ir.ui.view">
+           <field name="name">proximas.sinistre.report.wizard.form</field>
+           <field name="model">proximas.sinistre.report.wizard</field>
+           <field name="type">form</field>
+           <field name="arch" type="xml">
+               <form string="Recap Report Details PEC">
+                   <sheet>
+                       <div class="panel">
+                          <h3 class="panel-header text-primary">Assistant Edition de Rapports de Suivi Portefeuille de Risque (Sinistralité) : </h3>
+                          <div class="panel-body">
+                            <blockquote class="blockquote mb-0">
+                              <!--<p class="text-primary">Cet assistant vous permet de générer votre rapport PDF de suivi
+                                  du portefeuille de risques maladie et l'évolution de la sinistralité sur une période
+                                  donnée (entre une date de début et une date de fin ) :
+                              </p>
+                                <hr/>-->
+                                <p class="h4 text-primary">1. Période de Début et Fin</p>
+                                <hr/>
+                                <group col="6" colspan="2" >
+                                    <field name="date_debut" />
+                                    <field name="date_fin"/>
+                                </group>
+                                <hr/>
+                                <p class="h4 text-primary">2. Choix Indicateur de suivi sinistres:</p>
+                                <hr/>
+                                <group col="6" colspan="2">
+                                    <field name="report_kpi"/>
+                                    <field name="report_type"
+                                           widget="radio"
+                                           options="{'horizontal': true}"/>
+                                </group>
+                                <group>
+                                    <field name="police_id"
+                                           attrs="{'invisible': ['|',('report_kpi','!=','police'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','police'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="contrat_id"
+                                           attrs="{'invisible': ['|',('report_kpi','!=','contrat'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','contrat'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="assure_id"
+                                           attrs="{'invisible': ['|',('report_kpi','!=','assure'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','assure'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="medecin_id"
+                                           attrs="{'invisible': ['|',('report_kpi','!=','medecin'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','medecin'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="rubrique_id" attrs="{'invisible': ['|',('report_kpi','!=','rubrique'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','rubrique'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="prestation_id" attrs="{'invisible': ['|',('report_kpi','!=','prestation'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','prestation'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="prestataire_id" attrs="{'invisible': ['|',('report_kpi','!=','prestataire'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','prestataire'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="groupe_id" attrs="{'invisible': ['|',('report_kpi','!=','groupe'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','groupe'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="zone_id" attrs="{'invisible': ['|',('report_kpi','!=','zone'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','zone'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                    <field name="localite_id" attrs="{'invisible': ['|',('report_kpi','!=','localite'),
+                                           ('report_type','!=','detail')],
+                                           'required': [('report_kpi','=','localite'),('report_type','=','detail')]}"
+                                           options ='{"no_open": True, "no_create": True}'/>
+                                </group>
+                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
+                              </footer>
+                            </blockquote>
+                          </div>
+                        </div>
+                   </sheet>
+                   <footer>
+                        <button name='get_report'
+                            string='Générer le Rapport'
+                            class='oe_highlight'
+                            type='object'/>
+                                    /
+                        <button string='Annuler' special='cancel'/>
+                    </footer>
+               </form>
+           </field>
+        </record>
+        <record model="ir.actions.act_window" id="assure_tableau_bord_action">
+            <field name="name">Proximaas: Tableau de Bord - Assurés</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">proximas.assure</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,calendar,kanban,graph,pivot</field>
+            <!--<field name="view_id" ref="assure_tree_view"/>-->
+        </record>
+        <record id="proximas_details_pec_user_action" model="ir.actions.act_window">
+            <field name="name">Tableau de Bord: Récapitulatif des Prestations Fournies</field>
+            <field name="res_model">proximas.details.pec</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,graph,pivot,kanban,calendar</field>
+            <field name="view_id" ref="portefeuille_pec_calendar_view"/>
+            <field name="search_view_id" ref="sinistralite_pec_search_view"/>
+            <field name="domain">
+                [('date_execution','!=',None),'|',('create_uid','=',uid),('write_uid','=',uid),('facture_id','=',None)]
+            </field>
+            <field name="context">{
+                'tree_view_ref' : 'proximas_medical.sinistralite_pec_tree_view',
+                'pivot_view_ref' : 'proximas_medical.portefeuille_pec_pivot_view',
+                'calendar_view_ref' : 'proximas_medical.portefeuille_pec_calendar_view',
+                }
+            </field>
+        </record>
+        <record id="sinistres_tableau_bord_action" model="ir.actions.act_window">
+            <field name="name">Tableau de Bord</field>
+            <field name="res_model">proximas.details.pec</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,graph,pivot,kanban,calendar</field>
+            <field name="view_id" ref="sinistralite_pec_graph_view"/>
+            <field name="search_view_id" ref="sinistralite_pec_search_view"/>
+            <field name="domain">[('date_execution','!=',None)]</field>
+            <!--('num_pec','!=',None)-->
+            <field name="context">{
+                'tree_view_ref' : 'proximas_medical.sinistralite_pec_tree_view',
+                'pivot_view_ref' : 'proximas_medical.sinistralite_pec_graph_view_pivot_view',
+                }
+            </field>
+        </record>
+        <record id="sinistres_filtre_action" model="ir.actions.act_window">
+            <field name="name">Filtre Sinistres</field>
+            <field name="res_model">proximas.details.pec</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,graph,pivot,kanban,calendar</field>
+            <field name="view_id" ref="sinistralite_pec_tree_view"/>
+            <field name="search_view_id" ref="sinistralite_pec_search_view"/>
+            <field name="domain">[('date_execution','!=',None)]</field>
+            <field name="context">{}</field>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_sinistre_report_wizard_action">
+            <field name="name">Proximaas: Etats: Rapports Suivi Portefeuille de Risques</field>
+            <field name="res_model">proximas.sinistre.report.wizard</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="proximas_sinistre_report_wizard_form"/>
+            <field name="target">new</field>
+            <field name="domain">[]</field>
+            <field name="context">{}</field>
+        </record>
+        <menuitem id="proximas_dashboard"
+                  name="Tableau de Bord"
+                  sequence="1"
+                  parent="proximas_root"
+                  groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_control"
+        />
+        <menuitem id="proximas_rapport_dashboard"
+                  name="1. Indicateurs de Suivi &amp; Contrôles"
+                  sequence="2"
+                  parent="proximas_dashboard"
+        />
+        <menuitem  id="sinistres_dashboard_menu"
+                   parent="proximas_rapport_dashboard"
+                   sequence="20"
+                   name=">> Statistiques - Sinistralité"
+                   action="sinistres_tableau_bord_action"
+        />
+        <menuitem  id="assure_dashboard_menu"
+                   parent="proximas_rapport_dashboard"
+                   sequence="21"
+                   name=">> Statistiques - Assurés"
+                   action="assure_tableau_bord_action"
+        />
+        <menuitem id="proximas_indicateur_dashboard"
+                  name="2. Rapports Statistiques &amp; Divers"
+                  sequence="3"
+                  parent="proximas_dashboard"
+        />
+        <menuitem  id="sinistre_report_recap_wizard"
+                   parent="proximas_indicateur_dashboard"
+                   sequence="30"
+                   name=">> Etats: Rapports Suivi Portefeuille de Risques"
+                   action="proximas_sinistre_report_wizard_action"
+        />
+        <!--<menuitem  id="assure_kanban_action_menu"
+                   parent="proximas_dashboard"
+                   sequence="3"
+                   name=">> Dashboard / Assurés"
+                   action="assure_dashboard_kanban_action"
+        />-->
+    </data>
+</odoo>

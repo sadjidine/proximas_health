@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl).
+-->
+<odoo>
+    <data>
+        <record model="workflow" id="wkf_prise_charge">
+            <field name="name">Proximas PEC workflow</field>
+            <field name="osv">proximas.prise.charge</field>
+            <field name="on_create">True</field>
+        </record>
+        <record model="workflow.activity" id="cours">
+            <field name="name">Encours</field>
+            <field name="wkf_id" ref="wkf_prise_charge"/>
+            <field name="flow_start" eval="True"/>
+            <field name="kind">function</field>
+            <field name="action">action_en_cours()</field>
+        </record>
+        <record model="workflow.activity" id="oriente">
+            <field name="name">Orientation</field>
+            <field name="wkf_id" ref="wkf_prise_charge"/>
+            <field name="kind">function</field>
+            <field name="action">action_orienter()</field>
+        </record>
+        <record model="workflow.activity" id="dispense">
+            <field name="name">Dispensation</field>
+            <field name="wkf_id" ref="wkf_prise_charge"/>
+            <field name="kind">function</field>
+            <field name="action">action_dispenser()</field>
+        </record>
+        <record model="workflow.activity" id="termine">
+            <field name="name">Terminer</field>
+            <field name="wkf_id" ref="wkf_prise_charge"/>
+            <field name="kind">function</field>
+            <field name="action">action_terminer()</field>
+        </record>
+        <!--<record model="workflow.activity" id="expire">
+            <field name="name">Expiration</field>
+            <field name="wkf_id" ref="wkf_prise_charge"/>
+            <field name="kind">function</field>
+            <field name="action">action_expirer()</field>
+        </record>-->
+
+        <record model="workflow.transition" id="pec_cours_to_oriente">
+            <field name="act_from" ref="cours"/>
+            <field name="act_to" ref="oriente"/>
+            <field name="signal">Orientation</field>
+            <field name="group_id" ref="proximas_medical.group_cro"/>
+        </record>
+        <record model="workflow.transition" id="pec_oriente_to_cours">
+            <field name="act_from" ref="oriente"/>
+            <field name="act_to" ref="cours"/>
+            <field name="signal">Encours</field>
+            <field name="group_id" ref="proximas_medical.group_manager"/>
+        </record>
+        <record model="workflow.transition" id="pec_dispense_to_cours">
+            <field name="act_from" ref="dispense"/>
+            <field name="act_to" ref="cours"/>
+            <field name="signal">Encours</field>
+            <field name="group_id" ref="proximas_medical.group_manager"/>
+        </record>
+        <record model="workflow.transition" id="pec_cours_to_dispense">
+            <field name="act_from" ref="cours"/>
+            <field name="act_to" ref="dispense"/>
+            <field name="signal">Dispensation</field>
+            <field name="group_id" ref="proximas_medical.group_cro"/>
+        </record>
+        <record model="workflow.transition" id="pec_oriente_to_dispense">
+            <field name="act_from" ref="oriente"/>
+            <field name="act_to" ref="dispense"/>
+            <field name="signal">Dispensation</field>
+            <field name="group_id" ref="proximas_medical.group_crs"/>
+        </record>
+       <!-- <record model="workflow.transition" id="pec_valide_to_oriente">
+            <field name="act_from" ref="valide"/>
+            <field name="act_to" ref="oriente"/>
+            <field name="signal">Orientation</field>
+            <field name="group_id" ref="proximas_medical.group_manager"/>
+        </record>-->
+        <record model="workflow.transition" id="pec_cours_to_termine">
+            <field name="act_from" ref="cours"/>
+            <field name="act_to" ref="termine"/>
+            <field name="signal">Terminer</field>
+            <field name="group_id" ref="proximas_medical.group_cro"/>
+        </record>
+        <record model="workflow.transition" id="pec_oriente_to_termine">
+            <field name="act_from" ref="oriente"/>
+            <field name="act_to" ref="termine"/>
+            <field name="signal">Terminer</field>
+            <field name="group_id" ref="proximas_medical.group_crs"/>
+        </record>
+        <record model="workflow.transition" id="pec_dispense_to_termine">
+            <field name="act_from" ref="dispense"/>
+            <field name="act_to" ref="termine"/>
+            <field name="signal">Terminer</field>
+            <field name="group_id" ref="proximas_medical.group_pharmacy"/>
+        </record>
+        <record model="workflow.transition" id="pec_termine_to_cours">
+            <field name="act_from" ref="termine"/>
+            <field name="act_to" ref="cours"/>
+            <field name="signal">Encours</field>
+            <field name="group_id" ref="proximas_medical.group_manager"/>
+        </record>
+        <!--<record model="workflow.transition" id="pec_expire_to_valide">
+            <field name="act_from" ref="expire"/>
+            <field name="act_to" ref="valide"/>
+            <field name="signal">Validation</field>
+        </record>-->
+    </data>
+</odoo>
