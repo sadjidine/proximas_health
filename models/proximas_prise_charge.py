@@ -2941,8 +2941,7 @@ class DetailsPec(models.Model):
                      'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
                      'prestataire_rembourse_id')
     @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                    'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
-                    'prestataire_rembourse_id')
+                    'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id')
     def _valide_prestation_id(self):
         self.ensure_one()
         if bool(self.prestation_demande_id) and bool(self.prestataire_crs_id) and bool(self.pool_medical_crs_id):
@@ -3381,11 +3380,11 @@ class DetailsPec(models.Model):
     @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
                  'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire','ticket_exigible',
-                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre', 'cout_unite')
+                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
     # @api.onchange('prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id', 'mt_exclusion',
     #               'substitut_phcie_id', 'mt_exclusion', 'cout_unit', 'quantite', 'quantite_livre', 'code_id_rfm',
     #               'cout_unite', 'prestataire_public', 'zone_couverte', 'prestataire')
-    @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+    @api.constrains('cout_unit', 'quantite_livre', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         self.ensure_one()
         if bool(self.prestation_id):
@@ -4272,11 +4271,10 @@ class DetailsPec(models.Model):
     # @api.depends('police_id', 'structure_id', 'prestation_id')
     #@api.onchange('date_execution', 'date_demande')
     # @api.multi
-    @api.constrains('date_execution', 'date_demande', 'exercice_id')
-    @api.depends('date_execution', 'date_demande', 'exercice_id')
+    @api.depends ('date_execution', 'date_demande', 'exercice_id')
     def _get_exo_sam(self):
         for rec in self:
-            exercices = self.env['proximas.exercice'].search([
+            exercices = self.env['proximas.exercice'].search ([
                 ('res_company_id', '=', rec.structure_id.id),
                 ('cloture', '=', False),
             ])
@@ -4284,43 +4282,44 @@ class DetailsPec(models.Model):
                 for exo in exercices:
                     date_debut = fields.Date.from_string (exo.date_debut)
                     date_fin = fields.Date.from_string (exo.date_fin)
-                    if bool(rec.date_execution) and not bool(rec.date_demande):
+                    if bool (rec.date_execution) and not bool (rec.date_demande):
                         date_execution = fields.Date.from_string (rec.date_execution)
                         if date_debut <= date_execution <= date_fin:
                             rec.exercice_id = exo.id
-                    elif bool(rec.date_execution) and bool(rec.date_demande):
+                    elif bool (rec.date_execution) and bool (rec.date_demande):
                         date_execution = fields.Date.from_string (rec.date_execution)
                         if date_debut <= date_execution <= date_fin:
                             rec.exercice_id = exo.id
-                    elif bool(rec.date_demande):
+                    elif bool (rec.date_demande):
                         date_demande = fields.Date.from_string (rec.date_demande)
                         if date_debut <= date_demande <= date_fin:
                             rec.exercice_id = exo.id
-                if rec.date_execution and not bool(rec.exercice_id):
-                    date_execution = fields.Datetime.from_string (self.date_execution)
-                    date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion:\n \
-                        La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
-                        paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
-                        offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-                        Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % date_execution_format
-                                           )
-                elif rec.date_demande and not bool(rec.exercice_id):
-                    date_demande = fields.Datetime.from_string (self.date_demande)
-                    date_demande_format = datetime.strftime (date_demande, '%d-%m-%Y')
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion:\n \
-                        La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
-                        paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
-                        offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-                        Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % date_demande_format
-                                           )
 
-                    # elif bool(exo.en_cours):
-                    #     rec.exercice_id = exo.id
+    @api.constrains('date_execution', 'date_demande')
+    def validate_exo_sam(self):
+        for rec in self:
+            if rec.date_execution and not bool (rec.exercice_id):
+                date_execution = fields.Datetime.from_string (self.date_execution)
+                date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
+                raise ValidationError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion:\n \
+                    La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
+                    paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
+                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % date_execution_format
+                                       )
+            elif rec.date_demande and not bool (rec.exercice_id):
+                date_demande = fields.Datetime.from_string (self.date_demande)
+                date_demande_format = datetime.strftime (date_demande, '%d-%m-%Y')
+                raise ValidationError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion:\n \
+                    La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
+                    paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
+                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % date_demande_format
+                )
 
 
     # @api.one
