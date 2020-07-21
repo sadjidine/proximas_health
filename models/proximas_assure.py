@@ -374,6 +374,11 @@ class Assure(models.Model):
         string="Durée Activation (Nbre. Jours)",
         compute='_get_duree_activation',
     )
+    date_debut_assure = fields.Date(
+        string="Date Débur Assuré",
+        compute='_compute_date_fin_prevue',
+        help="Date de début de la couverture en rapport avec le délai de validité de la police."
+    )
     date_fin_prevue = fields.Date(
         string="Date Fin Contrat",
         compute='_compute_date_fin_prevue',

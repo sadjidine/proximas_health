@@ -1364,7 +1364,7 @@ class Contrat(models.Model):
             
 
     # CALCULS DE PRIMES DE COUVERTURE PAAR CONTRAT
-    @api.one
+    # @api.one
     @api.depends('police_id', 'ayant_droit_ids', 'cotisation_ids', 'prime_contrat_ids', 'date_activation',
                  'date_resiliation', 'delai_carence', 'retard_cotisation', 'date_fin_prevue', 'validite_contrat_police')
     def _compute_prime_contrat(self):

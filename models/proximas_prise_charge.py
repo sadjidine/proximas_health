@@ -2779,7 +2779,6 @@ class DetailsPec(models.Model):
                                                  rec.produit_phcie_id.dosage or '')
                 rec.medicament = rec.produit_phcie
 
-
     @api.multi
     def _get_current_user(self):
         for rec in self:
@@ -2803,14 +2802,14 @@ class DetailsPec(models.Model):
     def send_accord_pec_mail(self):
         # self.ensure_one()
         for rec in self:
-            if bool(rec.accord_prealable) and not bool (rec.accorde):
+            if bool(rec.accord_prealable) and not bool(rec.accorde):
                 # Find the e-mail template
                 template = rec.env.ref ('proximas_medical.accord_pec_mail_template')
                 # You can also find the e-mail template like this:
                 # template = rec.env['ir.model.data'].get_object('mail_template_demo', 'example_email_template')
 
                 # Send out the e-mail template to the user
-                rec.env['mail.template'].browse (template.id).send_mail (rec.id)
+                self.env['mail.template'].browse (template.id).send_mail (rec.id)
                 action = {
                     'warning': {
                         'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
@@ -2937,11 +2936,8 @@ class DetailsPec(models.Model):
                         rec.prestation_id = prestation.id
 
     @api.one
-    @api.onchange('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                     'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
-                     'prestataire_rembourse_id')
-    @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                    'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id')
+    @api.onchange('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id','code_id_rfm',
+                  'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id', 'prestataire_rembourse_id')
     def _valide_prestation_id(self):
         self.ensure_one()
         if bool(self.prestation_demande_id) and bool(self.prestataire_crs_id) and bool(self.pool_medical_crs_id):
@@ -3020,6 +3016,87 @@ class DetailsPec(models.Model):
                     l'administrateur..."
                     )
                 )
+
+    @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
+                    'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id')
+    def _valide_prestation_id(self):
+        for rec in self:
+            if bool (rec.prestation_demande_id) and bool (rec.prestataire_crs_id) and bool (rec.pool_medical_crs_id):
+                # Récupérer la prestation médicale du CRS
+                code_prestation_id = rec.prestation_demande_id.id
+                prestataire_id = rec.prestataire_crs_id.id
+                prestation = self.env['proximas.prestation'].search (
+                    [
+                        ('code_prestation_id', '=', code_prestation_id),
+                        ('prestataire_id', '=', prestataire_id)
+                    ]
+                )
+                if not bool (prestation):
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion:\n \
+                        La prestation demandée: %s ne figure pas dans la liste des prestations fournies par le\
+                        prestataire: %s. Par conséquent, cette prestation ne peut être prise en compte dans le cadre \
+                        de la convention signée avec le prestataire concernée. Pour plus d'informations, \
+                        veuillez contactez l'administrateur..."
+                    ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
+                                     )
+            # rec.code_medical_id = rec.prestation_crs_id.code_medical_id.id
+            # REMBOURSEMENT - PHARMACIE
+            elif bool (rec.code_id_rfm) and bool (rec.prestataire_rembourse_id) and bool (rec.produit_phcie_id):
+                # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
+                pharmacie_rembourse_id = rec.prestataire_rembourse_id.id
+                if bool (pharmacie_rembourse_id):
+                    prestation = self.env['proximas.prestation'].search (
+                        [
+                            ('prestataire_id', '=', pharmacie_rembourse_id),
+                            ('rubrique', '=', 'PHARMACIE')
+                        ]
+                    )
+                    if not bool (prestation):
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion:\n \
+                            Le prestataire concerné : %s n'a pas été parametré pour fournir les médicaments (Pharmacie).\
+                            Par conséquent, vous ne pourrez dispenser de médicament(s) pour le compte de celui-ci. \
+                            Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % rec.prestataire_rembourse_id.name
+                                         )
+                else:
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion:\n \
+                        Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dipenser\
+                        de médicament(s) pour le prestaire concerné. \
+                        Pour plus d'informations, veuillez contactez l'administrateur..."
+                    )
+                    )
+            # PHARMACIE PEC
+            elif (bool (rec.prestataire_phcie_id) or bool (rec.produit_phcie_id)) or bool (
+                    rec.substitut_phcie_id) and rec.date_execution:
+                # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
+                pharmacie_id = rec.prestataire_phcie_id.id
+                if bool (pharmacie_id):
+                    pharmacie = rec.prestataire_phcie_id.name
+                    prestation = self.env['proximas.prestation'].search (
+                        [
+                            ('prestataire_id', '=', pharmacie_id),
+                            ('rubrique', 'ilike', 'PHARMACIE')
+                        ]
+                    )
+                    if not bool (prestation):
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion:\n \
+                            Le prestataire concerné: {}, n'a pas été parametré pour dispenser les médicaments (Pharmacie).\
+                            Par conséquent, vous ne pourrez enregistrer les produits pour le compte de celui-ci. \
+                            Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ).format (pharmacie)
+                                         )
+                else:
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion:\n \
+                        Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dispenser\
+                        des médicaments pour le prestataire concerné. Pour plus d'informations, veuillez contactez \
+                        l'administrateur..."
+                    )
+                    )
 
     # IDENTIFICATION ASSURE - PATIENT
     @api.depends('code_id_rfm', 'assure')
