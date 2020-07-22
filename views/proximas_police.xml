@@ -295,7 +295,7 @@
                                    <field name="groupe_suspendu"/>
                                    <field name="cas_chronique" string="Malade chronique?"/>
                                    <field name="duree_activation"/>
-                                    <!--<field name="est_suspendu"/>-->
+
                               </group>
                             </page>
                             <page string="ADRESSE &amp; CONTACTS:">
