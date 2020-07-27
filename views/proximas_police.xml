@@ -234,21 +234,51 @@
                           string="Activé/Désactivé" class="oe_highlight"/>
                       </header>-->
                       <sheet>
-                          <!--<field name="id" invisible="1"/>-->
-                          <!--<div class="oe_button_box" name="button_box">
-                              &lt;!&ndash;<button name="toggle_actif" type="object" class="oe_stat_button" icon="fa-check">
-                                  <field name="actif" widget="boolean_button"
-                                         options='{"terminology":"custom",
-                                         "terminology_values":{
-                                         "string_true":"Activé(e)",
-                                         "hover_true":"Désactivé(e)",
-                                         "string_false":"Désactivé(e)",
-                                         "hover_false":"Réactivé(e)"
-                                         }}'
-                                  />
-                              </button>&ndash;&gt;
-                          </div>-->
-                          <div class="oe_button_box" name="button_box">
+                          <div class="oe_right oe_button_box" name="buttons">
+                            <button name="proximas_medical.proximas_details_pec_encours_action" class="oe_stat_button"
+                                    icon="fa-edit"
+                                    type="action"
+                                    context="{'search_default_contrat_id': id}">
+                                <field name="nbre_pec_contrat_encours" widget="statinfo" string="Nbre.PEC" />
+                            </button>
+                            <button name="proximas_medical.proximas_details_pec_encours_action" class="oe_stat_button"
+                                  icon="fa-flask"
+                                  type="action"
+                                  context="{'search_default_contrat_id': id}">
+                              <field name="nbre_rfm_contrat_encours" widget="statinfo" string="Nbre. Remb." />
+                            </button>
+                            <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                    type="action"
+                                    icon="fa-hospital-o"
+                                    context="{'search_default_contrat_id': id}">
+                                <field name="mt_sinistres_contrat_encours" widget="statinfo"
+                                       options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'
+                                       string="S/Totaux Sinistres." />
+                            </button>
+                            <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                    type="action"
+                                    icon="fa-cart-plus"
+                                    context="{'search_default_contrat_id': id}">
+                                <field name="mt_sinistres_phcie_contrat_encours" widget="statinfo" string="S/Totaux Phcie"/>
+                            </button>
+                            <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                    type="action"
+                                    icon="fa-list"
+                                    context="{'search_default_contrat_id': id}">
+                                <field name="nbre_actes_contrat_encours" widget="statinfo" string="Actes"/>
+                            </button>
+                            <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                    type="action"
+                                    icon="fa-calendar"
+                                    context="{'search_default_contrat_id: id}">
+                                <field name="nbre_phcie_contrat_encours" widget="statinfo" string="Dispensations"/>
+                            </button>
+                            <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                    type="action"
+                                    icon="fa-briefcase"
+                                    context="{'search_default_contrat_id': id}">
+                                <field name="taux_sinistre_plafond_famille" widget="percentpie" />
+                            </button>
                             <button name="toggle_actif" type="object" class="oe_stat_button" icon="fa-check">
                                 <field name="actif" widget="boolean_button" options='{"terminology": "active"}'/>
                             </button>
@@ -267,7 +297,7 @@
                                            options='{"no_open": True, "no_create": True}'/>
                                  </h3>
                                   <h3 class="text-primary"><field name="code_id" string="Code ID."/></h3>
-                                  <h4 class="text-primary"><field name="num_contrat" string="Contrat N°"/></h4>
+                                  <h3 class="text-primary"><field name="num_contrat" string="Contrat N°"/></h3>
                               </div>
                               <group>
                                   <field name="is_company" invisible="1"/>
@@ -295,7 +325,6 @@
                                    <field name="groupe_suspendu"/>
                                    <field name="cas_chronique" string="Malade chronique?"/>
                                    <field name="duree_activation"/>
-
                               </group>
                             </page>
                             <page string="ADRESSE &amp; CONTACTS:">

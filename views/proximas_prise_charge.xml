@@ -4,6 +4,30 @@
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
 
 <odoo>
+    <!-- DATAILS PEC ENCOURS LIST VIEW -->
+    <record id="proximas_details_pec_encours_list" model="ir.ui.view">
+        <field name="name">proximas details pec encours list</field>
+        <field name="model">proximas.details.pec</field>
+        <field name="arch" type="xml">
+            <tree string="Details PEC" create="0" edit="0" delete="0">
+                <field name="num_pec"/>
+                <field name="date_execution"/>
+                <field name="code_id"/>
+                <field name="assure_id" string="Assuré"/>
+                <field name="prestataire"/>
+                <field name="details_prestation" string="Désignation"/>
+                <field name="quantite" string="QTE."/>
+                <field name="cout_unite" string="Coût Unit."/>
+                <field name="cout_total" string="S/Total" sum="S/Total"/>
+                <field name="total_pc" sum="Total PC"/>
+                <field name="total_npc" sum="Total NPC"/>
+                <field name="taux_couvert" string="Taux(%)"/>
+                <field name="net_tiers_payeur" sum="Part SAM"/>
+                <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod."/>
+                <field name="net_prestataire" sum="Net Prestataire"/>
+            </tree>
+        </field>
+    </record>
     <!-- DATAILS PEC TREE -->
     <record id="proximas_details_pec_view_tree" model="ir.ui.view">
         <field name="name">proximas details pec tree</field>
@@ -70,6 +94,9 @@
                     <filter string="Date exécution"
                             domain="[]"
                             context="{'group_by':'date_execution'}" />
+                    <filter string="Contrat"
+                            domain="[]"
+                            context="{'group_by':'contrat_id'}" />
                     <filter string="Adhérent"
                             domain="[]"
                             context="{'group_by':'adherent_id'}" />
@@ -1620,6 +1647,16 @@
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="proximas_details_pec_view_tree"/>
+        <field name="domain">[('date_execution','!=',None)]</field>
+        <field name="context">{}</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_details_pec_encours_action">
+        <field name="name">Proximaas: Gestion Prestations Médicales En Cours</field>
+        <field name="res_model">proximas.details.pec</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="proximas_details_pec_encours_list"/>
+        <field name="search_view_id" ref="details_pec_search_view"/>
         <field name="domain">[('date_execution','!=',None)]</field>
         <field name="context">{}</field>
     </record>

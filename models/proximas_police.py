@@ -1205,6 +1205,37 @@ class Contrat(models.Model):
         store=True,
         readonly=True,
     )
+    prise_charge_ids = fields.One2many(
+        comodel_name="proximas.prise.charge",
+        inverse_name="contrat_id",
+        string="Prises en charge",
+    )
+    rfm_ids = fields.One2many(
+        comodel_name="proximas.remboursement.pec",
+        inverse_name="contrat_id",
+        string="Remb. Frais Médicaux",
+    )
+    details_pec_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        inverse_name="contrat_id",
+        string="Détails PEC",
+    )
+    details_actes_ids = fields.One2many (
+        comodel_name="proximas.details.pec",
+        inverse_name="contrat_id",
+        string="Détails PEC",
+        domain=[
+            ('produit_phcie_id', '=', None),
+        ]
+    )
+    details_phcie_ids = fields.One2many (
+        comodel_name="proximas.details.pec",
+        inverse_name="contrat_id",
+        string="Détails PEC",
+        domain=[
+            ('produit_phcie_id', '!=', None),
+        ]
+    )
     # Champs calculés pour Prime de Couverture
     totaux_net_payable_police = fields.Float(
         string='Net Payable Prime Police',
@@ -1270,28 +1301,47 @@ class Contrat(models.Model):
         # related='assure_id.nbre_actes_pec',
     )
     # CHAMPS CALCULES - CONTROLES DE PLAFONDS
-    mt_sinistre_encours = fields.Float(
-        string="Totaux.Sinistre Famille",
-        digits=(9, 0),
-        compute='_sinistre_details_pec',
-        default=0,
-    )
-    nbre_acte_encours = fields.Integer(
-        string="Nbre. Actes/Famille",
-        compute='_sinistre_details_pec',
+    nbre_pec_contrat_encours = fields.Integer(
+        string="Nbre. PEC/Famille",
+        compute='_compute_sinistres_contrat',
         default=0,
         help="Nombre de prises en charge (PEC) pour l'exercice en cours..."
     )
-    nbre_phcie_encours = fields.Integer(
+    nbre_rfm_contrat_encours = fields.Integer(
+        string="Nbre. Remb./Famille",
+        compute='_compute_sinistres_contrat',
+        default=0,
+        help="Nombre de Remboursemenr(s)/Contrat pour l'exercice en cours..."
+    )
+    mt_sinistres_contrat_encours = fields.Float(
+        string="Totaux Sinistres Famille",
+        digits=(9, 0),
+        compute='_compute_sinistres_contrat',
+        default=0,
+        help="Totaux Sinistres /Contrat pour l'exercice en cours..."
+    )
+    nbre_actes_contrat_encours = fields.Integer(
+        string="Nbre. Actes/Famille",
+        compute='_compute_sinistres_contrat',
+        default=0,
+        help="Nombre d'actes médicaux pour l'exercice en cours..."
+    )
+    nbre_phcie_contrat_encours = fields.Integer(
         string="Nbre. Prescription(s)/Famille",
-        compute='_sinistre_details_pec',
+        compute='_compute_sinistres_contrat',
         default=0,
         help="Nombre de prescription(s) pour l'exercice en cours..."
+    )
+    mt_sinistres_phcie_contrat_encours = fields.Float (
+        string="Totaux Phcie. Famille",
+        digits=(9, 0),
+        compute='_compute_sinistres_contrat',
+        default=0,
     )
     taux_sinistre_plafond_famille = fields.Float(
         string="Taux Sinistre/Plafond",
         digits=(9, 0),
-        compute='_sinistre_details_pec',
+        compute='_compute_sinistres_contrat',
         default=0,
     )
     duree_activation = fields.Char (
@@ -1299,9 +1349,43 @@ class Contrat(models.Model):
         compute='_get_duree_activation',
     )
 
-    # @api.depends('date_resiliation', 'date_activation', 'validite_contrat', 'validite_contrat_police', 'jours_contrat',
-    #               'police_id', 'ayant_droit_ids', 'cotisation_ids', 'prime_contrat_ids', 'retard_cotisation')
-    @api.multi
+    @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_phcie_ids', 'plafond_famille')
+    def _compute_sinistres_contrat(self):
+        for rec in self:
+            if rec.details_pec_ids:
+                date_debut = rec.date_debut_contrat
+                date_fin = rec.date_fin_prevue
+                prise_en_charge_encours = []
+                rfm_encours = []
+                details_pec_encours = []
+                details_actes_encours = []
+                details_phcie_encours = []
+                for detail in rec.prise_charge_ids:
+                    if date_debut <= detail.date_saisie <= date_fin:
+                        prise_en_charge_encours.append(detail)
+                for detail in rec.rfm_ids:
+                    if date_debut <= detail.date_saisie <= date_fin:
+                        rfm_encours.append(detail)
+                for detail in rec.details_pec_ids:
+                    if date_debut <= detail.date_execution <= date_fin:
+                        details_pec_encours.append(detail)
+                for detail in rec.details_actes_ids:
+                    if date_debut <= detail.date_execution <= date_fin:
+                        details_actes_encours.append(detail)
+                for detail in rec.details_phcie_ids:
+                    if date_debut <= detail.date_execution <= date_fin:
+                        details_phcie_encours.append(detail)
+                rec.nbre_pec_contrat_encours = len(prise_en_charge_encours)
+                rec.nbre_rfm_contrat_encours = len(rfm_encours)
+                rec.nbre_actes_contrat_encours = len(details_actes_encours)
+                rec.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_actes_encours)
+                rec.nbre_phcie_contrat_encours = len (details_phcie_encours)
+                rec.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
+            if rec.plafond_famille:
+                rec.taux_sinistre_plafond_famille = rec.mt_sinistres_contrat_encours * 100 / rec.plafond_famille
+
+    @api.depends('date_activation', 'date_resiliation',  'validite_contrat', 'validite_contrat_police', 'jours_contrat',
+                 'mode_controle_plafond')
     def _compute_debut_fin_contrat(self):
         for rec in self:
             now = fields.Datetime.from_string (fields.Date.today())
@@ -1438,7 +1522,7 @@ class Contrat(models.Model):
     @api.multi
     def _get_assure(self):
         for rec in self:
-            assure = self.env['proximas.assure'].search ([('code_id', 'ilike', self.code_id)])
+            assure = self.env['proximas.assure'].search([('code_id', 'ilike', self.code_id)])
             rec.assure_id = assure.id
 
     @api.depends ('date_activation', 'date_inscription')
@@ -1502,19 +1586,19 @@ class Contrat(models.Model):
     def _compute_prime_contrat(self):
         for rec in self:
             now = fields.Datetime.from_string (fields.Date.today ())
-            activation_contrat = fields.Datetime.from_string (rec.date_activation) or now
-            date_resiliation = fields.Datetime.from_string (rec.date_resiliation) or now
-            date_fin_prevue = fields.Datetime.from_string (rec.date_fin_prevue) or now
-            nbre_jours_validite_police = int (rec.validite_contrat_police)
-            nbre_jours_contrat = int (rec.jours_contrat)
-            mt_retard_cotisation = int (rec.retard_cotisation)
-            controle_retard = bool (rec.controle_retard_cotisation)
-            totaux_versements = int (rec.mt_totaux_versmt_cotisation) or 0
-            mt_supp_enfant = int (rec.police_id.mt_supplement_enfant) or 0
-            mt_supp_conjoint = int (rec.police_id.mt_supplement_conjoint) or 0
-            mt_supp_parent = int (rec.police_id.mt_supplement_parent) or 0
-            mt_supp_ascendant = int (rec.police_id.mt_supplement_ascendant) or 0
-            mt_supp_malade_chronique = int(rec.police_id.mt_supplement_maladie) or 0
+            activation_contrat = fields.Datetime.from_string(rec.date_activation) or now
+            date_resiliation = fields.Datetime.from_string(rec.date_resiliation) or now
+            date_fin_prevue = fields.Datetime.from_string(rec.date_fin_prevue) or now
+            nbre_jours_validite_police = int(rec.validite_contrat_police)
+            nbre_jours_contrat = int(rec.jours_contrat)
+            mt_retard_cotisation = int(rec.retard_cotisation)
+            controle_retard = bool(rec.controle_retard_cotisation)
+            totaux_versements = int(rec.mt_totaux_versmt_cotisation)
+            mt_supp_enfant = int(rec.police_id.mt_supplement_enfant)
+            mt_supp_conjoint = int(rec.police_id.mt_supplement_conjoint)
+            mt_supp_parent = int(rec.police_id.mt_supplement_parent)
+            mt_supp_ascendant = int(rec.police_id.mt_supplement_ascendant)
+            mt_supp_malade_chronique = int(rec.police_id.mt_supplement_maladie)
             mt_supp_global = mt_supp_conjoint + mt_supp_enfant + mt_supp_ascendant + mt_supp_parent + mt_supp_malade_chronique
             rec.effectif_contrat = len(rec.ayant_droit_ids) + 1
             effectif_famille = int(rec.effectif_contrat)

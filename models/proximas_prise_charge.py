@@ -266,7 +266,7 @@ class PriseEnCharge(models.Model):
         comodel_name="proximas.contrat",
         string="Contrat Assuré",
         related='assure_id.contrat_id',
-        # compute='_get_contrat_assure',
+        store=True,
         readonly=True,
     )
     num_contrat = fields.Char(
@@ -1118,36 +1118,33 @@ class PriseEnCharge(models.Model):
         # if self.delai_pec > self.validite_pec and (self.state == 'oriente' or self.state == 'termune'):
         #     self.state = 'expire'
 
-    # @api.multi
-    @api.onchange('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
-    def _check_validite_pec_onchange(self):
-        # self.ensure_one()
-        if 0 < int(self.validite_pec) < int(self.delai_pec):
-            action = {'warning': {
-                            'title': u'Proximaas : Règles de Gestion',
-                              'message': u"Les modifications effectuées ne peuvent être validées pour des \
-                              raisons de validité de délai de traitement.Cette prise en charge a été générée \
-                              depuis : %d heures, alors que le délai maximum (en heures) autorisé avant \
-                              expiration est de : %d heures. \n Pour plus d'informations, veuillez contactez \
-                              l'administrateur..." % (self.delai_pec, self.validite_pec)
-                            }
-                    }
-            return action
+    # @api.one
+    # @api.onchange('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
+    # def _check_validite_pec_onchange(self):
+    #     if 0 < int(self.validite_pec) < int(self.delai_pec):
+    #         action = {'warning': {
+    #                         'title': u'Proximaas : Règles de Gestion',
+    #                           'message': u"Cette prise en charge a été générée \
+    #                           depuis : %d heures, alors que le délai maximum (en heures) autorisé avant \
+    #                           expiration est de : %d heures. \n Pour plus d'informations, veuillez contactez \
+    #                           l'administrateur..." % (self.delai_pec, self.validite_pec)
+    #                         }
+    #                 }
+    #         return action
 
     # @api.multi
     @api.constrains('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
     def _validate_validite_pec(self):
-        # self.ensure_one()
-        if 0 < int(self.validite_pec) < int(self.delai_pec):
-            raise ValidationError(_(
-                u"Proximas : Contrôle de Règles de Gestion (Délai Validité PEC) :\n \
-                Les modifications effectuées ne peuvent être validées pour des raisons de validité de délai de traitement.\
-                Cette prise en charge a été générée depuis : %d heures, alors que le délai maximum \
-                (en heures) autorisé avant expiration est de : %d heures. \n \
-                Pour plus d'informations, veuillez contactez l'administrateur..."
-                ) % (self.delai_pec, self.validite_pec)
-            )
-
+        for rec in self:
+            if 0 < int(rec.validite_pec) < int (rec.delai_pec):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de Règles de Gestion (Délai Validité PEC) :\n \
+                    Les modifications effectuées ne peuvent être validées pour des raisons de validité de délai de traitement.\
+                    Cette prise en charge a été générée depuis : %d heures, alors que le délai maximum \
+                    (en heures) autorisé avant expiration est de : %d heures. \n \
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % (rec.delai_pec, rec.validite_pec)
+                                       )
 
     @api.onchange('details_pec_phcie_ids', 'nbre_prescriptions', 'nbre_prescription_maxi')
     def _check_details_prescription(self):
@@ -1174,24 +1171,24 @@ class PriseEnCharge(models.Model):
     # @api.multi
     @api.constrains('details_pec_phcie_ids', 'nbre_prescriptions')
     def _validate_details_prescriptions(self):
-        if 0 < int(self.nbre_prescription_maxi) < int(self.nbre_prescriptions):
-            raise ValidationError(_(
-                u"Proximas : Contrôle de règles de Gestion => Nombre Maxi Prescriptions:\n \
-                Cette prise en charge ne peut contenir plus de : (%d) prescriptions. Par conséquent,\
-                vous devez en tenir compte pour pouvoir valider les données. \
-                Pour plus d'informations, veuillez contactez l'administrateur..."
-                ) % self.nbre_prescription_maxi
-            )
-        elif 0 < int(self.mt_plafond_prescription) < int(self.totaux_phcie) and not bool(self.leve_plafond_prescription):
-            raise ValidationError(_(
-                u"Proximas : Contrôle de règles de Gestion => Plafond Prescriptions : :\n \
-                Cette prise en charge ne peut excéder le plafond pour les prescriptions: (%d).  \
-                Par conséquent, vous devez en tenir compte pour pouvoir valider les données. \
-                Pour plus d'informations, veuillez contactez l'administrateur..."
-
-                ) % self.mt_plafond_prescription
-            )
-
+        for rec in self:
+            if 0 < int (rec.nbre_prescription_maxi) < int (rec.nbre_prescriptions):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Nombre Maxi Prescriptions:\n \
+                    Cette prise en charge ne peut contenir plus de : (%d) prescriptions. Par conséquent,\
+                    vous devez en tenir compte pour pouvoir valider les données. \
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % rec.nbre_prescription_maxi
+                                       )
+            elif 0 < int (rec.mt_plafond_prescription) < int (rec.totaux_phcie) and not bool (
+                    rec.leve_plafond_prescription):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Plafond Prescriptions : :\n \
+                    Cette prise en charge ne peut excéder le plafond pour les prescriptions: (%d).  \
+                    Par conséquent, vous devez en tenir compte pour pouvoir valider les données. \
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % rec.mt_plafond_prescription
+                                       )
 
     # @api.one
     # @api.constrains('details_pec_phcie_ids', 'nbre_prescriptions', 'nbre_prescription_maxi')
@@ -2042,7 +2039,7 @@ class DetailsPec(models.Model):
         readonly=True,
     )
     contrat_id = fields.Many2one(
-        # comodel_name="proximas.contrat",
+        comodel_name="proximas.contrat",
         string="Contrat Assuré",
         related='assure_id.contrat_id',
         store=True,
@@ -2272,6 +2269,20 @@ class DetailsPec(models.Model):
         store=True,
         readonly=True,
     )
+    validite_pec = fields.Integer(
+        string="Validité (Heures)",
+        related='pec_id.validite_pec',
+        readonly=True,
+        default=0,
+        help='Délai de validité d\'une prise en charge exprimé en heures',
+    )
+    delai_pec = fields.Integer(
+        string="Délai (Heures)",
+        related='pec_id.delai_pec',
+        readonly=True,
+        help='Délai du PEC exprimé en heures',
+        default=0,
+    )
     accorde = fields.Boolean (
         string="Accord?",
         default=False,
@@ -2361,6 +2372,7 @@ class DetailsPec(models.Model):
         string="Taux Couv.(%)",
         digits=(3, 0),
         compute='_calcul_couts_details_pec',
+        store=True,
         # default=lambda self: self.police_id.tx_couv_prive_couvert,
     )
     net_tiers_payeur = fields.Float(
@@ -3630,7 +3642,14 @@ class DetailsPec(models.Model):
                 cout_unitaire = self.cout_unite
                 code_non_controle = self.code_non_controle
                 # 1. Si oui, alors vérifier si le coût de la prestation est modifiable
-
+                # if quantite <= 0:
+                #     raise UserError (_(
+                #         "Proximaas : Contrôle de Règles de Gestion.\n \
+                #         Veuillez vérifier la quantité renseignée.. La quantité étant exigée, ne peut être\
+                #         inférieure ou égale à 0. Pour plus d'informations, \
+                #         veuillez contactez l'administrateur..."
+                #         )
+                #     )
                 if 0 < plafond < cout_unitaire and not code_non_controle:
                     # Si OUI, alors vérifier le montant plafond n'est pas nulle et est inférieur au cout unitaire
                     # donné par l'utilisateur
@@ -3675,7 +3694,7 @@ class DetailsPec(models.Model):
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
-                        self.cout_total = int (cout_unitaire * self.coefficient * quantite)
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite)
                         self.total_pc = int (
                             cout_unitaire * self.coefficient * quantite)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
@@ -3898,31 +3917,52 @@ class DetailsPec(models.Model):
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.net_prestataire -= self.mt_exclusion
 
+    @api.onchange('date_execution', 'prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
+                  'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+    def _check_validite_pec_onchange(self):
+        if 0 < int(self.validite_pec) < int(self.delai_pec):
+            action = {'warning': {
+                'title': u'Proximaas : Règles de Gestion',
+                'message': u"Cette prise en charge a été générée \
+                            depuis : %d heures, alors que le délai maximum (en heures) autorisé avant \
+                            expiration est de : %d heures. \n Pour plus d'informations, veuillez contactez \
+                            l'administrateur..." % (self.delai_pec, self.validite_pec)
+            }
+            }
+            return action
 
-    # @api.multi
-    @api.onchange('substitut_phcie_id', 'cout_unit', 'date_execution', 'quantite_livre', 'mt_paye_assure', 'quantite')
+    # @api.one
+    @api.onchange('substitut_phcie_id', 'cout_unit', 'quantite_exige', 'quantite_livre', 'mt_paye_assure', 'quantite')
     def _check_quantite_prescription(self):
-        for rec in self:
-            if bool(rec.produit_phcie_id) and rec.quantite == 0:
-                return {'value': {},
-                        'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Prescription.',
-                                    'message': u"Vous essayez de dispenser le produit: %s, dont la quantité prescrite \
-                                    n'est pas indiquée. Veuillez définir la quantité exacte prescrite par le médecin. \
-                                    Pour plus de détails, veuillez contacter l'administrateur..." % rec.produit_phcie
-                                    }
-                        }
-            if bool(rec.produit_phcie_id) and bool(rec.date_execution) and int (rec.cout_unit) > 0 and int (
-                    rec.quantite_livre) == 0:
-                return {'value': {},
-                        'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Fournie.',
-                                    'message': u"Il semble que vous avez omis de renseigner la quantité fournie \
-                                    (livrée) concerant le produit: %s. Veuillez bien renseigner la quantité exacte \
-                                    dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
-                                    % rec.produit_phcie
-                                    }
-                        }
+        # self.ensure_one()
+        if bool(self.produit_phcie_id) and self.quantite == 0:
+            return {'value': {},
+                    'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Prescription.',
+                                'message': u"Vous essayez de dispenser le produit: %s, dont la quantité prescrite \
+                                n'est pas indiquée. Veuillez définir la quantité exacte prescrite par le médecin. \
+                                Pour plus de détails, veuillez contacter l'administrateur..." % self.produit_phcie
+                                }
+                    }
+        if bool(self.produit_phcie_id) and bool (self.date_execution) and int (self.cout_unit) > 0 and int (
+                self.quantite_livre) == 0:
+            return {'value': {},
+                    'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Fournie.',
+                                'message': u"Il semble que vous avez omis de renseigner la quantité fournie \
+                                (livrée) concerant le produit: %s. Veuillez bien renseigner la quantité exacte \
+                                dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
+                                           % self.produit_phcie
+                                }
+                    }
+        if self.quantite_exige and self.quantite_livre == 0:
+            return {'value': {},
+                    'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Prescription.',
+                                'message': u"Pour cette prestation, la quantitée est exigée. Cépendant, vous \
+                                renseigner la quantité. Veuillez indiquer la quantité exacte fournie pour la \
+                                prestation. Pour plus de détails, veuillez contacter l'administrateur..."
+                                }
+                    }
 
-    @api.constrains('produit_phcie_id', 'quantite_livre', 'quantite')
+    @api.constrains('produit_phcie_id', 'quantite_livre', 'quantite', 'quantite_exige')
     def _validate_quantite_prescription(self):
         for rec_id in self:
             if bool(rec_id.produit_phcie_id) and rec_id.quantite == 0:
@@ -3942,6 +3982,14 @@ class DetailsPec(models.Model):
                       dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
                     ) % rec_id.produit_phcie
                 )
+            if rec_id.quantite_exige and rec_id.quantite_livre == 0:
+                return {'value': {},
+                        'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Prescription.',
+                                    'message': u"Pour cette prestation, la quantitée est exigée. Cépendant, vous \
+                                    renseigner la quantité. Veuillez indiquer la quantité exacte fournie pour la \
+                                    prestation. Pour plus de détails, veuillez contacter l'administrateur..."
+                                    }
+                        }
 
     # @api.multi
     # @api.onchange('prestation_cro_id', 'prestation_crs_id', 'date_execution', 'mt_paye_assure', 'produit_phcie_id',
