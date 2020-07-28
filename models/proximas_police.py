@@ -1378,7 +1378,8 @@ class Contrat(models.Model):
                 rec.nbre_pec_contrat_encours = len(prise_en_charge_encours)
                 rec.nbre_rfm_contrat_encours = len(rfm_encours)
                 rec.nbre_actes_contrat_encours = len(details_actes_encours)
-                rec.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_actes_encours)
+                # rec.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_actes_encours)
+                rec.mt_sinistres_contrat_encours = sum(item.sous_totaux_pec for item in prise_en_charge_encours)
                 rec.nbre_phcie_contrat_encours = len (details_phcie_encours)
                 rec.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
             if rec.plafond_famille:
@@ -1453,7 +1454,7 @@ class Contrat(models.Model):
 
         # NIVEAU CONSO COURANT
         # @api.multi
-        @api.depends ('adherent_id', 'mode_controle_plafond')
+        @api.depends('adherent_id', 'mode_controle_plafond')
         def _sinistre_details_pec(self):
             for rec in self:
                 # CALCULS DE DETAILS SINISTRES
@@ -1461,7 +1462,7 @@ class Contrat(models.Model):
                 contrat_id = rec.id
                 plafond_famille = rec.plafond_famille
                 if bool (rec.mode_controle_plafond == 'exercice'):
-                    exo = self.env['proximas.exercice'].search ([
+                    exo = self.env['proximas.exercice'].search([
                         ('res_company_id', '=', rec.structure_id.id),
                         ('en_cours', '=', True),
                     ])

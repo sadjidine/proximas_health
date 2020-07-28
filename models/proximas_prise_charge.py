@@ -1891,12 +1891,6 @@ class DetailsPec(models.Model):
         string="Coût unitaire",
         digits=(6, 0),
     )
-    cout_unite = fields.Float(
-        string="Coût unitaire",
-        # compute='_check_cout_unitaire',
-        digits=(6, 0),
-        default=0,
-    )
     quantite = fields.Integer(
         string="Qté. demandée",
         default=0,
@@ -2346,6 +2340,13 @@ class DetailsPec(models.Model):
         help="Indique la quantité restant à livrer"
     )
     # CHAMPS CALCULES AUTOMATIQUEMENT
+    cout_unite = fields.Float (
+        string="Coût unitaire",
+        compute='_calcul_couts_details_pec',
+        digits=(6, 0),
+        default=0,
+        store=True,
+    )
     cout_total = fields.Float(
         digits=(6, 0),
         string="Coût Total",
@@ -2511,7 +2512,28 @@ class DetailsPec(models.Model):
         related='exercice_id.res_company_id',
         readonly=True,
     )
+    compteur_maj_details_pec = fields.Integer(
+        string="Compteur MAJ",
+        required=False,
+    )
+    date_maj_details_pec = fields.Date(
+        string="Date MAJ",
+    )
 
+    def process_details_pec_updater(self, cr, uid, context=None):
+        updater_line_obj = self.pool.get('proximas.details.pec')
+        # Contient tous les enregistrements (ids) de la table contrat
+        updater_line_ids = self.pool.get('proximas.details.pec').search(cr, uid, [])
+        # Parcours sur chaque enregistrement de la table contrat
+        for line_id in updater_line_ids:
+            # Contient tous les détails de l'enregistrement dans la variable shaduller_line
+            updater_line = updater_line_obj.browse (cr, uid, line_id, context=context)
+            compteur_maj_assure = updater_line.compteur_maj_assure
+            # Mettre à jour chaque enregistrement
+            updater_line_obj.write(cr, uid, line_id, {
+                'compteur_maj_details_pec': (compteur_maj_assure + 1),
+                'date_maj_details_pec': datetime.now()
+            }, context=context)
 
     @api.multi
     def action_valider(self):
@@ -3514,6 +3536,9 @@ class DetailsPec(models.Model):
                 self.taux_couvert = int (self.police_id.tx_couv_public)
             else:
                 self.taux_couvert = int (self.police_id.tx_couv_prive)
+            taux_couvert = self.taux_couvert
+            plafond = 0
+            forfait = 0
             ##################################################################
             # Récupérer le coût unitaire
             if bool (self.cout_unit):
@@ -3523,9 +3548,6 @@ class DetailsPec(models.Model):
             else:
                 self.cout_unite = 0
             ####################################################################
-            taux_couvert = self.taux_couvert
-            plafond = 0
-            forfait = 0
             if bool (code_medical_police):
                 plafond = int (code_medical_police.mt_plafond)
             self.mt_plafond = plafond
@@ -3920,16 +3942,16 @@ class DetailsPec(models.Model):
     @api.onchange('date_execution', 'prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
                   'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _check_validite_pec_onchange(self):
-        if 0 < int(self.validite_pec) < int(self.delai_pec):
-            action = {'warning': {
-                'title': u'Proximaas : Règles de Gestion',
-                'message': u"Cette prise en charge a été générée \
-                            depuis : %d heures, alors que le délai maximum (en heures) autorisé avant \
-                            expiration est de : %d heures. \n Pour plus d'informations, veuillez contactez \
-                            l'administrateur..." % (self.delai_pec, self.validite_pec)
-            }
-            }
-            return action
+        for rec in self:
+            if 0 < int(rec.validite_pec) < int (rec.delai_pec):
+                warning = {'title': u'Proximaas : Règles de Gestion',
+                           'message': u"Cette prise en charge a été générée \
+                                    depuis : %d heures, alors que le délai maximum (en heures) autorisé avant \
+                                    expiration est de : %d heures. Pour plus d'informations, veuillez contactez \
+                                    l'administrateur..." % (rec.delai_pec, rec.validite_pec)
+                          }
+                return {'warning': warning}
+
 
     # @api.one
     @api.onchange('substitut_phcie_id', 'cout_unit', 'quantite_exige', 'quantite_livre', 'mt_paye_assure', 'quantite')

@@ -16,8 +16,8 @@
                 <field name="assure_id" string="Assuré"/>
                 <field name="prestataire"/>
                 <field name="details_prestation" string="Désignation"/>
-                <field name="quantite" string="QTE."/>
-                <field name="cout_unite" string="Coût Unit."/>
+                <!--<field name="quantite" string="QTE."/>-->
+                <!--<field name="cout_unite" string="Coût Unit."/>-->
                 <field name="cout_total" string="S/Total" sum="S/Total"/>
                 <field name="total_pc" sum="Total PC"/>
                 <field name="total_npc" sum="Total NPC"/>
@@ -668,8 +668,10 @@
                                     <!--<field name="pool_medical_id"/>-->
                                     <!--<field name="prestataire"/>-->
                                     <field name="prestation_cro_id" string="Prestation Médicale"/>
-                                    <field name="coefficient" />
                                     <field name="cout_unite" string="Coût Unit."/>
+                                    <field name="coefficient" />
+                                    <!--<field name="cout_unitaire" string="Coût Unit." invisible="context.get('cout_unit',True)==0"/>-->
+                                    <!--<field name="cout_unit" string="Coût Unit." invisible="context.get('cout_unitaire',True)==0"/>-->
                                     <field name="cout_total" string="S/Total" sum="S/Total"/>
                                     <field name="total_pc" sum="S/Total PC"/>
                                     <field name="total_npc" sum="S/Total NPC"/>
