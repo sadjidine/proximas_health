@@ -1889,10 +1889,10 @@ class DetailsPec(models.Model):
     )
     cout_unite = fields.Float(
         string="Coût unitaire",
-        # compute='_check_cout_unitaire',
+        compute='_check_cout_unite',
         digits=(6, 0),
         default=0,
-        # store=True,
+        store=True,
     )
     quantite = fields.Integer(
         string="Qté. demandée",
@@ -3708,12 +3708,23 @@ class DetailsPec(models.Model):
         else:
             self.net_a_payer = 0
 
+    @api.one
+    @api.depends('cout_unit', 'cout_unitaire')
+    def _check_cout_unite(self):
+        if bool(self.cout_unit):
+            self.cout_unite = self.cout_unit
+        elif bool (self.cout_unitaire):
+            self.cout_unite = self.cout_unitaire
+        else:
+            self.cout_unite = 0
+
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
-    @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id', 'produit_phcie_id',
-                 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte', 'prestataire','ticket_exigible',
-                 'substitut_phcie_id', 'cout_unit', 'quantite', 'quantite_livre')
-    @api.constrains('cout_unitaire', 'cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+    # @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
+    #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
+    #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
+    @api.depends('cout_unite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+    # @api.constrains('cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         self.ensure_one()
         if bool(self.prestation_id):
@@ -3756,12 +3767,12 @@ class DetailsPec(models.Model):
                 self.taux_couvert = int (self.police_id.tx_couv_prive)
             ##################################################################
             # Récupérer le coût unitaire
-            if bool(self.cout_unit):
-                self.cout_unite = self.cout_unit
-            elif bool(self.cout_unitaire):
-                self.cout_unite = self.cout_unitaire
-            else:
-                self.cout_unite = 0
+            # if bool(self.cout_unit):
+            #     self.cout_unite = self.cout_unit
+            # elif bool(self.cout_unitaire):
+            #     self.cout_unite = self.cout_unitaire
+            # else:
+            #     self.cout_unite = 0
             ####################################################################
             taux_couvert = self.taux_couvert
             plafond = 0
@@ -4155,13 +4166,19 @@ class DetailsPec(models.Model):
     @api.multi
     def write(self, values):
         if self.prestation_id:
-            # Récupérer le coût unitaire
-            if self.cout_unitaire:
-                values['cout_unite'] = self.cout_unitaire
-            elif self.cout_unit:
-                values['cout_unite'] = self.cout_unit
+            if self.mt_remboursement:
+                values['net_a_payer'] = self.mt_remboursement
+            elif self.net_prestataire:
+                values['net_a_payer'] = self.net_prestataire
             else:
-                values['cout_unite'] = 0
+                values['net_a_payer'] = 0
+            # Récupérer le coût unitaire
+            # if self.cout_unitaire:
+            #     values['cout_unite'] = self.cout_unitaire
+            # elif self.cout_unit:
+            #     values['cout_unite'] = self.cout_unit
+            # else:
+            #     values['cout_unite'] = 0
         res = super(DetailsPec, self).write(values)
         return res
 

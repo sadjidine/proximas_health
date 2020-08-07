@@ -29,7 +29,7 @@
         </field>
     </record>-->
     <!-- DATAILS PEC TREE -->
-    <record id="proximas_details_pec_list_view" model="ir.ui.view">
+    <record id="proximas_details_pec_track_list" model="ir.ui.view">
         <field name="name">proximas details pec tree</field>
         <field name="model">proximas.details.pec</field>
         <field name="arch" type="xml">
@@ -49,6 +49,7 @@
                 <field name="net_tiers_payeur" sum="Part SAM"/>
                 <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod."/>
                 <field name="net_prestataire" sum="Net Prestataire"/>
+                <field name="net_a_payer"/>
             </tree>
         </field>
     </record>
@@ -516,7 +517,7 @@
                                                         <label for="prestataire_id"
                                                                string="Prestataire de Soins Médicaux &amp; paramédicaux - CRO"
                                                         />
-                                                        <h3 class="bg-primary">
+                                                        <h3 class="bg-info text-primary">
                                                             <field name="prestataire_id" required="1"
                                                                options='{"no_open": True, "no_create": True}'
                                                                context="{'default_prestataire_id':prestataire_id}"
@@ -554,13 +555,6 @@
                                                 </group>
                                                 <hr/>
                                                 <group string="Détails Coûts - Prestation médicale">
-                                                    <group>
-                                                        <field name="prestation_id"
-                                                               options='{"no_open": True, "no_create": True}'
-                                                               class="text-primary"
-                                                               invisible="1"
-                                                        />
-                                                    </group>
                                                     <group col="6" colspan="2" >
                                                         <!--<separator string="Calculs Coûts:" />-->
                                                         <field name="cout_unit"
@@ -570,10 +564,8 @@
                                                                attrs="{'required': [('quantite_exige','=',True)],'invisible': [('quantite_exige','=',False)]}"
                                                         />
                                                         <newline/>
-                                                        <field name="cout_unitaire" string="Coût Unitaire"
-                                                               attrs="{'invisible': [('cout_unitaire','=',0)]}"/>
-                                                        <field name="coefficient"
-                                                        />
+                                                        <field name="cout_unite"/>
+                                                        <field name="coefficient"/>
                                                         <field name="forfait_sam" string="Forfait SAM"/>
                                                         <field name="forfait_ticket"/>
                                                         <field name="mt_plafond"/>
@@ -590,7 +582,6 @@
                                                                string="Net à devoir (SAM)"/>
                                                     </group>
                                                     <group invisible="1">
-                                                        <field name="cout_unite"/>
                                                         <field name="remise_prestation"/>
                                                         <field name="mt_rabais"/>
                                                         <field name="mt_paye_assure"
@@ -604,7 +595,16 @@
                                                     </group>
                                                 </group>
                                                 <hr/>
-                                                <group col="6" colspan="2">
+                                                <group col="4" colspan="2" class="bg-info">
+                                                    <field name="prestation_id"
+                                                           options='{"no_open": True, "no_create": True}'
+                                                           readonly="1"
+                                                    />
+                                                    <field name="cout_unitaire" string="Coût Actuel Prestation"
+                                                           attrs="{'invisible': [('cout_unitaire','=',0)]}"
+                                                    />
+                                                </group>
+                                                <group col="6" colspan="2" class="bg-primary">
                                                     <field name="code_medical_id"
                                                            options='{"no_open": True, "no_create": True}'/>
                                                     <field name="rubrique_id" string="Rubrisue médicale"
@@ -1647,7 +1647,7 @@
         <field name="res_model">proximas.details.pec</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="proximas_details_pec_list_view"/>
+        <field name="view_id" ref="proximas_details_pec_track_list"/>
         <field name="search_view_id" ref="details_pec_search_view"/>
         <field name="domain">[('date_execution','!=',None)]</field>
         <field name="context">{}</field>
