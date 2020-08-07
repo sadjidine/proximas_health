@@ -1360,8 +1360,8 @@ class Contrat(models.Model):
     )
 
     @api.one
-    # @api.depends('date_activation', 'date_resiliation',  'validite_contrat', 'validite_contrat_police', 'jours_contrat',
-    #              'mode_controle_plafond')
+    @api.depends('date_activation', 'date_resiliation',  'validite_contrat', 'validite_contrat_police', 'jours_contrat',
+                 'mode_controle_plafond')
     def _compute_debut_fin_contrat(self):
         now = fields.Datetime.from_string (fields.Date.today ())
         activation_contrat = fields.Date.from_string(self.date_activation)
@@ -1426,7 +1426,7 @@ class Contrat(models.Model):
                     self.date_fin_prevue = date_debut + timedelta(days=int (self.validite_police))
 
     @api.one
-    # @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
+    @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
     def _compute_sinistres_contrat(self):
         # for rec in self:
         if self.details_pec_ids:

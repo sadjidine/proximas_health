@@ -516,154 +516,153 @@ class Assure (models.Model):
 
     # @api.depends('date_activation', 'date_resiliation', 'validite_contrat', 'validite_contrat_police', 'jours_contrat',
     #               'mode_controle_plafond')
+    @api.one
     def _compute_debut_fin_assure(self):
         # now = fields.Datetime.from_string (fields.Date.today())
-        for rec in self:
-            activation_contrat = fields.Date.from_string (rec.date_activation_contrat)
-            activation_assure = fields.Date.from_string (rec.date_activation)
-            date_deces = fields.Date.from_string (rec.date_deces)
-            date_resiliation = fields.Date.from_string (rec.date_resiliation_contrat)
-            validite_contrat = int (rec.validite_contrat)
-            validite_police = int (rec.validite_contrat_police)
-            if validite_contrat:
-                nbre_renouvellement = rec.jours_activation / validite_contrat
-                rec.nbre_renouvellement_contrat = nbre_renouvellement
-            elif validite_police:
-                nbre_renouvellement = rec.jours_activation / validite_police
-                rec.nbre_renouvellement_contrat = nbre_renouvellement
-            # 1. MODE DE CONTROLE PAR EXERCICE
-            if rec.mode_controle_plafond in ['exercice']:
-                exercice = self.env['proximas.exercice'].search ([
-                    ('res_company_id', '=', rec.structure_id.id),
-                    ('en_cours', '=', True),
-                ])
-                if exercice and len (exercice) == 1:
-                    date_debut = fields.Date.from_string (exercice.date_debut)
-                    date_fin = fields.Date.from_string (exercice.date_fin)
-                    if date_deces:
-                        rec.date_debut_assure = activation_contrat
-                        rec.date_fin_prevue_assure = date_deces
-                    elif date_resiliation:
-                        rec.date_debut_assure = activation_contrat
-                        rec.date_fin_prevue_assure = date_resiliation
-                    elif activation_contrat > date_debut:
-                        rec.date_debut_assure = activation_contrat
-                        rec.date_fin_prevue_assure = date_fin
-                    else:
-                        rec.date_debut_assure = date_debut
-                        rec.date_fin_prevue_assure = date_fin
-                else:
-                    raise UserError (
-                        '''
-                             Proximaas - Contrôle des règles de Gestion :\n
-                             Le mode de contrôle défini pour le plafond famille (contrat)\
-                             est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
-                             en cours. Pour plus d'informations, veuillez contactez l'administrateur...
-                         '''
-                    )
-            # 2. MODE DE CONTROLE PAR CONTRAT
-            elif rec.mode_controle_plafond in ['contrat']:
+        activation_contrat = fields.Date.from_string (self.date_activation_contrat)
+        activation_assure = fields.Date.from_string (self.date_activation)
+        date_deces = fields.Date.from_string (self.date_deces)
+        date_resiliation = fields.Date.from_string (self.date_resiliation_contrat)
+        validite_contrat = int (self.validite_contrat)
+        validite_police = int (self.validite_contrat_police)
+        if validite_contrat:
+            nbre_renouvellement = self.jours_activation / validite_contrat
+            self.nbre_renouvellement_contrat = nbre_renouvellement
+        elif validite_police:
+            nbre_renouvellement = self.jours_activation / validite_police
+            self.nbre_renouvellement_contrat = nbre_renouvellement
+        # 1. MODE DE CONTROLE PAR EXERCICE
+        if self.mode_controle_plafond in ['exercice']:
+            exercice = self.env['proximas.exercice'].search ([
+                ('res_company_id', '=', self.structure_id.id),
+                ('en_cours', '=', True),
+            ])
+            if exercice and len (exercice) == 1:
+                date_debut = fields.Date.from_string (exercice.date_debut)
+                date_fin = fields.Date.from_string (exercice.date_fin)
                 if date_deces:
-                    rec.date_debut_assure = activation_assure
-                    rec.date_fin_prevue_assure = date_deces
+                    self.date_debut_assure = activation_contrat
+                    self.date_fin_prevue_assure = date_deces
                 elif date_resiliation:
-                    rec.date_debut_assure = activation_contrat
-                    rec.date_fin_prevue_assure = date_resiliation
-                elif rec.nbre_renouvellement_contrat >= 1:
-                    if validite_contrat:
-                        rec.date_debut_assure = activation_assure + timedelta (days=int (rec.validite_contrat))
-                        date_debut = fields.Date.from_string (rec.date_debut_assure)
-                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_contrat))
-                    elif validite_police:
-                        rec.date_debut_assure = activation_contrat + timedelta (days=int (rec.validite_police))
-                        date_debut = fields.Date.from_string (rec.date_debut_assure)
-                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_police))
+                    self.date_debut_assure = activation_contrat
+                    self.date_fin_prevue_assure = date_resiliation
+                elif activation_contrat > date_debut:
+                    self.date_debut_assure = activation_contrat
+                    self.date_fin_prevue_assure = date_fin
                 else:
-                    if validite_contrat:
-                        rec.date_debut_assure = activation_assure
-                        date_debut = fields.Date.from_string (rec.date_debut_assure)
-                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_contrat))
-                    elif validite_police:
-                        rec.date_debut_assure = activation_assure
-                        date_debut = fields.Date.from_string (rec.date_debut_assure)
-                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_police))
-
+                    self.date_debut_assure = date_debut
+                    self.date_fin_prevue_assure = date_fin
+            else:
+                raise UserError (
+                    '''
+                         Proximaas - Contrôle des règles de Gestion :\n
+                         Le mode de contrôle défini pour le plafond famille (contrat)\
+                         est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
+                         en cours. Pour plus d'informations, veuillez contactez l'administrateur...
+                     '''
+                )
+        # 2. MODE DE CONTROLE PAR CONTRAT
+        elif self.mode_controle_plafond in ['contrat']:
+            if date_deces:
+                self.date_debut_assure = activation_assure
+                self.date_fin_prevue_assure = date_deces
+            elif date_resiliation:
+                self.date_debut_assure = activation_contrat
+                self.date_fin_prevue_assure = date_resiliation
+            elif self.nbre_renouvellement_contrat >= 1:
+                if validite_contrat:
+                    self.date_debut_assure = activation_assure + timedelta (days=int (self.validite_contrat))
+                    date_debut = fields.Date.from_string (self.date_debut_assure)
+                    self.date_fin_prevue_assure = date_debut + timedelta (days=int (self.validite_contrat))
+                elif validite_police:
+                    self.date_debut_assure = activation_contrat + timedelta (days=int (self.validite_police))
+                    date_debut = fields.Date.from_string (self.date_debut_assure)
+                    self.date_fin_prevue_assure = date_debut + timedelta (days=int (self.validite_police))
+            else:
+                if validite_contrat:
+                    self.date_debut_assure = activation_assure
+                    date_debut = fields.Date.from_string (self.date_debut_assure)
+                    self.date_fin_prevue_assure = date_debut + timedelta (days=int (self.validite_contrat))
+                elif validite_police:
+                    self.date_debut_assure = activation_assure
+                    date_debut = fields.Date.from_string (self.date_debut_assure)
+                    self.date_fin_prevue_assure = date_debut + timedelta (days=int (self.validite_police))
+    
+    @api.one
     @api.depends('date_activation', 'date_inscription')
     def _get_duree_activation(self):
-        for rec in self:
-            now = datetime.now ()
-            if bool (rec.date_activation):
-                activation = fields.Datetime.from_string (rec.date_activation)
-                delta = relativedelta (now, activation)
-                annees_mois_jours = '%s %s - %s %s - %s %s' % (
-                    delta.years, _ ('an(s)'),
-                    delta.months, _ ('mois'),
-                    delta.days, _ ('jours')
-                )
-                rec.duree_activation = annees_mois_jours
-                rec.jours_activation = int (delta.days)
+        now = datetime.now ()
+        if bool (self.date_activation):
+            activation = fields.Datetime.from_string (self.date_activation)
+            delta = relativedelta (now, activation)
+            annees_mois_jours = '%s %s - %s %s - %s %s' % (
+                delta.years, _ ('an(s)'),
+                delta.months, _ ('mois'),
+                delta.days, _ ('jours')
+            )
+            self.duree_activation = annees_mois_jours
+            self.jours_activation = int (delta.days)
 
-    # @api.depends ('prise_charge_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
+    @api.one
+    @api.depends('prise_charge_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
     def _compute_sinistres_assure(self):
-        for rec in self:
-            if rec.details_pec_ids:
-                date_debut = fields.Date.from_string (rec.date_debut_assure)
-                date_fin = fields.Date.from_string (rec.date_fin_prevue_assure)
-                prise_en_charge_encours = []
-                details_pec_encours = []
-                details_actes_encours = []
-                details_phcie_encours = []
-                for detail in rec.prise_charge_ids:
-                    date_saisie = fields.Date.from_string (detail.date_saisie)
-                    if date_debut <= date_saisie <= date_fin:
-                        prise_en_charge_encours.append (detail)
-                for detail in rec.details_pec_ids:
-                    date_execution = fields.Date.from_string (detail.date_execution)
-                    if date_debut <= date_execution <= date_fin:
-                        details_pec_encours.append (detail)
-                for detail in rec.details_actes_ids:
-                    date_execution = fields.Date.from_string (detail.date_execution)
-                    if date_debut <= date_execution <= date_fin:
-                        details_actes_encours.append (detail)
-                for detail in rec.details_phcie_ids:
-                    date_execution = fields.Date.from_string (detail.date_execution)
-                    if date_debut <= date_execution <= date_fin:
-                        details_phcie_encours.append (detail)
-                rec.nbre_pec_assure_encours = len (prise_en_charge_encours)
-                rec.nbre_actes_assure_encours = len (details_actes_encours)
-                rec.mt_sinistres_assure_encours = sum (item.sous_totaux_pec for item in prise_en_charge_encours)
-                rec.mt_sinistres_actes_assure_encours = sum (item.total_pc for item in details_actes_encours)
-                rec.nbre_phcie_assure_encours = len (details_phcie_encours)
-                rec.mt_sinistres_phcie_assure_encours = sum (item.mt_totaux_phcie for item in prise_en_charge_encours)
-            if rec.plafond_individu:
-                rec.taux_sinistre_plafond_assure = rec.mt_sinistres_assure_encours * 100 / rec.plafond_individu
+        if self.details_pec_ids:
+            date_debut = fields.Date.from_string (self.date_debut_assure)
+            date_fin = fields.Date.from_string (self.date_fin_prevue_assure)
+            prise_en_charge_encours = []
+            details_pec_encours = []
+            details_actes_encours = []
+            details_phcie_encours = []
+            for detail in self.prise_charge_ids:
+                date_saisie = fields.Date.from_string (detail.date_saisie)
+                if date_debut <= date_saisie <= date_fin:
+                    prise_en_charge_encours.append (detail)
+            for detail in self.details_pec_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_pec_encours.append (detail)
+            for detail in self.details_actes_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_actes_encours.append (detail)
+            for detail in self.details_phcie_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_phcie_encours.append (detail)
+            self.nbre_pec_assure_encours = len (prise_en_charge_encours)
+            self.nbre_actes_assure_encours = len (details_actes_encours)
+            self.mt_sinistres_assure_encours = sum (item.sous_totaux_pec for item in prise_en_charge_encours)
+            self.mt_sinistres_actes_assure_encours = sum (item.total_pc for item in details_actes_encours)
+            self.nbre_phcie_assure_encours = len (details_phcie_encours)
+            self.mt_sinistres_phcie_assure_encours = sum (item.mt_totaux_phcie for item in prise_en_charge_encours)
+        if self.plafond_individu:
+            self.taux_sinistre_plafond_assure = self.mt_sinistres_assure_encours * 100 / self.plafond_individu
 
-    @api.depends ('date_naissance', 'age')
+    #@api.depends('date_naissance', 'age')
     def _check_tranche_age(self):
-        for rec in self:
-            if bool (rec.age):
-                if rec.age <= 0:
-                    rec.tranche_age = '0'
-                elif rec.age == 1:
-                    rec.tranche_age = '1'
-                elif 2 <= rec.age <= 5:
-                    rec.tranche_age = '2'
-                elif 6 <= rec.age <= 10:
-                    rec.tranche_age = '3'
-                elif 11 <= rec.age <= 15:
-                    rec.tranche_age = '4'
-                elif 16 <= rec.age <= 20:
-                    rec.tranche_age = '5'
-                elif 21 <= rec.age <= 30:
-                    rec.tranche_age = '6'
-                elif 31 <= rec.age <= 40:
-                    rec.tranche_age = '7'
-                elif 41 <= rec.age <= 50:
-                    rec.tranche_age = '8'
-                elif 51 <= rec.age <= 60:
-                    rec.tranche_age = '9'
-                elif rec.age > 60:
-                    rec.tranche_age = '10'
+        if bool(self.age):
+            if self.age <= 0:
+                self.tranche_age = '0'
+            elif self.age == 1:
+                self.tranche_age = '1'
+            elif 2 <= self.age <= 5:
+                self.tranche_age = '2'
+            elif 6 <= self.age <= 10:
+                self.tranche_age = '3'
+            elif 11 <= self.age <= 15:
+                self.tranche_age = '4'
+            elif 16 <= self.age <= 20:
+                self.tranche_age = '5'
+            elif 21 <= self.age <= 30:
+                self.tranche_age = '6'
+            elif 31 <= self.age <= 40:
+                self.tranche_age = '7'
+            elif 41 <= self.age <= 50:
+                self.tranche_age = '8'
+            elif 51 <= self.age <= 60:
+                self.tranche_age = '9'
+            elif self.age > 60:
+                self.tranche_age = '10'
 
     @api.multi
     def _check_details_pec(self):

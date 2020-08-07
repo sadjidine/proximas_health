@@ -344,37 +344,6 @@
                                        options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'/>
                             </h2>
                     </div>
-                    <hr/>
-                    <!--</div>
-                        <field name="image"
-                           widget='image'
-                           class="oe_left oe_kanban_avatar"
-                           options="{'preview_image': 'image', 'size': [90, 120]}"
-                           readonly="1"/>
-                        &lt;!&ndash;<field name="image" widget='image' class="oe_avatar oe_left"/>&ndash;&gt;
-                    <div class="oe_title oe_left" name="title">
-                        <label for="name" string="Assuré Bénéficiaire:"/>
-                        <h2><field name="name" class="text-primary" readonly="True"/></h2>
-                        &lt;!&ndash;<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>&ndash;&gt;
-                        <b><field name="age_details" class="text-muted"/></b>
-                        <h4><field name="statut_familial" class="text-muted" string="Lien Parenté :"/></h4>
-                    </div>
-                    <newline/>
-                    <div class="oe_right">
-                        &lt;!&ndash;<div class="oe_left">&ndash;&gt;
-                            <field name="code_pec" invisible="1"/>
-                            <label for="code_pc" string="Code PEC :"/>
-                            <h2 class="text-center bg-primary"><field name="code_pc"/></h2>
-                        &lt;!&ndash;</div>&ndash;&gt;
-                        &lt;!&ndash;<div class="oe_right text-right">&ndash;&gt;
-                            <label for="totaux_phcie_estimation" string="Estimation Prescriptions:"/>
-                            <h2 class="text-center">
-                                <field name="totaux_phcie_estimation" widget="monetary"
-                                       options='{"widget": "monetary", "display_currency": "res_company.currency_id"}' />
-                            </h2>
-                        &lt;!&ndash;</div>&ndash;&gt;
-                    </div>
-                    <hr/>-->
                     <notebook>
                         <page string="DETAILS PRISE EN CHARGE:">
                              <group>
@@ -545,15 +514,15 @@
                                                 <group>
                                                     <div class="oe_title" name="title">
                                                         <label for="prestataire_id"
-                                                               string="Centre de Référence"
+                                                               string="Prestataire de Soins Médicaux &amp; paramédicaux - CRO"
                                                         />
-                                                        <h2 class="bg-primary">
+                                                        <h3 class="bg-primary">
                                                             <field name="prestataire_id" required="1"
                                                                options='{"no_open": True, "no_create": True}'
                                                                context="{'default_prestataire_id':prestataire_id}"
                                                                readonly="1"
                                                             />
-                                                        </h2>
+                                                        </h3>
                                                     </div>
                                                     <newline/>
                                                     <group>
@@ -584,15 +553,13 @@
                                                     </group>
                                                 </group>
                                                 <hr/>
-                                                <group>
+                                                <group string="Détails Coûts - Prestation médicale">
                                                     <group>
                                                         <field name="prestation_id"
                                                                options='{"no_open": True, "no_create": True}'
                                                                class="text-primary"
                                                                invisible="1"
                                                         />
-                                                        <!--domain="[('prestataire_id', '=', prestataire_id),('active', '=', True)]"-->
-                                                        <!--<field name="quantite"/>-->
                                                     </group>
                                                     <group col="6" colspan="2" >
                                                         <!--<separator string="Calculs Coûts:" />-->
@@ -657,16 +624,6 @@
                                                     <field name="nbre_actes_rubrique_contrat" invisible="1"/>
                                                 </group>
                                             </page>
-                                            <!--<page string="Traitement des exclusions sur prestation "
-                                                  groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,proximas_medical.group_medical"
-                                            >
-                                                <group>
-                                                    <field name="mt_exclusion"/>
-                                                    <field name="motif_exclusion"
-                                                           attrs="{'required': [('mt_exclusion','!=',0)]}"
-                                                    />
-                                                </group>
-                                            </page>-->
                                         </notebook>
                                     </sheet>
                                 </form>
@@ -861,15 +818,15 @@
                                             <page string="DETAILS COÛTS - PRESTATION MEDICALE (CRS)"
                                                    attrs="{'invisible': [('prestataire_crs_id','=', False)]}">
                                                 <div class="oe_title" name="title">
-                                                    <label for="prestataire" string="Centre d'Orientation :"
+                                                    <label for="prestataire" string="Prestataire de Soins Médicaux &amp; paramédicaux - CRS"
                                                            class="oe_edit_only"/>
-                                                    <h2 class="bg-info">
+                                                    <h3 class="bg-info">
                                                         <field name="prestataire"
                                                            options='{"no_open": True, "no_create": True}'
                                                            readonly="1"
                                                         />
                                                         <!--context="{'default_prestataire_id':prestataire_id}"-->
-                                                    </h2>
+                                                    </h3>
                                                 </div>
                                                 <newline/>
                                                 <group>
@@ -904,7 +861,7 @@
                                                            options='{"no_open": True, "no_create": True}'/>
                                                 </group>
                                                 <hr/>
-                                                <group col="6" colspan="2">
+                                                <group col="6" colspan="2" string="Détails Coûts - Prestation médicale">
                                                     <field name="cout_unit"
                                                        attrs="{'required': [('cout_modifiable','=',True)],'invisible': [('cout_modifiable','=',False)]}"
                                                     />
@@ -1074,11 +1031,11 @@
                                             >
                                                 <div class="oe_title" name="title">
                                                     <label for="prestataire_phcie_id" string="Pharmacie / Officine :"/>
-                                                    <h2 class="bg-success text-success">
+                                                    <h3 class="bg-success text-success">
                                                         <field name="prestataire_phcie_id"
                                                            options='{"no_open": True, "no_create": True}'
-                                                           readonly="1" string="Pharmacie/Officine"/>
-                                                    </h2>
+                                                           readonly="1" sstring="Prestataire Conventionné - Pharmacie/Officine"/>
+                                                    </h3>
                                                 </div>
                                                 <newline/>
                                                 <group>
@@ -1096,7 +1053,7 @@
                                                     <field name="quantite_livre" required="1"/>
                                                     <!--attrs="{'required': [('prestataire_phcie_id','!=',False)]}"-->
                                                 </group>
-                                                <group col="6" colspan="2">
+                                                <group col="6" colspan="2" string="Détails Coûts - Médicament">
                                                     <field name="cout_unit"
                                                            required="1"
                                                     />

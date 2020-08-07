@@ -106,24 +106,9 @@ class PriseEnCharge(models.Model):
             '|', ('accord_prestation_demande', '=', False),
             ('accorde', '=', True)
         ],
-        # domain=['|',
-        #         ('prestation_demande_id', '!=', None),
-        #         ('prestation_crs_id', '!=', None),
-        # ],
-        # ondelete='restrict',
         track_visibility='always',
         string='Prestation Médicale',
     )
-    # details_pec_soins_crs_ids = fields.One2many (
-    #     comodel_name="proximas.details.pec",
-    #     inverse_name="pec_id",
-    #     domain=['|',
-    #             ('prestation_demande_id', '!=', None),
-    #             ('prestation_crs_id', '!=', None),
-    #     ],
-    #     # ondelete='restrict',
-    #     string='Exécution Prestation Médicale',
-    # )
     details_pec_phcie_ids = fields.One2many(
         comodel_name="proximas.details.pec",
         inverse_name="pec_id",
@@ -135,6 +120,26 @@ class PriseEnCharge(models.Model):
         # ondelete='restrict',
         string='Prescription/Dispensation Médicament',
         track_visibility='always',
+    )
+    details_pec_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        inverse_name="assure_id",
+        string="Détails PEC",
+        domain=[
+            ('date_execution', '!=', None),
+        ]
+    )
+    details_pec_assure_ids = fields.One2many (
+        comodel_name="proximas.details.pec",
+        string="Détails PEC - Assuré",
+        related='assure_id.details_pec_ids',
+        readonly=True,
+    )
+    details_pec_contrat_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        string="Détails PEC - Contrat",
+        related='contrat_id.details_pec_ids',
+        readonly=True,
     )
     note = fields.Text(
         string="Notes et Observations",
@@ -783,43 +788,83 @@ class PriseEnCharge(models.Model):
             else:
                 rec.is_termine = False
 
-
     @api.one
-    @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids','details_pec_phcie_ids')
-    @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids','details_pec_phcie_ids')
+    @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
+                 'details_pec_phcie_ids')
+    # @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids','details_pec_phcie_ids')
     def _check_nbre_details_pec(self):
         self.ensure_one()
-        details_pec_assure = self.env['proximas.details.pec'].search([
-            ('assure_id', '=', self.assure_id.id),
-            ('pec_id', '=', self.id),
-            ('produit_phcie_id', '!=', None),
-        ])
+        details_pec_phcie_encours = self.details_pec_phcie_ids
         self.nbre_prestations_fournies = len(self.details_pec_soins_ids)
         self.nbre_prestations_demandes = len(self.details_pec_soins_crs_ids) or len(self.details_pec_demande_crs_ids)
         # self.nbre_prestations_demandes = len (self.details_pec_demande_crs_ids)
-        self.nbre_prescriptions = len(self.details_pec_phcie_ids)
-        self.totaux_phcie = sum(item.total_pc for item in details_pec_assure) or 0
-        self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_assure) or 0
+        self.nbre_prescriptions = len(details_pec_phcie_encours)
+        self.totaux_phcie = sum(item.total_pc for item in details_pec_phcie_encours)
+        self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
 
-
-    # @api.multi
-    # def _get_user_prestataire(self):
-    #     for rec in self:
-    #         if rec.prestataire_cro == rec.user_prestataire:
-    #             rec.user_prise_charge = True
+    @api.one
+    @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
+                  'nbre_prestations_fournies')
+    # @api.onchange('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
+    #               'nbre_prestations_fournies')
+    def _compute_details_pec(self):
+        self.ensure_one()
+        details_pec_encours = self.details_pec_ids
+        details_pec_cro = self.details_pec_soins_ids
+        details_pec_crs = self.details_pec_soins_crs_ids
+        details_pec_phcie = self.details_pec_phcie_ids
+        if details_pec_encours:
+            # for detail in details_pec_encours:
+            #     if detail.prestataire == self.prestataire_id.id:
+            #         details_pec_cro.append(detail)
+            #     elif detail.prestataire == self.prestataire_crs_id.id:
+            #         details_pec_crs.append(detail)
+            #     elif detail.prestataire == self.prestataire_phcie_id.id:
+            #         details_pec_phcie.append(detail)
+            #     else:
+            #         pass
+            self.sous_totaux_pec = sum (item.total_pc for item in details_pec_encours)
+            self.sous_totaux_npc_pec = sum (item.total_npc for item in details_pec_encours)
+            self.part_sam_pec = sum (item.net_tiers_payeur for item in details_pec_encours)
+            self.ticket_moderateur_pec = sum (item.ticket_moderateur for item in details_pec_encours)
+            self.net_prestataire_pec = sum (item.net_prestataire for item in details_pec_encours)
+            self.net_remboursement_pec = sum (item.mt_remboursement for item in details_pec_encours)
+            self.paye_assure_pec = sum (item.mt_paye_assure for item in details_pec_encours)
+            # Calculs des S/Totaux (CRO-CRS-Phcie)
+            # 1. S/Totaux
+            self.mt_totaux_cro = sum (item.total_pc for item in details_pec_cro) or 0
+            self.mt_totaux_crs = sum (item.total_pc for item in details_pec_crs) or 0
+            self.mt_totaux_phcie = sum (item.total_pc for item in details_pec_phcie) or 0
+            # 2. Part SAM
+            self.part_sam_cro = sum (item.net_tiers_payeur for item in details_pec_cro) or 0
+            self.part_sam_crs = sum (item.net_tiers_payeur for item in details_pec_crs) or 0
+            self.part_sam_phcie = sum (item.net_tiers_payeur for item in details_pec_phcie) or 0
+            # 3. Ticket Modérateur
+            self.ticket_moderateur_cro = sum (item.ticket_moderateur for item in details_pec_cro) or 0
+            self.ticket_moderateur_crs = sum (item.ticket_moderateur for item in details_pec_crs) or 0
+            self.ticket_moderateur_phcie = sum (item.ticket_moderateur for item in details_pec_phcie) or 0
+            # 4. Ticket Exigible
+            self.ticket_exigible_cro = sum (
+                item.ticket_moderateur for item in details_pec_cro if bool (item.ticket_exigible) or 0
+            )
+            self.ticket_exigible_crs = sum (
+                item.ticket_moderateur for item in details_pec_crs if bool (item.ticket_exigible) or 0
+            )
+            self.ticket_exigible_phcie = sum (
+                item.ticket_moderateur for item in details_pec_phcie if bool (item.ticket_exigible) or 0
+            )
+            # 5. Net à Payer
+            self.net_prestataire_cro = sum (item.net_prestataire for item in details_pec_cro) or 0
+            self.net_prestataire_crs = sum (item.net_prestataire for item in details_pec_crs) or 0
+            self.net_prestataire_phcie = sum (item.net_prestataire for item in details_pec_phcie) or 0
+            # 6. Totaux Encaissement
+            # self.mt_encaisse_cro = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_cro)
+            # self.mt_encaisse_crs = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_crs)
+            # self.mt_encaisse_phcie = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_phcie)
 
     @api.multi
     def action_en_cours(self):
         self.state = 'cours'
-        # action = {
-        #     'type': 'ir.actions.client',
-        #     'tag': 'reload',
-        #     'params': {
-        #         # 'menu_action': 'proximas_user_list_pec_action',
-        #         'menu_id': 129
-        #     }
-        # }
-        # return action
 
     @api.multi
     def action_expire(self):
@@ -969,174 +1014,165 @@ class PriseEnCharge(models.Model):
             }
             return action
 
-    # @api.multi
-    # def _get_prestataire_cro(self):
-    #     if bool(self.prestataire_id):
-    #         user_id = self.env.context.get('uid')
-    #         group_id = self.env.context.get('gid')
-    #         user = self.env['res.users'].search([('id', '=', user_id)])
-    #         group = self.env['res.groups'].search([('id', '=', group_id)])
-    #         prestataire = self.env['res.partner'].search([('id', '=', user.partner_id.id)])
-
-    @api.one
-    @api.onchange('pathologie_ids')
-    def _check_pathologie_ids(self):
-        # CONTROLE ANTECEDANT POLICE
-        for pathologie in self.pathologie_ids:
-            pathologie_id = pathologie.id
-            controle_affection = self.env['proximas.controle.antecedent'].search([
-                ('police_id', '=', self.police_id.id), ('pathologie_id', '=', pathologie_id)
-            ])
-            if controle_affection:
-                # Si Le contrôle Antécédant est activé (renseigné), alors;
-                # selfherche l'ensemble des prises en charge de l'assuré
-                prise_en_charge_individu = self.env['proximas.prise.charge'].search([
-                    ('assure_id', '=', self.assure_id.id)
-                ])
-                # selfherche l'ensemble des prises en charge de la famille (contrat)
-                prise_en_charge_famille = self.env['proximas.prise.charge'].search([
-                    ('contrat_id', '=', self.contrat_id.id)
-                ])
-                if bool(prise_en_charge_individu):
-                    # pour chaque prise en charge de l'assuré, alors,
-                    for item in prise_en_charge_individu:
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('pec_id', '=', item.id),
-                        ])
-                        totaux_pathologie_assure = 0
-                        nombre_pec_assure = 0
-                        # on vérifie si elle est reliée à la pathologie (affection)
-                        pathologie_relie_pec_assure = self.env['proximas.pathologie.proximas.prise.charge.rel'].search(
-                            [
-                                ('proximas_pathologie_id', '=', pathologie_id),
-                                ('proximas_prise_charge_id', '=', item.id),
-                            ])
-                        pathologies_assure = []
-                        # S'il y a des liens entre la prise en charge et la pathologie,
-                        if pathologie_relie_pec_assure:
-                            # dans ce cas, on récupère le montant total prise en charge (total_pc) et on incrémente
-                            # le compteur pour le nombre de prises en charge
-                            pathologies_assure += pathologie_relie_pec_assure
-                            totaux_pathologie_assure += sum(detail.total_pc or 0 for detail in details_pec)
-                            nombre_pec_assure += 1
-                            # On vérifie ainsi, si le contrôle de nombre de prises en charge est atteint ou pas ?
-                            if 0 < int(controle_affection.nbre_pec) <= int(nombre_pec_assure):
-                                # Si le contrôle de nombre de prises en charge est différent de 0 et est atteint, alors
-                                # on lève une exception sur la validation des données...
-                                # On vérifie si le facteur du contrôle est bloquant ou pas ? si OUI alors,
-                                if bool(controle_affection.controle_strict):
-                                    raise ValidationError (_ (
-                                         u"Proximas :contrôle Règles de gestion ==> Nbre. Limite PEC Antécédant:\n L'assuré concerné\
-                                         a atteint le quota de prise en charge faisant apparaître cette pathologie : %s.\n \
-                                         Par conséquent, vos données ne pourront être validées.\n \
-                                         Pour plus d'informations, veuillez contactez l'administrateur..."
-                                        ) % pathologie_id.libelle
-                                    )
-                                else:
-                                    # Sinon, une simple alerte envoyée à l'utilisateur.
-                                    return {'value': {},
-                                            'warning': {
-                                                'title': u'Proximas :contrôle Règles de gestion ==> Nbre. Limite PEC Antécédant:',
-                                                'message': u"L'assuré concerné a atteint le quota de prise en charge \
-                                                faisant apparaître cette pathologie : %r.\n Par conséquent, vos données ne \
-                                                pourront être validées.\n Pour plus d'informations, veuillez contactez \
-                                                l'administrateur..." % pathologie_id.libelle
-                                            }
-                                            }
-                            # Sinon, on vérifie si le plafond individuel pour la pathologie est atteint ou pas
-                            elif 0 < int(controle_affection.plafond_individu) <= int(totaux_pathologie_assure):
-                                # Si le plafond individuel pour la pathologie est différent de 0 et est atteint ou dépassé,alors
-                                # on lève une exception sur la validation des données...
-                                # On vérifie si le facteur du contrôle est bloquant ou pas ? si OUI alors,
-                                if bool(controle_affection.controle_strict):
-                                    raise ValidationError (_ (
-                                        u"Proximas : Contrôle Règles de gestion - Plafond Individu sur Antécédant:\n \
-                                        L'assuré concerné atteint le plafond individuel pour la pathologie : %r. \
-                                        Par conséquent, vos données ne pourront être validées.Pour plus d'informations,\
-                                         veuillez contactez l'administrateur..."
-                                        ) % pathologie_id.libelle
-                                    )
-                                else:
-                                    # Sinon, une simple alerte envoyée à l'utilisateur.
-                                    return {'value': {},
-                                            'warning': {
-                                                'title': u'Proximas : Contrôle Règles de gestion => Plafond Individu sur Antécédant:',
-                                                'message': u"L'assuré concerné a atteint le plafond individuel pour la \
-                                                pathologie : %s. Par conséquent, vos données ne pourront être \
-                                                validées. Pour plus d'informations, veuillez contactez \
-                                                l'administrateur..." % pathologie_id.libelle
-                                            }
-                                            }
-                        # CONTROLE DELAI D'ATTENTE ENTRE 2 PATHOLOGIES DE MEME NATURE
-                        now = datetime.now ()
-                        dernier_pathologie_pec_id = max(pathologie.pec_id for pathologie in pathologies_assure)
-                        dernier_prise_charge = self.search([
-                            ('id', '=', dernier_pathologie_pec_id)
-                        ])
-                        date_pec = fields.Datetime.from_string(dernier_prise_charge.date_saisie)
-                        nbre_jours_ecoules = int(now - date_pec)
-                        delai_attente = int(controle_affection.delai_attente)
-                        if 0 < delai_attente <= nbre_jours_ecoules:
-                            # Si contrôle strict pour le caractère bloquant du contrôle?
-                            if bool(controle_affection.controle_strict):
-                                raise ValidationError (_ (
-                                    u"Proximas : Contrôle Règles de Gestion: Délai d'Attente Pathologie:\n \
-                                     L'assuré concerné a déjà fait l'objet d'une prise en charge au cours de laquelle la \
-                                     pathologie : (%d)s a été diagnostiquée le : (%s). Par conséquent, il doit \
-                                     impérativement respecter un délai d'attente de : (%d) jours.\n \
-                                     Pour plus d'informations,veuillez contactez l'administrateur..."
-                                    ) % (pathologie_id, date_pec, delai_attente)
-                                )
-                            else:
-                                # Sinon, une simple alerte envoyée à l'utilisateur.
-                                return {'value': {},
-                                        'warning': {
-                                            'title': u'Contrôle Règles de Gestion ==> Délai d\'attente Pathologie:',
-                                            'message': u"L'assuré concerné a déjà fait l'objet d'une prise en charge au cours de laquelle la \
-                                                        pathologie : (%d)s a été diagnostiquée le : (%s). Par conséquent, il doit \
-                                                        impérativement respecter un délai d'attente de : (%d) jours.\n \
-                                                        Pour plus d'informations,veuillez contactez l'administrateur..."
-                                                       % (pathologie_id, date_pec, delai_attente)
-                                            }
-                                        }
-                if bool(prise_en_charge_famille):
-                    # pour chaque prise en charge de la famille (contrat), alors,
-                    for item in prise_en_charge_famille:
-                        details_pec = self.env['proximas.details.pec'].search([('pec_id', '=', item.id)])
-                        totaux_pathologie_famille = 0
-                        # on vérifie si elle est reliée à la pathologie (affection)
-                        pathologie_relie_pec_famille = self.env[
-                            'proximas_pathologie_proximas_prise_charge_rel'].search([
-                            ('proximas_pathologie_id', '=', pathologie_id),
-                            ('proximas_prise_charge_id', '=', item.id),
-                        ])
-                        # S'il y a des liens entre la prise en charge et la pathologie,
-                        if pathologie_relie_pec_famille:
-                            # dans ce cas, on récupère le montant total prise en charge (total_pc)
-                            totaux_pathologie_famille += sum(detail.total_pc for detail in details_pec) or 0
-                            # Sinon, on vérifie si le plafond individuel pour la pathologie est atteint ou pas
-                            if 0 < int(controle_affection.plafond_famille) <= int(totaux_pathologie_famille):
-                                # Si le plafond famille pour la pathologie est différent de 0 et est atteint ou dépassé,alors
-                                # on lève une exception sur la validation des données...
-                                if bool(controle_affection.controle_strict):
-                                    raise ValidationError(_(
-                                        u"Proximas : Contrôle Règles de gestion ==> Plafond Famille sur Antécédant:\n L'assuré concerné\
-                                         a atteint le plafond famille pour la pathologie : %s. Par conséquent, vos données \
-                                         ne pourront être validées. Pour plus d'informations, veuillez contactez \
-                                         l'administrateur..."
-                                        ) % pathologie_id.libelle
-                                    )
-                                else:
-                                    # Sinon, une simple alerte envoyée à l'utilisateur.
-                                    return {'value': {},
-                                            'warning': {
-                                                'title': u'Proximas : Contrôle Règles de gestion => Plafond Famille sur Antécédant:',
-                                                'message': u"L'assuré concerné a atteint le plafond famille pour la \
-                                                pathologie : %s. Par conséquent, vos données ne pourront être validées. \
-                                                Pour plus d'informations, veuillez contactez l'administrateur..."
-                                                % pathologie_id
-                                                }
-                                            }
+    # @api.one
+    # @api.onchange('pathologie_ids')
+    # def _check_pathologie_ids(self):
+    #     # CONTROLE ANTECEDANT POLICE
+    #     for pathologie in self.pathologie_ids:
+    #         pathologie_id = pathologie.id
+    #         controle_affection = self.env['proximas.controle.antecedent'].search([
+    #             ('police_id', '=', self.police_id.id), ('pathologie_id', '=', pathologie_id)
+    #         ])
+    #         if controle_affection:
+    #             # Si Le contrôle Antécédant est activé (renseigné), alors;
+    #             # selfherche l'ensemble des prises en charge de l'assuré
+    #             prise_en_charge_individu = self.env['proximas.prise.charge'].search([
+    #                 ('assure_id', '=', self.assure_id.id)
+    #             ])
+    #             # selfherche l'ensemble des prises en charge de la famille (contrat)
+    #             prise_en_charge_famille = self.env['proximas.prise.charge'].search([
+    #                 ('contrat_id', '=', self.contrat_id.id)
+    #             ])
+    #             if bool(prise_en_charge_individu):
+    #                 # pour chaque prise en charge de l'assuré, alors,
+    #                 for item in prise_en_charge_individu:
+    #                     details_pec = self.env['proximas.details.pec'].search([
+    #                         ('pec_id', '=', item.id),
+    #                     ])
+    #                     totaux_pathologie_assure = 0
+    #                     nombre_pec_assure = 0
+    #                     # on vérifie si elle est reliée à la pathologie (affection)
+    #                     pathologie_relie_pec_assure = self.env['proximas.pathologie.proximas.prise.charge.rel'].search(
+    #                         [
+    #                             ('proximas_pathologie_id', '=', pathologie_id),
+    #                             ('proximas_prise_charge_id', '=', item.id),
+    #                         ])
+    #                     pathologies_assure = []
+    #                     # S'il y a des liens entre la prise en charge et la pathologie,
+    #                     if pathologie_relie_pec_assure:
+    #                         # dans ce cas, on récupère le montant total prise en charge (total_pc) et on incrémente
+    #                         # le compteur pour le nombre de prises en charge
+    #                         pathologies_assure += pathologie_relie_pec_assure
+    #                         totaux_pathologie_assure += sum(detail.total_pc or 0 for detail in details_pec)
+    #                         nombre_pec_assure += 1
+    #                         # On vérifie ainsi, si le contrôle de nombre de prises en charge est atteint ou pas ?
+    #                         if 0 < int(controle_affection.nbre_pec) <= int(nombre_pec_assure):
+    #                             # Si le contrôle de nombre de prises en charge est différent de 0 et est atteint, alors
+    #                             # on lève une exception sur la validation des données...
+    #                             # On vérifie si le facteur du contrôle est bloquant ou pas ? si OUI alors,
+    #                             if bool(controle_affection.controle_strict):
+    #                                 raise ValidationError (_ (
+    #                                      u"Proximas :contrôle Règles de gestion ==> Nbre. Limite PEC Antécédant:\n L'assuré concerné\
+    #                                      a atteint le quota de prise en charge faisant apparaître cette pathologie : %s.\n \
+    #                                      Par conséquent, vos données ne pourront être validées.\n \
+    #                                      Pour plus d'informations, veuillez contactez l'administrateur..."
+    #                                     ) % pathologie_id.libelle
+    #                                 )
+    #                             else:
+    #                                 # Sinon, une simple alerte envoyée à l'utilisateur.
+    #                                 return {'value': {},
+    #                                         'warning': {
+    #                                             'title': u'Proximas :contrôle Règles de gestion ==> Nbre. Limite PEC Antécédant:',
+    #                                             'message': u"L'assuré concerné a atteint le quota de prise en charge \
+    #                                             faisant apparaître cette pathologie : %r.\n Par conséquent, vos données ne \
+    #                                             pourront être validées.\n Pour plus d'informations, veuillez contactez \
+    #                                             l'administrateur..." % pathologie_id.libelle
+    #                                         }
+    #                                         }
+    #                         # Sinon, on vérifie si le plafond individuel pour la pathologie est atteint ou pas
+    #                         elif 0 < int(controle_affection.plafond_individu) <= int(totaux_pathologie_assure):
+    #                             # Si le plafond individuel pour la pathologie est différent de 0 et est atteint ou dépassé,alors
+    #                             # on lève une exception sur la validation des données...
+    #                             # On vérifie si le facteur du contrôle est bloquant ou pas ? si OUI alors,
+    #                             if bool(controle_affection.controle_strict):
+    #                                 raise ValidationError (_ (
+    #                                     u"Proximas : Contrôle Règles de gestion - Plafond Individu sur Antécédant:\n \
+    #                                     L'assuré concerné atteint le plafond individuel pour la pathologie : %r. \
+    #                                     Par conséquent, vos données ne pourront être validées.Pour plus d'informations,\
+    #                                      veuillez contactez l'administrateur..."
+    #                                     ) % pathologie_id.libelle
+    #                                 )
+    #                             else:
+    #                                 # Sinon, une simple alerte envoyée à l'utilisateur.
+    #                                 return {'value': {},
+    #                                         'warning': {
+    #                                             'title': u'Proximas : Contrôle Règles de gestion => Plafond Individu sur Antécédant:',
+    #                                             'message': u"L'assuré concerné a atteint le plafond individuel pour la \
+    #                                             pathologie : %s. Par conséquent, vos données ne pourront être \
+    #                                             validées. Pour plus d'informations, veuillez contactez \
+    #                                             l'administrateur..." % pathologie_id.libelle
+    #                                         }
+    #                                         }
+    #                     # CONTROLE DELAI D'ATTENTE ENTRE 2 PATHOLOGIES DE MEME NATURE
+    #                     now = datetime.now ()
+    #                     dernier_pathologie_pec_id = max(pathologie.pec_id for pathologie in pathologies_assure)
+    #                     dernier_prise_charge = self.search([
+    #                         ('id', '=', dernier_pathologie_pec_id)
+    #                     ])
+    #                     date_pec = fields.Datetime.from_string(dernier_prise_charge.date_saisie)
+    #                     nbre_jours_ecoules = int(now - date_pec)
+    #                     delai_attente = int(controle_affection.delai_attente)
+    #                     if 0 < delai_attente <= nbre_jours_ecoules:
+    #                         # Si contrôle strict pour le caractère bloquant du contrôle?
+    #                         if bool(controle_affection.controle_strict):
+    #                             raise ValidationError (_ (
+    #                                 u"Proximas : Contrôle Règles de Gestion: Délai d'Attente Pathologie:\n \
+    #                                  L'assuré concerné a déjà fait l'objet d'une prise en charge au cours de laquelle la \
+    #                                  pathologie : (%d)s a été diagnostiquée le : (%s). Par conséquent, il doit \
+    #                                  impérativement respecter un délai d'attente de : (%d) jours.\n \
+    #                                  Pour plus d'informations,veuillez contactez l'administrateur..."
+    #                                 ) % (pathologie_id, date_pec, delai_attente)
+    #                             )
+    #                         else:
+    #                             # Sinon, une simple alerte envoyée à l'utilisateur.
+    #                             return {'value': {},
+    #                                     'warning': {
+    #                                         'title': u'Contrôle Règles de Gestion ==> Délai d\'attente Pathologie:',
+    #                                         'message': u"L'assuré concerné a déjà fait l'objet d'une prise en charge au cours de laquelle la \
+    #                                                     pathologie : (%d)s a été diagnostiquée le : (%s). Par conséquent, il doit \
+    #                                                     impérativement respecter un délai d'attente de : (%d) jours.\n \
+    #                                                     Pour plus d'informations,veuillez contactez l'administrateur..."
+    #                                                    % (pathologie_id, date_pec, delai_attente)
+    #                                         }
+    #                                     }
+    #             if bool(prise_en_charge_famille):
+    #                 # pour chaque prise en charge de la famille (contrat), alors,
+    #                 for item in prise_en_charge_famille:
+    #                     details_pec = self.env['proximas.details.pec'].search([('pec_id', '=', item.id)])
+    #                     totaux_pathologie_famille = 0
+    #                     # on vérifie si elle est reliée à la pathologie (affection)
+    #                     pathologie_relie_pec_famille = self.env[
+    #                         'proximas_pathologie_proximas_prise_charge_rel'].search([
+    #                         ('proximas_pathologie_id', '=', pathologie_id),
+    #                         ('proximas_prise_charge_id', '=', item.id),
+    #                     ])
+    #                     # S'il y a des liens entre la prise en charge et la pathologie,
+    #                     if pathologie_relie_pec_famille:
+    #                         # dans ce cas, on récupère le montant total prise en charge (total_pc)
+    #                         totaux_pathologie_famille += sum(detail.total_pc for detail in details_pec) or 0
+    #                         # Sinon, on vérifie si le plafond individuel pour la pathologie est atteint ou pas
+    #                         if 0 < int(controle_affection.plafond_famille) <= int(totaux_pathologie_famille):
+    #                             # Si le plafond famille pour la pathologie est différent de 0 et est atteint ou dépassé,alors
+    #                             # on lève une exception sur la validation des données...
+    #                             if bool(controle_affection.controle_strict):
+    #                                 raise ValidationError(_(
+    #                                     u"Proximas : Contrôle Règles de gestion ==> Plafond Famille sur Antécédant:\n L'assuré concerné\
+    #                                      a atteint le plafond famille pour la pathologie : %s. Par conséquent, vos données \
+    #                                      ne pourront être validées. Pour plus d'informations, veuillez contactez \
+    #                                      l'administrateur..."
+    #                                     ) % pathologie_id.libelle
+    #                                 )
+    #                             else:
+    #                                 # Sinon, une simple alerte envoyée à l'utilisateur.
+    #                                 return {'value': {},
+    #                                         'warning': {
+    #                                             'title': u'Proximas : Contrôle Règles de gestion => Plafond Famille sur Antécédant:',
+    #                                             'message': u"L'assuré concerné a atteint le plafond famille pour la \
+    #                                             pathologie : %s. Par conséquent, vos données ne pourront être validées. \
+    #                                             Pour plus d'informations, veuillez contactez l'administrateur..."
+    #                                             % pathologie_id
+    #                                             }
+    #                                         }
 
     @api.multi
     def _get_date_user(self):
@@ -1154,10 +1190,6 @@ class PriseEnCharge(models.Model):
             rec.user_prestataire = user.partner_id.name
             if rec.prestataire_cro == rec.user_prestataire:
                 rec.user_prise_charge = True
-
-    # @api.multi
-    # def action_expirer(self):
-    #     self.state = 'expire'
 
     @api.multi
     def _check_date_last_pec(self):
@@ -1215,7 +1247,6 @@ class PriseEnCharge(models.Model):
                 ) % (self.delai_pec, self.validite_pec)
             )
 
-
     @api.onchange('details_pec_phcie_ids', 'nbre_prescriptions', 'nbre_prescription_maxi')
     def _check_details_prescription(self):
         if 0 < int (self.nbre_prescription_maxi) < int(self.nbre_prescriptions):
@@ -1238,26 +1269,27 @@ class PriseEnCharge(models.Model):
                         }
             }
 
-    # @api.multi
     @api.constrains('details_pec_phcie_ids', 'nbre_prescriptions')
     def _validate_details_prescriptions(self):
-        if 0 < int(self.nbre_prescription_maxi) < int(self.nbre_prescriptions):
-            raise ValidationError(_(
-                u"Proximas : Contrôle de règles de Gestion => Nombre Maxi Prescriptions:\n \
-                Cette prise en charge ne peut contenir plus de : (%d) prescriptions. Par conséquent,\
-                vous devez en tenir compte pour pouvoir valider les données. \
-                Pour plus d'informations, veuillez contactez l'administrateur..."
-                ) % self.nbre_prescription_maxi
-            )
-        elif 0 < int(self.mt_plafond_prescription) < int(self.totaux_phcie) and not bool(self.leve_plafond_prescription):
-            raise ValidationError(_(
-                u"Proximas : Contrôle de règles de Gestion => Plafond Prescriptions : :\n \
-                Cette prise en charge ne peut excéder le plafond pour les prescriptions: (%d).  \
-                Par conséquent, vous devez en tenir compte pour pouvoir valider les données. \
-                Pour plus d'informations, veuillez contactez l'administrateur..."
+        for rec in self:
+            if 0 < int(rec.nbre_prescription_maxi) < int(rec.nbre_prescriptions):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Nombre Maxi Prescriptions:\n \
+                    Cette prise en charge ne peut contenir plus de : (%d) prescriptions. Par conséquent,\
+                    vous devez en tenir compte pour pouvoir valider les données. \
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % rec.nbre_prescription_maxi
+                                       )
+            elif 0 < int(rec.mt_plafond_prescription) < int(rec.totaux_phcie) and not bool (
+                    rec.leve_plafond_prescription):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Plafond Prescriptions : :\n \
+                    Cette prise en charge ne peut excéder le plafond pour les prescriptions: (%d).  \
+                    Par conséquent, vous devez en tenir compte pour pouvoir valider les données. \
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
 
-                ) % self.mt_plafond_prescription
-            )
+                ) % rec.mt_plafond_prescription
+                )
 
 
     # @api.one
@@ -1293,140 +1325,37 @@ class PriseEnCharge(models.Model):
 
     @api.constrains('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',)
     def _validate_ticket_exigible_and_encaissement(self):
-        # 1. Controle cas de CRO
-        if self.state == 'cours' and 0 < int(self.ticket_exigible_cro) > int(self.mt_encaisse_cro):
-            raise ValidationError(_(
-                u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
-                Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
-                Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
-                vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
-                veuillez contactez l'administrateur..."
-                ) % (self.ticket_exigible_cro, self.mt_encaisse_cro)
-            )
-        # 2. Controle cas de CRS
-        if self.state == 'oriente' and 0 < int (self.ticket_exigible_crs) > int (self.mt_encaisse_crs):
-            raise ValidationError (_ (
-                u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
-                Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
-                Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
-                vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
-                veuillez contactez l'administrateur..."
-                ) % (self.ticket_exigible_crs, self.mt_encaisse_crs)
-            )
-        # 3. Controle cas de PHARMACIE
-        if self.state == 'dispense' and 0 < int(self.ticket_exigible_phcie) > int(self.mt_encaisse_phcie):
-            raise ValidationError(_(
-                u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
-                Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
-                Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
-                vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
-                veuillez contactez l'administrateur..."
-                ) % (self.ticket_exigible_phcie, self.mt_encaisse_phcie)
-            )
-
-    @api.one
-    @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',)
-    def _stuff_note(self):
-        note = u"Ajout d'une prestation par %s." % self.user_id.name
-        stuff_to_notes = str(note)
-        self.note = stuff_to_notes
-
-    @api.one
-    @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
-                 'nbre_prestations_fournies')
-    @api.onchange('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
-                  'nbre_prestations_fournies')
-    def _compute_details_pec(self):
-        self.ensure_one()
-        details_pec_assure = self.env['proximas.details.pec'].search(
-            [
-                ('assure_id', '=', self.assure_id.id),
-                ('code_id', '=', self.code_id)
-            ]
-        )
-        details_pec_contrat = self.env['proximas.details.pec'].search([
-            # ('adherent_id', '=', self.adherent.id),
-            ('contrat_id', '=', self.contrat_id.id),
-            ('date_execution', '!=', None),
-        ])
-        nbre_details_pec_contrat = self.env['proximas.details.pec'].search_count([
-            # ('adherent_id', '=', self.adherent.id),
-            ('contrat_id', '=', self.contrat_id.id),
-            ('date_execution', '!=', None),
-        ])
-        nbre_details_pec_assure = self.env['proximas.details.pec'].search_count([
-            ('assure_id', '=', self.assure_id.id),
-            ('prestation_id', '!=', None),
-            ('date_execution', '!=', None),
-        ])
-        totaux_details_pec = self.env['proximas.details.pec'].search([('pec_id', '=', self.id)])
-        totaux_details_pec_cro = self.env['proximas.details.pec'].search([
-            ('pec_id', '=', self.id),
-            ('prestataire', '=', self.prestataire_id.id),
-            ('date_execution', '!=', None),
-        ])
-        totaux_details_pec_crs = self.env['proximas.details.pec'].search([
-            ('pec_id', '=', self.id),
-            ('prestataire', '=', self.prestataire_crs_id.id),
-            ('date_execution', '!=', None),
-        ])
-        totaux_details_pec_phcie = self.env['proximas.details.pec'].search([
-            ('pec_id', '=', self.id),
-            ('prestataire', '=', self.prestataire_phcie_id.id),
-            ('produit_phcie_id', '!=', None),
-            ('date_execution', '!=', None),
-
-
-        ])
-
-        if bool(details_pec_assure):
-            self.nbre_actes_assure = int(nbre_details_pec_assure)
-            self.nbre_actes_contrat = int(nbre_details_pec_contrat)
-            self.sous_totaux_assure = sum(item.total_pc for item in details_pec_assure) or 0
-            self.sous_totaux_contrat = sum(item.total_pc for item in details_pec_contrat) or 0
-            self.sous_totaux_pec = sum(item.total_pc for item in totaux_details_pec) or 0
-            self.sous_totaux_npc_pec = sum(item.total_npc for item in totaux_details_pec)
-            self.part_sam_pec = sum(item.net_tiers_payeur for item in totaux_details_pec)
-            self.ticket_moderateur_pec = sum(item.ticket_moderateur for item in totaux_details_pec)
-            self.net_prestataire_pec = sum(item.net_prestataire for item in totaux_details_pec)
-            self.net_remboursement_pec = sum(item.mt_remboursement for item in totaux_details_pec)
-            self.paye_assure_pec = sum(item.mt_paye_assure for item in totaux_details_pec)
-            self.niveau_sinistre_assure = (self.sous_totaux_assure * 100 / self.plafond_individu) \
-                if bool(self.plafond_individu) else 0
-            self.niveau_sinistre_contrat = (self.sous_totaux_contrat * 100 / self.plafond_famille) \
-                if bool(self.plafond_famille) else 0
-            # self.totaux_contrat = sum(item.total_pc for item in details_pec_contrat)
-            # Calculs des S/Totaux (CRO-CRS-Phcie)
-            # 1. S/Totaux
-            self.mt_totaux_cro = sum(item.total_pc for item in totaux_details_pec_cro) or 0
-            self.mt_totaux_crs = sum(item.total_pc for item in totaux_details_pec_crs) or 0
-            self.mt_totaux_phcie = sum (item.total_pc for item in totaux_details_pec_phcie) or 0
-            # 2. Part SAM
-            self.part_sam_cro = sum(item.net_tiers_payeur for item in totaux_details_pec_cro) or 0 
-            self.part_sam_crs = sum(item.net_tiers_payeur for item in totaux_details_pec_crs) or 0
-            self.part_sam_phcie = sum(item.net_tiers_payeur for item in totaux_details_pec_phcie) or 0
-            # 3. Ticket Modérateur
-            self.ticket_moderateur_cro = sum(item.ticket_moderateur for item in totaux_details_pec_cro) or 0
-            self.ticket_moderateur_crs = sum(item.ticket_moderateur for item in totaux_details_pec_crs) or 0
-            self.ticket_moderateur_phcie = sum(item.ticket_moderateur for item in totaux_details_pec_phcie) or 0
-            # 4. Ticket Exigible
-            self.ticket_exigible_cro = sum(
-                item.ticket_moderateur for item in totaux_details_pec_cro if bool(item.ticket_exigible) or 0
-            )
-            self.ticket_exigible_crs = sum(
-                item.ticket_moderateur for item in totaux_details_pec_crs if bool(item.ticket_exigible) or 0
-            )
-            self.ticket_exigible_phcie = sum(
-                item.ticket_moderateur for item in totaux_details_pec_phcie if bool(item.ticket_exigible) or 0
-            )
-            # 5. Net à Payer
-            self.net_prestataire_cro = sum(item.net_prestataire for item in totaux_details_pec_cro) or 0
-            self.net_prestataire_crs = sum(item.net_prestataire for item in totaux_details_pec_crs) or 0
-            self.net_prestataire_phcie = sum(item.net_prestataire for item in totaux_details_pec_phcie) or 0
-            # 6. Totaux Encaissement
-            # self.mt_encaisse_cro = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_cro)
-            # self.mt_encaisse_crs = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_crs)
-            # self.mt_encaisse_phcie = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_phcie)
+        for rec in self:
+            # 1. Controle cas de CRO
+            if rec.state == 'cours' and 0 < int(rec.ticket_exigible_cro) > int(rec.mt_encaisse_cro):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
+                    Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
+                    Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
+                    vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
+                    veuillez contactez l'administrateur..."
+                ) % (rec.ticket_exigible_cro, rec.mt_encaisse_cro)
+                                       )
+            # 2. Controle cas de CRS
+            if rec.state == 'oriente' and 0 < int(rec.ticket_exigible_crs) > int(rec.mt_encaisse_crs):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
+                    Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
+                    Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
+                    vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
+                    veuillez contactez l'administrateur..."
+                ) % (rec.ticket_exigible_crs, rec.mt_encaisse_crs)
+                                       )
+            # 3. Controle cas de PHARMACIE
+            if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie) > int(rec.mt_encaisse_phcie):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
+                    Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
+                    Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
+                    vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
+                    veuillez contactez l'administrateur..."
+                ) % (rec.ticket_exigible_phcie, rec.mt_encaisse_phcie)
+                                       )
 
     @api.multi
     def name_get(self):
@@ -1461,8 +1390,6 @@ class PriseEnCharge(models.Model):
         self.ensure_one()
         self.code_pc = self.code_pec
 
-
-
     @api.constrains('code_pec')
     def validate_code_pec(self):
         check_code_pec = self.search_count([('code_pec', '=', self.code_pec)])
@@ -1474,7 +1401,6 @@ class PriseEnCharge(models.Model):
                 Veuillez contactez les administrateurs pour plus détails..."
                 ) % self.code_pec
             )
-
 
 class PecWizard(models.TransientModel):
     _name = 'proximas.pec.wizard'
@@ -3775,13 +3701,12 @@ class DetailsPec(models.Model):
     #                     )
 
     def _compute_net_a_payer(self):
-        for rec in self:
-            if rec.pec_id:
-                rec.net_a_payer = rec.net_prestataire
-            elif rec.rfm_id:
-                rec.net_a_payer = rec.mt_remboursement
-            else:
-                rec.net_a_payer = 0
+        if self.pec_id:
+            self.net_a_payer = self.net_prestataire
+        elif self.rfm_id:
+            self.net_a_payer = self.mt_remboursement
+        else:
+            self.net_a_payer = 0
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
@@ -3833,7 +3758,7 @@ class DetailsPec(models.Model):
             # Récupérer le coût unitaire
             if bool(self.cout_unit):
                 self.cout_unite = self.cout_unit
-            elif bool (self.cout_unitaire):
+            elif bool(self.cout_unitaire):
                 self.cout_unite = self.cout_unitaire
             else:
                 self.cout_unite = 0
