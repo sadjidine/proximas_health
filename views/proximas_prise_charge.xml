@@ -530,7 +530,7 @@
                                                         <field name="assure_id"
                                                            options='{"no_open": True, "no_create": True}'
                                                            readonly="1"/>
-                                                        <field name="pool_medical_id" string="Médecin Prescripteur"
+                                                        <field name="pool_medical_id" string="Médecin/Praticien"
                                                                options='{"no_open": True, "no_create": True}'
                                                                ontext="{'default_pool_medical_id':pool_medical_id}"
                                                                domain="[('prestataire_id', '=', prestataire_id)]"
@@ -578,8 +578,8 @@
                                                                class="text-primary"
                                                                string="Part SAM"/>
                                                         <field name="net_prestataire"
-                                                               class="bg-info h5"
-                                                               string="Net à devoir (SAM)"/>
+                                                               class="bg-primary"
+                                                               string="MONTANT NET DÛ =>"/>
                                                     </group>
                                                     <group invisible="1">
                                                         <field name="remise_prestation"/>
