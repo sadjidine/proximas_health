@@ -1426,7 +1426,7 @@ class Contrat(models.Model):
                     self.date_fin_prevue = date_debut + timedelta(days=int (self.validite_police))
 
     @api.one
-    @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
+    @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_phcie_ids')
     def _compute_sinistres_contrat(self):
         # for rec in self:
         if self.details_pec_ids:

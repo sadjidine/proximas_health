@@ -604,7 +604,7 @@ class Assure (models.Model):
             self.jours_activation = int (delta.days)
 
     @api.one
-    @api.depends('prise_charge_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
+    @api.depends('prise_charge_ids', 'details_pec_ids', 'details_phcie_ids')
     def _compute_sinistres_assure(self):
         if self.details_pec_ids:
             date_debut = fields.Date.from_string (self.date_debut_assure)
@@ -629,8 +629,8 @@ class Assure (models.Model):
                 date_execution = fields.Date.from_string (detail.date_execution)
                 if date_debut <= date_execution <= date_fin:
                     details_phcie_encours.append (detail)
-            self.nbre_pec_assure_encours = len (prise_en_charge_encours)
-            self.nbre_actes_assure_encours = len (details_actes_encours)
+            self.nbre_pec_assure_encours = len(prise_en_charge_encours)
+            self.nbre_actes_assure_encours = len(details_actes_encours)
             self.mt_sinistres_assure_encours = sum (item.sous_totaux_pec for item in prise_en_charge_encours)
             self.mt_sinistres_actes_assure_encours = sum (item.total_pc for item in details_actes_encours)
             self.nbre_phcie_assure_encours = len (details_phcie_encours)
