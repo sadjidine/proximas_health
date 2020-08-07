@@ -268,6 +268,12 @@
                                 <field name="nbre_actes_contrat_encours" widget="statinfo" string="Actes"/>
                             </button>
                             <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                  type="action"
+                                  icon="fa-list"
+                                  context="{'search_default_contrat_id': id}">
+                              <field name="mt_sinistres_actes_contrat_encours" widget="statinfo" string="Actes"/>
+                            </button>
+                            <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                     type="action"
                                     icon="fa-calendar"
                                     context="{'search_default_contrat_id: id}">

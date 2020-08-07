@@ -478,13 +478,65 @@
             <form string="Assure" create="0">
                 <!--<header />-->
                 <header>
-                    <button name="%(action_report_visa_sante_card)d" string="CARTE VISA SANTE"
+                    <!--<button name="%(action_report_visa_sante_card)d" string="CARTE VISA SANTE"
                             type="action" icon="fa-file-o" class="oe_highlight"
                             help="Impression de la carte d'accès aux soins (Carte Visa Santé)."
-                            attrs="{'invisible': [('state','!=','actif')]}"/>
+                            attrs="{'invisible': [('state','!=','actif')]}"/>-->
                 </header>
                 <sheet>
-                    <div class="oe_right oe_button_box" name="buttons" />
+                    <div class="oe_right oe_button_box" name="buttons">
+                        <button name="proximas_medical.proximas_details_pec_encours_action" class="oe_stat_button"
+                                icon="fa-edit"
+                                type="action"
+                                context="{'search_default_assure_id': id}">
+                            <field name="nbre_pec_assure_encours" widget="statinfo" string="Nbre.PEC" />
+                        </button>
+                        <button name="proximas_medical.proximas_details_pec_encours_action" class="oe_stat_button"
+                              icon="fa-flask"
+                              type="action"
+                              context="{'search_default_assure_id': id}">
+                          <field name="nbre_rfm_contrat_encours" widget="statinfo" string="Nbre. Remb." />
+                        </button>
+                        <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                type="action"
+                                icon="fa-hospital-o"
+                                context="{'search_default_assure_id': id}">
+                            <field name="mt_sinistres_assure_encours" widget="statinfo"
+                                   options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'
+                                   string="Totaux Sinistres." />
+                        </button>
+                        <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                type="action"
+                                icon="fa-calendar"
+                                context="{'search_default_assure_id: id}">
+                            <field name="nbre_phcie_assure_encours" widget="statinfo" string="Dispensations"/>
+                        </button>
+                        <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                type="action"
+                                icon="fa-cart-plus"
+                                context="{'search_default_assure_id': id}">
+                            <field name="mt_sinistres_phcie_assure_encours" widget="statinfo" string="Totaux Phcie"/>
+                        </button>
+                        <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                type="action"
+                                icon="fa-list"
+                                context="{'search_default_assure_id': id}">
+                            <field name="nbre_actes_assure_encours" widget="statinfo" string="Nbre. Actes"/>
+                        </button>
+                        <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                              type="action"
+                              icon="fa-list"
+                              context="{'search_default_assure_id': id}">
+                          <field name="mt_sinistres_actes_assure_encours" widget="statinfo" string="Totaux Actes"/>
+                        </button>
+                        <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
+                                type="action"
+                                icon="fa-briefcase"
+                                context="{'search_default_assure_id': id}">
+                            <field name="taux_sinistre_plafond_assure"
+                                   widget="percentpie" string="Plafond" />
+                        </button>
+                    </div>
                     <field name="image"
                            widget='image'
                            class="oe_left oe_kanban_avatar thumbnail"
@@ -527,10 +579,12 @@
                                <field name="contrat_id" readonly="1"/>
                                <field name="num_contrat"/>
                                <field name="tranche_age"/>
+                               <field name="date_debut_assure"/>
+                               <field name="date_fin_prevue_assure"/>
                                <!--<field name="compteur_maj_assure" readonly="1"/>-->
                                 <!--<field name="date_maj_assure" readonly="1"/>-->
                                <!--<field name="delai_carence"/>
-                               <field name="jours_activation_assure"/>
+                               <field  name="jours_activation_assure"/>
                                <field name="sous_totaux_assure"/>
                                <field name="nbre_actes_assure"/>
                                <field name="sous_totaux_contrat"/>-->

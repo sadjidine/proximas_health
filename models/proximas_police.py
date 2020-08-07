@@ -743,7 +743,6 @@ class Contrat(models.Model):
     date_fin_prevue = fields.Date(
         string="Date Fin Contrat",
         compute='_compute_debut_fin_contrat',
-        store=True,
         help="Date de fin prévue du contrat de couverture en rapport avec le délai de validité de la police."
     )
     date_debut_contrat = fields.Date(
@@ -1219,12 +1218,16 @@ class Contrat(models.Model):
         comodel_name="proximas.details.pec",
         inverse_name="contrat_id",
         string="Détails PEC",
+        domain=[
+            ('date_execution', '!=', None),
+        ]
     )
     details_actes_ids = fields.One2many (
         comodel_name="proximas.details.pec",
         inverse_name="contrat_id",
         string="Détails PEC",
         domain=[
+            ('date_execution', '!=', None),
             ('produit_phcie_id', '=', None),
         ]
     )
@@ -1233,6 +1236,7 @@ class Contrat(models.Model):
         inverse_name="contrat_id",
         string="Détails PEC",
         domain=[
+            ('date_execution', '!=', None),
             ('produit_phcie_id', '!=', None),
         ]
     )
@@ -1326,6 +1330,12 @@ class Contrat(models.Model):
         default=0,
         help="Nombre d'actes médicaux pour l'exercice en cours..."
     )
+    mt_sinistres_actes_contrat_encours = fields.Float(
+        string="Totaux Actes Famille",
+        digits=(9, 0),
+        compute='_compute_sinistres_contrat',
+        default=0,
+    )
     nbre_phcie_contrat_encours = fields.Integer(
         string="Nbre. Prescription(s)/Famille",
         compute='_compute_sinistres_contrat',
@@ -1344,181 +1354,187 @@ class Contrat(models.Model):
         compute='_compute_sinistres_contrat',
         default=0,
     )
-    duree_activation = fields.Char (
+    duree_activation = fields.Char(
         string="Durée Activation (Details)",
         compute='_get_duree_activation',
     )
 
-    @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_phcie_ids', 'plafond_famille')
-    def _compute_sinistres_contrat(self):
-        for rec in self:
-            if rec.details_pec_ids:
-                date_debut = rec.date_debut_contrat
-                date_fin = rec.date_fin_prevue
-                prise_en_charge_encours = []
-                rfm_encours = []
-                details_pec_encours = []
-                details_actes_encours = []
-                details_phcie_encours = []
-                for detail in rec.prise_charge_ids:
-                    if date_debut <= detail.date_saisie <= date_fin:
-                        prise_en_charge_encours.append(detail)
-                for detail in rec.rfm_ids:
-                    if date_debut <= detail.date_saisie <= date_fin:
-                        rfm_encours.append(detail)
-                for detail in rec.details_pec_ids:
-                    if date_debut <= detail.date_execution <= date_fin:
-                        details_pec_encours.append(detail)
-                for detail in rec.details_actes_ids:
-                    if date_debut <= detail.date_execution <= date_fin:
-                        details_actes_encours.append(detail)
-                for detail in rec.details_phcie_ids:
-                    if date_debut <= detail.date_execution <= date_fin:
-                        details_phcie_encours.append(detail)
-                rec.nbre_pec_contrat_encours = len(prise_en_charge_encours)
-                rec.nbre_rfm_contrat_encours = len(rfm_encours)
-                rec.nbre_actes_contrat_encours = len(details_actes_encours)
-                # rec.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_actes_encours)
-                rec.mt_sinistres_contrat_encours = sum(item.sous_totaux_pec for item in prise_en_charge_encours)
-                rec.nbre_phcie_contrat_encours = len (details_phcie_encours)
-                rec.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
-            if rec.plafond_famille:
-                rec.taux_sinistre_plafond_famille = rec.mt_sinistres_contrat_encours * 100 / rec.plafond_famille
-
-    @api.depends('date_activation', 'date_resiliation',  'validite_contrat', 'validite_contrat_police', 'jours_contrat',
-                 'mode_controle_plafond')
+    @api.one
+    # @api.depends('date_activation', 'date_resiliation',  'validite_contrat', 'validite_contrat_police', 'jours_contrat',
+    #              'mode_controle_plafond')
     def _compute_debut_fin_contrat(self):
+        now = fields.Datetime.from_string (fields.Date.today ())
+        activation_contrat = fields.Date.from_string(self.date_activation)
+        date_resiliation = fields.Date.from_string(self.date_resiliation)
+        validite_contrat = int (self.validite_contrat)
+        validite_police = int (self.validite_contrat_police)
+        if validite_contrat:
+            nbre_renouvellement = self.jours_contrat / validite_contrat
+            self.nbre_renouvellement_contrat = nbre_renouvellement
+        elif validite_police:
+            nbre_renouvellement = self.jours_contrat / validite_police
+            self.nbre_renouvellement_contrat = nbre_renouvellement
+        # 1. MODE DE CONTROLE PAR EXERCICE
+        if self.mode_controle_plafond in ['exercice']:
+            exercice = self.env['proximas.exercice'].search ([
+                ('res_company_id', '=', self.structure_id.id),
+                ('en_cours', '=', True),
+            ])
+            if exercice and len (exercice) == 1:
+                date_debut = fields.Date.from_string (exercice.date_debut)
+                date_fin = fields.Date.from_string (exercice.date_fin)
+                if date_resiliation:
+                    self.date_debut_contrat = activation_contrat
+                    self.date_fin_prevue = date_resiliation
+                elif activation_contrat > date_debut:
+                    self.date_debut_contrat = activation_contrat
+                    self.date_fin_prevue = date_fin
+                else:
+                    self.date_debut_contrat = date_debut
+                    self.date_fin_prevue = date_fin
+            else:
+                raise UserError (
+                    '''
+                         Proximaas - Contrôle des règles de Gestion :\n
+                         Le mode de contrôle défini pour le plafond famille (contrat)\
+                         est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
+                         en cours. Pour plus d'informations, veuillez contactez l'administrateur...
+                     '''
+                )
+        # 2. MODE DE CONTROLE PAR CONTRAT
+        elif self.mode_controle_plafond in ['contrat']:
+            if date_resiliation:
+                self.date_debut_contrat = activation_contrat
+                self.date_fin_prevue = date_resiliation
+            elif self.nbre_renouvellement_contrat >= 1:
+                if validite_contrat:
+                    self.date_debut_contrat = activation_contrat + timedelta (days=int (self.validite_contrat))
+                    date_debut = fields.Date.from_string(self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta (days=int (self.validite_contrat))
+                elif validite_police:
+                    self.date_debut_contrat = activation_contrat + timedelta (days=int (self.validite_police))
+                    date_debut = fields.Date.from_string (self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta (days=int (self.validite_police))
+            else:
+                if validite_contrat:
+                    self.date_debut_contrat = activation_contrat
+                    date_debut = fields.Date.from_string (self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta (days=int (self.validite_contrat))
+                elif validite_police:
+                    self.date_debut_contrat = activation_contrat
+                    date_debut = fields.Date.from_string (self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta(days=int (self.validite_police))
+
+    @api.one
+    # @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
+    def _compute_sinistres_contrat(self):
+        # for rec in self:
+        if self.details_pec_ids:
+            date_debut = fields.Date.from_string(self.date_debut_contrat)
+            date_fin = fields.Date.from_string(self.date_fin_prevue)
+            prise_en_charge_encours = []
+            rfm_encours = []
+            details_pec_encours = []
+            details_actes_encours = []
+            details_phcie_encours = []
+            for detail in self.prise_charge_ids:
+                date_saisie = fields.Date.from_string(detail.date_saisie)
+                if date_debut <= date_saisie <= date_fin:
+                    prise_en_charge_encours.append(detail)
+            for detail in self.rfm_ids:
+                date_saisie = fields.Date.from_string(detail.date_saisie)
+                if date_debut <= date_saisie <= date_fin:
+                    rfm_encours.append(detail)
+            for detail in self.details_pec_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_pec_encours.append (detail)
+            for detail in self.details_actes_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_actes_encours.append (detail)
+            for detail in self.details_phcie_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_phcie_encours.append (detail)
+            self.nbre_pec_contrat_encours = len(prise_en_charge_encours)
+            self.nbre_rfm_contrat_encours = len(rfm_encours)
+            self.nbre_actes_contrat_encours = len(details_actes_encours)
+            self.mt_sinistres_contrat_encours = sum(item.sous_totaux_pec for item in prise_en_charge_encours)
+            self.mt_sinistres_actes_contrat_encours = sum(item.total_pc for item in details_actes_encours)
+            self.nbre_phcie_contrat_encours = len(details_phcie_encours)
+            self.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
+        if self.plafond_famille:
+            self.taux_sinistre_plafond_famille = self.mt_sinistres_contrat_encours * 100 / self.plafond_famille
+        
+
+    # NIVEAU CONSO COURANT
+    # @api.multi
+    @api.depends('adherent_id', 'mode_controle_plafond')
+    def _sinistre_details_pec(self):
         for rec in self:
-            now = fields.Datetime.from_string (fields.Date.today())
-            activation_contrat = fields.Date.from_string(rec.date_activation)
-            date_resiliation = fields.Date.from_string(rec.date_resiliation)
-            validite_contrat = int(rec.validite_contrat)
-            validite_police = int(rec.validite_contrat_police)
-            if validite_contrat:
-                nbre_renouvellement = rec.jours_contrat / validite_contrat
-                rec.nbre_renouvellement_contrat = nbre_renouvellement
-            elif validite_police:
-                nbre_renouvellement = rec.jours_contrat / validite_police
-                rec.nbre_renouvellement_contrat = nbre_renouvellement
+            # CALCULS DE DETAILS SINISTRES
             # 1. MODE DE CONTROLE PAR EXERCICE
-            if rec.mode_controle_plafond in ['exercice']:
-                exercice = self.env['proximas.exercice'].search([
+            contrat_id = rec.id
+            plafond_famille = rec.plafond_famille
+            if bool (rec.mode_controle_plafond == 'exercice'):
+                exo = self.env['proximas.exercice'].search([
                     ('res_company_id', '=', rec.structure_id.id),
                     ('en_cours', '=', True),
                 ])
-                if exercice and len(exercice) == 1:
-                    date_debut = fields.Date.from_string(exercice.date_debut)
-                    date_fin = fields.Date.from_string(exercice.date_fin)
-                    if date_resiliation:
-                        rec.date_debut_contrat = activation_contrat
-                        rec.date_fin_prevue = date_resiliation
-                    elif activation_contrat > date_debut:
-                        rec.date_debut_contrat = activation_contrat
-                        rec.date_fin_prevue = date_fin
-                    else:
-                        rec.date_debut_contrat = date_debut
-                        rec.date_fin_prevue = date_fin
-                else:
-                    raise UserError(
-                        '''
-                             Proximaas - Contrôle des règles de Gestion :\n
-                             Le mode de contrôle défini pour le plafond famille (contrat)\
-                             est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
-                             en cours. Pour plus d'informations, veuillez contactez l'administrateur...
-                         '''
+                if bool (exo) and len (exo) != 1:
+                    return {'value': {},
+                            'warning': {
+                                'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
+                                'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
+                                 est l'Exercice. Cependant, le système a détecté plus d'un exercice\
+                                 en cours. Pour plus d'informations, veuillez contactez l'administrateur..."
+                            }
+                            }
+                elif bool (exo) and len (exo) == 1:
+                    details_pec_exo_encours = self.env['proximas.details.pec'].search (
+                        [
+                            ('contrat_id', '=', contrat_id),
+                            ('date_execution', '!=', None),
+                            ('exo_name', '=', exo.name)
+                        ]
                     )
-            # 2. MODE DE CONTROLE PAR CONTRAT
-            elif rec.mode_controle_plafond in ['contrat']:
-                if date_resiliation:
-                    rec.date_debut_contrat = activation_contrat
-                    rec.date_fin_prevue = date_resiliation
-                elif rec.nbre_renouvellement_contrat >= 1:
-                    if validite_contrat:
-                        rec.date_debut_contrat = activation_contrat + timedelta(days=int(rec.validite_contrat))
-                        date_debut = fields.Date.from_string(rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta(days=int(rec.validite_contrat))
-                    elif validite_police:
-                        rec.date_debut_contrat = activation_contrat + timedelta(days=int(rec.validite_police))
-                        date_debut = fields.Date.from_string(rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta(days=int(rec.validite_police))
+                    actes_exo_encours = self.env['proximas.details.pec'].search_count (
+                        [
+                            ('contrat_id', '=', contrat_id),
+                            ('date_execution', '!=', None),
+                            ('produit_phcie_id', '=', None),
+                            ('exo_name', '=', exo.name)
+                        ]
+                    )
+                    phcie_exo_encours = self.env['proximas.details.pec'].search_count (
+                        [
+                            ('contrat_id', '=', contrat_id),
+                            ('date_execution', '!=', None),
+                            ('produit_phcie_id', '!=', None),
+                            ('exo_name', '=', exo.name)
+                        ]
+                    )
+                    if bool (details_pec_exo_encours):
+                        rec.mt_sinistre_encours = sum (item.total_pc for item in details_pec_exo_encours) or 0
+                        if bool (actes_exo_encours):
+                            rec.nbre_acte_encours = int (actes_exo_encours)
+                        if bool (phcie_exo_encours):
+                            rec.nbre_phcie_encours = int (phcie_exo_encours)
+                        if bool (rec.plafond_famille):
+                            rec.taux_sinistre_plafond_famille = rec.mt_sinistre_encours * 100 / plafond_famille
                 else:
-                    if validite_contrat:
-                        rec.date_debut_contrat = activation_contrat
-                        date_debut = fields.Date.from_string(rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta(days=int(rec.validite_contrat))
-                    elif validite_police:
-                        rec.date_debut_contrat = activation_contrat
-                        date_debut = fields.Date.from_string(rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta(days=int(rec.validite_police))
-
-
-        # NIVEAU CONSO COURANT
-        # @api.multi
-        @api.depends('adherent_id', 'mode_controle_plafond')
-        def _sinistre_details_pec(self):
-            for rec in self:
-                # CALCULS DE DETAILS SINISTRES
-                # 1. MODE DE CONTROLE PAR EXERCICE
-                contrat_id = rec.id
-                plafond_famille = rec.plafond_famille
-                if bool (rec.mode_controle_plafond == 'exercice'):
-                    exo = self.env['proximas.exercice'].search([
-                        ('res_company_id', '=', rec.structure_id.id),
-                        ('en_cours', '=', True),
-                    ])
-                    if bool (exo) and len (exo) != 1:
-                        return {'value': {},
-                                'warning': {
-                                    'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
-                                    'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
-                                     est l'Exercice. Cependant, le système a détecté plus d'un exercice\
-                                     en cours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                                }
-                                }
-                    elif bool (exo) and len (exo) == 1:
-                        details_pec_exo_encours = self.env['proximas.details.pec'].search (
-                            [
-                                ('contrat_id', '=', contrat_id),
-                                ('date_execution', '!=', None),
-                                ('exo_name', '=', exo.name)
-                            ]
-                        )
-                        actes_exo_encours = self.env['proximas.details.pec'].search_count (
-                            [
-                                ('contrat_id', '=', contrat_id),
-                                ('date_execution', '!=', None),
-                                ('produit_phcie_id', '=', None),
-                                ('exo_name', '=', exo.name)
-                            ]
-                        )
-                        phcie_exo_encours = self.env['proximas.details.pec'].search_count (
-                            [
-                                ('contrat_id', '=', contrat_id),
-                                ('date_execution', '!=', None),
-                                ('produit_phcie_id', '!=', None),
-                                ('exo_name', '=', exo.name)
-                            ]
-                        )
-                        if bool (details_pec_exo_encours):
-                            rec.mt_sinistre_encours = sum (item.total_pc for item in details_pec_exo_encours) or 0
-                            if bool (actes_exo_encours):
-                                rec.nbre_acte_encours = int (actes_exo_encours)
-                            if bool (phcie_exo_encours):
-                                rec.nbre_phcie_encours = int (phcie_exo_encours)
-                            if bool (rec.plafond_famille):
-                                rec.taux_sinistre_plafond_famille = rec.mt_sinistre_encours * 100 / plafond_famille
-                    else:
-                        return {'value': {},
-                                'warning': {
-                                    'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
-                                    'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
-                                     est l'Exercice. Cependant, le système n'a pu obtenir aucun exercice\
-                                     en cours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                                }
-                                }
-                # 2. MODE DE CONTROLE PAR CONTRAT
-                elif bool (rec.mode_controle_plafond == 'contrat'):
-                    pass
+                    return {'value': {},
+                            'warning': {
+                                'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
+                                'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
+                                 est l'Exercice. Cependant, le système n'a pu obtenir aucun exercice\
+                                 en cours. Pour plus d'informations, veuillez contactez l'administrateur..."
+                            }
+                            }
+            # 2. MODE DE CONTROLE PAR CONTRAT
+            elif bool (rec.mode_controle_plafond == 'contrat'):
+                pass
 
     @api.multi
     def _get_assure(self):
@@ -1526,19 +1542,18 @@ class Contrat(models.Model):
             assure = self.env['proximas.assure'].search([('code_id', 'ilike', self.code_id)])
             rec.assure_id = assure.id
 
-    @api.depends ('date_activation', 'date_inscription')
+    @api.depends('date_activation', 'date_inscription')
     def _get_duree_activation(self):
         now = datetime.now()
-        for rec in self:
-            if bool(rec.date_activation):
-                activation = fields.Datetime.from_string (rec.date_activation)
-                delta = relativedelta (now, activation)
-                annees_mois_jours = '%s %s - %s %s - %s %s' % (
-                    delta.years, _ ('an(s)'),
-                    delta.months, _ ('mois'),
-                    delta.days, _ ('jours')
-                )
-                rec.duree_activation = annees_mois_jours
+        if bool(self.date_activation):
+            activation = fields.Datetime.from_string (self.date_activation)
+            delta = relativedelta (now, activation)
+            annees_mois_jours = '%s %s - %s %s - %s %s' % (
+                delta.years, _ ('an(s)'),
+                delta.months, _ ('mois'),
+                delta.days, _ ('jours')
+            )
+            self.duree_activation = annees_mois_jours
 
     # @api.one
     # @api.depends('date_resiliation', 'date_activation', 'validite_contrat', 'validite_contrat_police', 'jours_contrat',
@@ -2317,43 +2332,42 @@ class Contrat(models.Model):
         self.actif = not self.actif
 
     #@api.multi
-    @api.depends('date_activation', 'date_resiliation', 'delai_carence', 'date_resiliation', 'retard_cotisation',
-                 'groupe_suspendu', 'mt_reste_payable')
+    # @api.depends('date_activation', 'date_resiliation', 'delai_carence', 'date_resiliation', 'retard_cotisation',
+    #              'groupe_suspendu', 'mt_reste_payable')
+    @api.one
     def _get_etat_contrat(self):
         """
         Vérifie l'état du contrat Actif ou non en fonction du délai de carence, date de résiliation ou plafond/famille.
         Return True or False
         """
         now = datetime.now()
-        for rec_id in self:
-            debut = fields.Datetime.from_string(rec_id.date_activation) or \
-                    fields.Datetime.from_string(fields.Date.today())
-            # 1. Verifier si la date de résiliation est renseignée (contrat résilié)
-            if bool(rec_id.date_resiliation):
-                resiliation = fields.Datetime.from_string(rec_id.date_resiliation)
-                jours = (resiliation - debut).days
-                rec_id.jours_contrat = int(jours)
-            else:
-                jours = (now - debut).days
-                rec_id.jours_contrat = int(jours)
-            delai = int(rec_id.delai_carence)
-            retard_cotisation = int(rec_id.retard_cotisation)
-            reste_payable = int(rec_id.mt_reste_payable)
-            # Verifie la validité de la date de résiliation
-            if 0 < retard_cotisation <= reste_payable:
-                rec_id.actif = False
-            elif bool(rec_id.date_resiliation) and (rec_id.date_resiliation < now):
-                rec_id.actif = False
-            # Verifie le délai de carence
-            elif delai >= rec_id.jours_contrat:
-                rec_id.actif = False
-            # Verifie le groupe
-            elif bool(rec_id.groupe_id) and bool(rec_id.groupe_suspendu):
-                rec_id.is_active = False
-            # Verifie le niveau de consommation (Plafond/Famille)
-            else:
-                rec_id.actif = True
-
+        debut = fields.Datetime.from_string(self.date_activation) or \
+                fields.Datetime.from_string(fields.Date.today ())
+        # 1. Verifier si la date de résiliation est renseignée (contrat résilié)
+        if bool(self.date_resiliation):
+            resiliation = fields.Datetime.from_string(self.date_resiliation)
+            jours = (resiliation - debut).days
+            self.jours_contrat = int(jours)
+        else:
+            jours = (now - debut).days
+            self.jours_contrat = int(jours)
+        delai = int(self.delai_carence)
+        retard_cotisation = int(self.retard_cotisation)
+        reste_payable = int(self.mt_reste_payable)
+        # Verifie la validité de la date de résiliation
+        if 0 < retard_cotisation <= reste_payable:
+            self.actif = False
+        elif bool(self.date_resiliation) and (self.date_resiliation < now):
+            self.actif = False
+        # Verifie le délai de carence
+        elif delai >= self.jours_contrat:
+            self.actif = False
+        # Verifie le groupe
+        elif bool(self.groupe_id) and bool(self.groupe_suspendu):
+            self.is_active = False
+        # Verifie le niveau de consommation (Plafond/Famille)
+        else:
+            self.actif = True
 
     @api.one
     @api.depends('ayant_droit_ids')

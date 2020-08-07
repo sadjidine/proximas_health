@@ -21,21 +21,21 @@ class Assure (models.Model):
     _inherits = {'res.partner': 'partner_id'}
     _short_name = 'name'
 
-    partner_id = fields.Many2one (
+    partner_id = fields.Many2one(
         string='Related Partner',
         comodel_name='res.partner',
         required=True,
         ondelete='restrict',
         index=True,
     )
-    sequence = fields.Integer (
+    sequence = fields.Integer(
         string="Sequence"
     )
     color = fields.Integer (
         string="Color index",
         required=False,
     )
-    full_name = fields.Char (
+    full_name = fields.Char(
         string="Nom Complet",
         compute='_get_full_name',
     )
@@ -44,50 +44,50 @@ class Assure (models.Model):
         size=32,
         required=True,
     )
-    prenoms = fields.Char (
+    prenoms = fields.Char(
         string="Prénoms",
         size=64,
         required=True,
     )
-    parent_id = fields.Many2one (
+    parent_id = fields.Many2one(
         comodel_name="proximas.assure",
         string="Assuré Principal",
         ondelete='restrict',
         index=True,
     )
-    child_ids = fields.One2many (
+    child_ids = fields.One2many(
         comodel_name="proximas.assure",
         inverse_name="parent_id",
         string="Ayant-droit",
     )
-    code_id = fields.Char (
+    code_id = fields.Char(
         string="Code Id.",
         compute="_get_code_id",
         help="Code d'identification unique fourni par le système.!",
         store=True,
         # default=lambda self: self._get_code_id(),
     )
-    code_id_externe = fields.Char (
+    code_id_externe = fields.Char(
         size=32,
         string='Code ID. Externe',
         help="Code ID. obtenu à partir d'un système exterieur."
     )
-    matricule = fields.Char (
+    matricule = fields.Char(
         size=32,
         string='N° Matricule',
         help='Numero matricule s\'il y a lieu',
     )
-    localite_id = fields.Many2one (
+    localite_id = fields.Many2one(
         comodel_name="proximas.localite",
         string="Localité",
         help="Indiquez la localité de rattachement de l'assuré",
     )
-    quartier = fields.Char (
+    quartier = fields.Char(
         size=64,
         string='Quartier/Secteur',
         help='Indiquer le secteur ou le quartier de résidence',
     )
-    groupe_id = fields.Many2one (
+    groupe_id = fields.Many2one(
         comodel_name="proximas.groupe",
         string="Groupe",
         required=False,
@@ -96,14 +96,14 @@ class Assure (models.Model):
     #     comodel_name="proximas.contrat",
     #     string="Contrat",
     # )
-    genre = fields.Selection (
+    genre = fields.Selection(
         [
             ('masculin', 'Masculin'),
             ('feminin', 'Feminin'),
         ],
         required=True,
     )
-    statut_familial = fields.Selection (
+    statut_familial = fields.Selection(
         [
             ('adherent', 'Adhérent'),
             ('conjoint', 'Conjoint(e)'),
@@ -117,7 +117,7 @@ class Assure (models.Model):
         store=True,
         help="Lien de parenté avec l'assuré principal.",
     )
-    statut = fields.Selection (
+    statut = fields.Selection(
         [
             ('conjoint', 'Conjoint(e)'),
             ('enfant', 'Enfant'),
@@ -127,7 +127,7 @@ class Assure (models.Model):
         string="Statut Familial",
         help="Lien de parenté avec l'assuré principal.",
     )
-    groupe_sanguin = fields.Selection (
+    groupe_sanguin = fields.Selection(
         [
             ('a+', 'A+'),
             ('a-', 'A-'),
@@ -142,24 +142,24 @@ class Assure (models.Model):
         string="Groupe Sanguin",
         help="Sélectionner un groupe sanguin dans la liste.",
     )
-    date_naissance = fields.Date (
+    date_naissance = fields.Date(
         string="Date Naissance",
         required=True,
     )
-    date_inscription = fields.Date (
+    date_inscription = fields.Date(
         string="Date Inscription",
         required=True,
         default=fields.Date.today ()
     )
-    date_activation = fields.Date (
+    date_activation = fields.Date(
         string="Date Activation",
         default=fields.Date.today (),
         help='Indiquer la date à laquelle l\'assuré sera actif',
     )
-    date_edition_carte = fields.Date (
+    date_edition_carte = fields.Date(
         string="Date Edition Carte",
     )
-    retrait_carte = fields.Boolean (
+    retrait_carte = fields.Boolean(
         string="Retrait Carte?",
         help="Cochez pour la carte rétirée!",
     )
@@ -171,21 +171,21 @@ class Assure (models.Model):
         compute='_get_date_deces',
         readonly=True,
     )
-    decede = fields.Boolean (
+    decede = fields.Boolean(
         compute='_get_date_deces',
         string='Décédé(e)?',
         default=False,
         help='(En cas de décès) A cocher automatiquement si une date de décès est fournie!',
     )
-    motif_desactivation = fields.Char (
+    motif_desactivation = fields.Char(
         string="Motif de désactivation",
         required=False,
     )
-    mobile_2 = fields.Char (
+    mobile_2 = fields.Char(
         string="Tél. mobile 1",
         size=8
     )
-    state = fields.Selection (
+    state = fields.Selection(
         string="Etat",
         selection=[
             ('actif', 'Activé(e)'),
@@ -202,35 +202,35 @@ class Assure (models.Model):
         default='attente',
         help='Ce champ indiquer le statut de l\'assuré dans la système...',
     )
-    sanction_ids = fields.One2many (
+    sanction_ids = fields.One2many(
         comodel_name="proximas.sanction",
         inverse_name="assure_id",
         string="Sanction (Supension/Exclusion)",
     )
-    assure_actif = fields.Boolean (
+    assure_actif = fields.Boolean(
         string="Actif?",
         dafault=True,
         halp="Etat de l'assuré : Actif ou non.",
     )
-    code_perso = fields.Integer (
+    code_perso = fields.Integer(
         string="Code Perso",
         default=0000,
     )
-    code_pass = fields.Integer (
+    code_pass = fields.Integer(
         string="Code Pass",
         compute='_get_code_pass',
         store=True,
     )
-    is_assure = fields.Boolean (
+    is_assure = fields.Boolean(
         string="Est Assuré?",
         default=True,
         readonly=True,
     )
-    cas_chronique = fields.Boolean (
+    cas_chronique = fields.Boolean(
         string="Malade Chronique?",
         default=False
     )
-    general_info = fields.Text (
+    general_info = fields.Text(
         string='Information General',
     )
     age = fields.Char (
@@ -239,12 +239,12 @@ class Assure (models.Model):
     age_details = fields.Char (
         compute='_compute_age',
     )
-    age_entier = fields.Integer (
+    age_entier = fields.Integer(
         string='Age assuré',
         compute='_compute_age_entier',
         store=True,
     )
-    tranche_age = fields.Selection (
+    tranche_age = fields.Selection(
         string="Tranche d'âge",
         selection=[
             ('0', '0'),
@@ -262,56 +262,56 @@ class Assure (models.Model):
         compute='_check_tranche_age',
         store=True,
     )
-    est_invalide = fields.Boolean (
+    est_invalide = fields.Boolean(
         # disponible uniquement pour le statut_familial = Enfant
         string="Enfant invalide?",
         help="Cocher uniquement au cas où l'enfant est considéré comme invalide"
     )
-    note = fields.Text (
+    note = fields.Text(
         string="Notes et Observations",
     )
-    delai_carence = fields.Integer (
+    delai_carence = fields.Integer(
         string="Délai de carence",
         help="La période (nbre. de jours) de carence à observer avant de bénéficier de la couverture!",
         default=0,
     )
     # POLICE DETAILS & CONTRAT
-    contrat_id = fields.Many2one (
+    contrat_id = fields.Many2one(
         comodel_name="proximas.contrat",
         string="Contrat",
         compute='_get_contrat_id',
         # related='police_id.contrat_id',
 
     )
-    num_contrat = fields.Char (
+    num_contrat = fields.Char(
         string="N° Contrat",
         related='contrat_id.num_contrat',
         store=True,
     )
-    contrat_actif = fields.Boolean (
+    contrat_actif = fields.Boolean(
         string="Contrat Activé?",
         related='contrat_id.actif',
         help="Indique l'état du contrat (actif ou non).",
     )
-    date_activation_contrat = fields.Date (
+    date_activation_contrat = fields.Date(
         string="Date Prise Effet",
         related='contrat_id.date_activation',
         help='Date à laquelle le contrat est activé (date de prise d\'effet).'
     )
-    police_id = fields.Many2one (
+    police_id = fields.Many2one(
         comodel_name="proximas.police",
         string="Police Couverture",
         related='contrat_id.police_id',
         # store=True,
         readonly=True,
     )
-    libelle_police = fields.Char (
+    libelle_police = fields.Char(
         string="Police Couverture",
         related='police_id.libelle',
         store=True,
         readonly=True,
     )
-    structure_id = fields.Many2one (
+    structure_id = fields.Many2one(
         comodel_name="res.company",
         string="Organisation",
         related='contrat_id.structure_id',
@@ -323,50 +323,50 @@ class Assure (models.Model):
         default=0,
         readonly=True,
     )
-    plafond_famille = fields.Float (
+    plafond_famille = fields.Float(
         string="Plafond Famille",
         digits=(9, 0),
         related='contrat_id.plafond_famille',
         default=0,
         readonly=True,
     )
-    date_resiliation_contrat = fields.Date (
+    date_resiliation_contrat = fields.Date(
         string="Date Résiliation",
         related='contrat_id.date_resiliation',
         help="Date de résiliation du contrat de couverture"
     )
-    date_fin_prevue_contrat = fields.Date (
+    date_fin_prevue_contrat = fields.Date(
         string="Date Fin Contrat",
         related='contrat_id.date_fin_prevue',
         store=True,
         help="Date de fin prévue du contrat de couverture en rapport avec le délai de validité de la police."
     )
-    date_debut_contrat = fields.Date (
+    date_debut_contrat = fields.Date(
         string="Date Début Contrat",
         related='contrat_id.date_debut_contrat',
         help="Date de début du contrat de couverture par rapport avec le délai de validité de la police."
     )
-    validite_contrat = fields.Integer (
+    validite_contrat = fields.Integer(
         string="Délai Validité contrat (jours)",
         related='contrat_id.validite_contrat',
         readonly=True,
     )
-    validite_contrat_police = fields.Integer (
+    validite_contrat_police = fields.Integer(
         string="Délai Validité contrat (jours)",
         related='contrat_id.validite_contrat_police',
         readonly=True,
     )
-    mode_controle_plafond = fields.Selection (
+    mode_controle_plafond = fields.Selection(
         string="Mode Contrôle Plafond",
         related='contrat_id.mode_controle_plafond',
         readonly=True,
     )
     ############################################
-    duree_activation = fields.Char (
+    duree_activation = fields.Char(
         string="Durée Activation (Details)",
         compute='_get_duree_activation',
     )
-    jours_activation = fields.Integer (
+    jours_activation = fields.Integer(
         string="Durée Activation (Nbre. Jours)",
         compute='_get_duree_activation',
     )
@@ -375,45 +375,140 @@ class Assure (models.Model):
         compute='_compute_debut_fin_assure',
         help='Nombre de renouvellement du contrat.',
     )
-    date_debut_assure = fields.Date (
+    date_debut_assure = fields.Date(
         string="Date Débur Assuré",
         compute='_compute_debut_fin_assure',
         help="Date de début de la couverture en rapport avec le délai de validité de la police."
     )
-    date_fin_prevue_assure = fields.Date (
+    date_fin_prevue_assure = fields.Date(
         string="Date Fin Contrat",
         compute='_compute_debut_fin_assure',
         help="Date de fin prévue de la couverture en rapport avec le délai de validité de la police."
     )
+    # DETAILS SINISTRES ASSURE
+    prise_charge_ids = fields.One2many(
+        comodel_name="proximas.prise.charge",
+        inverse_name="assure_id",
+        string="Prises en charge",
+    )
+    details_pec_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        inverse_name="assure_id",
+        string="Détails PEC",
+        domain=[
+            ('date_execution', '!=', None),
+        ]
+    )
+    details_actes_ids = fields.One2many (
+        comodel_name="proximas.details.pec",
+        inverse_name="assure_id",
+        string="Détails PEC",
+        domain=[
+            ('date_execution', '!=', None),
+            ('produit_phcie_id', '=', None),
+        ]
+    )
+    details_phcie_ids = fields.One2many (
+        comodel_name="proximas.details.pec",
+        inverse_name="assure_id",
+        string="Détails PEC",
+        domain=[
+            ('date_execution', '!=', None),
+            ('produit_phcie_id', '!=', None),
+        ]
+    )
+    # CHAMPS CALCULES - CONTROLES SINISTRES - PLAFONDS ASSURE
+    nbre_pec_assure_encours = fields.Integer(
+        string="Nbre. PEC/Assuré",
+        compute='_compute_sinistres_assure',
+        default=0,
+        help="Nombre de prises en charge (PEC) pour l'exercice en cours..."
+    )
+    nbre_rfm_contrat_encours = fields.Integer(
+        string="Nbre. Remb./Assuré",
+        related='contrat_id.nbre_rfm_contrat_encours',
+        default=0,
+        help="Nombre de Remboursemenr(s)/A pour l'exercice en cours..."
+    )
+    mt_sinistres_assure_encours = fields.Float(
+        string="Totaux Sinistres Assure",
+        digits=(9, 0),
+        compute='_compute_sinistres_assure',
+        default=0,
+        help="Totaux Sinistres/Assuré pour l'exercice en cours..."
+    )
+    mt_sinistres_contrat_encours = fields.Float (
+        string="Totaux Sinistres Contrat",
+        digits=(9, 0),
+        related='contrat_id.mt_sinistres_contrat_encours',
+        default=0,
+        help="Totaux Sinistres/Famille pour l'exercice en cours..."
+    )
+    nbre_actes_assure_encours = fields.Integer(
+        string="Nbre. Actes/Famille",
+        compute='_compute_sinistres_assure',
+        default=0,
+        help="Nombre d'actes médicaux pour l'exercice en cours..."
+    )
+    mt_sinistres_actes_assure_encours = fields.Float(
+        string="Totaux Actes Famille",
+        digits=(9, 0),
+        compute='_compute_sinistres_assure',
+        default=0,
+    )
+    nbre_phcie_assure_encours = fields.Integer(
+        string="Nbre. Prescription(s)/Famille",
+        compute='_compute_sinistres_assure',
+        default=0,
+        help="Nombre de prescription(s) pour l'exercice en cours..."
+    )
+    mt_sinistres_phcie_assure_encours = fields.Float(
+        string="Totaux Phcie. Famille",
+        digits=(9, 0),
+        compute='_compute_sinistres_assure',
+        default=0,
+    )
+    taux_sinistre_plafond_assure = fields.Float(
+        string="Taux Sinistre/Plafond - Assuré",
+        digits=(9, 0),
+        compute='_compute_sinistres_assure',
+        default=0,
+    )
+    taux_sinistre_plafond_famille = fields.Float(
+        string="Taux Sinistre/Plafond - Contrat",
+        digits=(9, 0),
+        related='contrat_id.taux_sinistre_plafond_famille',
+        default=0,
+    )
     # SURVEILLANCE DU PORTEFUEILLE DE RISQUES
-    sous_totaux_assure = fields.Float (
+    sous_totaux_assure = fields.Float(
         string="S/Totaux Assuré",
         digits=(9, 0),
         compute='_check_details_pec',
         default=0,
     )
-    sous_totaux_contrat = fields.Float (
+    sous_totaux_contrat = fields.Float(
         string="S/Totaux Contrat",
         digits=(9, 0),
         compute='_check_details_pec',
         default=0,
     )
-    nbre_actes_assure = fields.Integer (
+    nbre_actes_assure = fields.Integer(
         string="Nbre. Actes (Prestations) ",
         compute='_check_details_pec',
         default=0,
     )
-    nbre_phcie_assure = fields.Integer (
+    nbre_phcie_assure = fields.Integer(
         string="Nbre. Prescriptions",
         # compute='_check_details_pec',
         default=0,
     )
-    date_maj_assure = fields.Datetime (
+    date_maj_assure = fields.Datetime(
         string="Dernière mise à jour",
         required=False,
         help='Date de la dernière mise à jour effectuée',
     )
-    compteur_maj_assure = fields.Integer (
+    compteur_maj_assure = fields.Integer(
         string="Compteur MAJ",
         default=0,
         help="Le nombre de fois que le système a mise à jour les données de l'assuré...",
@@ -423,92 +518,125 @@ class Assure (models.Model):
     #               'mode_controle_plafond')
     def _compute_debut_fin_assure(self):
         # now = fields.Datetime.from_string (fields.Date.today())
-        activation_contrat = fields.Date.from_string(self.date_activation_contrat)
-        activation_assure = fields.Date.from_string(self.date_activation)
-        date_deces = fields.Date.from_string(self.date_deces)
-        date_resiliation = fields.Date.from_string(self.date_resiliation_contrat)
-        validite_contrat = int(self.validite_contrat)
-        validite_police = int(self.validite_contrat_police)
-        if validite_contrat:
-            nbre_renouvellement = self.jours_activation / validite_contrat
-            self.nbre_renouvellement_contrat = nbre_renouvellement
-        elif validite_police:
-            nbre_renouvellement = self.jours_activation / validite_police
-            self.nbre_renouvellement_contrat = nbre_renouvellement
-        # 1. MODE DE CONTROLE PAR EXERCICE
-        if self.mode_controle_plafond in ['exercice']:
-            exercice = self.env['proximas.exercice'].search ([
-                ('res_company_id', '=', self.structure_id.id),
-                ('en_cours', '=', True),
-            ])
-            if exercice and len (exercice) == 1:
-                date_debut = fields.Date.from_string (exercice.date_debut)
-                date_fin = fields.Date.from_string (exercice.date_fin)
-                if date_deces:
-                    self.date_debut_assure = activation_contrat
-                    self.date_fin_prevue_assure = date_deces
-                elif date_resiliation:
-                    self.date_debut_assure = activation_contrat
-                    self.date_fin_prevue_assure = date_resiliation
-                elif activation_contrat > date_debut:
-                    self.date_debut_assure = activation_contrat
-                    self.date_fin_prevue_assure = date_fin
+        for rec in self:
+            activation_contrat = fields.Date.from_string (rec.date_activation_contrat)
+            activation_assure = fields.Date.from_string (rec.date_activation)
+            date_deces = fields.Date.from_string (rec.date_deces)
+            date_resiliation = fields.Date.from_string (rec.date_resiliation_contrat)
+            validite_contrat = int (rec.validite_contrat)
+            validite_police = int (rec.validite_contrat_police)
+            if validite_contrat:
+                nbre_renouvellement = rec.jours_activation / validite_contrat
+                rec.nbre_renouvellement_contrat = nbre_renouvellement
+            elif validite_police:
+                nbre_renouvellement = rec.jours_activation / validite_police
+                rec.nbre_renouvellement_contrat = nbre_renouvellement
+            # 1. MODE DE CONTROLE PAR EXERCICE
+            if rec.mode_controle_plafond in ['exercice']:
+                exercice = self.env['proximas.exercice'].search ([
+                    ('res_company_id', '=', rec.structure_id.id),
+                    ('en_cours', '=', True),
+                ])
+                if exercice and len (exercice) == 1:
+                    date_debut = fields.Date.from_string (exercice.date_debut)
+                    date_fin = fields.Date.from_string (exercice.date_fin)
+                    if date_deces:
+                        rec.date_debut_assure = activation_contrat
+                        rec.date_fin_prevue_assure = date_deces
+                    elif date_resiliation:
+                        rec.date_debut_assure = activation_contrat
+                        rec.date_fin_prevue_assure = date_resiliation
+                    elif activation_contrat > date_debut:
+                        rec.date_debut_assure = activation_contrat
+                        rec.date_fin_prevue_assure = date_fin
+                    else:
+                        rec.date_debut_assure = date_debut
+                        rec.date_fin_prevue_assure = date_fin
                 else:
-                    self.date_debut_assure = date_debut
-                    self.date_fin_prevue_assure = date_fin
-            else:
-                raise UserError(
-                    '''
-                         Proximaas - Contrôle des règles de Gestion :\n
-                         Le mode de contrôle défini pour le plafond famille (contrat)\
-                         est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
-                         en cours. Pour plus d'informations, veuillez contactez l'administrateur...
-                     '''
-                )
-        # 2. MODE DE CONTROLE PAR CONTRAT
-        elif self.mode_controle_plafond in ['contrat']:
-            if date_deces:
-                self.date_debut_assure = activation_assure
-                self.date_fin_prevue_assure = date_deces
-            elif date_resiliation:
-                self.date_debut_assure = activation_contrat
-                self.date_fin_prevue_assure = date_resiliation
-            elif self.nbre_renouvellement_contrat >= 1:
-                if validite_contrat:
-                    self.date_debut_assure = activation_assure + timedelta (days=int(self.validite_contrat))
-                    date_debut = fields.Date.from_string(self.date_debut_assure)
-                    self.date_fin_prevue_assure = date_debut + timedelta(days=int(self.validite_contrat))
-                elif validite_police:
-                    self.date_debut_assure = activation_contrat + timedelta(days=int(self.validite_police))
-                    date_debut = fields.Date.from_string(self.date_debut_assure)
-                    self.date_fin_prevue_assure = date_debut + timedelta(days=int(self.validite_police))
-            else:
-                if validite_contrat:
-                    self.date_debut_assure = activation_assure
-                    date_debut = fields.Date.from_string(self.date_debut_assure)
-                    self.date_fin_prevue_assure = date_debut + timedelta(days=int(self.validite_contrat))
-                elif validite_police:
-                    self.date_debut_assure = activation_assure
-                    date_debut = fields.Date.from_string(self.date_debut_assure)
-                    self.date_fin_prevue_assure = date_debut + timedelta(days=int(self.validite_police))
+                    raise UserError (
+                        '''
+                             Proximaas - Contrôle des règles de Gestion :\n
+                             Le mode de contrôle défini pour le plafond famille (contrat)\
+                             est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
+                             en cours. Pour plus d'informations, veuillez contactez l'administrateur...
+                         '''
+                    )
+            # 2. MODE DE CONTROLE PAR CONTRAT
+            elif rec.mode_controle_plafond in ['contrat']:
+                if date_deces:
+                    rec.date_debut_assure = activation_assure
+                    rec.date_fin_prevue_assure = date_deces
+                elif date_resiliation:
+                    rec.date_debut_assure = activation_contrat
+                    rec.date_fin_prevue_assure = date_resiliation
+                elif rec.nbre_renouvellement_contrat >= 1:
+                    if validite_contrat:
+                        rec.date_debut_assure = activation_assure + timedelta (days=int (rec.validite_contrat))
+                        date_debut = fields.Date.from_string (rec.date_debut_assure)
+                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_contrat))
+                    elif validite_police:
+                        rec.date_debut_assure = activation_contrat + timedelta (days=int (rec.validite_police))
+                        date_debut = fields.Date.from_string (rec.date_debut_assure)
+                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_police))
+                else:
+                    if validite_contrat:
+                        rec.date_debut_assure = activation_assure
+                        date_debut = fields.Date.from_string (rec.date_debut_assure)
+                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_contrat))
+                    elif validite_police:
+                        rec.date_debut_assure = activation_assure
+                        date_debut = fields.Date.from_string (rec.date_debut_assure)
+                        rec.date_fin_prevue_assure = date_debut + timedelta (days=int (rec.validite_police))
 
-    # def _compute_date_fin_prevue(self):
-    #     if bool (self.contrat_id):
-    #         now = fields.Datetime.from_string (fields.Date.today ())
-    #         activation_assure = fields.Datetime.from_string (self.date_activation)
-    #         date_deces = fields.Datetime.from_string (self.date_deces)
-    #         date_fin_prevue = fields.Datetime.from_string (self.date_fin_prevue)
-    #         nbre_jours_validite_contrat = int (self.validite_contrat) or 366
-    #         nbre_renouvellement = int (self.jours_activation / nbre_jours_validite_contrat) + 1
-    #         # Calcul de la date de fin prévue du contrat Adherent
-    #         # datetime.now () + timedelta (days=2, hours=4, minutes=3, seconds=12)
-    #         if bool (date_deces):
-    #             self.date_fin_prevue = date_deces
-    #         elif bool (date_fin_prevue) and date_fin_prevue <= now:
-    #             self.date_fin_prevue += timedelta (days=int (self.validite_contrat))
-    #         else:
-    #             self.date_fin_prevue = activation_assure + timedelta (
-    #                 days=int (self.validite_contrat) * nbre_renouvellement)
+    @api.depends('date_activation', 'date_inscription')
+    def _get_duree_activation(self):
+        for rec in self:
+            now = datetime.now ()
+            if bool (rec.date_activation):
+                activation = fields.Datetime.from_string (rec.date_activation)
+                delta = relativedelta (now, activation)
+                annees_mois_jours = '%s %s - %s %s - %s %s' % (
+                    delta.years, _ ('an(s)'),
+                    delta.months, _ ('mois'),
+                    delta.days, _ ('jours')
+                )
+                rec.duree_activation = annees_mois_jours
+                rec.jours_activation = int (delta.days)
+
+    # @api.depends ('prise_charge_ids', 'details_pec_ids', 'details_pec_ids', 'details_phcie_ids')
+    def _compute_sinistres_assure(self):
+        for rec in self:
+            if rec.details_pec_ids:
+                date_debut = fields.Date.from_string (rec.date_debut_assure)
+                date_fin = fields.Date.from_string (rec.date_fin_prevue_assure)
+                prise_en_charge_encours = []
+                details_pec_encours = []
+                details_actes_encours = []
+                details_phcie_encours = []
+                for detail in rec.prise_charge_ids:
+                    date_saisie = fields.Date.from_string (detail.date_saisie)
+                    if date_debut <= date_saisie <= date_fin:
+                        prise_en_charge_encours.append (detail)
+                for detail in rec.details_pec_ids:
+                    date_execution = fields.Date.from_string (detail.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        details_pec_encours.append (detail)
+                for detail in rec.details_actes_ids:
+                    date_execution = fields.Date.from_string (detail.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        details_actes_encours.append (detail)
+                for detail in rec.details_phcie_ids:
+                    date_execution = fields.Date.from_string (detail.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        details_phcie_encours.append (detail)
+                rec.nbre_pec_assure_encours = len (prise_en_charge_encours)
+                rec.nbre_actes_assure_encours = len (details_actes_encours)
+                rec.mt_sinistres_assure_encours = sum (item.sous_totaux_pec for item in prise_en_charge_encours)
+                rec.mt_sinistres_actes_assure_encours = sum (item.total_pc for item in details_actes_encours)
+                rec.nbre_phcie_assure_encours = len (details_phcie_encours)
+                rec.mt_sinistres_phcie_assure_encours = sum (item.mt_totaux_phcie for item in prise_en_charge_encours)
+            if rec.plafond_individu:
+                rec.taux_sinistre_plafond_assure = rec.mt_sinistres_assure_encours * 100 / rec.plafond_individu
 
     @api.depends ('date_naissance', 'age')
     def _check_tranche_age(self):
