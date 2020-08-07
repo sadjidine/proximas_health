@@ -403,46 +403,40 @@ class PriseEnCharge(models.Model):
         default=0,
     )
     ########################################################
-    sous_totaux_assure = fields.Float(
+    sous_totaux_assure_encours = fields.Float(
         string="S/Totaux Assuré",
         digits=(9, 0),
         compute='_compute_details_pec',
-        store=True,
         default=0,
         #related='assure_id.sous_totaux_pec',
     )
-    sous_totaux_contrat = fields.Float(
+    sous_totaux_contrat_encours = fields.Float(
         string="S/Totaux Contrat",
         digits=(9, 0),
         compute='_compute_details_pec',
-        store=True,
         default=0,
         # related='assure_id.sous_totaux_pec',
     )
-    nbre_actes_contrat = fields.Integer(
+    nbre_actes_contrat_encours = fields.Integer(
         string="Nbre. Actes Contrat",
         compute='_compute_details_pec',
-        store=True,
         default=0,
         #related='assure_id.nbre_actes_pec',
     )
-    nbre_actes_assure = fields.Integer(
+    nbre_actes_assure_encours = fields.Integer(
         string="Nbre. Actes Assuré",
         compute='_compute_details_pec',
-        store=True,
         default=0,
         # related='assure_id.nbre_actes_pec',
     )
     niveau_sinistre_assure = fields.Float(
         string="Niveau Sinistre Assuré",
         compute='_compute_details_pec',
-        store=True,
         default=0,
     )
     niveau_sinistre_contrat = fields.Float(
         string="Niveau Sinistre Contrat",
         compute='_compute_details_pec',
-        store=True,
         default=0,
     )
     totaux_contrat = fields.Float(
@@ -791,9 +785,10 @@ class PriseEnCharge(models.Model):
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
                  'details_pec_phcie_ids')
-    # @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids','details_pec_phcie_ids')
+    @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
+                  'details_pec_phcie_ids')
     def _check_nbre_details_pec(self):
-        self.ensure_one()
+        # self.ensure_one()
         details_pec_phcie_encours = self.details_pec_phcie_ids
         self.nbre_prestations_fournies = len(self.details_pec_soins_ids)
         self.nbre_prestations_demandes = len(self.details_pec_soins_crs_ids) or len(self.details_pec_demande_crs_ids)
@@ -803,26 +798,22 @@ class PriseEnCharge(models.Model):
         self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
 
     @api.one
-    @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
+    @api.depends('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
+    @api.onchange('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
                   'nbre_prestations_fournies')
-    # @api.onchange('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
-    #               'nbre_prestations_fournies')
     def _compute_details_pec(self):
-        self.ensure_one()
+        #self.ensure_one()
+        details_pec_assure_encours = self.details_pec_assure_ids
+        details_pec_contrat_encours = self.details_pec_contrat_ids
         details_pec_encours = self.details_pec_ids
         details_pec_cro = self.details_pec_soins_ids
         details_pec_crs = self.details_pec_soins_crs_ids
         details_pec_phcie = self.details_pec_phcie_ids
         if details_pec_encours:
-            # for detail in details_pec_encours:
-            #     if detail.prestataire == self.prestataire_id.id:
-            #         details_pec_cro.append(detail)
-            #     elif detail.prestataire == self.prestataire_crs_id.id:
-            #         details_pec_crs.append(detail)
-            #     elif detail.prestataire == self.prestataire_phcie_id.id:
-            #         details_pec_phcie.append(detail)
-            #     else:
-            #         pass
+            self.nbre_actes_assure_envours = len(details_pec_assure_encours)
+            self.nbre_actes_contrat_encours = len(details_pec_contrat_encours)
+            self.sous_totaux_assure_encours = sum(item.total_pc for item in details_pec_assure_encours)
+            self.sous_totaux_contrat_encours = sum(item.total_pc for item in details_pec_contrat_encours)
             self.sous_totaux_pec = sum (item.total_pc for item in details_pec_encours)
             self.sous_totaux_npc_pec = sum (item.total_npc for item in details_pec_encours)
             self.part_sam_pec = sum (item.net_tiers_payeur for item in details_pec_encours)

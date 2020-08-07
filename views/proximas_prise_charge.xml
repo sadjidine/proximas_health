@@ -288,7 +288,7 @@
                                 type="action"
                                 icon="fa-cart-plus"
                                 context="{'search_default_assure_id': assure_id}">
-                            <field name="mt_sinistres_assure_encours" widget="statinfo"
+                            <field name="sous_totaux_assure_encours" widget="statinfo"
                                    options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'
                                    string="Totaux Indiv." />
                         </button>
@@ -296,7 +296,7 @@
                                 type="action"
                                 icon="fa-users"
                                 context="{'search_default_contrat_id': contrat_id}">
-                            <field name="mt_sinistres_contrat_encours" widget="statinfo" string="S/Totaux Famille"/>
+                            <field name="sous_totaux_contrat_encours" widget="statinfo" string="S/Totaux Famille"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
