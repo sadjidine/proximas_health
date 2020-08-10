@@ -419,6 +419,8 @@
                     <field name="accord_prealable"/>
                     <field name="cout_modifiable"/>
                     <field name="quantite_exige"/>
+                    <field name="age_minimum"/>
+                    <field name="age_maximum"/>
                     <field name="delai_attente"/>
                     <newline />
                     <group expand="0" string="Groupé par...">
@@ -455,6 +457,8 @@
                    <field name="accord_prealable"/>
                    <field name="cout_modifiable"/>
                    <field name="quantite_exige"/>
+                   <field name="age_minimum"/>
+                   <field name="age_maximum"/>
                    <field name="delai_attente"/>
                </tree>
            </field>
@@ -475,6 +479,8 @@
                            <field name="rubrique_id" options='{"no_open": True, "no_create": True}'/>
                            <field name="coefficient"/>
                            <field name="delai_attente"/>
+                           <field name="age_minimum"/>
+                           <field name="age_maximum"/>
                            <field name="accord_prealable"/>
                            <field name="cout_modifiable"/>
                            <field name="quantite_exige"/>
