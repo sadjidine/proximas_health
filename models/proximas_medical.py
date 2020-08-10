@@ -254,7 +254,19 @@ class CodePrestation(models.Model):
         default=0,
         help="délai d'attente ==> Nombre de jours à observer pour bénéficier une seconde fois de cette prestation."
     )
-    active = fields.Boolean(default=True)
+    age_minimum = fields.Integer(
+        string="Age Minimum.(années)",
+        required=True,
+        default=0,
+        help="L'âge minimum autorisé pour l'accès à cette prestation."
+    )
+    age_maximum = fields.Integer(
+        string="Age Maxi.(années)",
+        required=True,
+        default=0,
+        help="L'âge maximum autorisé pour l'accès à cette prestation."
+    )
+    # active = fields.Boolean(default=True)
     note = fields.Text(
         string="Notes et Observations",
     )

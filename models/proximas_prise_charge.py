@@ -123,7 +123,7 @@ class PriseEnCharge(models.Model):
     )
     details_pec_ids = fields.One2many(
         comodel_name="proximas.details.pec",
-        inverse_name="assure_id",
+        inverse_name="pec_id",
         string="Détails PEC",
         domain=[
             ('date_execution', '!=', None),
@@ -785,8 +785,8 @@ class PriseEnCharge(models.Model):
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
                  'details_pec_phcie_ids')
-    @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
-                  'details_pec_phcie_ids')
+    # @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
+    #               'details_pec_phcie_ids')
     def _check_nbre_details_pec(self):
         # self.ensure_one()
         details_pec_phcie_encours = self.details_pec_phcie_ids
@@ -799,8 +799,8 @@ class PriseEnCharge(models.Model):
 
     @api.one
     @api.depends('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
-    @api.onchange('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
-                  'nbre_prestations_fournies')
+    # @api.onchange('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
+    #               'nbre_prestations_fournies')
     def _compute_details_pec(self):
         #self.ensure_one()
         details_pec_assure_encours = self.details_pec_assure_ids
@@ -4164,12 +4164,12 @@ class DetailsPec(models.Model):
             else:
                 values['net_a_payer'] = 0
             # Récupérer le coût unitaire
-            # if self.cout_unitaire:
-            #     values['cout_unite'] = self.cout_unitaire
-            # elif self.cout_unit:
-            #     values['cout_unite'] = self.cout_unit
-            # else:
-            #     values['cout_unite'] = 0
+            if self.cout_unitaire:
+                values['cout_unite'] = self.cout_unitaire
+            elif self.cout_unit:
+                values['cout_unite'] = self.cout_unit
+            else:
+                values['cout_unite'] = 0
         res = super(DetailsPec, self).write(values)
         return res
 
