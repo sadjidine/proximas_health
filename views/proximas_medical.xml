@@ -234,9 +234,11 @@
                                               widget="many2many_tags" placeholder="Sélectionner le(s) groupe(s)..."/>
                                        <field name="voie_therapeutique_id"
                                               options='{"no_open": True, "no_create": True}'/>
+                                       <field name="prix_indicatif"/>
                                    </group>
                                    <group>
-                                       <field name="prix_indicatif"/>
+                                       <field name="age_minimum"/>
+                                       <field name="age_maximum"/>
                                        <field name="marge_medicament"/>
                                        <field name="delai_attente"/>
                                        <field name="arret_medicament"/>

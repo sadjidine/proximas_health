@@ -491,22 +491,7 @@
                                 <!--'default_pool_medical_id':pool_medical_id-->
                                 <form string="Détails de Prise en charge Assuré">
                                     <sheet>
-                                        <!--<div class="panel">
-                                          <h4 class="panel-header text-primary">Enregistrement des Actes médicaux &amp; paramédicaux </h4>
-                                          <div class="panel-body">
-                                            <blockquote class="blockquote mb-0">
-                                              <p class="text-info h5">
-                                                Ce formulaire vous permet d'enregistrer les actes médicaux &amp;
-                                                  paramédicaux pour la prise en charge médicale concernée.
-                                                  Les prestations que vous fournissez sont parametrées en accord avec
-                                                  la convention qui définit les tarifs applicables...
-                                              </p>
-                                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
-                                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
-                                              </footer>
-                                            </blockquote>
-                                          </div>
-                                        </div>-->
+
                                         <notebook>
                                             <page string="DETAILS PRESTATION MEDICALE - CRO">
                                                 <group invisible="1">
@@ -517,13 +502,13 @@
                                                         <label for="prestataire_id"
                                                                string="Prestataire de Soins Médicaux &amp; paramédicaux - CRO"
                                                         />
-                                                        <h3 class="bg-info text-primary">
+                                                        <h2 class="bg-info text-primary">
                                                             <field name="prestataire_id" required="1"
                                                                options='{"no_open": True, "no_create": True}'
                                                                context="{'default_prestataire_id':prestataire_id}"
                                                                readonly="1"
                                                             />
-                                                        </h3>
+                                                        </h2>
                                                     </div>
                                                     <newline/>
                                                     <group>
@@ -1031,11 +1016,11 @@
                                             >
                                                 <div class="oe_title" name="title">
                                                     <label for="prestataire_phcie_id" string="Pharmacie / Officine :"/>
-                                                    <h3 class="bg-success text-success">
+                                                    <h2 class="bg-success text-success">
                                                         <field name="prestataire_phcie_id"
                                                            options='{"no_open": True, "no_create": True}'
                                                            readonly="1" sstring="Prestataire Conventionné - Pharmacie/Officine"/>
-                                                    </h3>
+                                                    </h2>
                                                 </div>
                                                 <newline/>
                                                 <group>
@@ -1050,22 +1035,26 @@
                                                     <field name="exercice_id"
                                                            string="Exercice SAM"
                                                            options='{"no_open": True, "no_create": True}'/>
-                                                    <field name="quantite_livre" required="1"/>
                                                     <!--attrs="{'required': [('prestataire_phcie_id','!=',False)]}"-->
                                                 </group>
-                                                <group col="6" colspan="2" string="Détails Coûts - Médicament">
+                                                <group col="6" colspan="2" string="Détails Coûts du Médicament &amp; Montants annexes">
                                                     <field name="cout_unit"
                                                            required="1"
                                                     />
+                                                    <field name="quantite_livre" required="1"/>
                                                     <field name="cout_total"/>
                                                     <field name="total_pc"/>
                                                     <field name="total_npc"/>
                                                     <field name="taux_couvert"/>
-                                                    <field name="ticket_moderateur"/>
+                                                    <field name="ticket_moderateur"
+                                                           class="bg-success"
+                                                    />
                                                     <field name="net_tiers_payeur"/>
                                                     <field name="net_prestataire"
-                                                            class="bg-info h5"
-                                                            string="Net à devoir (SAM)"/>
+                                                            class="bg-success"
+                                                            string="NET A DEVOIR (SAM)"
+                                                    />
+
                                                     <!--<field name="total_pc"/>
                                                     <field name="total_npc"/>
                                                     <field name="taux_couvert"/>
@@ -1082,10 +1071,16 @@
                                                 <hr/>
                                                 <group col="6" colspan="2" invisible="0">
                                                     <field name="delai_attente_produit" string="Délai (jours)"/>
+                                                    <field name="age_maximum"/>
+                                                    <field name="age_minimum"/>
+                                                </group>
+                                                <hr/>
+                                                <group col="6" colspan="2" class="bg-success">
+                                                    <field name="rubrique_id" string="Rubrisue médicale"
+                                                           options='{"no_open": True, "no_create": True}'/>
                                                     <field name="ticket_exigible" string="Ticket Exigible?"/>
                                                     <field name="arret_produit" string="Médicament en arrêt?"/>
                                                 </group>
-                                                <hr/>
                                                 <group col="6" colspan="2" groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,
                                                         proximas_medical.group_medecin">
                                                     <field name="totaux_rubrique_assure" string="Sinistres Rubrique Assuré"/>

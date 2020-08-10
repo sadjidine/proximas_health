@@ -494,6 +494,18 @@ class ProduitPharmacie(models.Model):
         default=0,
         help="Nombre de jours à observer avant de dispenser le même médicament"
     )
+    age_minimum = fields.Integer (
+        string="Age Minimum.(années)",
+        required=True,
+        default=0,
+        help="L'âge minimum autorisé pour l'accès au médicament."
+    )
+    age_maximum = fields.Integer (
+        string="Age Maxi.(années)",
+        required=True,
+        default=0,
+        help="L'âge maximum autorisé pour l'accès au médicament."
+    )
     note = fields.Text(
         string="Notes et Observations",
     )

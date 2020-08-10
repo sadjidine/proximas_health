@@ -1864,6 +1864,20 @@ class DetailsPec(models.Model):
         readonly=True,
         help="Nombre de jours à observer avant de dispenser le même médicament"
     )
+    age_minimum = fields.Integer (
+        string="Age Minimum.(années)",
+        related='produit_phcie_id.age_minimum',
+        default=0,
+        readonly=True,
+        help="L'âge minimum autorisé pour l'accès au médicament."
+    )
+    age_maximum = fields.Integer (
+        string="Age Maxi.(années)",
+        related='produit_phcie_id.age_maximum',
+        default=0,
+        readonly=True,
+        help="L'âge maximum autorisé pour l'accès au médicament."
+    )
     zone_couverte = fields.Boolean(
         string="Zone Couverte?",
         default=True,
@@ -2003,7 +2017,6 @@ class DetailsPec(models.Model):
     age = fields.Char(
         string="Age",
         related='assure_id.age',
-        # store=True,
         required=False,
         readonly=True,
     )
@@ -2858,21 +2871,20 @@ class DetailsPec(models.Model):
     # @api.multi
     @api.onchange('date_demande', 'prestation_id', 'date_execution', 'pool_medical_crs_id')
     def _check_accord_prealable(self):
-        for rec in self:
-            if bool(rec.accord_prealable):
-                if not bool(rec.accorde) and rec.pec_state == 'cours':
-                    action = {
-                        'warning': {
-                            'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
-                            'message': _(u"La prestation: %s est soumise à l'accord préalable du médecin conseil. \
-                                         A cet effet, il faudra impérativement l'autorisation expresse du médecin avant\
-                                         l'exécution de la prestation concernée. Une notification est envoyée au médecin\
-                                         pour validation. Pour plus d'informations, veuillez contactez \
-                                         l'administrateur."
-                                        ) % rec.prestation_id.name
-                        },
-                    }
-                    return action
+        if bool(self.accord_prealable):
+            if not bool(self.accorde) and self.pec_state == 'cours':
+                action = {
+                    'warning': {
+                        'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
+                        'message': _(u"La prestation: %s est soumise à l'accord préalable du médecin conseil. \
+                                     A cet effet, il faudra impérativement l'autorisation expresse du médecin avant\
+                                     l'exécution de la prestation concernée. Une notification est envoyée au médecin\
+                                     pour validation. Pour plus d'informations, veuillez contactez \
+                                     l'administrateur."
+                                      ) % self.prestation_id.name
+                    },
+                }
+                return action
 
     @api.onchange('prestation_crs_id',)
     def _warning_crs_prestation(self):
@@ -2906,7 +2918,7 @@ class DetailsPec(models.Model):
 
     # IDENTIFICATION DES PRESTATIONS FOURNIES
     # @api.one
-    @api.depends('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'code_id_rfm',
+    @api.depends('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id','date_execution',
                  'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id', 'prestataire_rembourse_id')
     def _check_prestation_id(self):
         # self.ensure_one()
@@ -2952,31 +2964,27 @@ class DetailsPec(models.Model):
                 # Récupérer le prestataire vde soins et la prestation médicale concernée
                 rec.prestation_id = rec.prestation_rembourse_id.id
             # PHARMACIE PEC
-            elif (bool (rec.prestataire_phcie_id) or bool (rec.produit_phcie_id)) or bool (
+            elif (bool(rec.prestataire_phcie_id) or bool (rec.produit_phcie_id)) or bool (
                     rec.substitut_phcie_id) and rec.date_execution:
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
                 pharmacie_id = rec.prestataire_phcie_id.id
-                if bool (pharmacie_id):
+                if bool(pharmacie_id):
                     pharmacie = rec.prestataire_phcie_id.name
-                    prestation = self.env['proximas.prestation'].search (
+                    prestation = self.env['proximas.prestation'].search(
                         [
                             ('prestataire_id', '=', pharmacie_id),
-                            ('rubrique', 'ilike', 'PHARMACIE')
+                            # ('rubrique', 'ilike', 'PHARMACIE')
                         ]
                     )
-                    if bool (prestation):
+                    if bool(prestation):
                         # rec.ensure_one()
                         rec.prestation_id = prestation.id
 
-    @api.one
+    # @api.one
     @api.onchange('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                     'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
-                     'prestataire_rembourse_id')
-    @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                    'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
-                    'prestataire_rembourse_id')
-    def _valide_prestation_id(self):
-        self.ensure_one()
+                  'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
+                  'prestataire_rembourse_id')
+    def _track_prestation_id(self):
         if bool(self.prestation_demande_id) and bool(self.prestataire_crs_id) and bool(self.pool_medical_crs_id):
             # Récupérer la prestation médicale du CRS
             code_prestation_id = self.prestation_demande_id.id
@@ -3054,15 +3062,91 @@ class DetailsPec(models.Model):
                     )
                 )
 
+    @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
+                    'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id', 'prestataire_rembourse_id')
+    def _valide_prestation_id(self):
+        for rec in self:
+            if bool(rec.prestation_demande_id) and bool (rec.prestataire_crs_id) and bool(rec.pool_medical_crs_id):
+                # Récupérer la prestation médicale du CRS
+                code_prestation_id = rec.prestation_demande_id.id
+                prestataire_id = rec.prestataire_crs_id.id
+                prestation = rec.env['proximas.prestation'].search (
+                    [
+                        ('code_prestation_id', '=', code_prestation_id),
+                        ('prestataire_id', '=', prestataire_id)
+                    ]
+                )
+                if not bool(prestation):
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion:\n \
+                        La prestation demandée: %s ne figure pas dans la liste des prestations fournies par le\
+                        prestataire: %s. Par conséquent, cette prestation ne peut être prise en compte dans le cadre \
+                        de la convention signée avec le prestataire concernée. Pour plus d'informations, \
+                        veuillez contactez l'administrateur..."
+                    ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
+                                     )
+            # rec.code_medical_id = rec.prestation_crs_id.code_medical_id.id
+            # REMBOURSEMENT - PHARMACIE
+            elif bool(rec.code_id_rfm) and bool (rec.prestataire_rembourse_id) and bool (rec.produit_phcie_id):
+                # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
+                pharmacie_rembourse_id = rec.prestataire_rembourse_id.id
+                if bool (pharmacie_rembourse_id):
+                    prestation = rec.env['proximas.prestation'].search (
+                        [
+                            ('prestataire_id', '=', pharmacie_rembourse_id),
+                            ('rubrique', '=', 'PHARMACIE')
+                        ]
+                    )
+                    if not bool (prestation):
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion:\n \
+                            Le prestataire concerné : %s n'a pas été parametré pour fournir les médicaments (Pharmacie).\
+                            Par conséquent, vous ne pourrez dispenser de médicament(s) pour le compte de celui-ci. \
+                            Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % rec.prestataire_rembourse_id.name
+                                         )
+                else:
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion:\n \
+                        Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dipenser\
+                        de médicament(s) pour le prestaire concerné. \
+                        Pour plus d'informations, veuillez contactez l'administrateur..."
+                    )
+                    )
+            # PHARMACIE PEC
+            elif (bool (rec.prestataire_phcie_id) or bool (rec.produit_phcie_id)) or bool (
+                    rec.substitut_phcie_id) and rec.date_execution:
+                # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
+                pharmacie_id = rec.prestataire_phcie_id.id
+                if bool (pharmacie_id):
+                    pharmacie = rec.prestataire_phcie_id.name
+                    prestation = rec.env['proximas.prestation'].search (
+                        [
+                            ('prestataire_id', '=', pharmacie_id),
+                            ('rubrique', 'ilike', 'PHARMACIE')
+                        ]
+                    )
+                    if not bool (prestation):
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion:\n \
+                            Le prestataire concerné: {}, n'a pas été parametré pour dispenser les médicaments (Pharmacie).\
+                            Par conséquent, vous ne pourrez enregistrer les produits pour le compte de celui-ci. \
+                            Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ).format (pharmacie)
+                                         )
+                else:
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion:\n \
+                        Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dispenser\
+                        des médicaments pour le prestataire concerné. Pour plus d'informations, veuillez contactez \
+                        l'administrateur..."
+                    )
+                    )
+
     # IDENTIFICATION ASSURE - PATIENT
     @api.depends('code_id_rfm', 'assure')
-    @api.onchange('code_id_rfm', 'assure')
-    @api.constrains('code_id_rfm', 'assure')
+    #  @api.constrains('code_id_rfm', 'assure')
     def _get_assure_id(self):
-        """
-        Récupération de l'identifiant de l'assuré
-        :return: assure.name
-        """
         for rec in self:
             adherent = rec.rfm_id.adherent_id
             contrat_adherent = self.env['proximas.contrat'].search(
@@ -3113,7 +3197,6 @@ class DetailsPec(models.Model):
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
                  'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _get_rubrique_medicale(self):
-        self.ensure_one()
         controle_rubrique = self.env['proximas.controle.rubrique'].search([
             ('rubrique_id', '=', self.rubrique_id.id),
             ('police_id', '=', self.police_id.id),
@@ -3134,141 +3217,71 @@ class DetailsPec(models.Model):
             ticket_exigible_rubrique = bool (controle_rubrique.ticket_exigible)
             # self.rubrique_id = controle_rubrique.id
             self.ticket_exigible = bool(ticket_exigible_rubrique)
-            # nbre_actes_rubrique_assure = 0
-            # totaux_rubrique_assure = 0
-            # nbre_actes_rubrique_contrat = 0
-            # totaux_rubrique_contrat = 0
-            # CONTROLES SUR LA RUBRIQUE MEDICALE
-            # 1. Contrôle Delai de carence pour la rubrique médicale
+
             now = fields.Date.from_string(fields.Date.today())
             debut_carence = fields.Date.from_string(
                 self.assure_id.date_activation) or fields.Date.from_string(fields.Date.today ())
             jours_activation = (now - debut_carence).days  # => différence en les 2 dates en nombre de jours.
             if 0 < delai_carence_rubrique >= int (jours_activation):
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
-                         observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
-                         contactez l'administrateur..."
-                    ) % (self.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                          L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
-                          observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
-                          contactez l'administrateur..."
-                    ) % (self.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
+                      observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
+                      contactez l'administrateur..."
+                ) % (self.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
+                                 )
             # 2. Contrôle age limite pour la rubrique
             if 0 < age_limite_rubrique < int (self.assure_id.age):
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à : \
-                         (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
-                         l'administrateur..."
-                    ) % (self.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à :\
-                        (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
-                        l'administrateur..."
-                    ) % (self.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à :\
+                    (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
+                    l'administrateur..."
+                ) % (self.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
+                                 )
             # 3. Contrôle sur le genre de l'assuré
             if str (self.assure_id.genre) != str (genre_rubrique) and genre_rubrique != 'tous':
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n\
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
-                        La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations, \
-                        veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.genre, genre_rubrique)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n\
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
-                        La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations,\
-                        veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.genre, genre_rubrique)
-                                     )
-
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n\
+                    L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
+                    La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations,\
+                    veuillez contactez l'administrateur..."
+                ) % (self.assure_id.name, self.assure_id.genre, genre_rubrique)
+                                 )
             # 4. Contrôle sur le statut familial de l'assuré
             if self.assure_id.statut_familial != statut_familial_rubrique and statut_familial_rubrique not in [
                 'adherent_conjoint', 'adherent_enfant', 'conjoint_enfant', 'tous']:
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                          L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                          familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
-                          est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                          L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                          familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
-                          est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                     )
-
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                      familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
+                      est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
+                                 )
             elif self.assure_id.statut_familial == 'enfant' and statut_familial_rubrique == 'adherent_conjoint':
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                         familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
-                         est:%s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                         familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
-                         %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                     familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                     %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
+                                 )
             elif self.assure_id.statut_familial == 'conjoint' and statut_familial_rubrique == 'adherent_enfant':
-                if bool(verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                         familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
-                         %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                         familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
-                         %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                     familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                     %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
+                                 )
             elif self.assure_id.statut_familial == 'adherent' and statut_familial_rubrique == 'conjoint_enfant':
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                         familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
-                         %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
-                         familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
-                         %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                     familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                     %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
+                                 )
             # Calculs sur les plafonds RUBRIQUE  / EXERCICE
             date_debut = fields.Date.from_string(self.date_debut_assure)
             date_fin = fields.Date.from_string(self.date_fin_prevue_assure)
@@ -3306,106 +3319,347 @@ class DetailsPec(models.Model):
                 nbre_jours_dernier_acte = (now - date_dernier_acte).days
                 # Comparer le délai d'attente prévu par la rubrique et le nombre de jours écoulés
                 if 0 < int(delai_attente_rubrique) >= int(nbre_jours_dernier_acte) != 0:
-                    if bool(verou_rubrique):
-                        raise ValidationError (_ (
-                            u"Proximaas : Contrôle de Règles de Gestion.\n \
-                             L'assuré(e) concerné(e) : %s ne peut bénéficier de cette prestation. Le délai d'attente à \
-                             observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
-                             d'informations, veuillez contactez l'administrateur..."
-                        ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
-                                               )
-                    else:
-                        raise UserError(_(
-                            u"Proximas : Proximaas : Contrôle de Règles de Gestion.\n \
-                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Car le délai d'attente\
-                             à observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
-                             d'informations, veuillez contactez l'administrateur..."
-                        ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
-                                         )
+                    raise UserError (_ (
+                        u"Proximas : Proximaas : Contrôle de Règles de Gestion.\n \
+                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Car le délai d'attente\
+                         à observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
+                         d'informations, veuillez contactez l'administrateur..."
+                    ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
+                                     )
             # 5.1. Contrôle Plafond Individu pour la rubrique
             if 0 < plafond_individu_rubrique <= totaux_rubrique_assure:
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
-                         fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
-                         contactez l'administrateur..."
-                    ) % (self.assure_id.name, controle_rubrique.plafond_individu,
-                         controle_rubrique.rubrique_name)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
-                         fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
-                         contactez l'administrateur..."
-                    ) % (self.assure_id.name, controle_rubrique.plafond_individu,
-                         controle_rubrique.rubrique_name)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
+                     fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
+                     contactez l'administrateur..."
+                ) % (self.assure_id.name, controle_rubrique.plafond_individu,
+                     controle_rubrique.rubrique_name)
+                                 )
             # 5.2. Contrôle Plafond famille (contrat)
             elif 0 < plafond_famille_rubrique <= totaux_rubrique_contrat:
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
-                         fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
-                         contactez l'administrateur..."
-                    ) % (self.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
-                         fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
-                         contactez l'administrateur..."
-                    ) % (self.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
+                     fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
+                     contactez l'administrateur..."
+                ) % (self.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
+                                 )
             # 6.1. Contrôle Nombre d'actes par individu pour la rubrique
             elif 0 < nbre_actes_individu_rubrique < nbre_actes_rubrique_assure:
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
-                         par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations, \
-                         veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                         L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
-                         par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations,\
-                         veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
+                     par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations,\
+                     veuillez contactez l'administrateur..."
+                ) % (self.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
+                                 )
             # 6.2. Contrôle nombre d'actes par famille pour la rubrique
             elif 0 < nbre_actes_famille_rubrique < nbre_actes_rubrique_contrat:
-                if bool (verou_rubrique):
-                    raise ValidationError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                          L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
-                          par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
-                          d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
-                                           )
-                else:
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                          L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
-                          par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
-                          d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
-                                     )
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
+                      par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
+                      d'informations, veuillez contactez l'administrateur..."
+                ) % (self.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
+                                 )
             # CALCULS DE TAUX DES SINISTRES PAR RUBRIQUE MEDICALE
             if plafond_individu_rubrique:
                 self.niveau_plafond_rubrique_assure = totaux_rubrique_assure * 100 / plafond_individu_rubrique
             if plafond_famille_rubrique:
                 self.niveau_plafond_rubrique_contrat = totaux_rubrique_contrat * 100 / plafond_famille_rubrique
 
-    @api.constrains ('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
-                     'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
-    def _controle_rubrique_medicale(self):
-        pass
+    @api.constrains('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
+                    'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+    def _validate_rubrique_medicale(self):
+        for rec in self:
+            controle_rubrique = rec.env['proximas.controle.rubrique'].search ([
+                ('rubrique_id', '=', rec.rubrique_id.id),
+                ('police_id', '=', rec.police_id.id),
+            ])
+            # Contrôles à effectuer sur la rubrique médicale
+            if bool (controle_rubrique):
+                # Si la rubrique médicale existe dans la table de contrôles rubriques médicales
+                genre_rubrique = str (controle_rubrique.genre)
+                statut_familial_rubrique = str (controle_rubrique.statut_familial)
+                plafond_individu_rubrique = int (controle_rubrique.plafond_individu)
+                plafond_famille_rubrique = int (controle_rubrique.plafond_famille)
+                delai_carence_rubrique = int (controle_rubrique.delai_carence)
+                age_limite_rubrique = int (controle_rubrique.age_limite)
+                nbre_actes_individu_rubrique = int (controle_rubrique.nbre_actes_maxi_individu)
+                nbre_actes_famille_rubrique = int (controle_rubrique.nbre_actes_maxi_famille)
+                delai_attente_rubrique = int (controle_rubrique.delai_attente)
+                verou_rubrique = bool (controle_rubrique.controle_strict)
+                ticket_exigible_rubrique = bool (controle_rubrique.ticket_exigible)
+                # rec.rubrique_id = controle_rubrique.id
+                rec.ticket_exigible = bool (ticket_exigible_rubrique)
+                # nbre_actes_rubrique_assure = 0
+                # totaux_rubrique_assure = 0
+                # nbre_actes_rubrique_contrat = 0
+                # totaux_rubrique_contrat = 0
+                # CONTROLES SUR LA RUBRIQUE MEDICALE
+                # 1. Contrôle Delai de carence pour la rubrique médicale
+                now = fields.Date.from_string (fields.Date.today ())
+                debut_carence = fields.Date.from_string (
+                    rec.assure_id.date_activation) or fields.Date.from_string (fields.Date.today ())
+                jours_activation = (now - debut_carence).days  # => différence en les 2 dates en nombre de jours.
+                if 0 < delai_carence_rubrique >= int (jours_activation):
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
+                             observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
+                             contactez l'administrateur..."
+                        ) % (rec.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
+                              observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
+                              contactez l'administrateur..."
+                        ) % (rec.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
+                                         )
+                # 2. Contrôle age limite pour la rubrique
+                if 0 < age_limite_rubrique < int (rec.assure_id.age):
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à : \
+                             (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
+                             l'administrateur..."
+                        ) % (rec.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                            L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à :\
+                            (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
+                            l'administrateur..."
+                        ) % (rec.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
+                                         )
+                # 3. Contrôle sur le genre de l'assuré
+                if str (rec.assure_id.genre) != str (genre_rubrique) and genre_rubrique != 'tous':
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n\
+                            L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
+                            La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations, \
+                            veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.genre, genre_rubrique)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n\
+                            L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
+                            La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations,\
+                            veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.genre, genre_rubrique)
+                                         )
+
+                # 4. Contrôle sur le statut familial de l'assuré
+                if rec.assure_id.statut_familial != statut_familial_rubrique and statut_familial_rubrique not in [
+                    'adherent_conjoint', 'adherent_enfant', 'conjoint_enfant', 'tous']:
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
+                              est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
+                              est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                         )
+
+                elif rec.assure_id.statut_familial == 'enfant' and statut_familial_rubrique == 'adherent_conjoint':
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                             familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
+                             est:%s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                             familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                             %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                         )
+                elif rec.assure_id.statut_familial == 'conjoint' and statut_familial_rubrique == 'adherent_enfant':
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                             familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                             %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                             familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                             %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                         )
+                elif rec.assure_id.statut_familial == 'adherent' and statut_familial_rubrique == 'conjoint_enfant':
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                             familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                             %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
+                             familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
+                             %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
+                                         )
+                # Calculs sur les plafonds RUBRIQUE  / EXERCICE
+                date_debut = fields.Date.from_string (rec.date_debut_assure)
+                date_fin = fields.Date.from_string (rec.date_fin_prevue_assure)
+                details_pec_rubrique_assure = rec.search ([
+                    ('assure_id', '=', rec.assure_id.id),
+                    ('rubrique_id', '=', rec.rubrique_id.id),
+                    ('date_execution', '>=', date_debut),
+                    ('date_execution', '<=', date_fin),
+                ])
+                details_pec_rubrique_contrat = rec.env['proximas.details.pec'].search ([
+                    ('contrat_id', '=', rec.contrat_id.id),
+                    ('rubrique_id', '=', rec.rubrique_id.id),
+                    ('date_execution', '>=', date_debut),
+                    ('date_execution', '<=', date_fin),
+                ])
+                nbre_actes_rubrique_assure = len (details_pec_rubrique_assure)
+                nbre_actes_rubrique_contrat = len (details_pec_rubrique_contrat)
+                # CALCULS NIVEAU DES SINISTRES PAR RUBRIQUE MEDICALE
+                totaux_rubrique_assure = sum (item.total_pc for item in details_pec_rubrique_assure)
+                totaux_rubrique_contrat = sum (item.total_pc for item in details_pec_rubrique_contrat)
+
+                rec.totaux_rubrique_assure = totaux_rubrique_assure  # + rec.total_pc
+                rec.totaux_rubrique_contrat = totaux_rubrique_contrat  # + rec.total_pc
+                rec.nbre_actes_rubrique_assure = nbre_actes_rubrique_assure  # + 1
+                rec.nbre_actes_rubrique_contrat = nbre_actes_rubrique_contrat  # + 1
+                # 8. Contrôle délai d'attente à observer
+                if bool (details_pec_rubrique_assure):
+                    # Contrôles si les prestations fournies à l'assuré sont liées à la rubrique
+                    # si OUI, sélectionner la dernière prestation liée à la rubrique
+                    dernier_acte_rubrique_assure = details_pec_rubrique_assure[0]
+                    # Récupérer la date de la dernière prestation liée à la rubrique
+                    date_dernier_acte = fields.Date.from_string (dernier_acte_rubrique_assure.date_execution) or \
+                                        fields.Date.from_string (fields.Date.today ())
+                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
+                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                    # Comparer le délai d'attente prévu par la rubrique et le nombre de jours écoulés
+                    if 0 < int (delai_attente_rubrique) >= int (nbre_jours_dernier_acte) != 0:
+                        if bool (verou_rubrique):
+                            raise ValidationError (_ (
+                                u"Proximaas : Contrôle de Règles de Gestion.\n \
+                                 L'assuré(e) concerné(e) : %s ne peut bénéficier de cette prestation. Le délai d'attente à \
+                                 observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
+                                 d'informations, veuillez contactez l'administrateur..."
+                            ) % (rec.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
+                                                   )
+                        else:
+                            raise UserError (_ (
+                                u"Proximas : Proximaas : Contrôle de Règles de Gestion.\n \
+                                 L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Car le délai d'attente\
+                                 à observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
+                                 d'informations, veuillez contactez l'administrateur..."
+                            ) % (rec.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
+                                             )
+                # 5.1. Contrôle Plafond Individu pour la rubrique
+                if 0 < plafond_individu_rubrique <= totaux_rubrique_assure:
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
+                             fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
+                             contactez l'administrateur..."
+                        ) % (rec.assure_id.name, controle_rubrique.plafond_individu,
+                             controle_rubrique.rubrique_name)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
+                             fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
+                             contactez l'administrateur..."
+                        ) % (rec.assure_id.name, controle_rubrique.plafond_individu,
+                             controle_rubrique.rubrique_name)
+                                         )
+                # 5.2. Contrôle Plafond famille (contrat)
+                elif 0 < plafond_famille_rubrique <= totaux_rubrique_contrat:
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
+                             fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
+                             contactez l'administrateur..."
+                        ) % (rec.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
+                             fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
+                             contactez l'administrateur..."
+                        ) % (rec.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
+                                         )
+                # 6.1. Contrôle Nombre d'actes par individu pour la rubrique
+                elif 0 < nbre_actes_individu_rubrique < nbre_actes_rubrique_assure:
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
+                             par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations, \
+                             veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
+                             par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations,\
+                             veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
+                                         )
+                # 6.2. Contrôle nombre d'actes par famille pour la rubrique
+                elif 0 < nbre_actes_famille_rubrique < nbre_actes_rubrique_contrat:
+                    if bool (verou_rubrique):
+                        raise ValidationError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
+                              par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
+                              d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
+                                               )
+                    else:
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
+                              par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
+                              d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
+                                         )
+                # CALCULS DE TAUX DES SINISTRES PAR RUBRIQUE MEDICALE
+                if plafond_individu_rubrique:
+                    rec.niveau_plafond_rubrique_assure = totaux_rubrique_assure * 100 / plafond_individu_rubrique
+                if plafond_famille_rubrique:
+                    rec.niveau_plafond_rubrique_contrat = totaux_rubrique_contrat * 100 / plafond_famille_rubrique
 
     # CONTROLES A EFFECTUER SUR PRESTATIONS MEDICALE ET CONTROLES POLICE
     # 1. CONTROLE RUBRIQUE MEDICALE POLICE
@@ -3715,9 +3969,7 @@ class DetailsPec(models.Model):
     #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
     #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
     @api.depends('cout_unite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
-    # @api.constrains('cout_unit', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
-        self.ensure_one()
         if bool(self.prestation_id):
             # Vérifier si la prestation est identifiée
             controle_rubrique = self.env['proximas.controle.rubrique'].search([
@@ -4252,9 +4504,102 @@ class DetailsPec(models.Model):
     #                     }
     #                 }
 
+    # @api.one
+    @api.onchange('prestation_id', 'produit_phcie_id', 'substitut_phcie_id')
+    def _track_age_acces_prestation(self):
+        # CONTRÖLE AGE MINIMUM & MAXIMUM PRODUITS PHCIE / PRESTATION MEDICALE
+        age_assure = int(self.age)
+        if self.substitut_phcie_id:
+            substitut_phcie = self.substitut_phcie
+            age_minimum = int(self.substitut_phcie_id.age_minimum)
+            age_maximum = int(self.substitut_phcie_id.age_maximum)
+            if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
+                return {'value': {},
+                        'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
+                                    'message': u"L'assuré concerné: %s ne peut bénéficier de cette \
+                                    prescription commme substitut médicament. La contrainte d'âge minimum et maximum\
+                                    pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
+                                    . Pour plus d'informations, veuillez contactez l'administrateur..."
+                                    % (self.assure_id.name, substitut_phcie, age_minimum, age_maximum)
+                                    }
+                        }
+        elif self.produit_phcie_id:
+            produit_phcie = self.produit_phcie
+            age_minimum = int(self.produit_phcie_id.age_minimum)
+            age_maximum = int(self.produit_phcie_id.age_maximum)
+            if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
+                return {'value': {},
+                        'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
+                                    'message': u"L'assuré concerné: %s ne peut bénéficier de cette \
+                                    prescription commme médicament. La contrainte d'âge minimum et maximum\
+                                    pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
+                                    . Pour plus d'informations, veuillez contactez l'administrateur..."
+                                    % (self.assure_id.name, produit_phcie, age_minimum, age_maximum)
+                                    }
+                        }
+        elif self.prestation_id:
+            details_prestation = self.details_prestation
+            age_minimum = int(self.code_prestation_id.age_minimum)
+            age_maximum = int(self.code_prestation_id.age_maximum)
+            if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
+                return {'value': {},
+                        'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
+                                    'message': u"L'assuré concerné: %s ne peut bénéficier de cette \
+                                    prestation médicale. La contrainte d'âge minimum et maximum\
+                                    pour la prestation : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
+                                    . Pour plus d'informations, veuillez contactez l'administrateur..."
+                                    % (self.assure_id.name, details_prestation, age_minimum, age_maximum)
+                                    }
+                        }
+
+    @api.constrains('prestation_id', 'produit_phcie_id', 'substitut_phcie_id')
+    def _validate_age_acces_prestation(self):
+        # CONTRÖLE AGE MINIMUM & MAXIMUM PRODUITS PHCIE / PRESTATION MEDICALE
+        for rec in self:
+            age_assure = int(rec.age)
+            if rec.substitut_phcie_id:
+                substitut_phcie = rec.substitut_phcie
+                age_minimum = int (rec.substitut_phcie_id.age_minimum)
+                age_maximum = int (rec.substitut_phcie_id.age_maximum)
+                if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
+                    raise ValidationError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion.\n \
+                         L'assuré concerné: %s ne peut bénéficier de cette \
+                         prescription commme substitut médicament. La contrainte d'âge minimum et maximum\
+                         pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
+                         . Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, substitut_phcie, age_minimum, age_maximum)
+                    )
+            elif rec.produit_phcie_id:
+                produit_phcie = rec.produit_phcie
+                age_minimum = int(rec.produit_phcie_id.age_minimum)
+                age_maximum = int(rec.produit_phcie_id.age_maximum)
+                if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
+                    raise ValidationError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion.\n \
+                         L'assuré concerné: %s ne peut bénéficier de cette \
+                         prescription commme médicament. La contrainte d'âge minimum et maximum\
+                         pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
+                        . Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (rec.assure_id.name, produit_phcie, age_minimum, age_maximum)
+                    )
+            elif rec.prestation_id:
+                details_prestation = rec.details_prestation
+                age_minimum = int(rec.code_prestation_id.age_minimum)
+                age_maximum = int(rec.code_prestation_id.age_maximum)
+                if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
+                    raise ValidationError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion.\n \
+                         L'assuré concerné: %s ne peut bénéficier de cette \
+                         prestation médicale. La contrainte d'âge minimum et maximum\
+                         pour la prestation : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
+                         . Pour plus d'informations, veuillez contactez l'administrateur..."
+                    ) % (rec.assure_id.name, details_prestation, age_minimum, age_maximum)
+                                           )
+
     @api.one
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
-                  'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+                 'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _check_delai_attente_prestation(self):
         # Contrôle du délai d'attente Substitut Médicament
         self.ensure_one()
