@@ -1018,6 +1018,7 @@
                                 <tree default_order="date_demande asc">
                                     <field name="date_demande"/>
                                     <field name="medicament" string="Médicaments Prescrits"/>
+                                    <field name="quantité"/>
                                     <field name="pool_medical" string="Prescripteur"/>
                                     <field name="posologie"/>
                                     <!--<field name="cout_unit" string="Coût Unit."/>
