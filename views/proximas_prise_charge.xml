@@ -955,9 +955,259 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="PRESCRIPTION / DISPENSATION DE MEDICAMENTS"
-                              attrs="{'invisible':[('state','=','cours'),'|',('nbre_prestations_demandes','!=',0),
+                        <page string="PRESCRIPTION DE MEDICAMENTS/ORDONNANCE"
+                              attrs="{'invisible':[('state','=','cours'),'|',('nbre_prestations_demandes','!=',0),'|',
+                              ('nbre_prestations_fournies','=',0),('state','in',['dispense','termine'])]}">
+                            <field name="details_pec_prescription_ids"
+                                   widget="one2many"
+                                   class="text-info"
+                                   domain="['|',('prestataire_id', '!=', None)]"
+                                   context="{
+                                   'default_prestataire_id':prestataire_id,'default_assure_id':assure_id,'default_police_id':police_id,
+                                   'default_prestataire_crs_id':prestataire_crs_id,'default_prestataire_phcie_id':prestataire_phcie_id,
+                                   'default_structure_id':structure_id,'default_user':uid}">
+                                <!--'form_view_ref': 'proximas_medical.details_pec_phcie_form',-->
+                                <form string="Détails de Prise en charge Assuré">
+                                    <sheet>
+                                        <notebook>
+                                            <!--<page string="Prescription/Dispensation Médicaments">-->
+                                            <group invisible="1">
+                                                <field name="create_uid"/>
+                                                <field name="write_uid"/>
+                                                <field name="current_user"/>
+                                                <field name="prestataire_phcie_id"/>
+                                                <field name="pec_state"/>
+                                                <field name="assure_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       readonly="1"/>
+                                                <field name="prestataire_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       readonly="1"/>
+                                                <field name="pool_medical_id" string="Médecin Prescripteur"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       domain="[('prestataire_id', '=', prestataire_id)]"/>
+                                                <field name="prestataire_crs_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       readonly="1"/>
+                                                <field name="pool_medical_crs_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       domain="[('prestataire_id', '=', prestataire_crs_id)]"
+                                                       readonly="0"/>
+                                            </group>
+                                            <page string="PRESCRIPTION MEDICAMENTS / MEDECIN"
+                                                   attrs="{'readonly': [('date_demande','!=',False),
+                                                   ('produit_phcie_id','!=',False),('quantite','>',0)]}"
+                                            >
+                                                <group>
+                                                    <field name="date_demande" required="1" string="Date Prescription"/>
+                                                    <field name="produit_phcie_id"
+                                                           options='{"no_open": True, "no_create": True}'
+                                                           required="1"
+                                                    />
+                                                    <field name="quantite" required="1"
+                                                           string="Quantité Prescrite"
+                                                    />
+                                                    <field name="posologie"/>
+                                                    <field name="nbre_produit_phcie" invisible="1"/>
+                                                </group>
+                                            </page>
+                                        </notebook>
+                                    </sheet>
+                                </form>
+                                <tree default_order="date_execution asc">
+                                    <!--<field name="pec_id"/>-->
+                                    <field name="date_execution"/>
+                                    <!--<field name="pool_medical_id"/>-->
+                                    <field name="medicament" string="Produits/Pharmacie"/>
+                                    <field name="cout_unit" string="Coût Unit."/>
+                                    <!--<field name="quantite" string="Qté."/>-->
+                                    <field name="quantite_livre" string="Qté."/>
+                                    <field name="cout_total" sum="S/Totaux"/>
+                                    <!--<field name="total_pc" sum="Totaux PC:"/>-->
+                                    <field name="taux_couvert"/>
+                                    <field name="net_tiers_payeur"  sum="Part SAM:"/>
+                                    <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod.:"/>
+                                    <!--<field name="mt_paye_assure" sum="Totaux Payé:"/>-->
+                                    <field name="net_prestataire" sum="Totaux Dû (Prestataire):"/>
+                                    <!--<field name="debit_ticket" sum="Débit Ticket:"/>-->
+                                </tree>
+                            </field>
+                            <!--<group>
+                                <group class="oe_subtotal_footer oe_right text-primary">
+                                   <field name="part_sam_phcie"/>
+                                   <field name="ticket_moderateur_phcie"/>
+                                   <field name="mt_totaux_phcie" class="oe_subtotal_footer_separator"/>
+                                   <field name="ticket_exigible_phcie"/>
+                                   <field name="mt_encaisse_phcie" string="Montant Perçu (Ticket Modérateur)"/>
+                                   <field name="net_prestataire_phcie" class="oe_subtotal_footer_separator"/>
+                                </group>
+                            </group>-->
+                        </page>
+                        <page string="DISPENSATION MEDICAMENTS - PHARMACIE"
+                              attrs="{'invisible':[('state','in',['cours','oriente']),'|',('nbre_prestations_demandes','!=',0),
                               ('prestataire_crs_id','=',None),'|',('state','=','oriente'),('nbre_prestations_fournies','=',0)]}">
+                            <field name="details_pec_phcie_ids"
+                                   widget="one2many"
+                                   class="text-info"
+                                   domain="['|',('prestataire_id', '!=', None)]"
+                                   context="{
+                                   'default_prestataire_id':prestataire_id,'default_assure_id':assure_id,'default_police_id':police_id,
+                                   'default_prestataire_crs_id':prestataire_crs_id,'default_prestataire_phcie_id':prestataire_phcie_id,
+                                   'default_structure_id':structure_id,'default_user':uid}">
+                                <!--'form_view_ref': 'proximas_medical.details_pec_phcie_form',-->
+                                <form string="Détails de Prise en charge Assuré">
+                                    <sheet>
+                                        <notebook>
+                                            <!--<page string="Prescription/Dispensation Médicaments">-->
+                                            <group invisible="1">
+                                                <field name="create_uid"/>
+                                                <field name="write_uid"/>
+                                                <field name="current_user"/>
+                                                <field name="prestataire_phcie_id"/>
+                                                <field name="pec_state"/>
+                                                <field name="assure_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       readonly="1"/>
+                                                <field name="prestataire_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       readonly="1"/>
+                                                <field name="pool_medical_id" string="Médecin Prescripteur"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       domain="[('prestataire_id', '=', prestataire_id)]"/>
+                                                <field name="prestataire_crs_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       readonly="1"/>
+                                                <field name="pool_medical_crs_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       domain="[('prestataire_id', '=', prestataire_crs_id)]"
+                                                       readonly="0"/>
+                                            </group>
+                                            <!--<page string="1. PRESCRIPTION MEDICAMENTS"
+                                                   attrs="{'readonly': [('date_demande','!=',False),
+                                                   ('produit_phcie_id','!=',False),('quantite','>',0)]}"
+                                            >
+                                                <group>
+                                                    <field name="date_demande" required="1" string="Date Prescription"/>
+                                                    <field name="produit_phcie_id"
+                                                           options='{"no_open": True, "no_create": True}'
+                                                           required="1"
+                                                           />
+                                                    <field name="quantite" required="1"
+                                                           string="Quantité Prescrite"
+                                                    />
+                                                    <field name="posologie"/>
+                                                    <field name="nbre_produit_phcie" invisible="1"/>
+                                                </group>
+                                            </page>-->
+                                            <page string="DISPENSATION MEDICAMENTS - PHARMACIE"
+                                                   attrs="{'invisible': [('prestataire_phcie_id','=',False)]}"
+                                            >
+                                                <div class="oe_title" name="title">
+                                                    <label for="prestataire_phcie_id" string="Pharmacie / Officine :"/>
+                                                    <h2 class="bg-success text-success">
+                                                        <field name="prestataire_phcie_id"
+                                                           options='{"no_open": True, "no_create": True}'
+                                                           readonly="1" sstring="Prestataire Conventionné - Pharmacie/Officine"/>
+                                                    </h2>
+                                                </div>
+                                                <newline/>
+                                                <group>
+                                                    <field name="medicament" class="text-primary" string="Médicament Prescrit"/>
+                                                    <field name="date_execution" string="Date livraison (Méd.)"
+                                                           attrs="{'required': [('prestataire_phcie_id','!=',False)]}"
+                                                    />
+                                                    <field name="substitut_phcie_id"  string="Substitut Produit"
+                                                           options='{"no_open": True, "no_create": True}'
+                                                    />
+                                                    <field name="date_dernier_acte" string="Date Dernier Acte"/>
+                                                    <field name="exercice_id"
+                                                           string="Exercice SAM"
+                                                           options='{"no_open": True, "no_create": True}'/>
+                                                    <!--attrs="{'required': [('prestataire_phcie_id','!=',False)]}"-->
+                                                </group>
+                                                <group col="6" colspan="2" string="Détails Coûts du Médicament &amp; Montants annexes">
+                                                    <field name="cout_unit"
+                                                           required="1"
+                                                    />
+                                                    <field name="quantite_livre" required="1"/>
+                                                    <field name="cout_total"/>
+                                                    <field name="total_pc"/>
+                                                    <field name="total_npc"/>
+                                                    <field name="taux_couvert"/>
+                                                    <field name="ticket_moderateur"
+                                                           class="bg-success"
+                                                    />
+                                                    <field name="net_tiers_payeur"/>
+                                                    <field name="net_prestataire"
+                                                            class="bg-success"
+                                                            string="NET A DEVOIR (SAM)"
+                                                    />
+                                                </group>
+                                                <hr/>
+                                                <group col="6" colspan="2" invisible="0">
+                                                    <field name="delai_attente_produit" string="Délai (jours)"/>
+                                                    <field name="age_maximum"/>
+                                                    <field name="age_minimum"/>
+                                                </group>
+                                                <hr/>
+                                                <group col="6" colspan="2" class="bg-success">
+                                                    <field name="rubrique_id" string="Rubrisue médicale"
+                                                           options='{"no_open": True, "no_create": True}'/>
+                                                    <field name="ticket_exigible" string="Ticket Exigible?"/>
+                                                    <field name="arret_produit" string="Médicament en arrêt?"/>
+                                                </group>
+                                                <group col="6" colspan="2" groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,
+                                                        proximas_medical.group_medecin">
+                                                    <field name="totaux_rubrique_assure" string="Sinistres Rubrique Assuré"/>
+                                                    <field name="totaux_rubrique_contrat" string="Sinistres Rubrique Famille"/>
+                                                    <field name="nbre_actes_rubrique_assure"/>
+                                                    <field name="nbre_actes_rubrique_contrat" invisible="1"/>
+                                                </group>
+                                                <group col="6" colspan="2" invisible="1">
+                                                    <field name="produit_phcie"/>
+                                                    <field name="substitut_phcie"/>
+                                                    <field name="cout_unite"/>
+                                                    <field name="prestation_id" readonly="1"/>
+                                                    <field name="code_medical_id"/>
+                                                    <field name="police_id"/>
+                                                    <field name="structure_id"/>
+                                                    <field name="zone_couverte"/>
+                                                </group>
+                                            </page>
+                                        </notebook>
+                                    </sheet>
+                                </form>
+                                <tree default_order="date_execution asc" create="0" delete="0">
+                                    <!--<field name="pec_id"/>-->
+                                    <field name="date_execution"/>
+                                    <!--<field name="pool_medical_id"/>-->
+                                    <field name="medicament" string="Produits/Pharmacie"/>
+                                    <field name="cout_unit" string="Coût Unit."/>
+                                    <!--<field name="quantite" string="Qté."/>-->
+                                    <field name="quantite_livre" string="Qté."/>
+                                    <field name="cout_total" sum="S/Totaux"/>
+                                    <!--<field name="total_pc" sum="Totaux PC:"/>-->
+                                    <field name="taux_couvert"/>
+                                    <field name="net_tiers_payeur"  sum="Part SAM:"/>
+                                    <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod.:"/>
+                                    <!--<field name="mt_paye_assure" sum="Totaux Payé:"/>-->
+                                    <field name="net_prestataire" sum="Totaux Dû (Prestataire):"/>
+                                    <!--<field name="debit_ticket" sum="Débit Ticket:"/>-->
+                                </tree>
+                            </field>
+                            <group>
+                                <group class="oe_subtotal_footer oe_right text-primary">
+                                   <field name="part_sam_phcie"/>
+                                   <field name="ticket_moderateur_phcie"/>
+                                   <field name="mt_totaux_phcie" class="oe_subtotal_footer_separator"/>
+                                   <field name="ticket_exigible_phcie"/>
+                                   <field name="mt_encaisse_phcie" string="Montant Perçu (Ticket Modérateur)"/>
+                                   <field name="net_prestataire_phcie" class="oe_subtotal_footer_separator"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="PRESCRIPTION / DISPENSATION DE MEDICAMENTS"
+                              attrs="{'invisible':[('state','not in',['dispense','termine'])]}">
                             <field name="details_pec_phcie_ids"
                                    widget="one2many"
                                    class="text-info"

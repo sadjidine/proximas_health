@@ -121,6 +121,16 @@ class PriseEnCharge(models.Model):
         string='Prescription/Dispensation Médicament',
         track_visibility='always',
     )
+    details_pec_prescription_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        inverse_name="pec_id",
+        domain=[
+            ('produit_phcie_id', '!=', None),
+        ],
+        # ondelete='restrict',
+        string='Prescription/Dispensation Médicament',
+        track_visibility='always',
+    )
     details_pec_ids = fields.One2many(
         comodel_name="proximas.details.pec",
         inverse_name="pec_id",
@@ -3033,8 +3043,7 @@ class DetailsPec(models.Model):
                     )
                 )
         # PHARMACIE PEC
-        elif (bool(self.prestataire_phcie_id) or bool(self.produit_phcie_id)) or bool(
-                self.substitut_phcie_id) and self.date_execution:
+        elif (self.prestataire_phcie_id or self.produit_phcie_id or self.substitut_phcie_id) and self.date_execution:
             # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
             pharmacie_id = self.prestataire_phcie_id.id
             if bool(pharmacie_id):
@@ -3114,8 +3123,7 @@ class DetailsPec(models.Model):
                     )
                     )
             # PHARMACIE PEC
-            elif (bool (rec.prestataire_phcie_id) or bool (rec.produit_phcie_id)) or bool (
-                    rec.substitut_phcie_id) and rec.date_execution:
+            elif (rec.prestataire_phcie_id or rec.produit_phcie_id or rec.substitut_phcie_id) and rec.date_execution:
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
                 pharmacie_id = rec.prestataire_phcie_id.id
                 if bool (pharmacie_id):
