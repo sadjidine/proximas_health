@@ -117,7 +117,6 @@ class PriseEnCharge(models.Model):
             # ('arret_produit', '=', False),
 
         ],
-        # ondelete='restrict',
         string='Prescription/Dispensation Médicament',
         track_visibility='always',
     )
@@ -127,9 +126,15 @@ class PriseEnCharge(models.Model):
         domain=[
             ('produit_phcie_id', '!=', None),
         ],
-        # ondelete='restrict',
-        string='Prescription/Dispensation Médicament',
-        track_visibility='always',
+        string='Prescription Médicament',
+    )
+    details_pec_dispensation_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        inverse_name="pec_id",
+        domain=[
+            ('produit_phcie_id', '!=', None),
+        ],
+        string='Dispensation Médicament',
     )
     details_pec_ids = fields.One2many(
         comodel_name="proximas.details.pec",
@@ -664,8 +669,14 @@ class PriseEnCharge(models.Model):
         help='Nombre de Prestations médicales et paramédicales Demandées',
         default=0,
     )
+    nbre_prescriptions_medecin = fields.Integer (
+        string="Nbre. Prescriptions Médecin",
+        compute='_check_nbre_details_pec',
+        help='Nombre de Prescriptions Médecin',
+        default=0,
+    )
     nbre_prescriptions = fields.Integer(
-        string="Prescriptions",
+        string="Nbre. Prescriptions",
         compute='_check_nbre_details_pec',
         # readonly=True,
         # store=True,
@@ -794,21 +805,24 @@ class PriseEnCharge(models.Model):
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
-                 'details_pec_phcie_ids')
+                 'details_pec_phcie_ids', 'details_pec_prescription_ids')
     # @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
     #               'details_pec_phcie_ids')
     def _check_nbre_details_pec(self):
         # self.ensure_one()
+        details_pec_prescription_encours = self.details_pec_prescription_ids
         details_pec_phcie_encours = self.details_pec_phcie_ids
         self.nbre_prestations_fournies = len(self.details_pec_soins_ids)
         self.nbre_prestations_demandes = len(self.details_pec_soins_crs_ids) or len(self.details_pec_demande_crs_ids)
         # self.nbre_prestations_demandes = len (self.details_pec_demande_crs_ids)
+        self.nbre_prescriptions_medecin = len(details_pec_prescription_encours)
         self.nbre_prescriptions = len(details_pec_phcie_encours)
         self.totaux_phcie = sum(item.total_pc for item in details_pec_phcie_encours)
         self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
 
     @api.one
-    @api.depends('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
+    @api.depends('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',
+                 'details_pec_prescription_ids')
     # @api.onchange('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
     #               'nbre_prestations_fournies')
     def _compute_details_pec(self):
@@ -1219,7 +1233,8 @@ class PriseEnCharge(models.Model):
         #     self.state = 'expire'
 
     # @api.multi
-    @api.onchange('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
+    @api.onchange('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',
+                  'details_pec_prescription_ids')
     def _check_validite_pec_onchange(self):
         # self.ensure_one()
         if 0 < int(self.validite_pec) < int(self.delai_pec):
@@ -1235,7 +1250,8 @@ class PriseEnCharge(models.Model):
             return action
 
     # @api.multi
-    @api.constrains('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
+    @api.constrains('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',
+                    'details_pec_prescription_ids')
     def _validate_validite_pec(self):
         # self.ensure_one()
         if 0 < int(self.validite_pec) < int(self.delai_pec):
@@ -2167,6 +2183,7 @@ class DetailsPec(models.Model):
         required=False,
     )
     prestataire = fields.Many2one(
+        comodel_name="res.partner",
         string="Prestataire",
         related='prestation_id.prestataire_id',
         store=True,
@@ -2834,7 +2851,6 @@ class DetailsPec(models.Model):
                                                  rec.produit_phcie_id.dosage or '')
                 rec.medicament = rec.produit_phcie
 
-
     @api.multi
     def _get_current_user(self):
         for rec in self:
@@ -2928,7 +2944,7 @@ class DetailsPec(models.Model):
 
     # IDENTIFICATION DES PRESTATIONS FOURNIES
     # @api.one
-    @api.depends('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id','date_execution',
+    @api.depends('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'date_execution',
                  'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id', 'prestataire_rembourse_id')
     def _check_prestation_id(self):
         # self.ensure_one()
@@ -2990,7 +3006,6 @@ class DetailsPec(models.Model):
                         # rec.ensure_one()
                         rec.prestation_id = prestation.id
 
-    # @api.one
     @api.onchange('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
                   'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
                   'prestataire_rembourse_id')
@@ -3976,7 +3991,7 @@ class DetailsPec(models.Model):
     # @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
     #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
     #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
-    @api.depends('cout_unite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+    @api.depends('cout_unite', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         if bool(self.prestation_id):
             # Vérifier si la prestation est identifiée
