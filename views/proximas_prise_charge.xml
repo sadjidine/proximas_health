@@ -1096,10 +1096,15 @@
                                                 </h2>
                                                 </div>
                                                 <newline/>
-                                                <group string="Détails Produit (Médicament) - Coûts &amp; Montants Annexes">
+                                                <group>
                                                     <field name="medicament" class=" bg-success text-success h4" string="Médicament Prescrit"/>
                                                     <field name="date_execution" string="Date livraison (Méd.)"
                                                            attrs="{'required': [('prestataire_phcie_id','!=',False)]}"
+                                                    />
+                                                    <field name="produit_phcie_id"
+                                                           string="Médicament"
+                                                           invisible="1"
+                                                           options='{"no_open": True, "no_create": True}'
                                                     />
                                                     <field name="substitut_phcie_id"  string="Substitut Produit"
                                                            options='{"no_open": True, "no_create": True}'
@@ -1161,9 +1166,9 @@
                                     <field name="date_execution"/>
                                     <!--<field name="pool_medical_id"/>-->
                                     <field name="medicament" string="Produits/Pharmacie"/>
+                                    <field name="quantite" string="Qté. Prescrite"/>
+                                    <field name="quantite_livre" string="Qté. Livrée"/>
                                     <field name="cout_unit" string="Coût Unit."/>
-                                    <!--<field name="quantite" string="Qté."/>-->
-                                    <field name="quantite_livre" string="Qté."/>
                                     <field name="cout_total" sum="S/Totaux"/>
                                     <!--<field name="total_pc" sum="Totaux PC:"/>-->
                                     <field name="taux_couvert"/>
