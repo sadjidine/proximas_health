@@ -806,16 +806,16 @@
                                                 <div class="oe_title" name="title">
                                                     <label for="prestataire" string="Prestataire de Soins Médicaux &amp; paramédicaux - CRS"
                                                            class="oe_edit_only"/>
-                                                    <h3 class="bg-info">
+                                                    <h2 class="bg-warning text-warning">
                                                         <field name="prestataire"
                                                            options='{"no_open": True, "no_create": True}'
                                                            readonly="1"
                                                         />
                                                         <!--context="{'default_prestataire_id':prestataire_id}"-->
-                                                    </h3>
+                                                    </h2>
                                                 </div>
                                                 <newline/>
-                                                <group>
+                                                <group string="Détails - Exécution Prestation Médicale">
                                                     <field name="pool_medical_crs_id"
                                                        options='{"no_open": True, "no_create": True}'
                                                        domain="[('prestataire_id', '=', prestataire_crs_id)]"
@@ -838,9 +838,13 @@
                                                            string="Prestation médicale"
                                                            options='{"no_open": True, "no_create": True}'
                                                            readonly="1"
-                                                           class="h5 text-success"
+                                                           class="h4 bg-warning text-warning"
                                                            domain="[('prestataire_id', '=', prestataire_crs_id),('active', '=', True)]"
                                                     />
+                                                </group>
+                                                <hr/>
+                                                <group col="6" colspan="2" class="bg-warning">
+                                                    <field name="arret_prestation" readonly="1"/>
                                                     <field name="date_dernier_acte" string="Date Dernier Acte"/>
                                                     <field name="exercice_id"
                                                            string="Exercice SAM"
@@ -874,10 +878,10 @@
                                                     <field name="total_npc"/>
                                                     <field name="taux_couvert"/>
                                                     <field name="net_tiers_payeur"/>
-                                                    <field name="ticket_moderateur"/>
+                                                    <field name="ticket_moderateur" class="bg-warning"/>
                                                     <field name="net_prestataire"
-                                                           class="bg-info h5"
-                                                           string="Net à devoir (SAM)"/>
+                                                           class="bg-warning"
+                                                           string="NET DÛS (SAM)"/>
                                                 </group>
                                                 <group invisible="1">
                                                     <field name="cout_unite"/>
@@ -885,10 +889,9 @@
                                                     <field name="mt_rabais"/>
                                                     <field name="cout_modifiable" invisible="1"/>
                                                     <field name="quantite_exige" invisible="1"/>
-                                                    <field name="arret_prestation" invisible="1"/>
                                                 </group>
                                                 <hr/>
-                                                <group col="6" colspan="2">
+                                                <group col="6" colspan="2" class="bg-warning">
                                                     <field name="code_medical_id"
                                                            options='{"no_open": True, "no_create": True}'/>
                                                     <field name="rubrique_id" class="text-primary"
@@ -1093,7 +1096,7 @@
                                                 </h2>
                                                 </div>
                                                 <newline/>
-                                                <group string="Détails Produit (Médicament)">
+                                                <group string="Détails Produit (Médicament) - Coûts &amp; Montants Annexes">
                                                     <field name="medicament" class=" bg-success text-success h4" string="Médicament Prescrit"/>
                                                     <field name="date_execution" string="Date livraison (Méd.)"
                                                            attrs="{'required': [('prestataire_phcie_id','!=',False)]}"
@@ -1113,7 +1116,7 @@
                                                            string="Exercice SAM"
                                                            options='{"no_open": True, "no_create": True}'/>
                                                 </group>
-                                                <group col="6" colspan="2" string="Détails Coûts du Médicament &amp; Montants annexes">
+                                                <group col="6" colspan="2">
                                                     <field name="quantite_livre" required="1"/>
                                                     <field name="cout_unit" required="1"/>
                                                     <field name="cout_total"/>
