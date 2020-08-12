@@ -1097,7 +1097,7 @@
                                                 </div>
                                                 <newline/>
                                                 <group>
-                                                    <field name="medicament" class=" bg-success text-success h4" string="Médicament Prescrit"/>
+                                                    <field name="medicament" class=" bg-success h4" string="Prescription"/>
                                                     <field name="date_execution" string="Date livraison (Méd.)"
                                                            attrs="{'required': [('prestataire_phcie_id','!=',False)]}"
                                                     />
@@ -1175,7 +1175,7 @@
                                     <field name="net_tiers_payeur"  sum="Part SAM:"/>
                                     <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod.:"/>
                                     <!--<field name="mt_paye_assure" sum="Totaux Payé:"/>-->
-                                    <field name="net_prestataire" sum="Totaux Dû (Prestataire):"/>
+                                    <field name="net_prestataire" string="S/TOTAUX" sum="Totaux Dû (Prestataire):"/>
                                     <!--<field name="debit_ticket" sum="Débit Ticket:"/>-->
                                 </tree>
                             </field>
@@ -1191,7 +1191,7 @@
                             </group>
                         </page>
                         <page string="PRESCRIPTION / DISPENSATION DE MEDICAMENTS"
-                              attrs="{'invisible':['|','&amp;',('state','not in',['dispense','termine']),('nbre_prescriptions_medecin','!=',0),('nbre_prestations_fournies','!=',0)]}">
+                              attrs="{'invisible':['|','&amp;',('state','in',['dispense','termine']),('nbre_prescriptions_medecin','!=',0),('nbre_prestations_fournies','!=',0)]}">
                             <field name="details_pec_phcie_ids"
                                    widget="one2many"
                                    class="text-info"

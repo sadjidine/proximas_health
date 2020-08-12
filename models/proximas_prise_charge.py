@@ -1419,6 +1419,7 @@ class PriseEnCharge(models.Model):
                 ) % self.code_pec
             )
 
+
 class PecWizard(models.TransientModel):
     _name = 'proximas.pec.wizard'
     _description = 'PEC CRO Wizard'
@@ -1428,8 +1429,6 @@ class PecWizard(models.TransientModel):
         required=True,
         help="Veuillez fournir le Code ID. de l'assuré concerné."
     )
-
-
 
     @api.multi
     def open_popup(self):
@@ -1540,31 +1539,31 @@ class PecMajWizard(models.TransientModel):
         pec_maj = self.env['proximas.pec.maj.wizard']
         # Contrôle de l'existence du code PEC
         if not bool(pec):
-            raise ValidationError(_(
-                u"Le code que vous avez fourni n'est pas un Code PEC de Prise en charge valide.\n "
-                " Pour plus d'informations, veuillez contactez l'administrateur en cas de besoin..!"
-                )
+            raise ValidationError (_ (
+                u"CODE ERRONE : Le Code PEC fourni n'est pas reconnu et se réfère à aucune Prise en charge valide. \
+                Pour plus d'informations, veuillez contactez l'administrateur en cas de besoin..!"
+            )
             )
         # Contrôle du statut Assuré - assure.state == 'actif'
         elif bool (pec) and (pec.assure_id.state != 'actif'):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
             raise ValidationError(_(
-                u"PROXIMAS : Contrôle du Statut PEC >> :\n \
+                u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
                 Le code PEC concerné : %s existe bel et bien en tant que prise en charge. Cependant, ne peut faire \
-                l'objet d'un traitement à cause du statut non actif de l'assuré: %s. \
+                l'objet d'un traitement du fait de : (STATUT NON ACTIF) de l'assuré: %s. \
                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
                 ) % (pec.code_pec, info_assure)
             )
         # Contrôle de délai PEC
         elif bool(pec) and (0 < validite_pec < delai_pec):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError(_(
-                u"PROXIMAS : Contrôle du Statut PEC >> : " + str(pec.code_pec) + ' (' + str(info_assure) + ').' +
-                "Le code PEC concerné est bien enregistré en tant que prise en charge. Cependant, ne peut faire \
-                l'objet d'un traitement à cause de son délai de validité qui a expiré. \
-                Veuillez contacter au besoin, les administrateurs pour plus détails..."
-                )
-            )
+            raise ValidationError (_ (
+                u"PROXIMAS : Contrôle du Statut PEC: Désolé!\n \
+                Le code PEC: %s (se référant à l'assuré: %s) concerné est bel et bien enregistré en tant \
+                que prise en charge. Cependant, ne peut faire l'objet d'un traitement pour cause de: DELAI \
+                VALIDITE EXPIRE. Veuillez contacter au besoin, les administrateurs pour plus détails..."
+            ) % (pec.code_pec, info_assure)
+                                   )
         elif bool(pec) and pec.state == 'oriente' and prestataire.categorie_id != 'Pharmacie':
             # Rediriger vers le formulaire de prise en charge pour Prestations CRS
             pec.prestataire_crs_id = prestataire.id
@@ -1593,13 +1592,13 @@ class PecMajWizard(models.TransientModel):
             return action
         else:
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError(_(
-                u"PROXIMAS : Contrôle du Statut PEC :\n \
-                Le code PEC concerné : %s -%s est bel et bien enregistré en tant que prise en charge. Cependant, \
-                vous n'y avez pas accès, parce que cette prise en charge n'a pas été transmise en Orientation. \
-                Pour plus d'informations, veuillez contactez les administrateurs..."
-                ) % (pec.code_pec, info_assure)
-            )
+            raise ValidationError (_ (
+                u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
+                Le code PEC concerné : %s - (se référant à l'assuré: %s) est bel et bien enregistré en tant que prise \
+                en charge. Cependant, vous n'y avez pas accès, parce que cette prise en charge n'a pas été transmise \
+                en Dipensation. Pour plus d'informations, veuillez contactez les administrateurs..."
+            ) % (pec.code_pec, info_assure)
+                                   )
 
     @api.multi
     def phcie_open_popup(self):
@@ -1620,30 +1619,30 @@ class PecMajWizard(models.TransientModel):
         # Contrôle de l'existence du code PEC
         if not bool(pec):
             raise ValidationError(_(
-                u"L'identifiant que vous avez fourni n'est pas un Code PEC de Prise en charge valide.\n \
+                u"CODE ERRONE : Le Code PEC fourni n'est pas reconnu et se réfère à aucune Prise en charge valide. \
                 Pour plus d'informations, veuillez contactez l'administrateur en cas de besoin..!"
                 )
             )
         # Contrôle du statut Assuré - assure.state == 'actif'
         elif bool (pec) and (pec.assure_id.state != 'actif'):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError(_(
-                u"PROXIMAS : Contrôle du Statut PEC >> :\n \
+            raise ValidationError (_ (
+                u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
                 Le code PEC concerné : %s existe bel et bien en tant que prise en charge. Cependant, ne peut faire \
-                l'objet d'un traitement à cause du statut non actif de l'assuré: %s. \
+                l'objet d'un traitement du fait de : (STATUT NON ACTIF) de l'assuré: %s. \
                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
-                ) % (pec.code_pec, info_assure)
-            )
+            ) % (pec.code_pec, info_assure)
+                                   )
         # Contrôle de délai PEC
         elif bool(pec) and (0 < validite_pec < delai_pec):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError(_(
-                u"PROXIMAS : Contrôle du Statut PEC >> : " + str(pec.code_pec) + ' (' + str(info_assure) + ').\n' +
-                "Le code PEC concerné est bien enregistré en tant que prise en charge. Cependant, ne peut faire \
-                l'objet d'un traitement à cause de son délai de validité qui a expiré.\n \
-                Veuillez contacter au besoin, les administrateurs pour plus détails..."
-            )
-            )
+            raise ValidationError (_ (
+                u"PROXIMAS : Contrôle du Statut PEC: Désolé!\n \
+                Le code PEC: %s (se référant à l'assuré: %s) concerné est bel et bien enregistré en tant \
+                que prise en charge. Cependant, ne peut faire l'objet d'un traitement pour cause de: DELAI \
+                VALIDITE EXPIRE. Veuillez contacter au besoin, les administrateurs pour plus détails..."
+            ) % (pec.code_pec, info_assure)
+                                   )
         elif bool(pec_id) and pec.state == 'dispense':
             # Rediriger vers le formulaire de prise en charge pour Dispensation Médicaments
             pec.prestataire_phcie_id = prestataire.id
@@ -1673,10 +1672,10 @@ class PecMajWizard(models.TransientModel):
         else:
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
             raise ValidationError(_(
-                u"PROXIMAS : Contrôle du Statut PEC :\n \
-                Le code PEC concerné : %s -%s est bel et bien enregistré en tant que prise en charge. Cependant, \
-                vous n'y avez pas accès, parce que cette prise en charge n'a pas été transmise en Dipensation. \
-                Pour plus d'informations, veuillez contactez les administrateurs..."
+                u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
+                Le code PEC concerné : %s - (se référant à l'assuré: %s) est bel et bien enregistré en tant que prise \
+                en charge. Cependant, vous n'y avez pas accès, parce que cette prise en charge n'a pas été transmise \
+                en Dipensation. Pour plus d'informations, veuillez contactez les administrateurs..."
                 ) % (pec.code_pec, info_assure)
             )
 
