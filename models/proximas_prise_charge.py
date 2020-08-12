@@ -4051,15 +4051,15 @@ class DetailsPec(models.Model):
                 # Cas de substitution de produit pharmacie (médicaments)
                 prix_substitut = int (self.prix_indicatif_substitut)
                 prix_produit = int (self.prix_indicatif_produit)
-                if prix_substitut > prix_produit:
-                    # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                        Le prix indicatif du médicament prescrit est de: (%d Fcfa). Cependant, vous vous ne pouvez pas\
-                        le substituer à un autre dont le prix indicatif est supérieur : (%d Fcfa). Pour plus \
-                        d'informations, veuillez contactez l'administrateur..."
-                    ) % (prix_produit, prix_substitut)
-                                     )
+                # if prix_substitut > prix_produit:
+                #     # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
+                #     raise UserError (_ (
+                #         u"Proximaas : Contrôle de Règles de Gestion.\n \
+                #         Le prix indicatif du médicament prescrit est de: (%d Fcfa). Cependant, vous vous ne pouvez pas\
+                #         le substituer à un autre dont le prix indicatif est supérieur : (%d Fcfa). Pour plus \
+                #         d'informations, veuillez contactez l'administrateur..."
+                #     ) % (prix_produit, prix_substitut)
+                #                      )
                 cout_produit = int (self.cout_unite)
                 quantite_prescrite = int (self.quantite)
                 quantite = int (self.quantite_livre)
@@ -4076,14 +4076,14 @@ class DetailsPec(models.Model):
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
-                    elif quantite_prescrite < quantite:
-                        raise UserError (_ (
-                            u"Proximaas : Contrôle de Règles de Gestion.\n \
-                             Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-                             (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-                             veuillez contactez l'administrateur..."
-                        ) % (quantite, quantite_prescrite)
-                                         )
+                    # elif quantite_prescrite < quantite:
+                    #     raise UserError (_ (
+                    #         u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    #          Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                    #          (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
+                    #          veuillez contactez l'administrateur..."
+                    #     ) % (quantite, quantite_prescrite)
+                    #                      )
                     else:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
@@ -4093,14 +4093,14 @@ class DetailsPec(models.Model):
                         self.cout_total = cout_produit * quantite
                         self.total_pc = self.cout_total  # - self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
-                    elif quantite_prescrite < quantite:
-                        raise UserError (_ (
-                            u"Proximaas : Contrôle de Règles de Gestion.\n \
-                            Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-                            (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-                            veuillez contactez l'administrateur..."
-                        ) % (quantite, quantite_prescrite)
-                                         )
+                    # elif quantite_prescrite < quantite:
+                    #     raise UserError (_ (
+                    #         u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    #         Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                    #         (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
+                    #         veuillez contactez l'administrateur..."
+                    #     ) % (quantite, quantite_prescrite)
+                    #                      )
                     else:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = self.cout_total  # - self.mt_exclusion
@@ -4124,14 +4124,14 @@ class DetailsPec(models.Model):
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
-                    elif quantite_prescrite < quantite:
-                        raise UserError (_ (
-                            u"Proximaas : Contrôle de Règles de Gestion.\n \
-                            Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-                            (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-                            veuillez contactez l'administrateur..."
-                        ) % (quantite, quantite_prescrite)
-                                         )
+                    # elif quantite_prescrite < quantite:
+                    #     raise UserError (_ (
+                    #         u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    #         Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                    #         (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
+                    #         veuillez contactez l'administrateur..."
+                    #     ) % (quantite, quantite_prescrite)
+                    #                      )
                     else:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
@@ -4141,14 +4141,14 @@ class DetailsPec(models.Model):
                         self.cout_total = cout_produit * quantite
                         self.total_pc = self.cout_total  # - self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
-                    elif quantite_prescrite < quantite:
-                        raise UserError (_ (
-                            "Proximaas : Contrôle de Règles de Gestion.\n \
-                            Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
-                            (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
-                            veuillez contactez l'administrateur..."
-                        ) % (quantite, quantite_prescrite)
-                                         )
+                    # elif quantite_prescrite < quantite:
+                    #     raise UserError (_ (
+                    #         "Proximaas : Contrôle de Règles de Gestion.\n \
+                    #         Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                    #         (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
+                    #         veuillez contactez l'administrateur..."
+                    #     ) % (quantite, quantite_prescrite)
+                    #                      )
                     else:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = self.cout_total  # - self.mt_exclusion
@@ -4448,28 +4448,169 @@ class DetailsPec(models.Model):
         res = super(DetailsPec, self).write(values)
         return res
 
-    # @api.multi
+    @api.onchange('quantite', 'quantite_livre', 'cout_unit')
+    def _check_phcie_quantite(self):
+        if self.substitut_phcie_id:
+            # Cas de substitution de produit pharmacie (médicaments)
+            cout_produit = int (self.cout_unit)
+            prix_substitut = int (self.prix_indicatif_substitut)
+            prix_produit = int (self.prix_indicatif_produit)
+            marge_police = int (self.marge_medicament_police)
+            marge_produit = int (self.marge_medicament_produit)
+            prix_majore = 0
+            if 0 < prix_produit < prix_substitut :
+                # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    Le prix indicatif du médicament prescrit est de: (%d Fcfa). Cependant, vous vous ne pouvez pas\
+                    le substituer à un autre dont le prix indicatif est supérieur : (%d Fcfa). Pour plus \
+                    d'informations, veuillez contactez l'administrateur..."
+                ) % (prix_produit, prix_substitut)
+                                 )
+            if 0 < marge_produit:
+                prix_majore = int (prix_produit + marge_produit)
+            elif 0 < marge_police:
+                prix_majore = int (prix_produit + marge_police)
+            if 0 < prix_majore < cout_produit:
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    Vous ne pourrez pas valider vos saisies, car le coût du produit renseigné est de:\
+                    (%d Fcfa), ce qui est supérieure au coût autorisé : (%d Fcfa). Pour plus d'informations, \
+                    veuillez contactez l'administrateur..."
+                ) % (cout_produit, prix_majore)
+                     )
+            quantite_prescrite = int (self.quantite)
+            quantite = int (self.quantite_livre)
+            if quantite_prescrite < quantite:
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                     Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                     (%d), ce qui est supérieure à la quantité prescrite: (%d). Pour plus d'informations, \
+                     veuillez contactez l'administrateur..."
+                ) % (quantite, quantite_prescrite)
+                                 )
+        elif self.produit_phcie_id:
+            # Cas de produit pharmacie (médicaments)
+            cout_produit = int(self.cout_unit)
+            prix_produit = int(self.prix_indicatif_produit)
+            quantite_prescrite = int (self.quantite)
+            quantite = int (self.quantite_livre)
+            marge_police = int (self.marge_medicament_police)
+            marge_produit = int (self.marge_medicament_produit)
+            prix_majore = 0
+            if 0 < marge_produit:
+                prix_majore = int (prix_produit + marge_produit)
+            elif 0 < marge_police:
+                prix_majore = int (prix_produit + marge_police)
+            if 0 < prix_majore < cout_produit:
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    Vous ne pourrez pas valider vos saisies, car le coût du produit renseigné est de:\
+                    (%d Fcfa), ce qui est supérieure au coût autorisé : (%d Fcfa). Pour plus d'informations, \
+                    veuillez contactez l'administrateur..."
+                ) % (cout_produit, prix_majore)
+                     )
+            if quantite_prescrite < quantite:
+                raise UserError (_ (
+                    "Proximaas : Contrôle de Règles de Gestion.\n \
+                    Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                    (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
+                    veuillez contactez l'administrateur..."
+                ) % (quantite, quantite_prescrite)
+                                 )
+
+    @api.constrains('quantite', 'quantite_livre', 'cout_unit')
+    def _validation_phcie_quantite(self):
+        for rec in self:
+            if rec.substitut_phcie_id:
+                # Cas de substitution de produit pharmacie (médicaments)
+                cout_produit = int (rec.cout_unit)
+                prix_substitut = int (rec.prix_indicatif_substitut)
+                prix_produit = int (rec.prix_indicatif_produit)
+                marge_police = int (rec.marge_medicament_police)
+                marge_produit = int (rec.marge_medicament_produit)
+                prix_majore = 0
+                if 0 < prix_produit < prix_substitut:
+                    # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion.\n \
+                        Le prix indicatif du médicament prescrit est de: (%d Fcfa). Cependant, vous vous ne pouvez pas\
+                        le substituer à un autre dont le prix indicatif est supérieur : (%d Fcfa). Pour plus \
+                        d'informations, veuillez contactez l'administrateur..."
+                    ) % (prix_produit, prix_substitut)
+                                     )
+                if 0 < marge_produit:
+                    prix_majore = int (prix_produit + marge_produit)
+                elif 0 < marge_police:
+                    prix_majore = int (prix_produit + marge_police)
+                if 0 < prix_majore < cout_produit:
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion.\n \
+                        Vous ne pourrez pas valider vos saisies, car le coût du produit renseigné est de:\
+                        (%d Fcfa), ce qui est supérieure au coût autorisé : (%d Fcfa). Pour plus d'informations, \
+                        veuillez contactez l'administrateur..."
+                    ) % (cout_produit, prix_majore)
+                                     )
+                quantite_prescrite = int (rec.quantite)
+                quantite = int (rec.quantite_livre)
+                if quantite_prescrite < quantite:
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion.\n \
+                         Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                         (%d), ce qui est supérieure à la quantité prescrite: (%d). Pour plus d'informations, \
+                         veuillez contactez l'administrateur..."
+                    ) % (quantite, quantite_prescrite)
+                                     )
+            elif rec.produit_phcie_id:
+                # Cas de produit pharmacie (médicaments)
+                cout_produit = int (rec.cout_unit)
+                prix_produit = int (rec.prix_indicatif_produit)
+                quantite_prescrite = int (rec.quantite)
+                quantite = int (rec.quantite_livre)
+                marge_police = int (rec.marge_medicament_police)
+                marge_produit = int (rec.marge_medicament_produit)
+                prix_majore = 0
+                if 0 < marge_produit:
+                    prix_majore = int (prix_produit + marge_produit)
+                elif 0 < marge_police:
+                    prix_majore = int (prix_produit + marge_police)
+                if 0 < prix_majore < cout_produit:
+                    raise UserError (_ (
+                        u"Proximaas : Contrôle de Règles de Gestion.\n \
+                        Vous ne pourrez pas valider vos saisies, car le coût du produit renseigné est de:\
+                        (%d Fcfa), ce qui est supérieure au coût autorisé : (%d Fcfa). Pour plus d'informations, \
+                        veuillez contactez l'administrateur..."
+                    ) % (cout_produit, prix_majore)
+                                     )
+                if quantite_prescrite < quantite:
+                    raise UserError (_ (
+                        "Proximaas : Contrôle de Règles de Gestion.\n \
+                        Vous ne pourrez pas valider vos saisies, car la quantité quantité à livrer est de:\
+                        (%d), ce qui est supérieure à la quantité prescrite : (%d). Pour plus d'informations, \
+                        veuillez contactez l'administrateur..."
+                    ) % (quantite, quantite_prescrite)
+                                     )
+
     @api.onchange('substitut_phcie_id', 'cout_unit', 'date_execution', 'quantite_livre', 'mt_paye_assure', 'quantite')
     def _check_quantite_prescription(self):
-        for rec in self:
-            if bool(rec.produit_phcie_id) and rec.quantite == 0:
-                return {'value': {},
-                        'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Prescription.',
-                                    'message': u"Vous essayez de dispenser le produit: %s, dont la quantité prescrite \
-                                    n'est pas indiquée. Veuillez définir la quantité exacte prescrite par le médecin. \
-                                    Pour plus de détails, veuillez contacter l'administrateur..." % rec.produit_phcie
-                                    }
-                        }
-            if bool(rec.produit_phcie_id) and bool(rec.date_execution) and int (rec.cout_unit) > 0 and int (
-                    rec.quantite_livre) == 0:
-                return {'value': {},
-                        'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Fournie.',
-                                    'message': u"Il semble que vous avez omis de renseigner la quantité fournie \
-                                    (livrée) concerant le produit: %s. Veuillez bien renseigner la quantité exacte \
-                                    dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
-                                    % rec.produit_phcie
-                                    }
-                        }
+        if bool (self.produit_phcie_id) and self.quantite == 0:
+            return {'value': {},
+                    'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Prescription.',
+                                'message': u"Vous essayez de dispenser le produit: %s, dont la quantité prescrite \
+                                n'est pas indiquée. Veuillez définir la quantité exacte prescrite par le médecin. \
+                                Pour plus de détails, veuillez contacter l'administrateur..." % self.produit_phcie
+                                }
+                    }
+        if bool (self.produit_phcie_id) and bool (self.date_execution) and int (self.cout_unit) > 0 and int (
+                self.quantite_livre) == 0:
+            return {'value': {},
+                    'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Fournie.',
+                                'message': u"Il semble que vous avez omis de renseigner la quantité fournie \
+                                (livrée) concerant le produit: %s. Veuillez bien renseigner la quantité exacte \
+                                dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
+                                           % self.produit_phcie
+                                }
+                    }
 
     @api.constrains('produit_phcie_id', 'quantite_livre', 'quantite')
     def _validate_quantite_prescription(self):
