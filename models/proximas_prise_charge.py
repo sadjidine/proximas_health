@@ -319,7 +319,7 @@ class PriseEnCharge(models.Model):
     structure_id = fields.Many2one(
         omodel_name="res.company",
         string="Organisation(SAM)",
-        related='contrat_id.structure_id',
+        related='police_id.structure_id',
         readonly=True,
     )
     organisation = fields.Char(
@@ -1929,6 +1929,12 @@ class DetailsPec(models.Model):
         default=0,
         help="Indiquer la quantité demandée"
     )
+    quantite_demande = fields.Integer (
+        string="Qté. demandée",
+        compute='_check_quantite_demande',
+        default=0,
+        help="Indiquer la quantité demandée"
+    )
     mt_paye_assure = fields.Float(
         string="Montant Payé (assuré)",
         digits=(6, 0),
@@ -2634,6 +2640,15 @@ class DetailsPec(models.Model):
                         être renseigné. Pour plus d'informations, veuillez contactez l'administrateur..."
                        ) % rec.prestation_demande_id.name
                 )
+
+
+    #@api.multi
+    def _check_quantite_demande(self):
+        for rec in self:
+            if rec.quantite:
+                rec.quantite_demande = rec.quantite
+            else:
+                rec.quantite_demande = 0
 
     @api.multi
     def _get_details_prestation(self):

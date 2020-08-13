@@ -1268,7 +1268,7 @@
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2" class="bg-success">
-                                                    <field name="quantite"
+                                                    <field name="quantite_demande"
                                                            string="Quantité Prescrite"
                                                            readonly="1"
                                                     />
@@ -1278,10 +1278,10 @@
                                                            options='{"no_open": True, "no_create": True}'/>
                                                 </group>
                                                 <group col="6" colspan="2" string="Détails Coûts du Médicament &amp; Montants annexes">
+                                                    <field name="quantite_livre" required="1"/>
                                                     <field name="cout_unit"
                                                            required="1"
                                                     />
-                                                    <field name="quantite_livre" required="1"/>
                                                     <field name="cout_total"/>
                                                     <field name="total_pc"/>
                                                     <field name="total_npc"/>

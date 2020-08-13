@@ -1460,7 +1460,7 @@ class Contrat(models.Model):
             self.nbre_pec_contrat_encours = len(prise_en_charge_encours)
             self.nbre_rfm_contrat_encours = len(rfm_encours)
             self.nbre_actes_contrat_encours = len(details_actes_encours)
-            self.mt_sinistres_contrat_encours = sum(item.sous_totaux_pec for item in prise_en_charge_encours)
+            self.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_pec_encours)
             self.mt_sinistres_actes_contrat_encours = sum(item.total_pc for item in details_actes_encours)
             self.nbre_phcie_contrat_encours = len(details_phcie_encours)
             self.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)

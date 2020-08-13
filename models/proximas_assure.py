@@ -302,7 +302,7 @@ class Assure (models.Model):
         comodel_name="proximas.police",
         string="Police Couverture",
         related='contrat_id.police_id',
-        store=True,
+        # store=True,
         readonly=True,
     )
     libelle_police = fields.Char(
