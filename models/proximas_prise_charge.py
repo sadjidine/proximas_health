@@ -859,7 +859,7 @@ class PriseEnCharge(models.Model):
 
     @api.one
     @api.depends('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',
-                 'details_pec_prescription_ids')
+                 'details_pec_prescription_ids', 'mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
     # @api.onchange('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
     #               'nbre_prestations_fournies')
     def _compute_details_pec(self):
@@ -914,6 +914,7 @@ class PriseEnCharge(models.Model):
             self.net_prestataire_crs = sum (item.net_prestataire for item in details_pec_crs) or 0
             self.net_prestataire_phcie = sum (item.net_prestataire for item in details_pec_phcie) or 0
             self.net_prestataire_phcie_dispense = self.net_prestataire_phcie
+            self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie_dispense, self.mt_encaisse_phcie
             # 6. Totaux Encaissement
             # self.mt_encaisse_cro = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_cro)
             # self.mt_encaisse_crs = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_crs)
