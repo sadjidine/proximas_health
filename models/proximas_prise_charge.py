@@ -516,6 +516,12 @@ class PriseEnCharge(models.Model):
         compute='_compute_details_pec',
         default=0,
     )
+    mt_totaux_phcie_dispense = fields.Float(
+        string="S/Totaux (Phcie)",
+        digits=(9, 0),
+        compute='_compute_details_pec',
+        default=0,
+    )
     # 2. Net à payer
     net_prestataire_cro = fields.Float(
         string="Net à payer (CRO)",
@@ -530,6 +536,12 @@ class PriseEnCharge(models.Model):
         default=0,
     )
     net_prestataire_phcie = fields.Float (
+        string="Net à payer (Phcie)",
+        digits=(9, 0),
+        compute='_compute_details_pec',
+        default=0,
+    )
+    net_prestataire_phcie_dispense = fields.Float (
         string="Net à payer (Phcie)",
         digits=(9, 0),
         compute='_compute_details_pec',
@@ -554,6 +566,12 @@ class PriseEnCharge(models.Model):
         compute='_compute_details_pec',
         default=0,
     )
+    part_sam_phcie_dispense = fields.Float(
+        string="S/Totaux Part SAM (Phcie)",
+        digits=(9, 0),
+        compute='_compute_details_pec',
+        default=0,
+    )
     # 4. Ticket Modérateur
     ticket_moderateur_cro = fields.Float(
         string="Ticket modérateur (CRO)",
@@ -568,6 +586,12 @@ class PriseEnCharge(models.Model):
         default=0,
     )
     ticket_moderateur_phcie = fields.Float(
+        string="Ticket modérateur (Phcie)",
+        digits=(9, 0),
+        compute='_compute_details_pec',
+        default=0,
+    )
+    ticket_moderateur_phcie_dispense = fields.Float(
         string="Ticket modérateur (Phcie)",
         digits=(9, 0),
         compute='_compute_details_pec',
@@ -592,6 +616,12 @@ class PriseEnCharge(models.Model):
         compute='_compute_details_pec',
         default=0,
     )
+    ticket_exigible_phcie_dispense = fields.Float(
+        string="Ticket exigible (Phcie)",
+        digits=(9, 0),
+        compute='_compute_details_pec',
+        default=0,
+    )
     # 6.  Encaissement - Paye Assure
     mt_encaisse_cro = fields.Float(
         string="Montant Encaissé (CRO)",
@@ -611,6 +641,13 @@ class PriseEnCharge(models.Model):
         string="Montant Encaissé (Phcie)",
         digits=(9, 0),
         #compute='_compute_details_pec',
+        default=0,
+        help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
+    )
+    mt_encaisse_phcie_dispense = fields.Float(
+        string="Montant Encaissé (Phcie)",
+        digits=(9, 0),
+        # compute='_compute_details_pec',
         default=0,
         help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
     )
@@ -850,14 +887,17 @@ class PriseEnCharge(models.Model):
             self.mt_totaux_cro = sum (item.total_pc for item in details_pec_cro) or 0
             self.mt_totaux_crs = sum (item.total_pc for item in details_pec_crs) or 0
             self.mt_totaux_phcie = sum (item.total_pc for item in details_pec_phcie) or 0
+            self.mt_totaux_phcie_dispense = self.mt_totaux_phcie
             # 2. Part SAM
             self.part_sam_cro = sum (item.net_tiers_payeur for item in details_pec_cro) or 0
             self.part_sam_crs = sum (item.net_tiers_payeur for item in details_pec_crs) or 0
             self.part_sam_phcie = sum (item.net_tiers_payeur for item in details_pec_phcie) or 0
+            self.part_sam_phcie_dispense = self.part_sam_phcie
             # 3. Ticket Modérateur
             self.ticket_moderateur_cro = sum (item.ticket_moderateur for item in details_pec_cro) or 0
             self.ticket_moderateur_crs = sum (item.ticket_moderateur for item in details_pec_crs) or 0
             self.ticket_moderateur_phcie = sum (item.ticket_moderateur for item in details_pec_phcie) or 0
+            self.ticket_moderateur_phcie_dispense = self.ticket_moderateur_phcie
             # 4. Ticket Exigible
             self.ticket_exigible_cro = sum (
                 item.ticket_moderateur for item in details_pec_cro if bool (item.ticket_exigible) or 0
@@ -868,10 +908,12 @@ class PriseEnCharge(models.Model):
             self.ticket_exigible_phcie = sum (
                 item.ticket_moderateur for item in details_pec_phcie if bool (item.ticket_exigible) or 0
             )
+            self.ticket_exigible_phcie_dispense = self.ticket_exigible_phcie
             # 5. Net à Payer
             self.net_prestataire_cro = sum (item.net_prestataire for item in details_pec_cro) or 0
             self.net_prestataire_crs = sum (item.net_prestataire for item in details_pec_crs) or 0
             self.net_prestataire_phcie = sum (item.net_prestataire for item in details_pec_phcie) or 0
+            self.net_prestataire_phcie_dispense = self.net_prestataire_phcie
             # 6. Totaux Encaissement
             # self.mt_encaisse_cro = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_cro)
             # self.mt_encaisse_crs = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_crs)
@@ -1014,6 +1056,15 @@ class PriseEnCharge(models.Model):
                 de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
                 contactez l'administrateur..."
                 ) % self.ticket_exigible_phcie
+            )
+        elif 0 < self.ticket_exigible_phcie_dispense > self.mt_encaisse_phcie_dispense:
+            raise UserError (_ (
+               u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
+                Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
+                exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
+                de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
+                contactez l'administrateur..."
+                ) % self.ticket_exigible_phcie_dispense
             )
         else:
             # self.env.user.notify_info('La Prise en charge : %s a été sauvegardée et terminée avec succès.') % self.name
@@ -1372,6 +1423,15 @@ class PriseEnCharge(models.Model):
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
                 ) % (rec.ticket_exigible_phcie, rec.mt_encaisse_phcie)
+                                       )
+            elif rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie_dispense) > int(rec.mt_encaisse_phcie_dispense):
+                raise ValidationError (_ (
+                    u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
+                    Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
+                    Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
+                    vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
+                    veuillez contactez l'administrateur..."
+                ) % (rec.ticket_exigible_phcie_dispense, rec.mt_encaisse_phcie_dispense)
                                        )
 
     @api.multi
@@ -2641,8 +2701,7 @@ class DetailsPec(models.Model):
                        ) % rec.prestation_demande_id.name
                 )
 
-
-    #@api.multi
+    @api.depends('quantite')
     def _check_quantite_demande(self):
         for rec in self:
             if rec.quantite:

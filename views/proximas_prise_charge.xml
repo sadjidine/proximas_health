@@ -1112,7 +1112,7 @@
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2" class="bg-success">
-                                                    <field name="quantite"
+                                                    <field name="quantite_demande"
                                                            string="Quantité Prescrite"
                                                            readonly="1"
                                                     />
@@ -1181,12 +1181,12 @@
                             </field>
                             <group>
                                 <group class="oe_subtotal_footer oe_right text-primary">
-                                   <field name="part_sam_phcie"/>
-                                   <field name="ticket_moderateur_phcie"/>
-                                   <field name="mt_totaux_phcie" class="oe_subtotal_footer_separator"/>
-                                   <field name="ticket_exigible_phcie"/>
-                                   <field name="mt_encaisse_phcie" string="Montant Perçu (Ticket Modérateur)"/>
-                                   <field name="net_prestataire_phcie" class="oe_subtotal_footer_separator"/>
+                                   <field name="part_sam_phcie_dispense"/>
+                                   <field name="ticket_moderateur_phcie_dispense"/>
+                                   <field name="mt_totaux_phcie_dispense" class="oe_subtotal_footer_separator"/>
+                                   <field name="ticket_exigible_phcie_dispense"/>
+                                   <field name="mt_encaisse_phcie_dispense" string="Montant Perçu (Ticket Modérateur)"/>
+                                   <field name="net_prestataire_phcie_dispense" class="oe_subtotal_footer_separator"/>
                                 </group>
                             </group>
                         </page>
@@ -1371,9 +1371,9 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="NOTES / OBSERVATION">
+                        <!--<page string="NOTES / OBSERVATION">
                             <field name="note"/>
-                        </page>
+                        </page>-->
                     </notebook>
                 </sheet>
                 <sheet position="after">
