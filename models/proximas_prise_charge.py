@@ -4544,23 +4544,23 @@ class DetailsPec(models.Model):
 
     @api.constrains('produit_phcie_id', 'quantite_livre', 'quantite')
     def _validate_quantite_prescription(self):
-        for rec_id in self:
-            if bool(rec_id.produit_phcie_id) and rec_id.quantite == 0:
+        for rec in self:
+            if bool(rec.produit_phcie_id) and rec.quantite == 0:
                 raise ValidationError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n\
                       Vous êtes tenus de renseigner la quantité demandée (prescrite) concernant le produit: %s.\
                       Veuillez à bien renseigner la quantité exacte demandée par le médecin traitant. Pour plus de\
                       détails, veuillez contacter l'administrateur..."
-                    ) % rec_id.produit_phcie
+                    ) % rec.produit_phcie
                 )
-            if bool(rec_id.produit_phcie_id) and bool(
-                    rec_id.date_execution) and rec_id.cout_unit > 0 and rec_id.quantite_livre == 0:
+            if bool(rec.produit_phcie_id) and bool(
+                    rec.date_execution) and rec.cout_unit > 0 and rec.quantite_livre == 0:
                 raise ValidationError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n\
                       Il semble que vous avez omis de renseigner la quantité fournie \
                       (livrée) concerant le produit: %s. Veuillez bien renseigner la quantité exacte \
                       dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
-                    ) % rec_id.produit_phcie
+                    ) % rec.produit_phcie
                 )
             if rec.substitut_phcie_id:
                 # Cas de substitution de produit pharmacie (médicaments)
