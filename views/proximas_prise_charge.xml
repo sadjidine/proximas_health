@@ -71,6 +71,8 @@
                 <field name="date_naissance"/>
                 <field name="genre"/>
                 <field name="statut_familial" />
+                <field name="date_debut_assure"/>
+                <field name="date_fin_prevue_assure"/>
                 <field name="contrat_id" />
                 <newline />
                 <group expand="0" string="Grouper par...">
@@ -162,6 +164,8 @@
                 <field name="date_naissance"/>
                 <field name="genre"/>
                 <field name="statut_familial" />
+                <field name="date_debut_assure"/>
+                <field name="date_fin_prevue_assure"/>
                 <field name="contrat_id" invisible="1" />
                 <filter name="assure_id"
                         string="Assuré"
@@ -179,7 +183,7 @@
                 <group expand="0" string="Grouper par...">
                     <filter string="Assuré"
                             domain="[]"
-                            context="{'group_by':'assure_id'}" />
+                            context="{'group_by':'code_id'}" />
                     <filter string="Date Saisie"
                             domain="[]"
                             context="{'group_by':'date_saisie'}" />
@@ -193,27 +197,40 @@
             </search>
         </field>
     </record>
-    <!-- PRISE EN CHARGE TREE -->
-    <record id="proximas_pec_view_tree" model="ir.ui.view">
+    <!-- PRISE EN CHARGE LIST FILTER VIEW -->
+    <record id="proximas_pec_list_filter_view" model="ir.ui.view">
         <field name="name">proximas.pec.tree</field>
         <field name="model">proximas.prise.charge</field>
         <field name="arch" type="xml">
-            <tree string="Prise en charge Assuré"
-                  create="0"
-            >
+            <tree string="Prise en charge Assuré" create="0">
                 <field name="code_pec"/>
                 <field name="code_id" />
                 <field name="num_bon"/>
                 <field name="date_saisie"/>
                 <field name="name" />
-                <!--<field name="date_naissance"/>-->
                 <field name="age" />
                 <field name="statut_familial"/>
                 <field name="genre"/>
-                <!--<field name="adherent"/>-->
+                <field name="sous_totaux_pec"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <!-- PRISE EN CHARGE TREE -->
+    <record id="proximas_pec_view_tree" model="ir.ui.view">
+        <field name="name">proximas.pec.tree</field>
+        <field name="model">proximas.prise.charge</field>
+        <field name="arch" type="xml">
+            <tree string="Prise en charge Assuré" create="0">
+                <field name="code_pec"/>
+                <field name="code_id" />
+                <field name="num_bon"/>
+                <field name="date_saisie"/>
+                <field name="name" />
+                <field name="age" />
+                <field name="statut_familial"/>
+                <field name="genre"/>
                 <field name="prestataire_id"/>
-                <!--<field name="current_user"/>-->
-                <!--<field name="user_prise_charge"/>-->
                 <field name="state"/>
             </tree>
         </field>
@@ -278,16 +295,18 @@
                 </header>
                 <sheet>
                     <div class="oe_right oe_button_box" name="buttons">
-                        <button name="proximas_medical.proximas_details_pec_encours_action" class="oe_stat_button"
+                        <button name="proximas_medical.proximas_list_pec_filter_action" class="oe_stat_button"
                                 icon="fa-list"
                                 type="action"
-                                context="{'search_default_assure_id': assure_id}">
+                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
+                                context="{'search_default_code_id': code_id}">
                             <field name="nbre_pec_assure_encours" widget="statinfo" string="Nbre.PEC" />
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-cart-plus"
-                                context="{'search_default_assure_id': assure_id}">
+                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
+                                context="{'search_default_code_id': code_id}">
                             <field name="sous_totaux_assure_encours" widget="statinfo"
                                    options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'
                                    string="Totaux Indiv." />
@@ -295,24 +314,28 @@
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
+                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
                                 context="{'search_default_contrat_id': contrat_id}">
                             <field name="sous_totaux_contrat_encours" widget="statinfo" string="S/Totaux Famille"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
+                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_id}">
                             <field name="nbre_prestations_fournies" widget="statinfo" string="Actes CRO"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
+                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_crs_id}">
                             <field name="nbre_prestations_demandes" widget="statinfo" string="Actes CRS"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
+                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_phcie_id}">
                             <field name="nbre_prescriptions" widget="statinfo" string="Prescriptions"/>
                         </button>
@@ -447,12 +470,14 @@
                                            invisible="1"
                                            options='{"no_open": True, "no_create": True}'
                                     />
+                                    <field name="date_debut_assure"/>
                                 </group>
                                 <group>
                                     <field name="validite_pec"/>
                                     <field name="is_valide"/>
                                     <field name="is_termine"/>
                                     <field name="nbre_prescription_maxi"/>
+                                    <field name="date_fin_prevue_assure"/>
                                     <!--<field name="user_prise_charge"/>-->
                                     <!--<field name="nbre_prestations_fournies"/>-->
                                 </group>
@@ -1829,6 +1854,16 @@
         <field name="res_model">proximas.prise.charge</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
+        <field name="domain">[]</field>
+        <field name="context">{}</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_list_pec_filter_action">
+        <field name="name">Proximaas: Filtre Prise en charge médicales</field>
+        <field name="res_model">proximas.prise.charge</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="proximas_pec_list_filter_view"/>
+        <field name="search_id" ref="prise_charge_view_search"/>
         <field name="domain">[]</field>
         <field name="context">{}</field>
     </record>

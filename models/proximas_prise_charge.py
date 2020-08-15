@@ -297,11 +297,13 @@ class PriseEnCharge(models.Model):
     date_debut_assure = fields.Date (
         string="Date Débur Assuré",
         related='assure_id.date_debut_assure',
+        # store=True,
         help="Date de début de la couverture en rapport avec le délai de validité de la police."
     )
     date_fin_prevue_assure = fields.Date (
         string="Date Fin Contrat",
         related='assure_id.date_fin_prevue_assure',
+        # store=True,
         help="Date de fin prévue de la couverture en rapport avec le délai de validité de la police."
     )
     groupe_id = fields.Many2one(
@@ -312,14 +314,14 @@ class PriseEnCharge(models.Model):
     police_id = fields.Many2one(
         # comodel_name="proximas.police",
         string="Police Assuré",
-        related='contrat_id.police_id',
-        # compute='_get_police_assure',
+        related='assure_id.contrat_id.police_id',
+        store=True,
         readonly=True,
     )
     structure_id = fields.Many2one(
         omodel_name="res.company",
         string="Organisation(SAM)",
-        related='police_id.structure_id',
+        related='assure_id.structure_id',
         readonly=True,
     )
     organisation = fields.Char(
@@ -438,7 +440,7 @@ class PriseEnCharge(models.Model):
         default=0,
         #related='assure_id.nbre_actes_pec',
     )
-    nbre_actes_assure_encours = fields.Integer(
+    nbre_actes_pec_assure_encours = fields.Integer(
         string="Nbre. Actes Assuré",
         compute='_compute_details_pec',
         default=0,
@@ -2149,11 +2151,13 @@ class DetailsPec(models.Model):
     date_debut_assure = fields.Date (
         string="Date Débur Assuré",
         related='assure_id.date_debut_assure',
+        # store=True,
         help="Date de début de la couverture en rapport avec le délai de validité de la police."
     )
     date_fin_prevue_assure = fields.Date (
         string="Date Fin Contrat",
         related='assure_id.date_fin_prevue_assure',
+        # store=True,
         help="Date de fin prévue de la couverture en rapport avec le délai de validité de la police."
     )
     groupe_id = fields.Many2one(
@@ -3021,8 +3025,9 @@ class DetailsPec(models.Model):
 
     # IDENTIFICATION DES PRESTATIONS FOURNIES
     # @api.one
-    @api.depends('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'date_execution',
-                 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id', 'prestataire_rembourse_id')
+    @api.depends('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
+                 'date_execution', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
+                 'prestataire_rembourse_id')
     def _check_prestation_id(self):
         # self.ensure_one()
         for rec in self:
@@ -3049,10 +3054,10 @@ class DetailsPec(models.Model):
                     rec.prestation_crs_id = prestation.id
 
             # REMBOURSEMENT - PHARMACIE
-            elif bool (rec.code_id_rfm) and bool (rec.prestataire_rembourse_id) and bool (rec.produit_phcie_id):
+            elif bool(rec.code_id_rfm) and bool(rec.prestataire_rembourse_id) and bool(rec.produit_phcie_id):
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
                 pharmacie_rembourse_id = rec.prestataire_rembourse_id.id
-                if bool (pharmacie_rembourse_id):
+                if bool(pharmacie_rembourse_id):
                     prestation = self.env['proximas.prestation'].search (
                         [
                             ('prestataire_id', '=', pharmacie_rembourse_id),
@@ -3084,8 +3089,8 @@ class DetailsPec(models.Model):
                         rec.prestation_id = prestation.id
 
     @api.onchange('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                  'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
-                  'prestataire_rembourse_id')
+                  'date_execution', 'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id',
+                  'prestation_rembourse_id', 'prestataire_rembourse_id')
     def _track_prestation_id(self):
         if bool(self.prestation_demande_id) and bool(self.prestataire_crs_id) and bool(self.pool_medical_crs_id):
             # Récupérer la prestation médicale du CRS
@@ -4068,7 +4073,8 @@ class DetailsPec(models.Model):
     # @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
     #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
     #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
-    @api.depends('cout_unitaire', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure', 'mt_exclusion')
+    @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
+                 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         if bool(self.prestation_id):
             # Vérifier si la prestation est identifiée
