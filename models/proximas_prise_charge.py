@@ -314,7 +314,7 @@ class PriseEnCharge(models.Model):
     police_id = fields.Many2one(
         # comodel_name="proximas.police",
         string="Police Assuré",
-        related='assure_id.contrat_id.police_id',
+        related='assure_id.police_id',
         store=True,
         readonly=True,
     )
