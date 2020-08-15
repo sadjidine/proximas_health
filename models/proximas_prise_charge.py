@@ -870,8 +870,9 @@ class PriseEnCharge(models.Model):
         details_pec_cro = self.details_pec_soins_ids
         details_pec_crs = self.details_pec_soins_crs_ids
         details_pec_phcie = self.details_pec_phcie_ids
+        self.mt_encaisse_phcie_dispense, self.mt_encaisse_phcie = self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense
         if details_pec_encours:
-            self.nbre_actes_assure_envours = len(details_pec_assure_encours)
+            self.nbre_actes_assure_encours = len(details_pec_assure_encours)
             self.nbre_actes_contrat_encours = len(details_pec_contrat_encours)
             self.sous_totaux_assure_encours = sum(item.total_pc for item in details_pec_assure_encours)
             self.sous_totaux_contrat_encours = sum(item.total_pc for item in details_pec_contrat_encours)
@@ -914,11 +915,12 @@ class PriseEnCharge(models.Model):
             self.net_prestataire_crs = sum (item.net_prestataire for item in details_pec_crs) or 0
             self.net_prestataire_phcie = sum (item.net_prestataire for item in details_pec_phcie) or 0
             self.net_prestataire_phcie_dispense = self.net_prestataire_phcie
-            self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie_dispense, self.mt_encaisse_phcie
+
             # 6. Totaux Encaissement
             # self.mt_encaisse_cro = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_cro)
             # self.mt_encaisse_crs = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_crs)
             # self.mt_encaisse_phcie = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_phcie)
+
 
     @api.multi
     def action_en_cours(self):
@@ -1049,15 +1051,15 @@ class PriseEnCharge(models.Model):
                   contactez l'administrateur..."
                 ) % self.ticket_exigible_crs
             )
-        elif 0 < self.ticket_exigible_phcie > self.mt_encaisse_phcie:
-            raise UserError (_ (
-               u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
-                Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
-                exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
-                de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
-                contactez l'administrateur..."
-                ) % self.ticket_exigible_phcie
-            )
+        # elif 0 < self.ticket_exigible_phcie > self.mt_encaisse_phcie:
+        #     raise UserError (_ (
+        #        u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
+        #         Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
+        #         exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
+        #         de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
+        #         contactez l'administrateur..."
+        #         ) % self.ticket_exigible_phcie
+        #     )
         elif 0 < self.ticket_exigible_phcie_dispense > self.mt_encaisse_phcie_dispense:
             raise UserError (_ (
                u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
@@ -1416,16 +1418,17 @@ class PriseEnCharge(models.Model):
                 ) % (rec.ticket_exigible_crs, rec.mt_encaisse_crs)
                                        )
             # 3. Controle cas de PHARMACIE
-            if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie) > int(rec.mt_encaisse_phcie):
-                raise ValidationError (_ (
-                    u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
-                    Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
-                    Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
-                    vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
-                    veuillez contactez l'administrateur..."
-                ) % (rec.ticket_exigible_phcie, rec.mt_encaisse_phcie)
-                                       )
-            elif rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie_dispense) > int(rec.mt_encaisse_phcie_dispense):
+            # if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie) > int(rec.mt_encaisse_phcie):
+            #     raise ValidationError (_ (
+            #         u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
+            #         Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
+            #         Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
+            #         vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
+            #         veuillez contactez l'administrateur..."
+            #     ) % (rec.ticket_exigible_phcie, rec.mt_encaisse_phcie)
+            #                            )
+            if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie_dispense) > \
+                    int(rec.mt_encaisse_phcie_dispense):
                 raise ValidationError (_ (
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \

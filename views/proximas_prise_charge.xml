@@ -1040,7 +1040,6 @@
                             <field name="details_pec_dispensation_ids"
                                    widget="one2many"
                                    class="text-info"
-                                   domain="[('date_execution','=',None)]"
                                    context="{
                                    'default_prestataire_id':prestataire_id,'default_assure_id':assure_id,
                                    'default_police_id':police_id,'default_prestataire_crs_id':prestataire_crs_id,
@@ -1348,8 +1347,8 @@
                                     <!--<field name="pool_medical_id"/>-->
                                     <field name="medicament" string="Produits/Pharmacie"/>
                                     <field name="cout_unit" string="Coût Unit."/>
-                                    <!--<field name="quantite" string="Qté."/>-->
-                                    <field name="quantite_livre" string="Qté."/>
+                                    <field name="quantite" string="Qté.Prescrite"/>
+                                    <field name="quantite_livre" string="Qté. livrée"/>
                                     <field name="cout_total" sum="S/Totaux"/>
                                     <!--<field name="total_pc" sum="Totaux PC:"/>-->
                                     <field name="taux_couvert"/>
@@ -1366,7 +1365,9 @@
                                    <field name="ticket_moderateur_phcie"/>
                                    <field name="mt_totaux_phcie" class="oe_subtotal_footer_separator"/>
                                    <field name="ticket_exigible_phcie"/>
-                                   <field name="mt_encaisse_phcie" string="Montant Perçu (Ticket Modérateur)"/>
+                                   <field name="mt_encaisse_phcie"
+                                          string="Montant Perçu (Ticket Modérateur)"
+                                   />
                                    <field name="net_prestataire_phcie" class="oe_subtotal_footer_separator"/>
                                 </group>
                             </group>
