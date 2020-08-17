@@ -300,7 +300,7 @@ class Assure (models.Model):
     )
     police_id = fields.Many2one(
         comodel_name="proximas.police",
-        string="Police Couverture",
+        string="Police ID.",
         related='contrat_id.police_id',
         # store=True,
         readonly=True,

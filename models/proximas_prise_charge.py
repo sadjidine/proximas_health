@@ -315,7 +315,7 @@ class PriseEnCharge(models.Model):
         # comodel_name="proximas.police",
         string="Police Assuré",
         related='assure_id.police_id',
-        store=True,
+        # store=True,
         readonly=True,
     )
     structure_id = fields.Many2one(
@@ -860,8 +860,7 @@ class PriseEnCharge(models.Model):
         self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
 
     @api.one
-    @api.depends('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',
-                 'details_pec_prescription_ids', 'mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
+    @api.depends('details_pec_ids')
     # @api.onchange('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
     #               'nbre_prestations_fournies')
     def _compute_details_pec(self):
@@ -2807,57 +2806,54 @@ class DetailsPec(models.Model):
     @api.onchange('produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'prestation_crs_id',
                   'prestation_demande_id')
     def _check_nbre_prestations(self):
-        for rec in self:
-            if bool(rec.produit_phcie_id):
-                nbre_produit_phcie = self.env['proximas.details.pec'].search_count ([
-                    ('pec_id', '=', rec.pec_id.id),
-                    ('produit_phcie_id', '=', rec.produit_phcie_id.id),
-                ])
-                rec.nbre_produit_phcie = int (nbre_produit_phcie)
-                if int (nbre_produit_phcie) >= 1:
-                    # produit_phcie = '%s %s %s' %(rec.produit_phcie_id.name, rec.produit_phcie_id.forme_galenique_id.name or '',
-                    #        rec.produit_phcie_id.dosage)
-                    return {'value': {},
-                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                        'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
-                                         cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
-                                         médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                         ou contactez l'administrateur." % rec.produit_phcie
-                                        }
-                            }
-            elif bool (rec.substitut_phcie_id):
-                nbre_substitut_phcie = rec.search_count ([
-                    ('pec_id', '=', rec.pec_id.id),
-                    ('assure', '=', rec.assure.id),
-                    '|', ('substitut_phcie_id', '=', rec.substitut_phcie_id.id),
-                    ('produit_phcie_id', '=', rec.substitut_phcie_id.id),
-                ])
-                if int (nbre_substitut_phcie) >= 1:
-                    substitut_phcie = rec.substitut_phcie
-                    return {'value': {},
-                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                        'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
-                                        cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
-                                        médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                        ou contactez l'administrateur." % substitut_phcie
-                                        }
-                            }
-            elif bool (rec.prestation_id):
-                nbre_prestation = rec.search_count ([
-                    ('pec_id', '=', rec.pec_id.id),
-                    ('assure', '=', rec.assure.id),
-                    ('produit_phcie_id', '=', None),
-                    ('prestation_id', '=', rec.prestation_id.id),
-                ])
-                if int (nbre_prestation) >= 1:
-                    return {'value': {},
-                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                        'message': u"Il semble que la prestation : (%s) ait déjà été fournie pour cette \
-                                        prise en charge. Par conséquent, il ne peut y avoir plus d'une fois la même \
-                                        prestation offerte sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                        ou contactez l'administrateur." % rec.prestation_id.name
-                                        }
-                            }
+        if self.produit_phcie_id:
+            nbre_produit_phcie = self.search_count([
+                ('pec_id', '=', self.pec_id.id),
+                ('produit_phcie_id', '=', self.produit_phcie_id.id),
+            ])
+            self.nbre_produit_phcie = int (nbre_produit_phcie)
+            if int(nbre_produit_phcie) >= 1:
+                # produit_phcie = '%s %s %s' %(self.produit_phcie_id.name, self.produit_phcie_id.forme_galenique_id.name or '',
+                #        self.produit_phcie_id.dosage)
+                return {'value': {},
+                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                    'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
+                                     cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
+                                     médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                     ou contactez l'administrateur." % self.produit_phcie
+                                    }
+                        }
+        elif self.substitut_phcie_id:
+            nbre_substitut_phcie = self.search_count([
+                ('pec_id', '=', self.pec_id.id),
+                '|', ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
+                ('produit_phcie_id', '=', self.substitut_phcie_id.id),
+            ])
+            if int(nbre_substitut_phcie) >= 1:
+                substitut_phcie = self.substitut_phcie
+                return {'value': {},
+                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                    'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
+                                    cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
+                                    médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                    ou contactez l'administrateur." % substitut_phcie
+                                    }
+                        }
+        elif self.prestation_id:
+            nbre_prestation = self.search_count([
+                ('pec_id', '=', self.pec_id.id),
+                ('produit_phcie_id', '=', None),
+                ('prestation_id', '=', self.prestation_id.id),
+            ])
+            if int(nbre_prestation) >= 1:
+                return {'value': {},
+                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                    'message': u"Il semble que la prestation : (%s) ait déjà été fournie pour cette \
+                                    prise en charge. Par conséquent, il ne peut y avoir plus d'une fois la même \
+                                    prestation offerte sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                    ou contactez l'administrateur." % self.prestation_id.name
+                                    }
+                        }
 
     # @api.one
     @api.constrains('prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id', 'produit_phcie_id',
@@ -4049,7 +4045,7 @@ class DetailsPec(models.Model):
     #                          d'informations, veuillez contactez l'administrateur..."
     #                         ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
     #                     )
-
+    @api.one
     def _compute_net_a_payer(self):
         if self.pec_id:
             self.net_a_payer = self.net_prestataire

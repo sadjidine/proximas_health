@@ -167,7 +167,7 @@
                 <field name="date_debut_assure"/>
                 <field name="date_fin_prevue_assure"/>
                 <field name="contrat_id" invisible="1" />
-                <filter name="assure_id"
+                <filter name="code_id"
                         string="Assuré"
                         domain="[]" />
                 <separator />
@@ -204,13 +204,17 @@
         <field name="arch" type="xml">
             <tree string="Prise en charge Assuré" create="0">
                 <field name="code_pec"/>
+                <field name="date_saisie"/>
                 <field name="code_id" />
                 <field name="num_bon"/>
-                <field name="date_saisie"/>
                 <field name="name" />
                 <field name="age" />
                 <field name="statut_familial"/>
                 <field name="genre"/>
+                <field name="num_contrat"/>
+                <field name="adherent"/>
+                <field name="date_debut_assure"/>
+                <field name="date_fin_prevue_assure"/>
                 <field name="sous_totaux_pec"/>
                 <field name="state"/>
             </tree>
@@ -298,8 +302,8 @@
                         <button name="proximas_medical.proximas_list_pec_filter_action" class="oe_stat_button"
                                 icon="fa-list"
                                 type="action"
-                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
-                                context="{'search_default_code_id': code_id}">
+                                domain="[]"
+                                context="{'search_default_code_id': code_id,'search_default_date_debut_assure': date_debut}">
                             <field name="nbre_pec_assure_encours" widget="statinfo" string="Nbre.PEC" />
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
@@ -471,6 +475,7 @@
                                            options='{"no_open": True, "no_create": True}'
                                     />
                                     <field name="date_debut_assure"/>
+                                    <!--<t t-set="date_debut" t-value="datetime.datetime.strptime(date_debut_assure, '%Y-%m-%d').strftime('%Y/%m/%d')"/>-->
                                 </group>
                                 <group>
                                     <field name="validite_pec"/>

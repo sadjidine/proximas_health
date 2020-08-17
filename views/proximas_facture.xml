@@ -4,6 +4,32 @@
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
 <odoo>
     <data>
+        <!-- DATAILS PEC TREE -->
+    <record id="proximas_details_pec_facture_list" model="ir.ui.view">
+        <field name="name">proximas details pec facture list</field>
+        <field name="model">proximas.details.pec</field>
+        <field name="arch" type="xml">
+            <tree string="Details PEC">
+                <field name="num_pec"/>
+                <field name="date_execution"/>
+                <field name="code_id"/>
+                <field name="assure_id" string="Assuré"/>
+                <field name="prestataire"/>
+                <field name="details_prestation" string="Désignation"/>
+                <field name="quantite" string="Qté. Demandée"/>
+                <field name="quantite_livre" string="Livré"/>
+                <field name="cout_unite" string="Coût Unit."/>
+                <field name="cout_total" string="Totaux" sum="Totaux"/>
+                <field name="total_pc" string="Totaux PC" sum="Totauc PC"/>
+                <field name="total_npc" string="Totaux NPC" sum="Totaux NPC"/>
+                <field name="taux_couvert" string="Taux(%)"/>
+                <field name="net_tiers_payeur" sum="Part SAM"/>
+                <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod."/>
+                <field name="net_prestataire" string="Net Prestataire" sum="Net Prestataire"/>
+                <field name="net_a_payer" string="NET DÛ"/>
+            </tree>
+        </field>
+    </record>
         <!-- FACTURE VIEW TREE -->
         <record id="proximas_facture_view_tree" model="ir.ui.view">
             <field name="name">proximas.facture.view</field>
@@ -215,7 +241,7 @@
                                       class="text-primary"
                                       widget="many2many"
                                       context="{'default_prestataire_id':prestataire_id, 'default_facture_id':id,
-                                      'tree_view_ref':'proximas_medical.proximas_details_pec_view_tree'}"
+                                      'tree_view_ref':'proximas_medical.proximas_details_pec_facture_list'}"
                                       domain="[('prestataire','=',prestataire_id),('date_execution','!=',None),
                                       ('facture_id','=',None),('total_pc','>',0),('pec_state','in',['dispense',
                                       'oriente','termine'])]"
