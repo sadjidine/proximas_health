@@ -136,6 +136,7 @@ class PriseEnCharge(models.Model):
         ],
         string='Dispensation Médicament Pharmacie/Officine',
     )
+    # RECUPERATION DE SINISTRES ASSURE
     details_pec_ids = fields.One2many(
         comodel_name="proximas.details.pec",
         inverse_name="pec_id",
@@ -144,18 +145,18 @@ class PriseEnCharge(models.Model):
             ('date_execution', '!=', None),
         ]
     )
-    details_pec_assure_ids = fields.One2many (
-        comodel_name="proximas.details.pec",
-        string="Détails PEC - Assuré",
-        related='assure_id.details_pec_ids',
-        readonly=True,
-    )
-    details_pec_contrat_ids = fields.One2many(
-        comodel_name="proximas.details.pec",
-        string="Détails PEC - Contrat",
-        related='contrat_id.details_pec_ids',
-        readonly=True,
-    )
+    # details_pec_assure_ids = fields.One2many (
+    #     comodel_name="proximas.details.pec",
+    #     string="Détails PEC - Assuré",
+    #     related='assure_id.details_pec_ids',
+    #     readonly=True,
+    # )
+    # details_pec_contrat_ids = fields.One2many(
+    #     comodel_name="proximas.details.pec",
+    #     string="Détails PEC - Contrat",
+    #     related='contrat_id.details_pec_ids',
+    #     readonly=True,
+    # )
     note = fields.Text(
         string="Notes et Observations",
     )
@@ -295,7 +296,7 @@ class PriseEnCharge(models.Model):
         readonly=True,
     )
     date_debut_assure = fields.Date (
-        string="Date Débur Assuré",
+        string="Date Début Assuré",
         related='assure_id.date_debut_assure',
         # store=True,
         help="Date de début de la couverture en rapport avec le délai de validité de la police."
@@ -363,107 +364,67 @@ class PriseEnCharge(models.Model):
         readonly=True,
     )
     # SUIVI PORTEFEUILLE DE RISQUES - NIVEAU SINISTRALITE
-    nbre_pec_assure_encours = fields.Integer(
-        string="Nbre. PEC/Assuré",
-        related='assure_id.nbre_pec_assure_encours',
-        default=0,
-        help="Nombre de prises en charge (PEC) pour l'exercice en cours..."
-    )
-    mt_sinistres_assure_encours = fields.Float(
-        string="Totaux Sinistres Assure",
-        digits=(9, 0),
-        related='assure_id.mt_sinistres_assure_encours',
-        default=0,
-        help="Totaux Sinistres/Assuré pour l'exercice en cours..."
-    )
-    mt_sinistres_contrat_encours = fields.Float (
-        string="Totaux Sinistres Contrat",
-        digits=(9, 0),
-        related='contrat_id.mt_sinistres_contrat_encours',
-        default=0,
-        help="Totaux Sinistres/Famille pour l'exercice en cours..."
-    )
-    nbre_actes_assure_encours = fields.Integer (
-        string="Nbre. Actes/Famille",
-        related='assure_id.nbre_actes_assure_encours',
-        default=0,
-        help="Nombre d'actes médicaux pour l'exercice en cours..."
-    )
-    mt_sinistres_actes_assure_encours = fields.Float(
-        string="Totaux Actes Famille",
-        digits=(9, 0),
-        related='assure_id.mt_sinistres_actes_assure_encours',
-        default=0,
-    )
-    nbre_phcie_assure_encours = fields.Integer(
-        string="Nbre. Prescription(s)/Famille",
-        related='assure_id.nbre_phcie_assure_encours',
-        default=0,
-        help="Nombre de prescription(s) pour l'exercice en cours..."
-    )
-    mt_sinistres_phcie_assure_encours = fields.Float(
-        string="Totaux Phcie. Famille",
-        digits=(9, 0),
-        related='assure_id.mt_sinistres_phcie_assure_encours',
-        default=0,
-    )
-    taux_sinistre_plafond_assure = fields.Float(
-        string="Taux Sinistre/Plafond - Assuré",
-        digits=(9, 0),
-        related='assure_id.taux_sinistre_plafond_assure',
-        default=0,
-    )
-    taux_sinistre_plafond_famille = fields.Float(
-        string="Taux Sinistre/Plafond - Contrat",
-        digits=(9, 0),
-        related='contrat_id.taux_sinistre_plafond_famille',
-        default=0,
-    )
-    ########################################################
-    sous_totaux_assure_encours = fields.Float(
-        string="S/Totaux Assuré",
-        digits=(9, 0),
-        compute='_compute_details_pec',
-        default=0,
-        #related='assure_id.sous_totaux_pec',
-    )
-    sous_totaux_contrat_encours = fields.Float(
-        string="S/Totaux Contrat",
-        digits=(9, 0),
-        compute='_compute_details_pec',
-        default=0,
-        # related='assure_id.sous_totaux_pec',
-    )
-    nbre_actes_contrat_encours = fields.Integer(
-        string="Nbre. Actes Contrat",
-        compute='_compute_details_pec',
-        default=0,
-        #related='assure_id.nbre_actes_pec',
-    )
-    nbre_actes_pec_assure_encours = fields.Integer(
-        string="Nbre. Actes Assuré",
-        compute='_compute_details_pec',
-        default=0,
-        # related='assure_id.nbre_actes_pec',
-    )
-    niveau_sinistre_assure = fields.Float(
-        string="Niveau Sinistre Assuré",
-        compute='_compute_details_pec',
-        default=0,
-    )
-    niveau_sinistre_contrat = fields.Float(
-        string="Niveau Sinistre Contrat",
-        compute='_compute_details_pec',
-        default=0,
-    )
-    totaux_contrat = fields.Float(
-        string="S/Totaux Famille",
-        digits=(9, 0),
-        related='contrat_id.sous_totaux_contrat',
-        default=0,
-        readonly=True,
-        # related='contrat_id.compteur',
-    )
+
+    #######################################################
+    # nbre_pec_assure = fields.Integer (
+    #     string="Nbre. PEC Assuré",
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # nbre_actes_assure = fields.Integer (
+    #     string="Nbre. Actes Assuré",
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # nbre_phcie_assure = fields.Integer (
+    #     string="Nbre. Phcie. Assuré",
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # totaux_assure = fields.Float(
+    #     string="Totaux Assuré",
+    #     digits=(9, 0),
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # totaux_actes_assure = fields.Float(
+    #     string="Totaux Actes Assuré",
+    #     digits=(9, 0),
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # totaux_phcie_assure = fields.Float (
+    #     string="Totaux Phcie. Assuré",
+    #     digits=(9, 0),
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # totaux_contrat = fields.Float(
+    #     string="Totaux Contrat",
+    #     digits=(9, 0),
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # nbre_actes_contrat = fields.Integer(
+    #     string="Nbre. Actes Contrat",
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # nbre_phcie_contrat = fields.Integer (
+    #     string="Nbre. Phcie. Contrat",
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # niveau_sinistre_assure = fields.Float(
+    #     string="Niveau Sinistre Assuré",
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
+    # niveau_sinistre_contrat = fields.Float(
+    #     string="Niveau Sinistre Contrat",
+    #     compute='_get_sinistres_encours',
+    #     default=0,
+    # )
     sous_totaux_pec = fields.Float(
         string="S/Totaux PEC",
         digits=(9, 0),
@@ -642,14 +603,19 @@ class PriseEnCharge(models.Model):
     mt_encaisse_phcie = fields.Float(
         string="Montant Encaissé (Phcie)",
         digits=(9, 0),
-        #compute='_compute_details_pec',
         default=0,
         help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
     )
     mt_encaisse_phcie_dispense = fields.Float(
         string="Montant Encaissé (Phcie)",
         digits=(9, 0),
-        # compute='_compute_details_pec',
+        default=0,
+        help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
+    )
+    tot_encaisse_phcie = fields.Float (
+        string="Mt. Encaissé (Phcie)",
+        digits=(9, 0),
+        compute='_get_encaisse_phcie',
         default=0,
         help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
     )
@@ -841,14 +807,22 @@ class PriseEnCharge(models.Model):
                 rec.is_termine = True
             else:
                 rec.is_termine = False
+    
+    @api.one
+    @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
+    def _get_encaisse_phcie(self):
+        if self.mt_encaisse_phcie:
+            self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
+        elif self.mt_encaisse_phcie_dispense:
+            self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
+        self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense if self.mt_encaisse_phcie_dispense \
+            else self.mt_encaisse_phcie
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
-                 'details_pec_phcie_ids', 'details_pec_prescription_ids')
-    # @api.onchange('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
-    #               'details_pec_phcie_ids')
+                 'details_pec_phcie_ids')
     def _check_nbre_details_pec(self):
-        # self.ensure_one()
+        self.ensure_one()
         details_pec_prescription_encours = self.details_pec_prescription_ids
         details_pec_phcie_encours = self.details_pec_phcie_ids
         self.nbre_prestations_fournies = len(self.details_pec_soins_ids)
@@ -858,70 +832,149 @@ class PriseEnCharge(models.Model):
         self.nbre_prescriptions = len(details_pec_phcie_encours)
         self.totaux_phcie = sum(item.total_pc for item in details_pec_phcie_encours)
         self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
+        # if self.mt_encaisse_phcie:
+        #     self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
+        # elif self.mt_encaisse_phcie_dispense:
+        #     self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
+
+    # @api.one
+    # @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
+    # def _get_sinistres_encours(self):
+    #     self.ensure_one()
+    #     pec_assure = self.search([
+    #         '|', ('assure_id', '=', self.assure_id.id),
+    #         ('code_id', '=ilike', self.code_id)
+    #     ])
+    #     details_pec_assure = self.env['proximas.details.pec'].search([
+    #         '|', ('assure_id', '=', self.assure_id.id),
+    #         ('code_id', '=ilike', self.code_id),
+    #         ('date_execution', '!=', None),
+    #     ])
+    #     details_actes_assure = self.env['proximas.details.pec'].search ([
+    #         '|', ('assure_id', '=', self.assure_id.id),
+    #         ('code_id', '=ilike', self.code_id),
+    #         ('date_execution', '!=', None),
+    #         ('produit_phcie_id', '=', None),
+    #     ])
+    #     details_phcie_assure = self.env['proximas.details.pec'].search ([
+    #         '|', ('assure_id', '=', self.assure_id.id),
+    #         ('code_id', '=ilike', self.code_id),
+    #         ('date_execution', '!=', None),
+    #         ('produit_phcie_id', '!=', None),
+    #     ])
+    #     details_pec_contrat = self.env['proximas.details.pec'].search ([
+    #         # ('adherent_id', '=', self.adherent.id),
+    #         ('contrat_id', '=', self.contrat_id.id),
+    #         ('date_execution', '!=', None),
+    #     ])
+    #     date_debut = fields.Date.from_string(self.date_debut_assure)
+    #     date_fin = fields.Date.from_string(self.date_fin_prevue_assure)
+    #     pec_assure_encours = []
+    #     details_pec_assure_encours = []
+    #     details_actes_assure_encours = []
+    #     details_phcie_assure_encours = []
+    #     details_pec_contrat_encours = []
+    #     if pec_assure:
+    #         for item in pec_assure:
+    #             date_saisie = fields.Date.from_string(item.date_saisie)
+    #             if date_debut <= date_saisie <= date_fin:
+    #                 pec_assure_encours.append(item)
+    #         for item in details_pec_assure:
+    #             date_execution = fields.Date.from_string(item.date_execution)
+    #             if date_debut <= date_execution <= date_fin:
+    #                 details_pec_assure_encours.append(item)
+    #         for item in details_actes_assure:
+    #             date_execution = fields.Date.from_string(item.date_execution)
+    #             if date_debut <= date_execution <= date_fin:
+    #                 details_actes_assure_encours.append(item)
+    #         for item in details_phcie_assure:
+    #             date_execution = fields.Date.from_string(item.date_execution)
+    #             if date_debut <= date_execution <= date_fin:
+    #                 details_phcie_assure_encours.append(item)
+    #         for item in details_pec_contrat:
+    #             date_execution = fields.Date.from_string(item.date_execution)
+    #             if date_debut <= date_execution <= date_fin:
+    #                 details_pec_contrat_encours.append(item)
+    #         self.nbre_pec_assure = len(pec_assure_encours)
+    #         self.nbre_actes_assure = len(details_actes_assure_encours)
+    #         self.nbre_phcie_assure = len(details_phcie_assure_encours)
+    #         self.nbre_actes_contrat = len(details_pec_contrat_encours)
+    #         self.totaux_assure = sum(item.total_pc for item in details_pec_assure_encours)
+    #         self.totaux_actes_assure = sum (item.total_pc for item in details_actes_assure_encours)
+    #         self.totaux_phcie_assure = sum (item.total_pc for item in details_phcie_assure_encours)
+    #         self.totaux_contrat = sum(item.total_pc for item in details_pec_contrat_encours)
+    #         self.niveau_sinistre_assure = (self.totaux_assure * 100 / self.plafond_individu) \
+    #             if self.plafond_individu else 0
+    #         self.niveau_sinistre_contrat = (self.totaux_contrat * 100 / self.plafond_famille) \
+    #             if self.plafond_famille else 0
 
     @api.one
-    @api.depends('details_pec_ids')
-    # @api.onchange('assure_id', 'details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', 'nbre_prescriptions',
-    #               'nbre_prestations_fournies')
+    @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
     def _compute_details_pec(self):
-        #self.ensure_one()
-        details_pec_assure_encours = self.details_pec_assure_ids
-        details_pec_contrat_encours = self.details_pec_contrat_ids
-        details_pec_encours = self.details_pec_ids
-        details_pec_cro = self.details_pec_soins_ids
-        details_pec_crs = self.details_pec_soins_crs_ids
-        details_pec_phcie = self.details_pec_phcie_ids
-        self.mt_encaisse_phcie_dispense, self.mt_encaisse_phcie = self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense
-        if details_pec_encours:
-            self.nbre_actes_assure_encours = len(details_pec_assure_encours)
-            self.nbre_actes_contrat_encours = len(details_pec_contrat_encours)
-            self.sous_totaux_assure_encours = sum(item.total_pc for item in details_pec_assure_encours)
-            self.sous_totaux_contrat_encours = sum(item.total_pc for item in details_pec_contrat_encours)
-            self.sous_totaux_pec = sum (item.total_pc for item in details_pec_encours)
-            self.sous_totaux_npc_pec = sum (item.total_npc for item in details_pec_encours)
-            self.part_sam_pec = sum (item.net_tiers_payeur for item in details_pec_encours)
-            self.ticket_moderateur_pec = sum (item.ticket_moderateur for item in details_pec_encours)
-            self.net_prestataire_pec = sum (item.net_prestataire for item in details_pec_encours)
-            self.net_remboursement_pec = sum (item.mt_remboursement for item in details_pec_encours)
-            self.paye_assure_pec = sum (item.mt_paye_assure for item in details_pec_encours)
-            # Calculs des S/Totaux (CRO-CRS-Phcie)
+        self.ensure_one()
+        totaux_details_pec = self.env['proximas.details.pec'].search([
+            ('pec_id', '=', self.id)
+        ])
+        totaux_details_pec_cro = self.env['proximas.details.pec'].search([
+            ('pec_id', '=', self.id),
+            ('prestataire', '=', self.prestataire_id.id),
+            ('date_execution', '!=', None),
+        ])
+        totaux_details_pec_crs = self.env['proximas.details.pec'].search ([
+            ('pec_id', '=', self.id),
+            ('prestataire', '=', self.prestataire_crs_id.id),
+            ('date_execution', '!=', None),
+        ])
+        totaux_details_pec_phcie = self.env['proximas.details.pec'].search ([
+            ('pec_id', '=', self.id),
+            ('prestataire', '=', self.prestataire_phcie_id.id),
+            ('produit_phcie_id', '!=', None),
+            ('date_execution', '!=', None),
+
+        ])
+        if totaux_details_pec:
+            self.sous_totaux_pec = sum(item.total_pc for item in totaux_details_pec) or 0
+            self.sous_totaux_npc_pec = sum(item.total_npc for item in totaux_details_pec)
+            self.part_sam_pec = sum(item.net_tiers_payeur for item in totaux_details_pec)
+            self.ticket_moderateur_pec = sum(item.ticket_moderateur for item in totaux_details_pec)
+            self.net_prestataire_pec = sum(item.net_prestataire for item in totaux_details_pec)
+            self.net_remboursement_pec = sum(item.mt_remboursement for item in totaux_details_pec)
+            self.paye_assure_pec = sum(item.mt_paye_assure for item in totaux_details_pec)
             # 1. S/Totaux
-            self.mt_totaux_cro = sum (item.total_pc for item in details_pec_cro) or 0
-            self.mt_totaux_crs = sum (item.total_pc for item in details_pec_crs) or 0
-            self.mt_totaux_phcie = sum (item.total_pc for item in details_pec_phcie) or 0
+            self.mt_totaux_cro = sum(item.total_pc for item in totaux_details_pec_cro) or 0
+            self.mt_totaux_crs = sum(item.total_pc for item in totaux_details_pec_crs) or 0
+            self.mt_totaux_phcie = sum(item.total_pc for item in totaux_details_pec_phcie) or 0
             self.mt_totaux_phcie_dispense = self.mt_totaux_phcie
             # 2. Part SAM
-            self.part_sam_cro = sum (item.net_tiers_payeur for item in details_pec_cro) or 0
-            self.part_sam_crs = sum (item.net_tiers_payeur for item in details_pec_crs) or 0
-            self.part_sam_phcie = sum (item.net_tiers_payeur for item in details_pec_phcie) or 0
+            self.part_sam_cro = sum(item.net_tiers_payeur for item in totaux_details_pec_cro) or 0
+            self.part_sam_crs = sum(item.net_tiers_payeur for item in totaux_details_pec_crs) or 0
+            self.part_sam_phcie = sum(item.net_tiers_payeur for item in totaux_details_pec_phcie) or 0
             self.part_sam_phcie_dispense = self.part_sam_phcie
             # 3. Ticket Modérateur
-            self.ticket_moderateur_cro = sum (item.ticket_moderateur for item in details_pec_cro) or 0
-            self.ticket_moderateur_crs = sum (item.ticket_moderateur for item in details_pec_crs) or 0
-            self.ticket_moderateur_phcie = sum (item.ticket_moderateur for item in details_pec_phcie) or 0
+            self.ticket_moderateur_cro = sum(item.ticket_moderateur for item in totaux_details_pec_cro) or 0
+            self.ticket_moderateur_crs = sum(item.ticket_moderateur for item in totaux_details_pec_crs) or 0
+            self.ticket_moderateur_phcie = sum(item.ticket_moderateur for item in totaux_details_pec_phcie) or 0
             self.ticket_moderateur_phcie_dispense = self.ticket_moderateur_phcie
             # 4. Ticket Exigible
-            self.ticket_exigible_cro = sum (
-                item.ticket_moderateur for item in details_pec_cro if bool (item.ticket_exigible) or 0
+            self.ticket_exigible_cro = sum(
+                item.ticket_moderateur for item in totaux_details_pec_cro if bool (item.ticket_exigible) or 0
             )
-            self.ticket_exigible_crs = sum (
-                item.ticket_moderateur for item in details_pec_crs if bool (item.ticket_exigible) or 0
+            self.ticket_exigible_crs = sum(
+                item.ticket_moderateur for item in totaux_details_pec_crs if bool (item.ticket_exigible) or 0
             )
-            self.ticket_exigible_phcie = sum (
-                item.ticket_moderateur for item in details_pec_phcie if bool (item.ticket_exigible) or 0
+            self.ticket_exigible_phcie = sum(
+                item.ticket_moderateur for item in totaux_details_pec_phcie if bool (item.ticket_exigible) or 0
             )
             self.ticket_exigible_phcie_dispense = self.ticket_exigible_phcie
             # 5. Net à Payer
-            self.net_prestataire_cro = sum (item.net_prestataire for item in details_pec_cro) or 0
-            self.net_prestataire_crs = sum (item.net_prestataire for item in details_pec_crs) or 0
-            self.net_prestataire_phcie = sum (item.net_prestataire for item in details_pec_phcie) or 0
+            self.net_prestataire_cro = sum(item.net_prestataire for item in totaux_details_pec_cro) or 0
+            self.net_prestataire_crs = sum(item.net_prestataire for item in totaux_details_pec_crs) or 0
+            self.net_prestataire_phcie = sum(item.net_prestataire for item in totaux_details_pec_phcie) or 0
             self.net_prestataire_phcie_dispense = self.net_prestataire_phcie
-
             # 6. Totaux Encaissement
             # self.mt_encaisse_cro = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_cro)
             # self.mt_encaisse_crs = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_crs)
             # self.mt_encaisse_phcie = sum(item.mt_paye_assure or 0 for item in totaux_details_pec_phcie)
-
 
     @api.multi
     def action_en_cours(self):
@@ -1052,23 +1105,14 @@ class PriseEnCharge(models.Model):
                   contactez l'administrateur..."
                 ) % self.ticket_exigible_crs
             )
-        # elif 0 < self.ticket_exigible_phcie > self.mt_encaisse_phcie:
-        #     raise UserError (_ (
-        #        u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
-        #         Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
-        #         exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
-        #         de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
-        #         contactez l'administrateur..."
-        #         ) % self.ticket_exigible_phcie
-        #     )
-        elif 0 < self.ticket_exigible_phcie_dispense > self.mt_encaisse_phcie_dispense:
+        elif 0 < self.ticket_exigible_phcie > self.tot_encaisse_phcie:
             raise UserError (_ (
                u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
                 Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
                 exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
                 de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
                 contactez l'administrateur..."
-                ) % self.ticket_exigible_phcie_dispense
+                ) % self.ticket_exigible_phcie
             )
         else:
             # self.env.user.notify_info('La Prise en charge : %s a été sauvegardée et terminée avec succès.') % self.name
@@ -1419,24 +1463,14 @@ class PriseEnCharge(models.Model):
                 ) % (rec.ticket_exigible_crs, rec.mt_encaisse_crs)
                                        )
             # 3. Controle cas de PHARMACIE
-            # if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie) > int(rec.mt_encaisse_phcie):
-            #     raise ValidationError (_ (
-            #         u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
-            #         Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
-            #         Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
-            #         vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
-            #         veuillez contactez l'administrateur..."
-            #     ) % (rec.ticket_exigible_phcie, rec.mt_encaisse_phcie)
-            #                            )
-            if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie_dispense) > \
-                    int(rec.mt_encaisse_phcie_dispense):
+            if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie) > int(rec.tot_encaisse_phcie):
                 raise ValidationError (_ (
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
                     Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
-                ) % (rec.ticket_exigible_phcie_dispense, rec.mt_encaisse_phcie_dispense)
+                ) % (rec.ticket_exigible_phcie, rec.tot_encaisse_phcie)
                                        )
 
     @api.multi
@@ -2379,6 +2413,13 @@ class DetailsPec(models.Model):
         store=True,
         readonly=True,
     )
+    pathologie_id = fields.Many2one (
+        comodel_name="proximas.pathologie",
+        string="Affection Principale",
+        related='pec_id.pathologie_id',
+        store=True,
+        help='Veuillez Indiquer le code de l\'affection( pathologie) principale.',
+    )
     accorde = fields.Boolean (
         string="Accord?",
         default=False,
@@ -2806,54 +2847,55 @@ class DetailsPec(models.Model):
     @api.onchange('produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'prestation_crs_id',
                   'prestation_demande_id')
     def _check_nbre_prestations(self):
-        if self.produit_phcie_id:
-            nbre_produit_phcie = self.search_count([
-                ('pec_id', '=', self.pec_id.id),
-                ('produit_phcie_id', '=', self.produit_phcie_id.id),
-            ])
-            self.nbre_produit_phcie = int (nbre_produit_phcie)
-            if int(nbre_produit_phcie) >= 1:
-                # produit_phcie = '%s %s %s' %(self.produit_phcie_id.name, self.produit_phcie_id.forme_galenique_id.name or '',
-                #        self.produit_phcie_id.dosage)
-                return {'value': {},
-                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                    'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
-                                     cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
-                                     médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                     ou contactez l'administrateur." % self.produit_phcie
-                                    }
-                        }
-        elif self.substitut_phcie_id:
-            nbre_substitut_phcie = self.search_count([
-                ('pec_id', '=', self.pec_id.id),
-                '|', ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
-                ('produit_phcie_id', '=', self.substitut_phcie_id.id),
-            ])
-            if int(nbre_substitut_phcie) >= 1:
-                substitut_phcie = self.substitut_phcie
-                return {'value': {},
-                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                    'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
-                                    cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
-                                    médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                    ou contactez l'administrateur." % substitut_phcie
-                                    }
-                        }
-        elif self.prestation_id:
-            nbre_prestation = self.search_count([
-                ('pec_id', '=', self.pec_id.id),
-                ('produit_phcie_id', '=', None),
-                ('prestation_id', '=', self.prestation_id.id),
-            ])
-            if int(nbre_prestation) >= 1:
-                return {'value': {},
-                        'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                    'message': u"Il semble que la prestation : (%s) ait déjà été fournie pour cette \
-                                    prise en charge. Par conséquent, il ne peut y avoir plus d'une fois la même \
-                                    prestation offerte sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
-                                    ou contactez l'administrateur." % self.prestation_id.name
-                                    }
-                        }
+        for rec in self:
+            if rec.produit_phcie_id:
+                nbre_produit_phcie = self.search_count([
+                    ('pec_id', '=', rec.pec_id.id),
+                    ('produit_phcie_id', '=', rec.produit_phcie_id.id),
+                ])
+                rec.nbre_produit_phcie = int (nbre_produit_phcie)
+                if int (nbre_produit_phcie) >= 1:
+                    # produit_phcie = '%s %s %s' %(rec.produit_phcie_id.name, rec.produit_phcie_id.forme_galenique_id.name or '',
+                    #        rec.produit_phcie_id.dosage)
+                    return {'value': {},
+                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                        'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
+                                         cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
+                                         médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                         ou contactez l'administrateur." % rec.produit_phcie
+                                        }
+                            }
+            elif rec.substitut_phcie_id:
+                nbre_substitut_phcie = self.search_count ([
+                    ('pec_id', '=', rec.pec_id.id),
+                    '|', ('substitut_phcie_id', '=', rec.substitut_phcie_id.id),
+                    ('produit_phcie_id', '=', rec.substitut_phcie_id.id),
+                ])
+                if int (nbre_substitut_phcie) >= 1:
+                    substitut_phcie = rec.substitut_phcie
+                    return {'value': {},
+                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                        'message': u"Il semble que le médicament: => (%s) ait déjà été prescrit pour \
+                                        cette prise en charge. Par conséquent, il ne peut y avoir plus d'une fois le même \
+                                        médicament prescrit sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                        ou contactez l'administrateur." % substitut_phcie
+                                        }
+                            }
+            elif rec.prestation_id:
+                nbre_prestation = self.search_count ([
+                    ('pec_id', '=', rec.pec_id.id),
+                    ('produit_phcie_id', '=', None),
+                    ('prestation_id', '=', rec.prestation_id.id),
+                ])
+                if int (nbre_prestation) >= 1:
+                    return {'value': {},
+                            'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                        'message': u"Il semble que la prestation : (%s) ait déjà été fournie pour cette \
+                                        prise en charge. Par conséquent, il ne peut y avoir plus d'une fois la même \
+                                        prestation offerte sur la même prise en charge. Vérifiez s'il n'y pas de doublon \
+                                        ou contactez l'administrateur." % rec.prestation_id.name
+                                        }
+                            }
 
     # @api.one
     @api.constrains('prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id', 'produit_phcie_id',
@@ -4057,6 +4099,7 @@ class DetailsPec(models.Model):
     @api.one
     @api.depends('cout_unit', 'cout_unitaire')
     def _check_cout_unite(self):
+        self.ensure_one()
         if bool(self.cout_unit):
             self.cout_unite = self.cout_unit
         elif bool (self.cout_unitaire):
@@ -4072,6 +4115,7 @@ class DetailsPec(models.Model):
     @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
                  'mt_exclusion')
     def _calcul_couts_details_pec(self):
+        self.ensure_one()
         if bool(self.prestation_id):
             # Vérifier si la prestation est identifiée
             controle_rubrique = self.env['proximas.controle.rubrique'].search([
@@ -4846,11 +4890,9 @@ class DetailsPec(models.Model):
                                            )
 
     @api.one
-    @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
-                 'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+    @api.depends('prestation_id', 'date_demande', 'date_execution', 'delai_prestation')
     def _check_delai_attente_prestation(self):
         # Contrôle du délai d'attente Substitut Médicament
-        self.ensure_one()
         if bool(self.substitut_phcie_id):
             # Récupère la date du jour
             now = datetime.now()
@@ -4931,7 +4973,7 @@ class DetailsPec(models.Model):
             # Si OUI, y a-t-il un délai d'attente à observer pour le produit prescrit?
             if 0 < int(self.delai_attente_produit):
                 # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
+                pec_produit_phcie_assure = self.search(
                     [
                         ('date_execution', '!=', None),
                         ('assure_id', '=', self.assure_id.id),
@@ -4939,7 +4981,7 @@ class DetailsPec(models.Model):
                         ('substitut_phcie_id', '=', self.produit_phcie_id.id),
                     ]
                 )
-                if bool (pec_produit_phcie_assure):
+                if bool(pec_produit_phcie_assure):
                     # Récupérer la dernière fourniture du médicament prescrit ou substituer
                     dernier_acte_assure = pec_produit_phcie_assure[0]
                     # Récupérer la date de la dernière prescription ou substitution liée au médicament
@@ -4985,7 +5027,7 @@ class DetailsPec(models.Model):
                     dernier_acte_assure = pec_produit_phcie_assure[0]
                     # Récupérer la date de la dernière prescription ou substitution liée au médicament
                     date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today ())
+                                        fields.Datetime.from_string (fields.Date.today())
                     self.date_dernier_acte = dernier_acte_assure.date_execution
                     # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                     nbre_jours_dernier_acte = (now - date_dernier_acte).days
@@ -4999,15 +5041,15 @@ class DetailsPec(models.Model):
         # delai_attente = int(self.delai_attente_prestation)
         elif int(self.delai_attente_prestation) > 0 and self.pec_state in ['cours', 'oriente']:
             # Si OUI, Récupère la date du jour
-            now = datetime.now ()
+            now = datetime.now()
             # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
             # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
-            pec_prestations_assure = self.env['proximas.details.pec'].search ([
+            pec_prestations_assure = self.search([
                 ('date_execution', '!=', False),
                 ('assure_id', '=', self.assure_id.id),
                 ('prestation_id', '=', self.prestation_id.id),
             ])
-            count_pec_prestations_assure = self.env['proximas.details.pec'].search_count(
+            count_pec_prestations_assure = self.search_count(
                 [
                     ('date_execution', '!=', False),
                     ('assure_id', '=', self.assure_id.id),
@@ -5018,16 +5060,16 @@ class DetailsPec(models.Model):
                 # Récupérer la dernier acte liée à la prestation offerte à l'assuré
                 dernier_acte_assure = pec_prestations_assure[0]
                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                    fields.Datetime.from_string (fields.Date.today ())
+                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution) or \
+                                        fields.Datetime.from_string (fields.Date.today())
                 date_acte_format = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
                 self.date_dernier_acte = dernier_acte_assure.date_execution
                 # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                 nbre_jours_dernier_acte = (now - date_dernier_acte).days
                 # => différence en les 2 dates en nombre de jours.
-                self.delai_prestation = int (nbre_jours_dernier_acte)
+                self.delai_prestation = int(nbre_jours_dernier_acte)
                 # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
-                if int(nbre_jours_dernier_acte) <= int(self.delai_attente_prestation):
+                if 0 < int(nbre_jours_dernier_acte) <= int(self.delai_attente_prestation):
                     # Sinon, rejeter la prestation
                     raise UserError (_ (
                         u"Proximaas : Contrôle de Règles de Gestion.\n \
@@ -5049,12 +5091,12 @@ class DetailsPec(models.Model):
             now = datetime.now ()
             # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
             # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
-            pec_prestations_assure = self.env['proximas.details.pec'].search ([
+            pec_prestations_assure = self.search([
                 ('date_execution', '!=', False),
                 ('assure_id', '=', self.assure_id.id),
                 ('prestation_id', '=', self.prestation_id.id),
             ])
-            count_pec_prestations_assure = self.env['proximas.details.pec'].search_count (
+            count_pec_prestations_assure = self.search_count (
                 [
                     ('date_execution', '!=', False),
                     ('assure_id', '=', self.assure_id.id),
@@ -5065,8 +5107,8 @@ class DetailsPec(models.Model):
                 # Récupérer la dernier acte liée à la prestation offerte à l'assuré
                 dernier_acte_assure = pec_prestations_assure[0]
                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                    fields.Datetime.from_string (fields.Date.today ())
+                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)or \
+                                        fields.Datetime.from_string (fields.Date.today())
                 self.date_dernier_acte = dernier_acte_assure.date_execution
                 # Calcul le nombre de jours écoulés entre la dernière prestation liée et aujourd'hui
                 nbre_jours_dernier_acte = (now - date_dernier_acte).days
@@ -5076,20 +5118,21 @@ class DetailsPec(models.Model):
                 self.date_dernier_acte = self.date_execution
                 self.delai_prestation = 0
 
-    @api.constrains('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
-                    'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+    @api.constrains('prestation_id', 'date_demande', 'date_execution')
+    # ('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
+    #                 'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _validate_delai_attente_prestation(self):
         # Contrôle du délai d'attente Substitut Médicament
         # 1. Vérifier s'il s'agit d'une substitution de médicament?
         for rec in self:
             if bool(rec.substitut_phcie_id):
                 # Récupère la date du jour
-                now = datetime.now ()
+                now = datetime.now()
                 substitut_phcie = rec.substitut_phcie
                 # Si OUI, y a-t-il un délai d'attente à observer pour le substitut?
-                if 0 < int (rec.delai_attente_substitut):
+                if 0 < int(rec.delai_attente_substitut):
                     # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                    pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
+                    pec_produit_phcie_assure = self.search(
                         [
                             ('date_execution', '!=', None),
                             ('assure_id', '=', rec.assure_id.id),
@@ -5097,12 +5140,11 @@ class DetailsPec(models.Model):
                             ('substitut_phcie_id', '=', rec.substitut_phcie_id.id),
                         ]
                     )
-                    if bool (pec_produit_phcie_assure):
+                    if bool(pec_produit_phcie_assure):
                         # Récupérer la dernière fourniture du médicament prescrit ou substituer
                         dernier_acte_assure = pec_produit_phcie_assure[0]
                         # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                        date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                            fields.Datetime.from_string (fields.Date.today ())
+                        date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution)
                         # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                         nbre_jours_dernier_acte = (
                                 now - date_dernier_acte).days  # => différence en les 2 dates en nombre de jours.
@@ -5126,7 +5168,7 @@ class DetailsPec(models.Model):
                 # Si OUI, y a-t-il un délai d'attente à observer pour le produit prescrit?
                 if 0 < int (rec.delai_attente_produit):
                     # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                    pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
+                    pec_produit_phcie_assure = self.search(
                         [
                             ('date_execution', '!=', None),
                             ('assure_id', '=', rec.assure_id.id),
@@ -5138,8 +5180,7 @@ class DetailsPec(models.Model):
                         # Récupérer la dernière fourniture du médicament prescrit ou substituer
                         dernier_acte_assure = pec_produit_phcie_assure[0]
                         # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                        date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                            fields.Datetime.from_string (fields.Date.today ())
+                        date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution)
                         # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                         nbre_jours_dernier_acte = (
                                 now - date_dernier_acte).days  # => différence en les 2 dates en nombre de jours.
@@ -5176,18 +5217,17 @@ class DetailsPec(models.Model):
                         ('prestation_id', '=', rec.prestation_id.id),
                     ]
                 )
-                if int (count_pec_prestations_assure) >= 1:
+                if int(count_pec_prestations_assure) > 1:
                     # Récupérer la dernier acte liée à la prestation offerte à l'assuré
                     dernier_acte_assure = pec_prestations_assure[0]
                     # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                    date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today ())
+                    date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
                     date_acte_format = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
                     # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                     nbre_jours_dernier_acte = (
                             now - date_dernier_acte).days  # => différence en les 2 dates en nombre de jours.
                     # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
-                    if int(rec.delai_attente_prestation) >= int(nbre_jours_dernier_acte):
+                    if 0 < int(nbre_jours_dernier_acte) <= int(rec.delai_attente_prestation):
                         # Sinon, rejeter la prestation
                         raise ValidationError (_ (
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
@@ -5196,7 +5236,7 @@ class DetailsPec(models.Model):
                             La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
                             (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.prestation_id.name, rec.delai_attente_prestation,
-                             date_acte_format, int (nbre_jours_dernier_acte))
+                             date_acte_format, int(nbre_jours_dernier_acte))
                                                )
 
     @api.constrains('prestation_id')
@@ -5240,14 +5280,14 @@ class DetailsPec(models.Model):
             ) % date_demande_format
                              )
 
-    @api.depends ('date_execution', 'date_demande')
+    @api.depends('date_execution', 'date_demande')
     def _get_exo_sam(self):
         for rec in self:
             exercices = self.env['proximas.exercice'].search ([
                 ('res_company_id', '=', rec.structure_id.id),
                 ('cloture', '=', False),
             ])
-            if bool (exercices):
+            if bool(exercices):
                 for exo in exercices:
                     date_debut = fields.Date.from_string (exo.date_debut)
                     date_fin = fields.Date.from_string (exo.date_fin)
@@ -5264,57 +5304,32 @@ class DetailsPec(models.Model):
                         if date_debut <= date_demande <= date_fin:
                             rec.exercice_id = exo.id
 
-    @api.constrains ('date_execution', 'date_demande')
-    def validate_exo_sam(self):
-        for rec in self:
-            if rec.date_execution and not bool (rec.exercice_id):
-                date_execution = fields.Datetime.from_string (self.date_execution)
-                date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
-                raise ValidationError (_ (
-                    u"Proximaas : Contrôle de Règles de Gestion:\n \
-                    La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
-                    paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
-                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-                    Pour plus d'informations, veuillez contactez l'administrateur..."
-                ) % date_execution_format
-                                       )
-            elif rec.date_demande and not bool (rec.exercice_id):
-                date_demande = fields.Datetime.from_string (self.date_demande)
-                date_demande_format = datetime.strftime (date_demande, '%d-%m-%Y')
-                raise ValidationError (_ (
-                    u"Proximaas : Contrôle de Règles de Gestion:\n \
-                    La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
-                    paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
-                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-                    Pour plus d'informations, veuillez contactez l'administrateur..."
-                ) % date_demande_format
-                                       )
-
-    # @api.constrains('date_demande', 'date_execution')
-    # def _validate_exo_sam(self):
+    # @api.constrains('exercice_id', 'date_execution', 'date_demande')
+    # def validate_exo_sam(self):
     #     for rec in self:
-    #         if bool(rec.date_execution) and not bool(rec.exercice_id):
-    #             date_execution = fields.Datetime.from_string(rec.date_execution)
+    #         if rec.date_execution and not bool(rec.exercice_id):
+    #             date_execution = fields.Datetime.from_string(self.date_execution)
     #             date_execution_format = datetime.strftime(date_execution, '%d-%m-%Y')
-    #             raise ValidationError(_(
+    #             raise ValidationError (_ (
     #                 u"Proximaas : Contrôle de Règles de Gestion:\n \
     #                 La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
     #                 paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
     #                 offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
     #                 Pour plus d'informations, veuillez contactez l'administrateur..."
-    #                 ) % date_execution_format
-    #             )
-    #         elif bool(rec.date_demande) and not bool(rec.exercice_id):
-    #             date_demande = fields.Datetime.from_string (rec.date_demande)
-    #             date_demande_format = datetime.strftime (date_demande, '%d/%m/%Y')
+    #             ) % date_execution_format
+    #                                    )
+    #         elif rec.date_demande and not bool (rec.exercice_id):
+    #             date_demande = fields.Datetime.from_string (self.date_demande)
+    #             date_demande_format = datetime.strftime (date_demande, '%d-%m-%Y')
     #             raise ValidationError (_ (
     #                 u"Proximaas : Contrôle de Règles de Gestion:\n \
-    #                 La date de la demande renseignée ici: %s n'est conforme à aucun des exercices \
+    #                 La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
     #                 paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
     #                 offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
     #                 Pour plus d'informations, veuillez contactez l'administrateur..."
-    #                 ) % date_demande_format
-    #             )
+    #             ) % date_demande_format
+    #                                    )
+
 
     sql_constraints = [
         (
@@ -5665,7 +5680,7 @@ class RemboursementPEC(models.Model):
     totaux_contrat = fields.Float(
         string="S/Totaux Famille",
         digits=(9, 0),
-        related='contrat_id.sous_totaux_contrat',
+        related='contrat_id.mt_sinistres_contrat_encours',
         default=0,
         readonly=True,
     )

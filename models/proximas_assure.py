@@ -300,7 +300,7 @@ class Assure (models.Model):
     )
     police_id = fields.Many2one(
         comodel_name="proximas.police",
-        string="Police ID.",
+        string="Police ID",
         related='contrat_id.police_id',
         # store=True,
         readonly=True,
@@ -606,6 +606,7 @@ class Assure (models.Model):
     @api.one
     @api.depends('prise_charge_ids', 'details_pec_ids', 'details_phcie_ids')
     def _compute_sinistres_assure(self):
+        self.ensure_one()
         if self.details_pec_ids:
             date_debut = fields.Date.from_string (self.date_debut_assure)
             date_fin = fields.Date.from_string (self.date_fin_prevue_assure)
@@ -616,7 +617,7 @@ class Assure (models.Model):
             for detail in self.prise_charge_ids:
                 date_saisie = fields.Date.from_string (detail.date_saisie)
                 if date_debut <= date_saisie <= date_fin:
-                    prise_en_charge_encours.append (detail)
+                    prise_en_charge_encours.append(detail)
             for detail in self.details_pec_ids:
                 date_execution = fields.Date.from_string (detail.date_execution)
                 if date_debut <= date_execution <= date_fin:
@@ -631,7 +632,7 @@ class Assure (models.Model):
                     details_phcie_encours.append (detail)
             self.nbre_pec_assure_encours = len(prise_en_charge_encours)
             self.nbre_actes_assure_encours = len(details_actes_encours)
-            self.mt_sinistres_assure_encours = sum (item.sous_totaux_pec for item in prise_en_charge_encours)
+            self.mt_sinistres_assure_encours = sum(item.total_pc for item in details_pec_encours)
             self.mt_sinistres_actes_assure_encours = sum (item.total_pc for item in details_actes_encours)
             self.nbre_phcie_assure_encours = len (details_phcie_encours)
             self.mt_sinistres_phcie_assure_encours = sum (item.mt_totaux_phcie for item in prise_en_charge_encours)
@@ -1736,17 +1737,17 @@ class JustificatifEnfantWizard (models.TransientModel):
     def open_popup(self):
         self.ensure_one ()
         user_id = self.env.context.get ('uid')
-        user = self.env['res.users'].search ([('id', '=', user_id)])
+        user = self.env['res.users'].search([('id', '=', user_id)])
         # prestataire = self.env['res.partner'].search ([('id', '=', user.partner_id.id)])
         # prestations = self.env['proximas.prestation'].search ([('prestataire_id', '=', user.partner_id.id)])
-        assure = self.env['proximas.assure'].search ([
+        assure = self.env['proximas.assure'].search([
             '|', ('code_id_externe', '=ilike', self.code_saisi),
             ('code_id', '=ilike', self.code_saisi)
         ])
-        info_assure = str (assure.name)
+        info_assure = assure.name
         statut_familial = assure.statut
         # 1. Vérification du contrat pour l'assuré.
-        if bool (assure) and not bool (assure.police_id):
+        if bool (assure) and not bool(assure.police_id):
             raise UserError (_ (
                 "Proximaas : Contrôle Règles de Gestion: \n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, celui-ci ne possède \

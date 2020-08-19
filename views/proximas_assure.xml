@@ -12,9 +12,9 @@
             <field name="arch" type="xml">
                 <tree string="Assuré Couverture" create="1" edite="1">
                     <field name="code_id" />
+                    <field name="code_id_externe"/>
                     <field name="nom"/>
                     <field name="prenoms"/>
-                    <!--<field name="full_name" string="Nom et Prénoms"/>-->
                     <field name="genre" />
                     <field name="statut_familial"/>
                     <field name="date_naissance"/>
@@ -402,6 +402,7 @@
             <field name="arch" type="xml">
                 <tree string="Assuré Couverture" colors="blue:state=='attente';green:state=='actif';red:state!='actif';">
                     <field name="code_id"/>
+                    <field name="code_id_externe"/>
                     <field name="nom"/>
                     <field name="prenoms"/>
                     <field name="genre"/>
@@ -412,7 +413,7 @@
                     <field name="num_contrat"/>
                     <field name="contrat_id"/>
                     <field name="state"/>
-                    <field name="motif_desactivation"/>
+                    <!--<field name="motif_desactivation"/>-->
                 </tree>
             </field>
         </record>

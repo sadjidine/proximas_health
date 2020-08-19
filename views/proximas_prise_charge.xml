@@ -213,8 +213,8 @@
                 <field name="genre"/>
                 <field name="num_contrat"/>
                 <field name="adherent"/>
-                <field name="date_debut_assure"/>
-                <field name="date_fin_prevue_assure"/>
+                <!--<field name="date_debut_assure"/>
+                <field name="date_fin_prevue_assure"/>-->
                 <field name="sous_totaux_pec"/>
                 <field name="state"/>
             </tree>
@@ -299,47 +299,47 @@
                 </header>
                 <sheet>
                     <div class="oe_right oe_button_box" name="buttons">
-                        <button name="proximas_medical.proximas_list_pec_filter_action" class="oe_stat_button"
+                        <!--<button name="proximas_medical.proximas_list_pec_filter_action" class="oe_stat_button"
                                 icon="fa-list"
                                 type="action"
                                 domain="[]"
-                                context="{'search_default_code_id': code_id,'search_default_date_debut_assure': date_debut}">
-                            <field name="nbre_pec_assure_encours" widget="statinfo" string="Nbre.PEC" />
+                                context="{'search_default_code_id': code_id}">
+                            <field name="nbre_pec_assure" widget="statinfo" string="Nbre.PEC" />
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-cart-plus"
-                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
+                                domain="[]"
                                 context="{'search_default_code_id': code_id}">
-                            <field name="sous_totaux_assure_encours" widget="statinfo"
+                            <field name="totaux_assure" widget="statinfo"
                                    options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'
                                    string="Totaux Indiv." />
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
-                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
+                                domain="[]"
                                 context="{'search_default_contrat_id': contrat_id}">
-                            <field name="sous_totaux_contrat_encours" widget="statinfo" string="S/Totaux Famille"/>
-                        </button>
+                            <field name="totaux_contrat" widget="statinfo" string="S/Totaux Famille"/>
+                        </button>-->
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
-                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
+                                domain="[]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_id}">
                             <field name="nbre_prestations_fournies" widget="statinfo" string="Actes CRO"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
-                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
+                                domain="[]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_crs_id}">
                             <field name="nbre_prestations_demandes" widget="statinfo" string="Actes CRS"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
                                 icon="fa-users"
-                                domain="[('date_debut_assure','=',date_debut_assure),('date_fin_prevue_assure','=',date_fin_prevue_assure)]"
+                                domain="[]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_phcie_id}">
                             <field name="nbre_prescriptions" widget="statinfo" string="Prescriptions"/>
                         </button>
@@ -434,6 +434,7 @@
                                      <field name="nbre_prescriptions_medecin"/>
                                      <field name="mt_plafond_prescription" invisible="1"/>
                                      <field name="totaux_phcie" invisible="1"/>
+                                     <field name="tot_encaisse_phcie" invisible="1"/>
                                      <!--<field name="mt_encaisse_cro" states="cours"/>
                                      <field name="mt_encaisse_crs" states="oriente"/>
                                      <field name="mt_encaisse_phcie" states="dispense"/>-->
@@ -488,22 +489,16 @@
                                 </group>
                             </group>
                         </page>
-                        <page string="CONTRÔLE NIVEAU SINISTRALITE / PLAFOND"
+                        <!--<page string="CONTRÔLE NIVEAU SINISTRALITE / PLAFOND"
                               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,
                               proximas_medical.group_operator" >
                             <div class="oe_left">
                                 <field name="niveau_sinistre_assure" string="Plafond Individuel" widget="percentpie"/>
-                                <!--<field name="sous_totaux_assure" widget="gauge" invisible="0"
-                                       style="width:120px;height:90px;cursor:pointer;"
-                                       options="{'max_field':'plafond_individu'}">
-                                             Plafond Individuel
-                                </field>-->
                             </div>
                             <div class="oe_right">
                                 <field name="niveau_sinistre_contrat" string="Plafond Famille" widget="percentpie"/>
                             </div>
-
-                        </page>
+                        </page>-->
                     </notebook>
                     <hr/>
                     <notebook>
@@ -560,17 +555,18 @@
                                                                required="1"
                                                                options='{"no_open": True, "no_create": True}' class="text-primary"
                                                                domain="[('prestataire_id', '=', prestataire_id),('accord_prealable', '=', False),]"/>
-                                                        <field name="date_dernier_acte" string="Date Dernier Acte "/>
-                                                        <field name="exercice_id"
-                                                               string="Exercice SAM"
-                                                               options='{"no_open": True, "no_create": True}'/>
-                                                    </group>
-                                                    <group col="6" colspan="2" invisible="1">
-                                                         <field name="delai_prestation"/>
                                                     </group>
                                                 </group>
                                                 <hr/>
-                                                <group string="Détails Coûts - Prestation médicale">
+                                                <group col="6" colspan="2" class="bg-info">
+                                                    <field name="date_dernier_acte" string="Date Dernier Acte "/>
+                                                    <field name="exercice_id"
+                                                           string="Exercice SAM"
+                                                           options='{"no_open": True, "no_create": True}'/>
+                                                     <field name="delai_prestation"/>
+                                                </group>
+                                                <hr/>
+                                                <group>
                                                     <group col="6" colspan="2" >
                                                         <!--<separator string="Calculs Coûts:" />-->
                                                         <field name="cout_unit"
@@ -607,18 +603,18 @@
                                                         <field name="debit_ticket"/>
                                                         <field name="cout_modifiable"/>
                                                         <field name="quantite_exige"/>
-                                                        <field name="arret_prestation" />
                                                     </group>
                                                 </group>
                                                 <hr/>
-                                                <group col="4" colspan="2" class="bg-info">
+                                                <group col="6" colspan="2" class="bg-info">
                                                     <field name="prestation_id"
                                                            options='{"no_open": True, "no_create": True}'
                                                            readonly="1"
                                                     />
-                                                    <field name="cout_unitaire" string="Coût Actuel Prestation"
+                                                    <field name="cout_unitaire" string="Coût Actuel"
                                                            attrs="{'invisible': [('cout_unitaire','=',0)]}"
                                                     />
+                                                    <field name="arret_prestation" readonly="1"/>
                                                 </group>
                                                 <group col="6" colspan="2" class="bg-primary">
                                                     <field name="code_medical_id"
@@ -716,8 +712,9 @@
                                                     <field name="date_dernier_acte" string="Date dernier acte"/>
                                                 </group>
                                                 <hr/>
-                                                <group col="6" colspan="2" invisible="1">
-                                                    <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
+                                                <group col="6" colspan="2" invisible="0">
+                                                    <field name="delai_attente_prestation" string="Délai Attente Prestation"/>
+                                                    <field name="delai_prestation"/>
                                                     <field name="accord_prealable"/>
                                                 </group>
                                             </page>
@@ -770,7 +767,7 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="ACTES MEDICAUX &amp; PARAMEDICAUX- CRS)"
+                        <page string="ACTES MEDICAUX &amp; PARAMEDICAUX - CRS"
                               states="oriente,termine">
                             <!--&gt;states="cours,oriente,termine"-->
                             <!--attrs="{'invisible': ['|',('state','=','dispense'),'|',('nbre_prestations_fournies','=',0),
@@ -825,11 +822,6 @@
                                                        options='{"no_open": True, "no_create": True}' class="text-primary"
                                                        domain="[('prestataire_id', '=', prestataire_id),('active', '=', True)]"/>-->
                                                 </group>
-                                                <hr/>
-                                                <group col="6" colspan="2" invisible="1">
-                                                    <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
-                                                    <field name="accord_prealable"/>
-                                                </group>
                                             </page>
                                             <page string="DETAILS COÛTS - PRESTATION MEDICALE (CRS)"
                                                    attrs="{'invisible': [('prestataire_crs_id','=', False)]}">
@@ -846,6 +838,9 @@
                                                 </div>
                                                 <newline/>
                                                 <group string="Détails - Exécution Prestation Médicale">
+                                                    <field name="date_execution"
+                                                       attrs="{'required': [('pool_medical_crs_id','!=', False)]}"
+                                                    />
                                                     <field name="pool_medical_crs_id"
                                                        options='{"no_open": True, "no_create": True}'
                                                        domain="[('prestataire_id', '=', prestataire_crs_id)]"
@@ -859,9 +854,6 @@
                                                            attrs="{'required': [('prestation_demande_id','=', False)],
                                                            'invisible': [('prestation_demande_id','!=', False)]}"
                                                     />
-                                                    <field name="date_execution"
-                                                       attrs="{'required': [('pool_medical_crs_id','!=', False)]}"
-                                                    />
                                                     <field name="details_prestation" invisible="1"/>
                                                     <!--<field name="prestation_id"/>-->
                                                     <field name="prestation_id"
@@ -874,11 +866,11 @@
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2" class="bg-warning">
-                                                    <field name="arret_prestation" readonly="1"/>
                                                     <field name="date_dernier_acte" string="Date Dernier Acte"/>
                                                     <field name="exercice_id"
                                                            string="Exercice SAM"
                                                            options='{"no_open": True, "no_create": True}'/>
+                                                    <field name="arret_prestation" readonly="1"/>
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2" string="Détails Coûts - Prestation médicale">
@@ -927,6 +919,11 @@
                                                     <field name="rubrique_id" class="text-primary"
                                                            options='{"no_open": True, "no_create": True}'/>
                                                     <field name="ticket_exigible" string="Ticket Exigible?"/>
+                                                </group>
+                                                <group col="6" colspan="2">
+                                                    <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
+                                                     <field name="delai_prestation"/>
+                                                    <field name="accord_prealable"/>
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2" groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,
@@ -1141,6 +1138,7 @@
                                                 </group>
                                                 <hr/>
                                                 <group col="6" colspan="2" class="bg-success">
+                                                    <field name="quantite" invisible="1"/>
                                                     <field name="quantite_demande"
                                                            string="Quantité Prescrite"
                                                            readonly="1"

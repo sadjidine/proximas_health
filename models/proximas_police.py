@@ -1291,19 +1291,19 @@ class Contrat(models.Model):
         help='Totaux à devoir pour la prime de couverture.',
     )
     # Compte contrat pour le controle consommation famille
-    sous_totaux_contrat = fields.Float(
-        string="S/Totaux Contrat",
-        digits=(9, 0),
-        compute='_check_details_pec',
-        default=0,
-        # related='assure_id.sous_totaux_pec',
-    )
-    nbre_actes_contrat = fields.Integer(
-        string="Nbre. Actes Contrat",
-        compute='_check_details_pec',
-        default=0,
-        # related='assure_id.nbre_actes_pec',
-    )
+    # sous_totaux_contrat = fields.Float(
+    #     string="S/Totaux Contrat",
+    #     digits=(9, 0),
+    #     compute='_check_details_pec',
+    #     default=0,
+    #     # related='assure_id.sous_totaux_pec',
+    # )
+    # nbre_actes_contrat = fields.Integer(
+    #     string="Nbre. Actes Contrat",
+    #     compute='_check_details_pec',
+    #     default=0,
+    #     # related='assure_id.nbre_actes_pec',
+    # )
     # CHAMPS CALCULES - CONTROLES DE PLAFONDS
     nbre_pec_contrat_encours = fields.Integer(
         string="Nbre. PEC/Famille",
@@ -2310,22 +2310,22 @@ class Contrat(models.Model):
 
     # DETAILS CONTROLES POLICE
     # @api.multi
-    @api.depends('adherent_id')
-    def _check_details_pec(self):
-        for rec in self:
-            contrat_id = rec.id
-            details_pec_contrat = self.env['proximas.details.pec'].search(
-                [('contrat_id', '=', contrat_id)]
-            )
-            nbre_details_pec_contrat = self.env['proximas.details.pec'].search_count(
-                [
-                    ('contrat_id', '=', contrat_id),
-                    ('pool_medical_id', '!=', None),
-                ]
-            )
-            if details_pec_contrat:
-                rec.nbre_actes_contrat = int(nbre_details_pec_contrat) or 0
-                rec.sous_totaux_contrat = sum(item.total_pc for item in details_pec_contrat) or 0
+    # @api.depends('adherent_id')
+    # def _check_details_pec(self):
+    #     for rec in self:
+    #         contrat_id = rec.id
+    #         details_pec_contrat = self.env['proximas.details.pec'].search(
+    #             [('contrat_id', '=', contrat_id)]
+    #         )
+    #         nbre_details_pec_contrat = self.env['proximas.details.pec'].search_count(
+    #             [
+    #                 ('contrat_id', '=', contrat_id),
+    #                 ('pool_medical_id', '!=', None),
+    #             ]
+    #         )
+    #         if details_pec_contrat:
+    #             rec.nbre_actes_contrat = int(nbre_details_pec_contrat) or 0
+    #             rec.sous_totaux_contrat = sum(item.total_pc for item in details_pec_contrat) or 0
 
     @api.multi
     def toggle_actif(self):
