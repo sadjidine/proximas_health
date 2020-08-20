@@ -300,7 +300,7 @@
                 <sheet>
                     <div class="oe_right oe_button_box" name="buttons">
                         <button name="proximas_medical.proximas_list_pec_filter_action" class="oe_stat_button"
-                                icon="fa-user_md"
+                                icon="fa-user-md"
                                 type="action"
                                 domain="[]"
                                 context="{'search_default_code_id': code_id}">
@@ -433,7 +433,7 @@
                                      />
                                      <field name="nbre_prescriptions_medecin"/>
                                      <field name="mt_plafond_prescription" invisible="1"/>
-                                     <field name="totaux_phcie" invisible="1"/>
+                                     <!--<field name="totaux_phcie" invisible="1"/>-->
                                      <field name="tot_encaisse_phcie" invisible="1"/>
                                      <!--<field name="mt_encaisse_cro" states="cours"/>
                                      <field name="mt_encaisse_crs" states="oriente"/>
