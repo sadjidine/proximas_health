@@ -204,6 +204,7 @@
         <field name="arch" type="xml">
             <tree string="Prise en charge Assuré" create="0">
                 <field name="code_pec"/>
+                 <field name="prestataire_cro"/>
                 <field name="date_saisie"/>
                 <field name="code_id" />
                 <field name="num_bon"/>
@@ -212,9 +213,9 @@
                 <field name="statut_familial"/>
                 <field name="genre"/>
                 <field name="num_contrat"/>
-                <field name="adherent"/>
-                <!--<field name="date_debut_assure"/>
-                <field name="date_fin_prevue_assure"/>-->
+                <!--<field name="totaux_cro"/>
+                <field name="totaux_crs"/>
+                <field name="totaux_phcie"/>-->
                 <field name="sous_totaux_pec"/>
                 <field name="state"/>
             </tree>
