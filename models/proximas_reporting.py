@@ -3100,8 +3100,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 montant_rfm = rfm.net_remb_texte
                 if facture:
                     date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime ('%d/%m/%Y')
-                    date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime (
-                        '%d/%m/%Y')
+                    date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime(
+                        '%d/%m/%Y') if facture.date_reception else now
                 if rfm:
                     date_saisie = datetime.strptime (rfm.date_saisie, DATETIME_FORMAT).strftime ('%d/%m/%Y')
                     date_depot = datetime.strptime (rfm.date_depot, DATE_FORMAT).strftime ('%d/%m/%Y')
@@ -3675,7 +3675,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     for facture in factures:
                         # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
                         date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y')
-                        date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y')
+                        date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
                         if police_id:
                             details_pec = self.env['proximas.details.pec'].search([
                                 ('facture_id', '=', facture.id),
@@ -3839,7 +3839,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     for facture in factures:
                         # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
                         date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y')
-                        date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y')
+                        date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
                         if police_id:
                             details_pec = self.env['proximas.details.pec'].search ([
                                 ('facture_id', '=', facture.id),
