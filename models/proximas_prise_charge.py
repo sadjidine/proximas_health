@@ -688,10 +688,21 @@ class PriseEnCharge(models.Model):
         help='Nombre de Prescriptions médicaments',
         default=0,
     )
+    totaux_cro = fields.Float(
+        string="Totaux PEC - CRO",
+        compute='_check_nbre_details_pec',
+        help='Totaux Prescriptions médicaments',
+        default=0,
+    )
+    totaux_crs = fields.Float(
+        string="Totaux PEC - CRS",
+        compute='_check_nbre_details_pec',
+        help='Totaux Prescriptions médicaments',
+        default=0,
+    )
     totaux_phcie = fields.Float(
         string="Totaux Pharmacie",
         compute='_check_nbre_details_pec',
-        readonly=True,
         help='Totaux Prescriptions médicaments',
         default=0,
     )
@@ -830,6 +841,8 @@ class PriseEnCharge(models.Model):
         # self.nbre_prestations_demandes = len (self.details_pec_demande_crs_ids)
         self.nbre_prescriptions_medecin = len(details_pec_prescription_encours)
         self.nbre_prescriptions = len(details_pec_phcie_encours)
+        self.totaux_cro = sum(item.total_pc for item in self.details_pec_soins_ids)
+        self.totaux_crs = sum (item.total_pc for item in self.details_pec_soins_crs_ids)
         self.totaux_phcie = sum(item.total_pc for item in details_pec_phcie_encours)
         self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
         # if self.mt_encaisse_phcie:

@@ -299,46 +299,46 @@
                 </header>
                 <sheet>
                     <div class="oe_right oe_button_box" name="buttons">
-                        <!--<button name="proximas_medical.proximas_list_pec_filter_action" class="oe_stat_button"
-                                icon="fa-list"
+                        <button name="proximas_medical.proximas_list_pec_filter_action" class="oe_stat_button"
+                                icon="fa-user_md"
                                 type="action"
                                 domain="[]"
                                 context="{'search_default_code_id': code_id}">
-                            <field name="nbre_pec_assure" widget="statinfo" string="Nbre.PEC" />
+                            <field name="totaux_cro" widget="statinfo" string="Totaux CRO" />
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
-                                icon="fa-cart-plus"
+                                icon="fa-stethoscope"
                                 domain="[]"
                                 context="{'search_default_code_id': code_id}">
-                            <field name="totaux_assure" widget="statinfo"
+                            <field name="totaux_crs" widget="statinfo"
                                    options='{"widget": "monetary", "display_currency": "res_company.currency_id"}'
-                                   string="Totaux Indiv." />
+                                   string="Totaux CRS" />
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
-                                icon="fa-users"
+                                icon="fa-plus-square"
                                 domain="[]"
                                 context="{'search_default_contrat_id': contrat_id}">
-                            <field name="totaux_contrat" widget="statinfo" string="S/Totaux Famille"/>
-                        </button>-->
+                            <field name="totaux_phcie" widget="statinfo" string="Totaux Phcie"/>
+                        </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
-                                icon="fa-users"
+                                icon="fa-pencil-square-o"
                                 domain="[]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_id}">
                             <field name="nbre_prestations_fournies" widget="statinfo" string="Actes CRO"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
-                                icon="fa-users"
+                                icon="fa-pencil"
                                 domain="[]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_crs_id}">
                             <field name="nbre_prestations_demandes" widget="statinfo" string="Actes CRS"/>
                         </button>
                         <button class="oe_stat_button" name="proximas_medical.proximas_details_pec_encours_action"
                                 type="action"
-                                icon="fa-users"
+                                icon="fa-pencil-square"
                                 domain="[]"
                                 context="{'search_default_pec_id': id,'search_default_prestataire': prestataire_phcie_id}">
                             <field name="nbre_prescriptions" widget="statinfo" string="Prescriptions"/>
