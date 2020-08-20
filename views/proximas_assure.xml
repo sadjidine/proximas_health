@@ -403,6 +403,7 @@
                 <tree string="Assuré Couverture" colors="blue:state=='attente';green:state=='actif';red:state!='actif';">
                     <field name="code_id"/>
                     <field name="code_id_externe"/>
+                    <field name="num_contrat"/>
                     <field name="nom"/>
                     <field name="prenoms"/>
                     <field name="genre"/>
@@ -410,10 +411,8 @@
                     <field name="date_naissance"/>
                     <field name="age" />
                     <field name="date_activation"/>
-                    <field name="num_contrat"/>
-                    <field name="contrat_id"/>
+                   <!-- <field name="contrat_id"/>-->
                     <field name="state"/>
-                    <!--<field name="motif_desactivation"/>-->
                 </tree>
             </field>
         </record>

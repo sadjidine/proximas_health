@@ -156,6 +156,7 @@
             <search string="Prise en charge Patients">
                 <field name="code_pec"/>
                 <field name="num_bon"/>
+                <field name="prestataire_cro"/>
                 <field name="date_saisie"/>
                 <field name="code_id_externe" />
                 <field name="code_id" />
@@ -204,7 +205,7 @@
         <field name="arch" type="xml">
             <tree string="Prise en charge Assuré" create="0">
                 <field name="code_pec"/>
-                 <field name="prestataire_cro"/>
+                <field name="prestataire_cro"/>
                 <field name="date_saisie"/>
                 <field name="code_id" />
                 <field name="num_bon"/>
