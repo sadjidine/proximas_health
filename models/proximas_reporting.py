@@ -158,6 +158,7 @@ class ReportSinistreRecapWizard(models.TransientModel):
          )
     ]
 
+
 class ReportPecDetailsRecap(models.AbstractModel):
     """
         Abstract Model for report template.
@@ -2506,7 +2507,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         net_a_payer = 0
 
                     docs.append({
-                        'localite_name': localite_name,
+                        'localite': localite_name,
                         'nbre_actes': int (nbre_actes),
                         'cout_total': int (cout_total),
                         'total_pc': int (total_pc),
@@ -2567,7 +2568,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
                             ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
                             ('rubrique_id', '=', rubrique_id),
-                            # ('prestataire', '!=', None),
+                            ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
                     else:
@@ -2601,16 +2602,16 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         docs.append({
                             'rubrique_id': rubrique_id,
                             'rubrique_medicale': rubrique_medicale,
-                            'nbre_actes': int (nbre_actes),
-                            'cout_total': int (cout_total),
-                            'total_pc': int (total_pc),
-                            'total_npc': int (total_npc),
-                            'total_exclusion': int (total_exclusion),
-                            'ticket_moderateur': int (ticket_moderateur),
-                            'net_tiers_payeur': int (net_tiers_payeur),
-                            'net_prestataire': int (net_prestataire),
-                            'net_remboursement': int (net_remboursement),
-                            'net_a_payer': int (net_a_payer),
+                            'nbre_actes': int(nbre_actes),
+                            'cout_total': int(cout_total),
+                            'total_pc': int(total_pc),
+                            'total_npc': int(total_npc),
+                            'total_exclusion': int(total_exclusion),
+                            'ticket_moderateur': int(ticket_moderateur),
+                            'net_tiers_payeur': int(net_tiers_payeur),
+                            'net_prestataire': int(net_prestataire),
+                            'net_remboursement': int(net_remboursement),
+                            'net_a_payer': int(net_a_payer),
                         })
                     if bool(docs):
                         docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
@@ -2831,11 +2832,11 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         ))
         # 7.2. RAPPORT SYNTHESE SINISTRALITE PAR RUBRIQUE MEDICALE
         elif report_kpi == 'rubrique' and report_type == 'groupe':
-            rubriques = self.env['proximas.rubrique.medicale'].search([])
+            rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
             for rubrique in rubriques:
                 # DETAILS PEC TRAITES ET LIES A UN CONTRAT
                 if police_id:
-                    details_pec = self.env['proximas.details.pec'].search ([
+                    details_pec = self.env['proximas.details.pec'].search([
                         ('date_execution', '>=', date_debut_obj.strftime(DATE_FORMAT)),
                         ('date_execution', '<=', date_fin_obj.strftime(DATE_FORMAT)),
                         ('prestataire', '!=', None),

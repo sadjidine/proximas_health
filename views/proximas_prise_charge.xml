@@ -123,7 +123,7 @@
                 <!--<field name="facture_id"/>-->
                 <field name="code_id"/>
                 <field name="contrat_id" invisible="1"/>
-                <field name="adherent_id"/>
+                <field name="adherent_id" invisible="1"/>
                 <field name="police_id" options ='{"no_open": True, "no_create": True}'/>
                 <field name="assure_id" options ='{"no_open": True, "no_create": True}'/>
                 <field name="date_execution"/>
@@ -135,6 +135,7 @@
                        string="Prestation médicale"
                        options ='{"no_open": True, "no_create": True}'
                 />
+                <field name="rubrique_id"/>
                 <field name="current_user" invisible="1"/>
                 <field name="user_prestataire" invisible="1"/>
                 <field name="user_prestation" invisible="1"/>

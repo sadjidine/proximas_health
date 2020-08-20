@@ -2218,6 +2218,11 @@ class DetailsPec(models.Model):
         store=True,
         readonly=True,
     )
+    localite_id = fields.Many2one(
+        string="Localité",
+        related="contrat_id.localite_id",
+        help="Indiquez la localité de rattachement de l'assuré",
+    )
     adherent = fields.Char(
         string="Adhérent",
         related='adherent_id.name',
@@ -2394,10 +2399,15 @@ class DetailsPec(models.Model):
     )
     rubrique_id = fields.Many2one(
         string="Rubrique",
-        # compute='_check_prestation_id',
         related='code_medical_id.rubrique_id',
+        # compute='_check_prestation_id',
         store=True,
         readonly=True,
+    )
+    rubrique = fields.Char(
+        string="Libellé Rubrique",
+        size=32,
+        related='rubrique_id.name',
     )
     ticket_exigible = fields.Boolean(
         string="Ticket Exigible?",
