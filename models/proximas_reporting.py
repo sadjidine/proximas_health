@@ -226,14 +226,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Suivi Evolution Sinistres: \n\
-                    #         Après recherche, aucun contrat ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % rubrique.name
-                    #     )
                     if bool(details_pec):
                         rubrique_id = rubrique.id
                         rubrique_medicale = rubrique.name
@@ -330,14 +322,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('prestation_id', '=', prestation.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % prestation.name
-                    #                      )
                     if bool (details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
@@ -436,14 +420,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('assure_id', '=', assure.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour le contrat. \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     )
-                    #                      )
                     if bool(details_pec):
                         assure_id = assure.id
                         assure_name = assure.name
@@ -633,14 +609,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
-                    # else:
-                    #     raise UserError(_(
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun contrat ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % rubrique.name
-                    #                      )
                     if bool(details_pec):
                         rubrique_id = rubrique.id
                         rubrique_medicale = rubrique.name
@@ -739,14 +707,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('prestation_id', '=', prestation.id),
                         ])
-                    # else:
-                    #     raise UserError(_(
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % prestation.name
-                    #                      )
                     if bool (details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
@@ -1061,14 +1021,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun contrat ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % rubrique.name
-                    #                      )
                     if bool(details_pec):
                         rubrique_id = rubrique.id
                         rubrique_medicale = rubrique.name
@@ -1157,14 +1109,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('prestation_id', '=', prestation.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % prestation.name
-                    #                      )
                     if bool(details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
@@ -1256,14 +1200,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('prestataire', '=', prestataire.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour le prestataire\
-                    #          indiqué. Par conséquent, le système ne peut vous fournir un rapport dont le contenu est \
-                    #          vide. Veuillez contacter les administrateurs pour plus détails..."
-                    #     )
-                    #     )
                     if bool(details_pec):
                         assure_id = assure.id
                         assure_name = assure.name
@@ -1451,14 +1387,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun contrat ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % rubrique.name
-                    #                      )
                     if bool(details_pec):
                         rubrique_id = rubrique.id
                         rubrique_medicale = rubrique.name
@@ -1547,14 +1475,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('code_prestation_id', '=', prestation.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % prestation.name
-                    #                      )
                     if bool(details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
@@ -1831,14 +1751,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
-                    # else:
-                    #     raise UserError(_(
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun contrat ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % rubrique.name
-                    #                      )
                     if bool(details_pec):
                         rubrique_id = rubrique.id
                         rubrique_medicale = rubrique.name
@@ -1926,14 +1838,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('prestation_id', '=', prestation.id),
                         ])
-                    # else:
-                    #     raise UserError(_(
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % prestation.name
-                    #                      )
                     if bool(details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
@@ -2024,14 +1928,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('assure_id', '=', assure.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour le groupe concerné. \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     )
-                    #     )
                     if bool(details_pec):
                         assure_id = assure.id
                         assure_name = assure.name
@@ -2206,14 +2102,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun contrat ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % rubrique.name
-                    #                      )
                     if bool(details_pec):
                         rubrique_id = rubrique.id
                         rubrique_medicale = rubrique.name
@@ -2298,14 +2186,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('prestation_id', '=', prestation.id),
                         ])
-                    # else:
-                    #     raise UserError(_(
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % prestation.name
-                    #                      )
                     if bool(details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
@@ -2393,14 +2273,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('localite_id', '=', localite_id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la localité indiquée. \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     )
-                    #     )
                     if bool(details_pec):
                         assure_id = assure.id
                         assure_name = assure.name
@@ -2570,14 +2442,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun contrat ne correspond à la période indiquée pour la Rubrique médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % rubrique.name
-                    #                      )
                     if bool(details_pec):
                         rubrique_id = rubrique_id
                         rubrique_medicale = rubrique.name
@@ -2662,14 +2526,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('code_prestation_id', '=', prestation.id),
                         ])
-                    # else:
-                    #     raise UserError (_ (
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #         Après recherche, aucun sinistre ne correspond à la période indiquée pour la prestation médicale : %s.  \
-                    #         Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                    #         Veuillez contacter les administrateurs pour plus détails..."
-                    #     ) % prestation.name
-                    #                      )
                     if bool(details_pec):
                         prestation_id = prestation.id
                         prestation_medicale = prestation.name
@@ -2757,13 +2613,6 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             ('prestataire', '!=', None),
                             ('rubrique_id', '=', rubrique_id),
                         ])
-                    # else:
-                    #     raise UserError(_(
-                    #         "Proximaas : Rapport - Evolution Niveau Sinistres: \n\
-                    #          Après recherche, aucun sinistre ne correspond à la période indiquée pour la rubrique médicale.\
-                    #          indiqué. Par conséquent, le système ne peut vous fournir un rapport dont le contenu est \
-                    #          vide. Veuillez contacter les administrateurs pour plus détails..."
-                    #     ))
                     if bool(details_pec):
                         assure_id = assure.id
                         assure_name = assure.name
