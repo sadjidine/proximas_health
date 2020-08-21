@@ -411,7 +411,6 @@ class Police(models.Model):
     def _check_taux(self):
         if 0 < self.seuil_alerte > 100:
             raise ValidationError(_ (
-
                 "Proximas : Violation de Règles de Gestion\n " +
                 "Contrôle Seuil d'alerte Police:\n Le seuil d'alerte est un taux compris entre 0 et 100 maximmum."
                 )

@@ -78,7 +78,6 @@ class RubriqueMedicale(models.Model):
         string="Notes et Observations",
     )
 
-
     @api.multi
     @api.onchange('name')
     def _check_name(self):
@@ -335,9 +334,9 @@ class ClasseTherapeutiqe(models.Model):
     @api.constrains('parent_id')
     def _check_hierarchy(self):
         if not self._check_recursion():
-            raise ValidationError(
-                'Erreur! Vous ne pouvez pas créer de catégories recursives...!'
-            )
+            raise ValidationError(_(
+                u"Erreur! Vous ne pouvez pas créer de catégories recursives...!"
+            ))
 
 
 

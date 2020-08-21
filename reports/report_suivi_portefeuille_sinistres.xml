@@ -3764,9 +3764,9 @@
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
                                             <td><span t-esc="doc['code_id']"/></td>
                                             <td class="bg-info"><span t-esc="doc['assure_name']"/></td>
-                                            <td><span t-esc="doc['statut_familial']"/></td>
-                                            <td><span t-esc="doc['genre']"/></td>
-                                            <td><span t-esc="doc['age']"/></td>
+                                            <td class="text-center"><span t-esc="doc['statut_familial']"/></td>
+                                            <td class="text-center"><span t-esc="doc['genre']"/></td>
+                                            <td class="text-center"><span t-esc="doc['age']"/></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
                                             <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
@@ -3893,7 +3893,7 @@
                                         <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
                                         <tr>
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
-                                            <td><span t-esc="doc['localite']"/></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['localite']"/></strong></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
                                             <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
@@ -3973,7 +3973,7 @@
                             <div class="row">
                                 <div class="col-xs-6">
                                     <table class="table table-condensed bg-info" style="border:1px solid black;">
-                                       <caption>INFORMATIONS - RUBRIQUE :</caption>
+                                       <caption>RUBRIQUE MEDICALE :</caption>
                                         <tr>
                                             <td>
                                                 <p class="h5"><b><t t-esc="rubrique_medicale"/></b></p>
@@ -4047,7 +4047,7 @@
                                         <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
                                         <tr>
                                             <td class="text-center"><strong><span t-esc="num"/></strong></td>
-                                            <td class="bg-info"><span t-esc="doc['rubrique_medicale']"/></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['rubrique_medicale']"/></strong></td>
                                             <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
                                             <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_actes']).replace(',',' ')"/></td>
                                             <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
@@ -4128,7 +4128,7 @@
                             <div class="row">
                                 <div class="col-xs-6">
                                     <table class="table table-condensed bg-info" style="border:1px solid black;">
-                                       <caption>INFORMATIONS - RUBRIQUE :</caption>
+                                       <caption>RUBRIQUE MEDICALE :</caption>
                                         <tr>
                                             <td>
                                                 <p class="h5"><b><t t-esc="rubrique_medicale"/></b></p>
@@ -4282,7 +4282,7 @@
                             <div class="row">
                                 <div class="col-xs-6">
                                     <table class="table table-condensed bg-info" style="border:1px solid black;">
-                                       <caption>INFORMATIONS - RUBRIQUE :</caption>
+                                       <caption>RUBRIQUE MEDICALE:</caption>
                                         <tr>
                                             <td>
                                                 <p class="h5"><b><t t-esc="rubrique_medicale"/></b></p>

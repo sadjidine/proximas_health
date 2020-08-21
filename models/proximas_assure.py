@@ -553,14 +553,12 @@ class Assure (models.Model):
                     self.date_debut_assure = date_debut
                     self.date_fin_prevue_assure = date_fin
             else:
-                raise UserError (
-                    '''
-                         Proximaas - Contrôle des règles de Gestion :\n
-                         Le mode de contrôle défini pour le plafond famille (contrat)\
-                         est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
-                         en cours. Pour plus d'informations, veuillez contactez l'administrateur...
-                     '''
-                )
+                raise UserError(_(
+                    u"Proximaas - Contrôle des règles de Gestion :\n \
+                      Le mode de contrôle défini pour le plafond famille (contrat)\
+                      est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
+                      en cours. Pour plus d'informations, veuillez contactez l'administrateur..."
+                ))
         # 2. MODE DE CONTROLE PAR CONTRAT
         elif self.mode_controle_plafond in ['contrat']:
             if date_deces:
@@ -932,12 +930,11 @@ class Assure (models.Model):
     def _check_date_naissance(self):
         for rec in self:
             if rec.date_naissance > fields.Date.today ():
-                raise ValidationError (
-                    '''
-                      Contrôle des règles de Gestion : Proximas
-                      La date de naissance doit être inférieure ou égale  à la date du jour ! 
-                      Vérifiez s'il n'y a pas d'erreur sur la date saisie ?
-                    ''')
+                raise ValidationError(_(
+                    u"Proximaas: Contrôle des règles de Gestion:\n \
+                      La date de naissance doit être inférieure ou égale  à la date du jour.\
+                      Vérifiez s'il n'y a pas d'erreur sur la date saisie."
+                ))
 
     # Contraintes d'integrité SQL sur champs
     sql_constraints = [
@@ -1012,12 +1009,11 @@ class Adherent (models.Model):
     def _check_date_naissance(self):
         for rec in self:
             if rec.date_naissance > fields.Date.today ():
-                raise ValidationError (
-                    '''
-                      Contrôle des règles de Gestion : Proximas
-                      La date de naissance doit être inférieure ou égale  à la date du jour ! 
-                      Vérifiez s'il n'y a pas d'erreur sur la date saisie ?
-                    ''')
+                raise ValidationError(_(
+                    u"Proximaas:Contrôle des règles de Gestion: \n \
+                      La date de naissance doit être inférieure ou égale  à la date du jour.\
+                      Vérifiez s'il n'y a pas d'erreur sur la date saisie."
+                    ))
 
     @api.constrains ('age')
     def _check_age_limite(self):
@@ -1026,13 +1022,11 @@ class Adherent (models.Model):
             # self._context is the shortcut of self.env.context
             police = self._context.get ('police_id')
             if rec.age > police.age_limite_adherent:
-                raise ValidationError (
-                    '''
-                         PROXIMAS : VIOLATION DE REGLE DE GESTION:
-                         Contrôle des règles de Gestion: Age limite Adhérent.
-                         L'âge de cet adhérent est supérieur à la limite autorisée.
-                     '''
-                )
+                raise ValidationError (_(
+                    u"Proximaas: Contrôle de Règles de Gestion:\n \
+                      Contrôle des règles de Gestion: Age limite Adhérent.\
+                      L'âge de cet adhérent est supérieur à la limite autorisée."
+                ))
 
     # CONTRAINTES DE VALIDATION ADHERENT
     sql_constraints = [
@@ -1163,13 +1157,12 @@ class AyantDroit (models.Model):
     @api.constrains ('date_naissance')
     def _check_date_naissance(self):
         for rec in self:
-            if rec.date_naissance > fields.Date.today ():
-                raise ValidationError (
-                    '''
-                      Contrôle des règles de Gestion : Proximas
-                      La date de naissance doit être inférieure ou égale  à la date du jour ! 
-                      Vérifiez s'il n'y a pas d'erreur sur la date saisie ?
-                    ''')
+            if rec.date_naissance > fields.Date.today():
+                raise ValidationError(_(
+                    u"Proximaas: Contrôle des règles de Gestion: \n \
+                      La date de naissance doit être inférieure ou égale  à la date du jour.\
+                      Vérifiez s'il n'y a pas d'erreur sur la date saisie ?"
+                    ))
 
     # CONTRAINTES DE VALIDATION AYANT-DROIT
     sql_constraints = [
@@ -1219,7 +1212,7 @@ class DecesWizard (models.TransientModel):
         # 1. Vérification du contrat pour l'assuré.
         if bool (assure) and not bool (assure.police_id):
             raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, celui-ci ne possède \
                  aucun contrat faisant référence à sa police de couverture. Veuillez contactez les administrateurs pour \
                  plus détails..."
@@ -1228,7 +1221,7 @@ class DecesWizard (models.TransientModel):
         # 2. Vérification de la préeésence de doublon sur l'assuré.
         elif len (assure) > 1:
             raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion:\n\
+                u"Proximaas : Contrôle Règles de Gestion:\n\
                 L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                 l'objet d'un traitement, car il y a risque de doublon sur l'assuré en question. \
                 Veuillez contactez les administrateurs pour plus détails..."
@@ -1239,7 +1232,7 @@ class DecesWizard (models.TransientModel):
             date_deces = fields.Datetime.from_string (self.date_deces)
             date_deces_format = date_deces.strftime ('%d-%m-%Y')
             raise ValidationError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                 L'assuré: %s - Code ID.: %s est bel et bien enregistré en tant que bénéficiaire. Cependant, \
                 a déjà fait l'objet d'une déclaration faisant passer son statut à celui de décédé le : %s.\n \
                 Veuillez contactez les administrateurs pour plus détails..."
@@ -1280,11 +1273,10 @@ class DecesWizard (models.TransientModel):
                 }
         else:
             raise ValidationError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  Le Code ID. que vous avez fourni n'est pas un identifiant valide dans le système.\n\
                  Veuillez contactez l 'administrateur en cas de besoin..!"
-            )
-            )
+            ))
 
 
 class DeclarationDeces (models.Model):
@@ -1488,7 +1480,7 @@ class SanctionWizard (models.TransientModel):
         # 1. Vérification du contrat pour l'assuré.
         if bool (assure) and not bool (assure.police_id):
             raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, celui-ci ne possède \
                  aucun contrat faisant référence à sa police de couverture. Veuillez contactez les administrateurs pour \
                  plus détails..."
@@ -1497,7 +1489,7 @@ class SanctionWizard (models.TransientModel):
         # 2. Vérification de la préeésence de doublon dans la liste sanctions (Suspension & Exclusion).
         elif bool (sanction_assure):
             raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion:\n\
+                u"Proximaas : Contrôle Règles de Gestion:\n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                  l'objet d'un traitement, car l'assuré en question fait l'objet d'une santion en cours. \
                  Veuillez contactez les administrateurs pour plus détails..."
@@ -1506,7 +1498,7 @@ class SanctionWizard (models.TransientModel):
         # 3. Vérification de la préeésence de doublon sur l'assuré.
         elif len (assure) > 1:
             raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion:\n\
+                u"Proximaas : Contrôle Règles de Gestion:\n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                  l'objet d'un traitement, car il y a risque de doublon sur l'assuré en question. \
                  Veuillez contactez les administrateurs pour plus détails..."
@@ -1517,7 +1509,7 @@ class SanctionWizard (models.TransientModel):
             date_deces = fields.Datetime.from_string (self.date_deces)
             date_deces_format = date_deces.strftime ('%d-%m-%Y')
             raise ValidationError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  L'assuré: %s - Code ID.: %s est bel et bien enregistré en tant que bénéficiaire. Cependant, \
                  a déjà fait l'objet d'une déclaration faisant passer son statut à celui de décédé(e) le : %s.\n \
                  Veuillez contactez les administrateurs pour plus détails..."
@@ -1557,12 +1549,11 @@ class SanctionWizard (models.TransientModel):
                     },
                 }
         else:
-            raise ValidationError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
-                 Le Code ID. que vous avez fourni n'est pas un identifiant valide dans le système.\n\
+            raise ValidationError(_(
+                u"Proximaas : Contrôle Règles de Gestion: \n\
+                 Le Code ID. que vous avez fourni n'est pas un identifiant valide dans le système.\
                  Veuillez contactez l 'administrateur en cas de besoin..!"
-            )
-            )
+            ))
 
 
 class Sanction (models.Model):
@@ -1685,14 +1676,13 @@ class Sanction (models.Model):
             debut = fields.Datetime.from_string (rec.date_debut)
             fin = fields.Datetime.from_string (rec.date_fin) or now
             if (rec.type_sanction == 'suspens') and (debut > fin):
-                raise ValidationError (
-                    '''
-                      Contrôle des règles de Gestion : Proximas
-                      La date de début doit obligatoirement être inférieure à la date de fin ! 
-                      Vérifiez s'il n'y a pas d'erreur sur la date saisie ?
-                    ''')
+                raise ValidationError(_(
+                    u"Contrôle des règles de Gestion : Proximas\n \
+                    La date de début doit obligatoirement être inférieure à la date de fin. \
+                    Vérifiez s'il n'y a pas d'erreur sur la date saisie ?"
+                ))
 
-    @api.constrains ('en_cours')
+    @api.constrains('en_cours')
     def auto_check_en_cours(self):
         nbre_encours = self.search_count (
             [
@@ -1703,12 +1693,11 @@ class Sanction (models.Model):
         )
         if nbre_encours > 1:
             raise ValidationError (_ (
-                "Proximaas : Règles de Gestion \n \
+                u"Proximaas : Règles de Gestion \n \
                 Il ne peut y avoir plus d'un enregistrement en cours pour un même assuré.\n \
                 Vérifiez bien la(es) date(s) de début et/ou de fin. \n Pour plus d'informations, \
                 veuillez contactez l'administrateur..."
-            )
-            )
+            ))
 
     # CONTRAINTES SQL
     _sql_constraints = [
@@ -1749,7 +1738,7 @@ class JustificatifEnfantWizard (models.TransientModel):
         # 1. Vérification du contrat pour l'assuré.
         if bool (assure) and not bool(assure.police_id):
             raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, celui-ci ne possède \
                  aucun contrat faisant référence à sa police de couverture. Veuillez contactez les administrateurs pour \
                  plus détails..."
@@ -1758,7 +1747,7 @@ class JustificatifEnfantWizard (models.TransientModel):
         # 2. Vérification de la préeésence de doublon sur l'assuré.
         elif len (assure) > 1:
             raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion:\n\
+                u"Proximaas : Contrôle Règles de Gestion:\n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                  l'objet d'un traitement, car il y a risque de doublon sur l'assuré en question. \
                  Veuillez contactez les administrateurs pour plus détails..."
@@ -1768,8 +1757,8 @@ class JustificatifEnfantWizard (models.TransientModel):
         elif bool (assure) and bool (assure.decede):
             date_deces = fields.Datetime.from_string (self.date_deces)
             date_deces_format = date_deces.strftime ('%d-%m-%Y')
-            raise ValidationError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+            raise ValidationError (_(
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  L'assuré: %s - Code ID.: %s est bel et bien enregistré en tant que bénéficiaire. Cependant, \
                  a déjà fait l'objet d'une déclaration faisant passer son statut à celui de décédé le : %s.\n \
                  Veuillez contactez les administrateurs pour plus détails..."
@@ -1777,8 +1766,8 @@ class JustificatifEnfantWizard (models.TransientModel):
                                    )
         # 4. Vérification du statut familial => enfant de l'assuré.
         elif bool (assure) and statut_familial != 'enfant':
-            raise UserError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+            raise UserError (_(
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, celui-ci n'a pas le \
                  statut familial => enfant. Veuillez contactez les administrateurs pour plus détails..."
             ) % (info_assure, assure.code_id)
@@ -1819,7 +1808,7 @@ class JustificatifEnfantWizard (models.TransientModel):
                 }
         else:
             raise ValidationError (_ (
-                "Proximaas : Contrôle Règles de Gestion: \n\
+                u"Proximaas : Contrôle Règles de Gestion: \n\
                  Le Code ID. que vous avez fourni n'est pas un identifiant valide dans le système.\n\
                  Veuillez contactez l 'administrateur en cas de besoin..!"
             )
@@ -1957,11 +1946,11 @@ class JustificatifEnfant (models.Model):
     @api.depends ('date_validite', 'jours_valide')
     def _check_en_cours(self):
         for rec in self:
-            now = datetime.now ()
+            now = datetime.now()
             validite = fields.Datetime.from_string (rec.date_validite) or now
             nbre_jours = (validite - now).days
             rec.jours_valide = nbre_jours + 1
-            if (rec.jours_valide >= 1):
+            if rec.jours_valide >= 1:
                 rec.en_cours = True
             else:
                 rec.en_cours = False
