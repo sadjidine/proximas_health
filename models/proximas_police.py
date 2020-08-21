@@ -2483,25 +2483,24 @@ class Contrat(models.Model):
         if not bool(self.controle_genre):
             for conjoint in self.ayant_droit_ids:
                 if conjoint.statut == 'conjoint' and conjoint.genre == self.genre:
-                    raise UserError (
-                        '''
-                        Contrôle du Genre Adhérent(e) et Conjoint(e).
-                        L\'adhérent et le Conjoint sont du même genre.
-                        Vérifiez bien si c'est cela que vous voulez réellement.
-                        '''
-                    )
+                    raise UserError(_(
+                        u"Proximaas: Contrôle de Règle de Gestion.\n \
+                        Contrôle du Genre Adhérent(e) et Conjoint(e). L'adhérent et le Conjoint sont du même genre.\
+                        Vérifiez bien si c'est cela que vous voulez réellement.Pour plus d'informations,veuillez \
+                        contactez l'administrateur..."
+                    ))
 
     @api.constrains('adherent_id')
     def _check_adherent_age_limite(self):
         for rec in self:
-            age = rec.adherent_id.age
+            age = int(rec.adherent_id.age)
             if int(age) > int(rec.age_limite_adherent) > 0:
                 raise ValidationError(_(
-                    '''
-                         PROXIMAS : VALIDATION DE REGLE DE GESTION:
-                         Contrôle des règles de Gestion: Age limite Adhérent.
-                    ''' + 'L\'âge de cet adhérent est supérieur à la limite autorisée' + ': ' + age
-                    )
+                    u"Proximaas: Contrôle de Règle de Gestion.\n \
+                     Contrôle des règles de Gestion: Age limite Adhérent. \
+                     L'âge de cet adhérent est supérieur à la limite autorisée, c-à-d: %d an(s).\
+                     Pour plus d'informations,veuillez contactez l'administrateur..."
+                    ) % age
                 )
 
     @api.constrains('ayant_droit_ids')
@@ -2512,26 +2511,26 @@ class Contrat(models.Model):
             maxi_parent = int(rec.nbre_maxi_parent)
             if rec.nbre_conjoint > maxi_conjoint > 0:
                 raise ValidationError(_(
-
-                         "PROXIMAS : VALIDATION DE REGLE DE GESTION\n " +
-                         "Contrôle Nombre Maxi Conjoint:\n Le nombre maximum de conjoints autorisés est de : %d \
-                          alors que le contrat de l\'adhérent en comporte : %d."
+                         u"Proximaas: Contrôle de Règle de Gestion.\n \
+                          Contrôle Nombre Maxi Conjoint:\n Le nombre maximum de conjoints autorisés est de : %d \
+                          alors que le contrat de l\'adhérent en comporte : %d. Pour plus d'informations,\
+                          veuillez contactez l'administrateur..."
                     ) % (maxi_conjoint, rec.nbre_conjoint)
                 )
             elif rec.nbre_ascendant > maxi_ascendant > 0:
                 raise ValidationError(_(
-
-                         "PROXIMAS : VALIDATION DE REGLE DE GESTION\n " +
-                         "Contrôle Nombre Maxi Ascendant:\n Le nombre maximum de d'ascendants autorisés est de : %d \
-                          alors que le contrat de l\'adhérent en comporte : %d."
+                         u"Proximaas: Contrôle de Règle de Gestion.\n \
+                          Contrôle Nombre Maxi Ascendant:\n Le nombre maximum de d'ascendants autorisés est de : %d \
+                          alors que le contrat de l\'adhérent en comporte : %d. Pour plus d'informations,\
+                          veuillez contactez l'administrateur..."
                     ) % (maxi_ascendant, rec.nbre_ascendant)
                 )
             elif rec.nbre_parent > maxi_parent > 0:
                 raise ValidationError(_(
-
-                         "PROXIMAS : VALIDATION DE REGLE DE GESTION\n " +
-                         "Contrôle Nombre Maxi Parents:\n Le nombre maximum de de parents autorisés est de : %d \
-                          alors que le contrat de l\'adhérent en comporte : %d."
+                         u"Proximaas: Contrôle de Règle de Gestion.\n \
+                          Contrôle Nombre Maxi Parents:\n Le nombre maximum de de parents autorisés est de : %d \
+                          alors que le contrat de l\'adhérent en comporte : %d. Pour plus d'informations,\
+                          veuillez contactez l'administrateur..."
                     ) % (maxi_parent, rec.nbre_parent)
                 )
 
@@ -2542,9 +2541,10 @@ class Contrat(models.Model):
             if rec.nbre_enfant > maxi_enfant > 0:
                 raise ValidationError(_(
 
-                    "PROXIMAS : VALIDATION DE REGLE DE GESTION\n " +
-                    "Contrôle Nombre Maxi Enfant:\n Le nombre maximum d'enfants autorisé par cette police est de : %d \
-                     alors que le contrat de l\'adhérent en comporte : %d."
+                    u"Proximaas: Contrôle de Règle de Gestion. \n \
+                    Contrôle Nombre Maxi Enfant: Le nombre maximum d'enfants autorisé par cette police est de : %d \
+                    alors que le contrat de l\'adhérent en comporte : %d. Pour plus d'informations,\
+                    veuillez contactez l'administrateur..."
                     ) % (maxi_enfant, rec.nbre_enfant)
                 )
 
@@ -2691,7 +2691,7 @@ class ContratWizard(models.TransientModel):
         # Prévention de doublon lors de la création de contrat adhérent
         if bool(check_adherent):
             raise UserError(_(
-                "Proximaas : Contrôle de Règle de Gestion: Doublon Adhérent \n \
+                u"Proximaas: Contrôle de Règle de Gestion: Doublon Adhérent \n \
                  L'adhérent concerné : %s a déjà souscrit pour cette police de couverture : %s an(s). Cependant, \
                  il y a risque de doublon dans le système. Pour plus de détails, veuillez contactez l'administrateur."
                 ) % (self.name, self.police_id.name)
@@ -2699,7 +2699,7 @@ class ContratWizard(models.TransientModel):
         # Vérification de limite d'âge pour la police concernée.
         elif age > age_limite and age_limite != 0:
             raise ValidationError(_(
-                "Proximaas : Contrôle de Règle de Gestion: Age limite Adhérent \n \
+                u"Proximaas: Contrôle de Règle de Gestion: Age limite Adhérent \n \
                  L'âge limite autorisé par cette police de couverture, est de : %02d an(s). Cependant, Cet(tte) \
                  adhérent(e) en a: %02d. Pour plus de détails, veuillez contactez l'administrateur."
                 ) % (age_limite, age)
@@ -2922,26 +2922,26 @@ class CodeMedicalPolice(models.Model):
     def _check_taux(self):
         if 0 > self.tx_public > 100:
             raise ValidationError(_(
-
-                "PROXIMAS : VALIDATION DE REGLE DE GESTION\n " +
-                "Contrôle Taux Couvertue Public:\n \
-                Le taux doit obligatoirement être compris entre 0 et 100 maximmum."
-                )
-            )
+                u"Proximaas : Contrôle de Règles de Gestion.\n \
+                Contrôle Taux Couvertue Public:\n \
+                Le taux doit obligatoirement être compris entre 0 et 100 maximmum. \
+                Pour plus d'informations, veuillez contactez l'administrateur..."
+                ))
         if 0 > self.tx_prive > 100:
             raise ValidationError(_(
-
-                "PROXIMAS : VALIDATION DE REGLE DE GESTION\n " +
-                "Contrôle Taux Couvertue Privé:\n \
-                Le taux doit obligatoirement être compris entre 0 et 100 maximmum."
+                u"Proximaas : Contrôle de Règles de Gestion.\n \
+                Contrôle Taux Couvertue Privé:\n \
+                Le taux doit obligatoirement être compris entre 0 et 100 maximmum. \
+                Pour plus d'informations, veuillez contactez l'administrateur..."
                 )
             )
         if 0 > self.tx_remb_couvert > 100:
             raise ValidationError(_(
 
-                "PROXIMAS : VALIDATION DE REGLE DE GESTION\n " +
-                "Contrôle Taux de Remboursement en Zone Couverte:\n \
-                Le taux doit obligatoirement être compris entre 0 et 100 maximmum."
+                u"Proximaas : Contrôle de Règles de Gestion.\n \
+                Contrôle Taux de Remboursement en Zone Couverte:\n \
+                Le taux doit obligatoirement être compris entre 0 et 100 maximmum. \
+                Pour plus d'informations, veuillez contactez l'administrateur..."
                 )
             )
 
