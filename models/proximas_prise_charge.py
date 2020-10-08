@@ -61,13 +61,13 @@ class PriseEnCharge(models.Model):
     code_saisi = fields.Char(
         string="Code ID.",
     )
-    pathologie_id = fields.Many2one (
+    pathologie_id = fields.Many2one(
         comodel_name="proximas.pathologie",
         string="Code Affection (Principale)",
         required=True,
-        help='Veuillez Indiquer le code de l\'affection( pathologie) principale.',
+        help="Veuillez Indiquer le code de l'affection( pathologie) principale.",
     )
-    pathologie_ids = fields.Many2many (
+    pathologie_ids = fields.Many2many(
         comodel_name="proximas.pathologie",
         string="Affections Associées",
         help='Veuillez Indiquer les affections associées à la pathologie principale.',
@@ -253,8 +253,13 @@ class PriseEnCharge(models.Model):
     # )
     pool_medical_id = fields.Many2one(
         comodel_name="proximas.pool.medical",
-        string="Médecin",
+        string="Médecin CRO",
         required=False,
+    )
+    medecin_id = fields.Many2one(
+        # comodel_name="proximas.medecin",
+        related='pool_medical_id.medecin_id',
+        string="Médecin - CRO",
     )
     prestataire_cro = fields.Char(
         string="Prestataire CRO",
@@ -818,7 +823,14 @@ class PriseEnCharge(models.Model):
                 rec.is_termine = True
             else:
                 rec.is_termine = False
-    
+
+    @api.one
+    @api.depends('pathologie_ids')
+    def _get_pathologie_pec(self):
+        if not self.pathologie_id and self.pathologie_ids:
+            pathologie = self.pathologie_ids[0]
+            self.pathologie_id = pathologie.id
+
     @api.one
     @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
     def _get_encaisse_phcie(self):
@@ -1656,12 +1668,21 @@ class PecMajWizard(models.TransientModel):
                 Pour plus d'informations, veuillez contactez l'administrateur en cas de besoin..!"
             )
             )
+        # Contrôle de doublon PEC
+        if pec and len(pec) != 1:
+            raise ValidationError(_(
+                u"PROXIMAS : Contrôle Code PEC : Code PEC en double!\n \
+                Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, il est possible \
+                que le code PEC soit dupliqué, c-à-d que le code PEC concerné est attribué à une autre prise en charge.\
+                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
+                ) % pec.code_pec
+            )
         # Contrôle du statut Assuré - assure.state == 'actif'
         elif bool (pec) and (pec.assure_id.state != 'actif'):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
             raise ValidationError(_(
                 u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
-                Le code PEC concerné : %s existe bel et bien en tant que prise en charge. Cependant, ne peut faire \
+                Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, ne peut faire \
                 l'objet d'un traitement du fait de : (STATUT NON ACTIF) de l'assuré: %s. \
                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
                 ) % (pec.code_pec, info_assure)
@@ -1735,12 +1756,21 @@ class PecMajWizard(models.TransientModel):
                 Pour plus d'informations, veuillez contactez l'administrateur en cas de besoin..!"
                 )
             )
+        # Contrôle de doublon PEC
+        if pec and len(pec) != 1:
+            raise ValidationError (_ (
+                u"PROXIMAS : Contrôle Code PEC : Code PEC en double!\n \
+                Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, il est possible \
+                que le code PEC soit dupliqué, c-à-d que le code PEC concerné est attribué à une autre prise en charge.\
+                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
+                ) % pec.code_pec
+            )
         # Contrôle du statut Assuré - assure.state == 'actif'
         elif bool (pec) and (pec.assure_id.state != 'actif'):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
             raise ValidationError (_ (
                 u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
-                Le code PEC concerné : %s existe bel et bien en tant que prise en charge. Cependant, ne peut faire \
+                Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, ne peut faire \
                 l'objet d'un traitement du fait de : (STATUT NON ACTIF) de l'assuré: %s. \
                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
             ) % (pec.code_pec, info_assure)
@@ -1872,7 +1902,7 @@ class DetailsPec(models.Model):
     )
     pool_medical = fields.Many2one (
         comodel_name="proximas.pool.medical",
-        string="Médecin Pool Médical",
+        string="Medécin Traitant",
         compute='_get_pool_medical',
         store=True,
     )
@@ -2336,6 +2366,7 @@ class DetailsPec(models.Model):
         comodel_name="proximas.code.prestation",
         string="Prestation",
         related='prestation_id.code_prestation_id',
+        store=True,
         readonly=True,
     )
     cout_unitaire = fields.Float(
@@ -2430,6 +2461,11 @@ class DetailsPec(models.Model):
         readonly=True,
     )
     # Champs relatifs Prise.charge (PEC)
+    date_saisie = fields.Datetime (
+        string="Date Enregistrement",
+        related='pec_id.date_saisie',
+        readonly=True,
+    )
     pec_state = fields.Selection(
         string="Etat PEC",
         related='pec_id.state',
@@ -2708,6 +2744,11 @@ class DetailsPec(models.Model):
              à laquelle est rattachée la prestation médicale fournie par le prestataire...',
         default=0,
     )
+
+    @api.model
+    def read_group(self, domain, fields, groupby, offset=0, limit=None, orderby=False, lazy=True):
+        return super(DetailsPec, self).read_group(domain, fields, groupby, offset=offset, limit=limit, orderby=orderby,
+                                                  lazy=False)
 
     @api.multi
     def action_valider(self):
@@ -4820,7 +4861,7 @@ class DetailsPec(models.Model):
     #                 }
 
     # @api.one
-    @api.onchange('prestation_id', 'produit_phcie_id', 'substitut_phcie_id')
+    @api.onchange('prestation_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestataire_rembourse_id')
     def _track_age_acces_prestation(self):
         # CONTRÖLE AGE MINIMUM & MAXIMUM PRODUITS PHCIE / PRESTATION MEDICALE
         age_assure = int(self.age)
@@ -4867,7 +4908,7 @@ class DetailsPec(models.Model):
                                     }
                         }
 
-    @api.constrains('prestation_id', 'produit_phcie_id', 'substitut_phcie_id')
+    @api.constrains('prestation_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestataire_rembourse_id')
     def _validate_age_acces_prestation(self):
         # CONTRÖLE AGE MINIMUM & MAXIMUM PRODUITS PHCIE / PRESTATION MEDICALE
         for rec in self:
@@ -5275,6 +5316,30 @@ class DetailsPec(models.Model):
                     ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
                 )
 
+    @api.one
+    @api.depends('date_execution', 'date_demande')
+    def _get_exo_sam(self):
+        exercices = self.env['proximas.exercice'].search ([
+            ('res_company_id', '=', self.structure_id.id),
+            ('cloture', '=', False),
+        ])
+        if bool(exercices):
+            for exo in exercices:
+                date_debut = fields.Date.from_string(exo.date_debut)
+                date_fin = fields.Date.from_string(exo.date_fin)
+                if bool(self.date_execution) and not bool(self.date_demande):
+                    date_execution = fields.Date.from_string(self.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        self.exercice_id = exo.id
+                elif bool(self.date_execution) and bool(self.date_demande):
+                    date_execution = fields.Date.from_string(self.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        self.exercice_id = exo.id
+                elif bool(self.date_demande):
+                    date_demande = fields.Date.from_string(self.date_demande)
+                    if date_debut <= date_demande <= date_fin:
+                        self.exercice_id = exo.id
+
     # @api.depends('police_id', 'structure_id', 'prestation_id')
     #@api.onchange('date_execution', 'date_demande')
     # @api.multi
@@ -5302,30 +5367,6 @@ class DetailsPec(models.Model):
                 Pour plus d'informations, veuillez contactez l'administrateur..."
             ) % date_demande_format
                              )
-
-    @api.depends('date_execution', 'date_demande')
-    def _get_exo_sam(self):
-        for rec in self:
-            exercices = self.env['proximas.exercice'].search ([
-                ('res_company_id', '=', rec.structure_id.id),
-                ('cloture', '=', False),
-            ])
-            if bool(exercices):
-                for exo in exercices:
-                    date_debut = fields.Date.from_string (exo.date_debut)
-                    date_fin = fields.Date.from_string (exo.date_fin)
-                    if bool (rec.date_execution) and not bool (rec.date_demande):
-                        date_execution = fields.Date.from_string (rec.date_execution)
-                        if date_debut <= date_execution <= date_fin:
-                            rec.exercice_id = exo.id
-                    elif bool (rec.date_execution) and bool (rec.date_demande):
-                        date_execution = fields.Date.from_string (rec.date_execution)
-                        if date_debut <= date_execution <= date_fin:
-                            rec.exercice_id = exo.id
-                    elif bool (rec.date_demande):
-                        date_demande = fields.Date.from_string (rec.date_demande)
-                        if date_debut <= date_demande <= date_fin:
-                            rec.exercice_id = exo.id
 
     # @api.constrains('exercice_id', 'date_execution', 'date_demande')
     # def validate_exo_sam(self):
@@ -5924,7 +5965,7 @@ class RemboursementPEC(models.Model):
 
     @api.multi
     def action_boucler(self):
-        self.state = 'termine'
+        self.state = 'boucle'
 
 
     @api.multi
@@ -5967,7 +6008,6 @@ class RemboursementPEC(models.Model):
                 else:
                     last_rfm = rfm_adherent[1]
                     rec.date_last_rfm = last_rfm.date_saisie
-
 
     @api.depends('details_rfm_soins_ids', 'details_rfm_phcie_ids')
     @api.onchange('details_rfm_soins_ids', 'details_rfm_phcie_ids')

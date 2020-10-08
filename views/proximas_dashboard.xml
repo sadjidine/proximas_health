@@ -365,217 +365,6 @@
                 </kanban>
             </field>
         </record>
-        <!-- ETAT SINISTRES CONFIRMES - Details PEC - Form wizard-->
-        <record id="proximas_report_reglement_sinistres_wizard_form" model="ir.ui.view">
-           <field name="name">proximas.reglement.sinistres.report.wizard.form</field>
-           <field name="model">proximas.reglement.sinistres.report.wizard</field>
-           <field name="type">form</field>
-           <field name="arch" type="xml">
-               <form string="Details PEC Confirmés (Facture/remboursement)">
-                   <sheet>
-                       <div class="panel">
-                          <h4 class="panel-header text-primary">Assistant Edition de Rapports de Suivi des Règlements
-                              Factures ou Remboursements : </h4>
-                          <div class="panel-body">
-                            <blockquote class="blockquote mb-0">
-                                 <p class="text-info text-justify h5">Veuillez renseigner avec soins, les champs
-                                     ci-dessous et valider afin que le système génère le rapport au format PDF à
-                                     télécharger...
-                                </p>
-                                <hr/>
-                               <!-- Cet assistant vous permet de générer des états et rapports
-                                     personnalisés en fonction de vos besoins spécifiques basés une période définie c-à-d
-                                     à partir d'une date de début et de fin. Vous choisirez ensuite, le type d'indicateur
-                                     de suivi concerné par le rapport à éditer. -->
-                                <p class="h5 text-primary">1. Période de Début et Fin</p>
-                                <div class="h5">
-                                    <group col="6" colspan="2" >
-                                        <field name="date_debut" />
-                                        <field name="date_fin"/>
-                                    </group>
-                                </div>
-                                <hr/>
-                                <p class="h5 text-primary">2. Choix Indicateur de suivi sinistres:</p>
-                                <div class="h5">
-                                    <group col="6" colspan="2">
-                                      <field name="report_kpi"/>
-                                      <field name="report_type"
-                                           widget="radio"
-                                           options="{'horizontal': true}"/>
-                                    </group>
-                                    <group col="6" colspan="2">
-                                      <field name="filter_type"/>
-                                      <field name="police_filter"/>
-                                    </group>
-                                    <hr/>
-                                    <group>
-                                        <field name="police_id"
-                                               attrs="{'invisible': [('police_filter','=',False)],
-                                               'required': [('police_filter','=',True)]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="adherent_id"
-                                               attrs="{'invisible': ['|',('filter_type','!=','rfm'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_type','=','detail'),('filter_type','=','rfm')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <!--<field name="rubrique_id" attrs="{'invisible': ['|',('report_kpi','!=','rubrique'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','rubrique'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>-->
-                                        <!--<field name="prestation_id" attrs="{'invisible': ['|',('report_kpi','!=','prestation'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','prestation'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>-->
-                                        <field name="prestataire_id" attrs="{'invisible': ['|',('report_type','!=','detail'),('filter_type','!=','pec')],
-                                               'required': [('report_type','=','detail'),('filter_type','=','pec')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="facture_id" attrs="{'invisible': ['|',('report_type','!=','detail'),
-                                               '|',('filter_type','!=','pec'),('report_kpi','=','facture')],
-                                               'required': [('report_type','=','detail'),('filter_type','=','pec'),('report_kpi','!=','facture')]}"
-                                               domain="[('prestataire_id', '=', prestataire_id),('date_emission','>=',date_debut)]"
-                                               options ='{"no_open": True, "no_create": True}'
-                                        />
-                                       <!--domain="[('prestataire_id', '=', prestataire_id)]"('date_emission', '&amp;gt=',datetime.datetime.strptime(date_debut,'%Y-%m-%d').datetime.datetime.strftime('%Y-%m-%d'))-->
-                                        <field name="rfm_id" attrs="{'invisible': ['|',('report_type','!=','detail'),('filter_type','!=','rfm')],
-                                               'required': [('report_type','=','detail'),('filter_type','=','rfm')]}"
-                                               domain="[('adherent_id', '=', adherent_id)]"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                    </group>
-                                </div>
-                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
-                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
-                              </footer>
-                            </blockquote>
-                          </div>
-                        </div>
-                   </sheet>
-                   <footer>
-                        <button name='get_report'
-                            string='Générer le Rapport'
-                            class='oe_highlight'
-                            type='object'/>
-                                    /
-                        <button string='Annuler' special='cancel'/>
-                    </footer>
-               </form>
-           </field>
-        </record>
-        <!-- Rapport Sinistralité Details PEC - RUBRIQUE Form wizard-->
-        <record id="proximas_sinistre_report_wizard_form" model="ir.ui.view">
-           <field name="name">proximas.sinistre.report.wizard.form</field>
-           <field name="model">proximas.sinistre.report.wizard</field>
-           <field name="type">form</field>
-           <field name="arch" type="xml">
-               <form string="Recap Report Details PEC">
-                   <sheet>
-                       <div class="panel">
-                          <h4 class="panel-header text-primary">Assistant Edition de Rapports de Suivi Portefeuille de Risque (Sinistralité) : </h4>
-                          <div class="panel-body">
-                            <blockquote class="blockquote mb-0">
-                                 <p class="text-info text-justify h5">Cet assistant vous permet de générer des états et rapports
-                                     personnalisés en fonction de vos besoins spécifiques selon une période définie c-à-d,
-                                     à partir d'une date de début et de fin. Vous choisirez ensuite, le type d'indicateur
-                                     de suivi concerné par le rapport à éditer. Veuillez renseigner avec soin, les champs
-                                     ci-dessous et valider pour que le système génère le rapport au format PDF téléchargeable.
-                                </p>
-                                <hr/>
-                                <p class="h5 text-primary">1. Définition de la Période de Début et Fin</p>
-                                <group col="6" colspan="2" class="h5" >
-                                    <field name="date_debut" />
-                                    <field name="date_fin"/>
-                                </group>
-                                <hr/>
-                                <p class="h5 text-primary">2. Choix d'Indicateur de suivi sinistres:</p>
-                                <div class="h5">
-                                    <group col="4" colspan="2">
-                                        <field name="report_kpi"/>
-                                        <field name="report_type"
-                                               widget="radio"
-                                               options="{'horizontal': true}"/>
-                                    </group>
-                                    <hr/>
-                                    <group col="4" colspan="2">
-                                        <field name="report_data"
-                                               string="Info détail"
-                                               attrs="{'invisible': [('report_type','=','groupe')],
-                                               'required': [('report_type','=','detail')]}"/>
-                                        <field name="police_filter"/>
-                                    </group>
-                                    <hr/>
-                                    <group col="4" colspan="2">
-                                        <field name="contrat_limit"
-                                               attrs="{'invisible': ['|','|',('report_type','!=','groupe'),('report_kpi','!=','contrat'),
-                                               ('assure_limit','=',True)],}"
-                                        />
-                                        <field name="assure_limit"
-                                               attrs="{'invisible': ['|','|',('report_type','!=','groupe'),('report_kpi','!=','assure'),
-                                               ('contrat_limit','=',True)],}"/>
-                                    </group>
-                                    <hr/>
-                                    <group>
-                                        <field name="police_id"
-                                               attrs="{'invisible': [('police_filter','=',False)],
-                                               'required': [('police_filter','=',True)]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="contrat_id"
-                                               attrs="{'invisible': ['|',('report_kpi','!=','contrat'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','contrat'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="assure_id"
-                                               attrs="{'invisible': ['|',('report_kpi','!=','assure'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','assure'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="medecin_id"
-                                               attrs="{'invisible': ['|',('report_kpi','!=','medecin'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','medecin'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="rubrique_id" attrs="{'invisible': ['|',('report_kpi','!=','rubrique'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','rubrique'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <!--<field name="prestation_id" attrs="{'invisible': ['|',('report_kpi','!=','prestation'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','prestation'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>-->
-                                        <field name="prestataire_id" attrs="{'invisible': ['|',('report_kpi','!=','prestataire'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','prestataire'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <field name="groupe_id" attrs="{'invisible': ['|',('report_kpi','!=','groupe'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','groupe'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                        <!--<field name="zone_id" attrs="{'invisible': ['|',('report_kpi','!=','zone'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','zone'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>-->
-                                        <field name="localite_id" attrs="{'invisible': ['|',('report_kpi','!=','localite'),
-                                               ('report_type','!=','detail')],
-                                               'required': [('report_kpi','=','localite'),('report_type','=','detail')]}"
-                                               options ='{"no_open": True, "no_create": True}'/>
-                                    </group>
-                                </div>
-                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
-                                  <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
-                              </footer>
-                            </blockquote>
-                          </div>
-                        </div>
-                   </sheet>
-                   <footer>
-                        <button name='get_report'
-                            string='Générer le Rapport'
-                            class='oe_highlight'
-                            type='object'/>
-                                    /
-                        <button string='Annuler' special='cancel'/>
-                    </footer>
-               </form>
-           </field>
-        </record>
         <!-- CONTRAT DASHBOARD VIEW DESIGN-->
         <!--<record id="contrat_police_genre_graph_view" model="ir.ui.view">
             <field name="name">contrat.police.genre.graph.view</field>
@@ -857,7 +646,7 @@
             <field name="code">action = self.facture_filter_function(cr, uid, context=context)</field>
             <field eval="True" name="condition"/>
         </record>-->
-        <record model="ir.actions.act_window" id="proximas_sinistre_report_wizard_action">
+        <!--<record model="ir.actions.act_window" id="proximas_sinistre_report_wizard_action">
             <field name="name">Proximaas: Etats: Rapports Suivi Portefeuille de Risques</field>
             <field name="res_model">proximas.sinistre.report.wizard</field>
             <field name="view_type">form</field>
@@ -876,7 +665,7 @@
             <field name="target">new</field>
             <field name="domain">[]</field>
             <field name="context">{}</field>
-        </record>
+        </record>-->
         <menuitem id="proximas_dashboard"
                   name="Tableau de Bord"
                   sequence="1"
@@ -901,27 +690,10 @@
                    action="sinistres_parametres_tableau_bord_action"
         />
         <!--<menuitem  id="assure_dashboard_menu"
-                   sequence="21"
+                   sequence="22"
                    parent="proximas_indicateurs_dashboard"
                    name=">> Statistiques - Assurés"
                    action="assure_tableau_bord_action"
         />-->
-        <menuitem id="proximas_rapports_dashboard"
-                  name="2. EDITION ETATS &amp; RAPPORTS DIVERS"
-                  sequence="3"
-                  parent="proximas_dashboard"
-        />
-        <menuitem  id="sinistre_report_recap_wizard"
-                   sequence="30"
-                   parent="proximas_rapports_dashboard"
-                   name=">> Evolution Portefeuille de Risques (Sinistralité)"
-                   action="proximas_sinistre_report_wizard_action"
-        />
-        <menuitem  id="report_reglement_sinistres_report"
-                   sequence="31"
-                   parent="proximas_rapports_dashboard"
-                   name=">> Etat Règlements Factures/Remboursements"
-                   action="proximas_report_reglement_sinistres_wizard_action"
-        />
     </data>
 </odoo>

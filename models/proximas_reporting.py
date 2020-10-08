@@ -36,7 +36,6 @@ class ReportSinistreRecapWizard(models.TransientModel):
             ('medecin', 'Médecin Traitant'),
             ('groupe', 'Groupe (Organe)'),
             ('localite', 'Localité'),
-            # ('zone', 'Zone adminsitrative'),
             ('rubrique', 'Rubrique médicale'),
         ],
         default='contrat',
@@ -502,13 +501,29 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 ], order='id asc')
             for contrat in contrats:
                 # DETAILS PEC TRAITES ET LIES A UN CONTRAT
-                details_pec = self.env['proximas.details.pec'].search ([
-                    ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
-                    ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
-                    ('prestataire', '!=', None),
-                    ('contrat_id', '=', contrat.id),
-                ])
-                if bool(details_pec):
+                # Selection de prise_charge pour le cin : L'inclure que lorsque celui-ci à au moins 1 prise en charge
+                contrat_id = contrat.id
+                date_debut = date_debut_obj.strftime (DATE_FORMAT)
+                date_fin = date_fin_obj.strftime (DATE_FORMAT)
+                sql = """
+                    SELECT COUNT(pec_id) AS nbre_pec,
+                    SUM(cout_total) AS cout_total, SUM(total_pc) AS total_pc, SUM(total_npc) AS total_npc,
+                    SUM(mt_exclusion) AS mt_exclusion, SUM(ticket_moderateur) AS ticket_moderateur, 
+                    SUM(net_tiers_payeur) AS net_tiers_payeur, SUM(net_prestataire) AS net_prestataire, 
+                    SUM(mt_remboursement) AS mt_remboursement
+                    FROM proximas_details_pec
+                    WHERE date_execution >= '%%%s%%' AND date_execution <= '%%%s%%' AND assure_id = '%d'
+                    GROUP BY contrat_id
+                    ORDER BY net_tiers_payeur;
+                """ % (date_debut, date_fin, contrat_id)
+                self.env.cr.execute(sql)
+                details_pec_assure = self.env.cr.fetchone()
+                if details_pec_assure:
+                    details_pec = list (details_pec_assure)
+                    # print details_pec
+                    net_prestataire = int(details_pec[7])
+                    net_remboursement = int (details_pec[8])
+                    net_a_payer = net_remboursement if net_remboursement else net_prestataire
                     name_length = len(contrat.adherent_id.name)
                     if int(name_length) > 60:
                         adherent = contrat.adherent_id.name[:40] + '...'
@@ -517,46 +532,86 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     code_id = contrat.adherent_id.code_id
                     code_id_externe = contrat.adherent_id.code_id_externe
                     date_activation = contrat.adherent_id.date_activation
+                    genre = contrat.adherent_id.genre.capitalize()
                     num_contrat = contrat.adherent_id.num_contrat
                     matricule = contrat.adherent_id.matricule
                     groupe_name = contrat.groupe_id.name
-                    nbre_actes = len(details_pec) or 0
-                    cout_total = sum(item.cout_total for item in details_pec) or 0
-                    total_pc = sum(item.total_pc for item in details_pec) or 0
-                    total_npc = sum(item.total_npc for item in details_pec) or 0
-                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                    net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
-                    net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                    net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                    # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
-                    net_a_payer = 0
-                    if net_prestataire:
-                        net_a_payer = int (net_prestataire)
-                    elif net_remboursement:
-                        net_a_payer = int (net_remboursement)
-                    else:
-                        net_a_payer = 0
-
-                    docs.append({
+                    docs.append ({
                         'adherent': adherent,
                         'code_id': code_id,
                         'code_id_externe': code_id_externe,
+                        'genre': genre,
                         'num_contrat': num_contrat,
                         'matricule': matricule,
                         'groupe_name': groupe_name,
-                        'date_activation': datetime.strptime(date_activation, DATE_FORMAT).strftime('%d/%m/%Y'),
-                        'nbre_actes': int(nbre_actes),
-                        'cout_total': int(cout_total),
-                        'total_pc': int(total_pc),
-                        'total_npc': int(total_npc),
-                        'total_exclusion': int(total_exclusion),
-                        'ticket_moderateur': int(ticket_moderateur),
-                        'net_tiers_payeur': int(net_tiers_payeur),
-                        'net_prestataire': int(net_prestataire),
-                        'net_remboursement': int(net_remboursement),
-                        'net_a_payer': int(net_a_payer),
+                        'date_activation': datetime.strptime(date_activation, DATE_FORMAT).strftime(
+                            '%d/%m/%Y'),
+                        'nbre_actes': int (details_pec[0]),
+                        'cout_total': int (details_pec[1]),
+                        'total_pc': int (details_pec[2]),
+                        'total_npc': int (details_pec[3]),
+                        'total_exclusion': int (details_pec[4]),
+                        'ticket_moderateur': int (details_pec[5]),
+                        'net_tiers_payeur': int (details_pec[6]),
+                        'net_prestataire': int (details_pec[7]),
+                        'net_remboursement': int (details_pec[8]),
+                        'net_a_payer': net_a_payer,
                     })
+                # details_pec = self.env['proximas.details.pec'].search ([
+                #     ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                #     ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                #     ('prestataire', '!=', None),
+                #     ('contrat_id', '=', contrat.id),
+                # ])
+                # if bool(details_pec):
+                #     name_length = len(contrat.adherent_id.name)
+                #     if int(name_length) > 60:
+                #         adherent = contrat.adherent_id.name[:40] + '...'
+                #     else:
+                #         adherent = contrat.adherent_id.name
+                #     code_id = contrat.adherent_id.code_id
+                #     code_id_externe = contrat.adherent_id.code_id_externe
+                #     date_activation = contrat.adherent_id.date_activation
+                #     num_contrat = contrat.adherent_id.num_contrat
+                #     matricule = contrat.adherent_id.matricule
+                #     groupe_name = contrat.groupe_id.name
+                #     nbre_actes = len(details_pec) or 0
+                #     cout_total = sum(item.cout_total for item in details_pec) or 0
+                #     total_pc = sum(item.total_pc for item in details_pec) or 0
+                #     total_npc = sum(item.total_npc for item in details_pec) or 0
+                #     total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                #     ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                #     net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
+                #     net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                #     net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                #     # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                #     net_a_payer = 0
+                #     if net_prestataire:
+                #         net_a_payer = int (net_prestataire)
+                #     elif net_remboursement:
+                #         net_a_payer = int (net_remboursement)
+                #     else:
+                #         net_a_payer = 0
+                #
+                #     docs.append({
+                #         'adherent': adherent,
+                #         'code_id': code_id,
+                #         'code_id_externe': code_id_externe,
+                #         'num_contrat': num_contrat,
+                #         'matricule': matricule,
+                #         'groupe_name': groupe_name,
+                #         'date_activation': datetime.strptime(date_activation, DATE_FORMAT).strftime('%d/%m/%Y'),
+                #         'nbre_actes': int(nbre_actes),
+                #         'cout_total': int(cout_total),
+                #         'total_pc': int(total_pc),
+                #         'total_npc': int(total_npc),
+                #         'total_exclusion': int(total_exclusion),
+                #         'ticket_moderateur': int(ticket_moderateur),
+                #         'net_tiers_payeur': int(net_tiers_payeur),
+                #         'net_prestataire': int(net_prestataire),
+                #         'net_remboursement': int(net_remboursement),
+                #         'net_a_payer': int(net_a_payer),
+                #     })
             if bool(docs):
                 docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
                 docargs = {
@@ -896,77 +951,60 @@ class ReportPecDetailsRecap(models.AbstractModel):
                     ))
         # 2.2. RAPPORT SYNTHESE SINISTRALITE PAR BENEFICIAIRE (ASSURE)
         elif report_kpi == 'assure' and report_type == 'groupe':
-            assures = self.env['proximas.assure'].search([])
+            assures = self.env['proximas.assure'].search([], order='name asc')
+            sql = ""
             if police_filter:
-                assures = self.env['proximas.assures'].search([
+                assures = self.env['proximas.assure'].search([
                     ('police_id', '=', police_id),
                 ], order='id asc')
             for assure in assures:
-                # DETAILS PEC TRAITES ET LIES A UN CONTRAT
-                details_pec = self.env['proximas.details.pec'].search ([
-                    ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
-                    ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
-                    ('prestataire', '!=', None),
-                    ('assure_id', '=', assure.id),
-                ])
-                if bool(details_pec):
-                    name_length = len(assure.name)
-                    if int(name_length) > 60:
-                        beneficiaire = assure.name[:40] + '...'
-                    else:
-                        beneficiaire = assure.name
-                    code_id = assure.code_id
-                    code_id_externe = assure.code_id_externe
-                    date_naissance = assure.date_naissance
-                    statut_familial = assure.statut_familial
-                    genre = assure.genre
-                    date_activation = assure.date_activation
-                    num_contrat = assure.contrat_id.num_contrat
-                    adherent = assure.contrat_id.adherent_id.name
-                    matricule = assure.contrat_id.matricule
-                    groupe_name = assure.groupe_id.name
-                    nbre_actes = len (details_pec) or 0
-                    cout_total = sum (item.cout_total for item in details_pec) or 0
-                    total_pc = sum (item.total_pc for item in details_pec) or 0
-                    total_npc = sum (item.total_npc for item in details_pec) or 0
-                    total_exclusion = sum (item.mt_exclusion for item in details_pec) or 0
-                    ticket_moderateur = sum (item.ticket_moderateur for item in details_pec) or 0
-                    net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
-                    net_prestataire = sum (item.net_prestataire for item in details_pec) or 0
-                    net_remboursement = sum (item.mt_remboursement for item in details_pec) or 0
-                    # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
-                    net_a_payer = 0
-                    if net_prestataire:
-                        net_a_payer = int (net_prestataire)
-                    elif net_remboursement:
-                        net_a_payer = int (net_remboursement)
-                    else:
-                        net_a_payer = 0
-
+                # Selection de prise_charge pour l'assure : L'inclure que lorsque celui-ci à au moins 1 prise en charge
+                assure_id = assure.id
+                date_debut = date_debut_obj.strftime(DATE_FORMAT)
+                date_fin = date_fin_obj.strftime(DATE_FORMAT)
+                sql = """
+                    SELECT COUNT(pec_id) AS nbre_pec,
+                    SUM(cout_total) AS cout_total, SUM(total_pc) AS total_pc, SUM(total_npc) AS total_npc,
+                    SUM(mt_exclusion) AS mt_exclusion, SUM(ticket_moderateur) AS ticket_moderateur, 
+                    SUM(net_tiers_payeur) AS net_tiers_payeur, SUM(net_prestataire) AS net_prestataire, 
+                    SUM(mt_remboursement) AS mt_remboursement
+                    FROM proximas_details_pec
+                    WHERE date_execution >= '%%%s%%' AND date_execution <= '%%%s%%' AND assure_id = '%d'
+                    GROUP BY assure_id
+                    ORDER BY net_tiers_payeur;
+                """ % (date_debut, date_fin, assure_id)
+                self.env.cr.execute(sql)
+                details_pec_assure = self.env.cr.fetchone()
+                if details_pec_assure:
+                    details_pec = list(details_pec_assure)
+                    # print details_pec
+                    net_prestataire = int(details_pec[7])
+                    net_remboursement = int(details_pec[8])
+                    net_a_payer = net_remboursement if net_remboursement else net_prestataire
                     docs.append({
-                        'adherent': adherent,
-                        'code_id': code_id,
-                        'beneficiaire': beneficiaire,
-                        'code_id_externe': code_id_externe,
+                        'adherent': assure.contrat_id.adherent_id.name,
+                        'code_id': assure.code_id,
+                        'beneficiaire': assure.name,
+                        'code_id_externe': assure.code_id_externe,
                         'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
                             '%d/%m/%Y'),
-                        'statut_familial': statut_familial,
-                        'genre': genre,
-                        'num_contrat': num_contrat,
-                        'matricule': matricule,
-                        'groupe_name': groupe_name,
-                        'date_activation': datetime.strptime (date_activation, DATE_FORMAT).strftime (
+                        'statut_familial': assure.statut_familial.capitalize(),
+                        'genre': assure.genre.capitalize(),
+                        'num_contrat': assure.contrat_id.num_contrat,
+                        'matricule': assure.contrat_id.matricule,
+                        'groupe_name': assure.contrat_id.groupe_id.name,
+                        'date_activation': datetime.strptime(assure.date_activation, DATE_FORMAT).strftime(
                             '%d/%m/%Y'),
-                        'nbre_actes': int (nbre_actes),
-                        'cout_total': int (cout_total),
-                        'total_pc': int (total_pc),
-                        'total_npc': int (total_npc),
-                        'total_exclusion': int (total_exclusion),
-                        'ticket_moderateur': int (ticket_moderateur),
-                        'net_tiers_payeur': int (net_tiers_payeur),
-                        'net_prestataire': int (net_prestataire),
-                        'net_remboursement': int (net_remboursement),
-                        'net_a_payer': int (net_a_payer),
+                        'nbre_actes': int(details_pec[0]),
+                        'cout_total': int (details_pec[1]),
+                        'total_pc': int (details_pec[2]),
+                        'total_npc': int (details_pec[3]),
+                        'total_exclusion': int (details_pec[4]),
+                        'ticket_moderateur': int (details_pec[5]),
+                        'net_tiers_payeur': int (details_pec[6]),
+                        'net_prestataire': int (details_pec[7]),
+                        'net_remboursement': int(details_pec[8]),
+                        'net_a_payer': net_a_payer,
                     })
             if bool(docs):
                 docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
@@ -2684,8 +2722,8 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 # DETAILS PEC TRAITES ET LIES A UN CONTRAT
                 if police_id:
                     details_pec = self.env['proximas.details.pec'].search ([
-                        ('date_execution', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                        ('date_execution', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                        ('date_execution', '>=', date_debut_obj.strftime(DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime(DATE_FORMAT)),
                         ('prestataire', '!=', None),
                         ('rubrique_id', '=', rubrique.id),
                         ('police_id', '=', police_id),
@@ -2755,563 +2793,802 @@ class ReportPecDetailsRecap(models.AbstractModel):
                 ))
         return report_obj.render('proximas_medical.report_suivi_sinistres_view', docargs)
 
-    class ReglementSinistresReportWizard (models.TransientModel):
-        _name = 'proximas.reglement.sinistres.report.wizard'
-        _description = 'Reglements Sinistres Report Wizard'
 
-        date_debut = fields.Date(
-            string="Date Début",
-            required=True,
-        )
-        date_fin = fields.Date(
-            string="Date Fin",
-            default=fields.Date.today,
-            required=True,
-        )
-        report_kpi = fields.Selection (
-            string="Indicateur de sinistralité",
-            selection=[
-                ('rubrique', 'Rubrique Médicale'),
-                ('prestation', 'Prestation Médicale'),
-                ('facture', 'Facture/Remboursement'),
-                # ('medecin', 'Médecin Traitant'),
-            ],
-            default='rubrique',
-            required=True,
-        )
-        report_type = fields.Selection(
-            string="Type d'Etat",
-            selection=[
-                ('groupe', 'Synthèse'),
-                ('detail', 'Détails'),
-            ],
-            default='groupe',
-            required=True,
-        )
-        filter_type = fields.Selection(
-            string="Type de Filtre",
-            selection=[
-                ('pec', 'Facture (Prestataire)'),
-                ('rfm', 'Reboursements (Adhérent)'),
-            ],
-            default='pec',
-            required=True,
-        )
-        police_filter = fields.Boolean(
-            string="Filtre/Police?",
-            help="Cochez pour filtrer l'état par police de couverture...",
-        )
-        police_id = fields.Many2one(
-            comodel_name="proximas.police",
-            string="Police Couverture",
-            required=False,
-        )
-        prestataire_id = fields.Many2one(
-            comodel_name="res.partner",
-            string="Prestataire de soins",
-            domain=[('is_prestataire', '=', True)],
-            required=False,
-        )
-        adherent_id = fields.Many2one(
-            comodel_name="proximas.adherent",
-            string="Adhérent Souccripteur",
-            required=False,
-        )
-        rubrique_id = fields.Many2one(
-            comodel_name="proximas.rubrique.medicale",
-            string="Rubrique Médicale",
-            required=False,
-        )
-        prestation_id = fields.Many2one(
-            comodel_name="proximas.code.prestation",
-            string="Prestation médicale",
-            required=False,
-        )
-        facture_id = fields.Many2one(
-            comodel_name="proximas.facture",
-            string="Réf. Facture",
-        )
-        rfm_id = fields.Many2one(
-            comodel_name="proximas.remboursement.pec",
-            string="Réf. Remb. frais médicaux",
-        )
+class ReglementSinistresReportWizard (models.TransientModel):
+    _name = 'proximas.reglement.sinistres.report.wizard'
+    _description = 'Reglements Sinistres Report Wizard'
 
-        @api.multi
-        def facture_filter_function(self, cr, uid, context=None):
-            prestataire_id = self.prestataire_id.id
-            date_debut_obj = datetime.strptime(self.date_debut, DATE_FORMAT)
-            date_fin_obj = datetime.strptime(self.date_fin, DATE_FORMAT)
-            view_id = self.env.ref('proximas_medical.proximas_report_reglement_sinistres_wizard_form')
-            context = self.env.context
-            action = {
-                'name': 'Filtre facture par date émission',
-                'view_type': 'form',
-                'view_mode': 'form',
-                'res_model': 'proximas.facture',
-                'target': 'current',
-                'domain': [
-                    ('prestataire_id', '=', prestataire_id),
+    date_debut = fields.Date(
+        string="Date Début",
+        required=True,
+    )
+    date_fin = fields.Date(
+        string="Date Fin",
+        default=fields.Date.today,
+        required=True,
+    )
+    report_kpi = fields.Selection (
+        string="Indicateur de sinistralité",
+        selection=[
+            ('rubrique', 'Rubrique Médicale'),
+            ('prestation', 'Prestation Médicale'),
+            ('facture', 'Facture/Remboursement'),
+            # ('medecin', 'Médecin Traitant'),
+        ],
+        default='rubrique',
+        required=True,
+    )
+    report_type = fields.Selection(
+        string="Type d'Etat",
+        selection=[
+            ('groupe', 'Synthèse'),
+            ('detail', 'Détails'),
+        ],
+        default='groupe',
+        required=True,
+    )
+    filter_type = fields.Selection(
+        string="Type de Filtre",
+        selection=[
+            ('pec', 'Facture (Prestataire)'),
+            ('rfm', 'Reboursements (Adhérent)'),
+        ],
+        default='pec',
+        required=True,
+    )
+    police_filter = fields.Boolean(
+        string="Filtre/Police?",
+        help="Cochez pour filtrer l'état par police de couverture...",
+    )
+    police_id = fields.Many2one(
+        comodel_name="proximas.police",
+        string="Police Couverture",
+        required=False,
+    )
+    prestataire_id = fields.Many2one(
+        comodel_name="res.partner",
+        string="Prestataire de soins",
+        domain=[('is_prestataire', '=', True)],
+        required=False,
+    )
+    adherent_id = fields.Many2one(
+        comodel_name="proximas.adherent",
+        string="Adhérent Souccripteur",
+        required=False,
+    )
+    rubrique_id = fields.Many2one(
+        comodel_name="proximas.rubrique.medicale",
+        string="Rubrique Médicale",
+        required=False,
+    )
+    prestation_id = fields.Many2one(
+        comodel_name="proximas.code.prestation",
+        string="Prestation médicale",
+        required=False,
+    )
+    facture_id = fields.Many2one(
+        comodel_name="proximas.facture",
+        string="Réf. Facture",
+    )
+    rfm_id = fields.Many2one(
+        comodel_name="proximas.remboursement.pec",
+        string="Réf. Remb. frais médicaux",
+    )
+
+    @api.multi
+    def facture_filter_function(self, cr, uid, context=None):
+        prestataire_id = self.prestataire_id.id
+        date_debut_obj = datetime.strptime(self.date_debut, DATE_FORMAT)
+        date_fin_obj = datetime.strptime(self.date_fin, DATE_FORMAT)
+        view_id = self.env.ref('proximas_medical.proximas_report_reglement_sinistres_wizard_form')
+        context = self.env.context
+        action = {
+            'name': 'Filtre facture par date émission',
+            'view_type': 'form',
+            'view_mode': 'form',
+            'res_model': 'proximas.facture',
+            'target': 'current',
+            'domain': [
+                ('prestataire_id', '=', prestataire_id),
+                ('date_emission', '>=', date_debut_obj.strftime(DATE_FORMAT)),
+                ('date_emission', '<=', date_fin_obj.strftime(DATE_FORMAT)),
+            ],
+            'context': context,
+            'views': [(view_id.id, 'form')],
+            'view_id': view_id,
+        }
+        return action
+
+    @api.multi
+    def get_report(self):
+        """"
+            Methode à appeler au clic sur le bouton "Valider" du formulaire Wuzard
+        """
+        data = {
+            'ids': self.ids,
+            'model': self._name,
+            'form': {
+                'date_debut': self.date_debut,
+                'date_fin': self.date_fin,
+                'report_kpi': self.report_kpi,
+                'report_type': self.report_type,
+                'filter_type': self.filter_type,
+                'police_filter': self.police_filter,
+                'police_id': self.police_id.id,
+                'prestataire_id': self.prestataire_id.id,
+                'rubrique_id': self.rubrique_id.id,
+                'adherent_id': self.adherent_id.id,
+                'prestation_id': self.prestation_id.id,
+                'facture_id': self.facture_id.id,
+                'rfm_id': self.rfm_id.id,
+            },
+        }
+
+        return self.env['report'].get_action(self, 'proximas_medical.report_reglements_sinistres_view', data=data)
+
+    # CONTRAINTES
+    _sql_constraints = [
+        ('check_dates',
+         'CHECK (date_debut < date_fin)',
+         '''
+         Erreurs sur les date début et date fin!
+         La date début doit obligatoirement être inférieure (antérieure) à la date de fin...
+         Vérifiez s'il n'y pas d'erreur de saisies sur les dates ou contactez l'administrateur.
+         '''
+         )
+    ]
+
+
+class ReglementSinistresReport(models.AbstractModel):
+    """
+        Abstract Model for report template.
+        for '_name' model, please use 'report.' as prefix then add 'module_name.report_name'.
+    """
+    _name = 'report.proximas_medical.report_reglements_sinistres_view'
+
+    @api.multi
+    def render_html(self, data=None):
+        report_obj = self.env['report']
+
+        date_debut = data['form']['date_debut']
+        date_fin = data['form']['date_fin']
+        report_kpi = data['form']['report_kpi']
+        report_type = data['form']['report_type']
+        filter_type = data['form']['filter_type']
+        date_debut_obj = datetime.strptime(date_debut, DATE_FORMAT)
+        date_fin_obj = datetime.strptime (date_fin, DATE_FORMAT)
+        date_diff = (date_fin_obj - date_debut_obj).days + 1
+        police_filter = data['form']['police_filter']
+        police_id = data['form']['police_id']
+        prestataire_id = data['form']['prestataire_id']
+        adherent_id = data['form']['adherent_id']
+        rubrique_id = data['form']['rubrique_id']
+        prestation_id = data['form']['prestation_id']
+        facture_id = data['form']['facture_id']
+        rfm_id = data['form']['rfm_id']
+
+        docs = []
+        docargs = {}
+        details_pec = []
+        # 1.1. ETAT DETAILLE PAR RUBRIQUE MEDICALE
+        if report_kpi == 'rubrique' and report_type == 'detail':
+            now = datetime.now().strftime('%d/%m/%Y')
+            rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
+            police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
+            facture = self.env['proximas.facture'].search([('id', '=', facture_id)])
+            rfm = self.env['proximas.remboursement.pec'].search([('id', '=', rfm_id)])
+            adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
+            prestataire = self.env['res.partner'].search([
+                ('id', '=', prestataire_id), ('is_prestataire', '=', True)], order='name asc')
+            date_emission = facture.date_emission
+            date_reception = facture.date_reception
+            montant_facture = facture.montant_en_text()
+            date_saisie = rfm.date_saisie
+            date_depot = rfm.date_depot
+            montant_rfm = rfm.net_remb_texte
+            if facture:
+                date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime ('%d/%m/%Y')
+                date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime(
+                    '%d/%m/%Y') if facture.date_reception else now
+            if rfm:
+                date_saisie = datetime.strptime (rfm.date_saisie, DATETIME_FORMAT).strftime ('%d/%m/%Y')
+                date_depot = datetime.strptime (rfm.date_depot, DATE_FORMAT).strftime ('%d/%m/%Y')
+
+            for rubrique in rubriques:
+                if filter_type == 'pec' and bool(prestataire_id) and bool(facture_id) and police_filter:
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '!=', None),
+                        ('facture_id', '=', facture.id),
+                        ('police_id', '=', police_id),
+                        ('rubrique_id', '=', rubrique.id),
+                    ])
+                elif filter_type == 'pec' and bool(prestataire_id) and bool(facture_id) and not police_filter :
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '!=', None),
+                        ('facture_id', '=', facture.id),
+                        ('rubrique_id', '=', rubrique.id),
+                    ])
+                elif filter_type == 'rfm' and bool(adherent_id) and bool(rfm_id) and police_filter:
+                    # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('rubrique_id', '=', rubrique.id),
+                        ('date_execution', '!=', None),
+                        ('rfm_id', '!=', rfm.id),
+                        ('police_id', '=', police_id),
+                    ])
+
+                elif filter_type == 'rfm' and bool(adherent_id) and bool(rfm_id) and not police_filter:
+                    # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '!=', None),
+                        ('rfm_id', '=', rfm.id),
+                        ('rubrique_id', '=', rubrique.id),
+                    ])
+                else:
+                    raise UserError (_ (
+                        "Proximaas : Rapport - Règlements Sinistres: \n\
+                        Vous n'avez pas renseigné tous les champs concernés pour générer le rapport.\
+                        Veuillez vérifier que les informations ont été fournies. Si c'est le cas, \
+                        Veuillez contacter les administrateurs pour plus détails..."
+                    )
+                    )
+                if bool(details_pec):
+                    rubrique_id = rubrique.id
+                    rubrique_medicale = rubrique.name
+                    nbre_actes = len(details_pec) or 0
+                    cout_total = sum(item.cout_total for item in details_pec) or 0
+                    total_pc = sum(item.total_pc for item in details_pec) or 0
+                    total_npc = sum(item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int(net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int(net_remboursement)
+                    else:
+                        net_a_payer = 0
+
+                    docs.append({
+                        'rubrique_id': rubrique_id,
+                        'rubrique_medicale': rubrique_medicale,
+                        'nbre_actes': int(nbre_actes),
+                        'cout_total': int(cout_total),
+                        'total_pc': int(total_pc),
+                        'total_npc': int(total_npc),
+                        'total_exclusion': int(total_exclusion),
+                        'ticket_moderateur': int(ticket_moderateur),
+                        'net_tiers_payeur': int(net_tiers_payeur),
+                        'net_prestataire': int(net_prestataire),
+                        'net_remboursement': int(net_remboursement),
+                        'net_a_payer': int(net_a_payer),
+                    })
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'report_type': report_type,
+                    'filter_type': filter_type,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'prestataire': prestataire.name,
+                    'adherent': adherent.name,
+                    'code_id': adherent.code_id,
+                    'groupe': adherent.groupe_id.name,
+                    'ref_facture': facture.name,
+                    'ref_interne': facture.ref_interne,
+                    'num_facture': facture.num_facture,
+                    'date_emission': date_emission,
+                    'date_reception': date_reception,
+                    'montant_facture': montant_facture,
+                    'city': facture.city,
+                    'phone': facture.phone,
+                    'mobile': facture.mobile,
+                    'note': facture.note,
+                    'num_rfm': rfm.code_rfm,
+                    'date_saisie': date_saisie,
+                    'date_depot': date_depot,
+                    'montant_rfm': montant_rfm,
+                    'ref_fiche': rfm.num_fiche,
+                    'code_saisi': rfm.code_saisi,
+                    'contrat_id': rfm.contrat_id,
+                    'num_contrat': rfm.num_contrat,
+                    'matricule': rfm.matricule,
+                    'photo': rfm.image,
+                    'docs': docs,
+                }
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        # 1.2. ETAT SYNTHESE PAR RUBRIQUE MEDICALE
+        elif report_kpi == 'rubrique' and report_type == 'groupe':
+            # Récuperer la liste complète des rubriques médicales
+            rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
+            police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
+            factures = []
+            remboursements = []
+            if filter_type == 'pec':
+                factures = self.env['proximas.facture'].search([
                     ('date_emission', '>=', date_debut_obj.strftime(DATE_FORMAT)),
                     ('date_emission', '<=', date_fin_obj.strftime(DATE_FORMAT)),
-                ],
-                'context': context,
-                'views': [(view_id.id, 'form')],
-                'view_id': view_id,
-            }
-            return action
-
-        @api.multi
-        def get_report(self):
-            """"
-                Methode à appeler au clic sur le bouton "Valider" du formulaire Wuzard
-            """
-            data = {
-                'ids': self.ids,
-                'model': self._name,
-                'form': {
-                    'date_debut': self.date_debut,
-                    'date_fin': self.date_fin,
-                    'report_kpi': self.report_kpi,
-                    'report_type': self.report_type,
-                    'filter_type': self.filter_type,
-                    'police_filter': self.police_filter,
-                    'police_id': self.police_id.id,
-                    'prestataire_id': self.prestataire_id.id,
-                    'rubrique_id': self.rubrique_id.id,
-                    'adherent_id': self.adherent_id.id,
-                    'prestation_id': self.prestation_id.id,
-                    'facture_id': self.facture_id.id,
-                    'rfm_id': self.rfm_id.id,
-                },
-            }
-
-            return self.env['report'].get_action(self, 'proximas_medical.report_reglements_sinistres_view', data=data)
-
-        # CONTRAINTES
-        _sql_constraints = [
-            ('check_dates',
-             'CHECK (date_debut < date_fin)',
-             '''
-             Erreurs sur les date début et date fin!
-             La date début doit obligatoirement être inférieure (antérieure) à la date de fin...
-             Vérifiez s'il n'y pas d'erreur de saisies sur les dates ou contactez l'administrateur.
-             '''
-             )
-        ]
-
-    class ReglementSinistresReport(models.AbstractModel):
-        """
-            Abstract Model for report template.
-            for '_name' model, please use 'report.' as prefix then add 'module_name.report_name'.
-        """
-        _name = 'report.proximas_medical.report_reglements_sinistres_view'
-
-        @api.multi
-        def render_html(self, data=None):
-            report_obj = self.env['report']
-
-            date_debut = data['form']['date_debut']
-            date_fin = data['form']['date_fin']
-            report_kpi = data['form']['report_kpi']
-            report_type = data['form']['report_type']
-            filter_type = data['form']['filter_type']
-            date_debut_obj = datetime.strptime(date_debut, DATE_FORMAT)
-            date_fin_obj = datetime.strptime (date_fin, DATE_FORMAT)
-            date_diff = (date_fin_obj - date_debut_obj).days + 1
-            police_filter = data['form']['police_filter']
-            police_id = data['form']['police_id']
-            prestataire_id = data['form']['prestataire_id']
-            adherent_id = data['form']['adherent_id']
-            rubrique_id = data['form']['rubrique_id']
-            prestation_id = data['form']['prestation_id']
-            facture_id = data['form']['facture_id']
-            rfm_id = data['form']['rfm_id']
-
-            docs = []
-            docargs = {}
-            details_pec = []
-            # 1.1. ETAT DETAILLE PAR RUBRIQUE MEDICALE
-            if report_kpi == 'rubrique' and report_type == 'detail':
-                now = datetime.now().strftime('%d/%m/%Y')
-                rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
-                police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
-                facture = self.env['proximas.facture'].search([('id', '=', facture_id)])
-                rfm = self.env['proximas.remboursement.pec'].search([('id', '=', rfm_id)])
-                adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
-                prestataire = self.env['res.partner'].search([
-                    ('id', '=', prestataire_id), ('is_prestataire', '=', True)], order='name asc')
-                date_emission = facture.date_emission
-                date_reception = facture.date_reception
-                montant_facture = facture.montant_en_text()
-                date_saisie = rfm.date_saisie
-                date_depot = rfm.date_depot
-                montant_rfm = rfm.net_remb_texte
-                if facture:
-                    date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime ('%d/%m/%Y')
-                    date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime(
-                        '%d/%m/%Y') if facture.date_reception else now
-                if rfm:
-                    date_saisie = datetime.strptime (rfm.date_saisie, DATETIME_FORMAT).strftime ('%d/%m/%Y')
-                    date_depot = datetime.strptime (rfm.date_depot, DATE_FORMAT).strftime ('%d/%m/%Y')
-
-                for rubrique in rubriques:
-                    if filter_type == 'pec' and bool(prestataire_id) and bool(facture_id) and police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('date_execution', '!=', None),
-                            ('facture_id', '=', facture.id),
-                            ('police_id', '=', police_id),
-                            ('rubrique_id', '=', rubrique.id),
-                        ])
-                    elif filter_type == 'pec' and bool(prestataire_id) and bool(facture_id) and not police_filter :
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('date_execution', '!=', None),
-                            ('facture_id', '=', facture.id),
-                            ('rubrique_id', '=', rubrique.id),
-                        ])
-                    elif filter_type == 'rfm' and bool(adherent_id) and bool(rfm_id) and police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('rubrique_id', '=', rubrique.id),
-                            ('date_execution', '!=', None),
-                            ('rfm_id', '!=', rfm.id),
-                            ('police_id', '=', police_id),
-                        ])
-
-                    elif filter_type == 'rfm' and bool(adherent_id) and bool(rfm_id) and not police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('date_execution', '!=', None),
-                            ('rfm_id', '=', rfm.id),
-                            ('rubrique_id', '=', rubrique.id),
-                        ])
+                ])
+            elif filter_type == 'rfm':
+                remboursements = self.env['proximas.remboursement.pec'].search ([
+                    ('date_saisie', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                    ('date_saisie', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                ])
+            for rubrique in rubriques:
+                if filter_type == 'pec' and police_filter:
+                    if factures:
+                        for facture in factures:
+                            # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                            details_pec = self.env['proximas.details.pec'].search ([
+                                ('rubrique_id', '=', rubrique.id),
+                                ('date_execution', '!=', None),
+                                ('facture_id', '!=', facture.id),
+                                ('pec_id', '!=', None),
+                                ('police_id', '=', police_id),
+                            ])
                     else:
                         raise UserError (_ (
                             "Proximaas : Rapport - Règlements Sinistres: \n\
-                            Vous n'avez pas renseigné tous les champs concernés pour générer le rapport.\
-                            Veuillez vérifier que les informations ont été fournies. Si c'est le cas, \
+                            Aucune facture n'a été enregistrée sur la période indiquée.\
+                            Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
                             Veuillez contacter les administrateurs pour plus détails..."
-                        )
-                        )
-                    if bool(details_pec):
-                        rubrique_id = rubrique.id
-                        rubrique_medicale = rubrique.name
-                        nbre_actes = len(details_pec) or 0
-                        cout_total = sum(item.cout_total for item in details_pec) or 0
-                        total_pc = sum(item.total_pc for item in details_pec) or 0
-                        total_npc = sum(item.total_npc for item in details_pec) or 0
-                        total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                        ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                        net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
-                        net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                        net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                        ))
+                elif filter_type == 'pec' and not police_filter:
+                    if factures:
+                        for facture in factures:
+                            # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                            details_pec = self.env['proximas.details.pec'].search ([
+                                ('rubrique_id', '=', rubrique.id),
+                                ('date_execution', '!=', None),
+                                ('facture_id', '!=', facture.id),
+                                ('pec_id', '!=', None),
+                            ])
+                    else:
+                        raise UserError (_ (
+                            "Proximaas : Rapport - Règlements Sinistres: \n\
+                            Aucune facture n'a été enregistrée sur la période indiquée.\
+                            Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                            Veuillez contacter les administrateurs pour plus détails..."
+                        ))
+                elif filter_type == 'rfm' and police_filter:
+                    if remboursements:
+                        for rfm in remboursements:
+                            # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                            details_pec = self.env['proximas.details.pec'].search([
+                                ('rubrique_id', '=', rubrique.id),
+                                ('date_execution', '!=', None),
+                                ('rfm_id', '!=', rfm.id),
+                                ('police_id', '=', police_id),
+                            ])
+                    else:
+                        raise UserError(_(
+                            "Proximaas : Rapport - Règlements Sinistres: \n\
+                            Aucun Remboursement n'a été enregistrée sur la période indiquée.\
+                            Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                            Veuillez contacter les administrateurs pour plus détails..."
+                        ))
+                elif filter_type == 'rfm' and not police_filter:
+                    if remboursements:
+                        for rfm in remboursements:
+                            # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                            details_pec = self.env['proximas.details.pec'].search([
+                                ('rubrique_id', '=', rubrique.id),
+                                ('date_execution', '!=', None),
+                                ('rfm_id', '!=', rfm.id),
+                            ])
+                    else:
+                        raise UserError(_(
+                            "Proximaas : Rapport - Règlements Sinistres: \n\
+                            Aucun Remboursement n'a été enregistrée sur la période indiquée.\
+                            Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                            Veuillez contacter les administrateurs pour plus détails..."
+                        ))
+                if bool(details_pec):
+                    rubrique_id = rubrique.id
+                    rubrique_medicale = rubrique.name
+                    nbre_actes = len(details_pec) or 0
+                    cout_total = sum(item.cout_total for item in details_pec) or 0
+                    total_pc = sum(item.total_pc for item in details_pec) or 0
+                    total_npc = sum(item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int(net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int(net_remboursement)
+                    else:
                         net_a_payer = 0
-                        if net_prestataire:
-                            net_a_payer = int(net_prestataire)
-                        elif net_remboursement:
-                            net_a_payer = int(net_remboursement)
-                        else:
-                            net_a_payer = 0
 
-                        docs.append({
-                            'rubrique_id': rubrique_id,
-                            'rubrique_medicale': rubrique_medicale,
-                            'nbre_actes': int(nbre_actes),
-                            'cout_total': int(cout_total),
-                            'total_pc': int(total_pc),
-                            'total_npc': int(total_npc),
-                            'total_exclusion': int(total_exclusion),
-                            'ticket_moderateur': int(ticket_moderateur),
-                            'net_tiers_payeur': int(net_tiers_payeur),
-                            'net_prestataire': int(net_prestataire),
-                            'net_remboursement': int(net_remboursement),
-                            'net_a_payer': int(net_a_payer),
-                        })
-                if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
-                    docargs = {
-                        'doc_ids': data['ids'],
-                        'doc_model': data['model'],
-                        'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
-                        'date_diff': date_diff,
-                        'report_kpi': report_kpi,
-                        'report_type': report_type,
-                        'filter_type': filter_type,
-                        'police_filter': police_filter,
-                        'police_id': police_id,
-                        'police': police.name,
-                        'prestataire': prestataire.name,
-                        'adherent': adherent.name,
-                        'code_id': adherent.code_id,
-                        'groupe': adherent.groupe_id.name,
-                        'ref_facture': facture.name,
-                        'ref_interne': facture.ref_interne,
-                        'num_facture': facture.num_facture,
-                        'date_emission': date_emission,
-                        'date_reception': date_reception,
-                        'montant_facture': montant_facture,
-                        'city': facture.city,
-                        'phone': facture.phone,
-                        'mobile': facture.mobile,
-                        'note': facture.note,
-                        'num_rfm': rfm.code_rfm,
-                        'date_saisie': date_saisie,
-                        'date_depot': date_depot,
-                        'montant_rfm': montant_rfm,
-                        'ref_fiche': rfm.num_fiche,
-                        'code_saisi': rfm.code_saisi,
-                        'contrat_id': rfm.contrat_id,
-                        'num_contrat': rfm.num_contrat,
-                        'matricule': rfm.matricule,
-                        'photo': rfm.image,
-                        'docs': docs,
-                    }
-                else:
-                    raise UserError(_(
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    ))
-            # 1.2. ETAT SYNTHESE PAR RUBRIQUE MEDICALE
-            elif report_kpi == 'rubrique' and report_type == 'groupe':
-                # Récuperer la liste complète des rubriques médicales
-                rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
-                police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
-                factures = []
-                remboursements = []
-                if filter_type == 'pec':
-                    factures = self.env['proximas.facture'].search([
-                        ('date_emission', '>=', date_debut_obj.strftime(DATE_FORMAT)),
-                        ('date_emission', '<=', date_fin_obj.strftime(DATE_FORMAT)),
+                    docs.append({
+                        'rubrique_id': rubrique_id,
+                        'rubrique_medicale': rubrique_medicale,
+                        'nbre_actes': int(nbre_actes),
+                        'cout_total': int(cout_total),
+                        'total_pc': int(total_pc),
+                        'total_npc': int(total_npc),
+                        'total_exclusion': int(total_exclusion),
+                        'ticket_moderateur': int(ticket_moderateur),
+                        'net_tiers_payeur': int(net_tiers_payeur),
+                        'net_prestataire': int(net_prestataire),
+                        'net_remboursement': int(net_remboursement),
+                        'net_a_payer': int(net_a_payer),
+                    })
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'report_type': report_type,
+                    'filter_type': filter_type,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs,
+                }
+            else:
+                raise UserError (_ (
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                )
+                )
+        # 2.1. ETAT DETAILLE PAR PRESTATION MEDICALE
+        if report_kpi == 'prestation' and report_type == 'detail':
+            now = datetime.now().strftime('%d/%m/%Y')
+            prestations = self.env['proximas.code.prestation'].search([])
+            police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
+            facture = self.env['proximas.facture'].search([('id', '=', facture_id)])
+            rfm = self.env['proximas.remboursement.pec'].search([('id', '=', rfm_id)])
+            adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
+            prestataire = self.env['res.partner'].search([
+                ('id', '=', prestataire_id), ('is_prestataire', '=', True)], order='name asc')
+            date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y') or now
+            date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
+            montant_facture = facture.montant_en_text()
+            date_saisie = datetime.strptime(rfm.date_saisie, DATETIME_FORMAT).strftime('%d/%m/%Y') or now
+            date_depot = datetime.strptime(rfm.date_depot, DATE_FORMAT).strftime('%d/%m/%Y') or now
+            montant_rfm = rfm.montant_en_text()
+
+            for prestation in prestations:
+                if filter_type == 'pec' and bool(prestataire_id) and bool(facture_id) and police_filter:
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    details_pec = self.env['proximas.details.pec'].search([
+                        # ('date_execution', '!=', None),
+                        # ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                        # ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                        # ('facture_id', '!=', None),
+                        # ('pec_id', '!=', None),
+                        ('facture_id', '=', facture_id),
+                        ('prestataire_id', '=', prestataire_id),
+                        ('police_id', '=', police_id),
+                        ('code_prestation_id', '=', prestation.id),
                     ])
+                elif filter_type == 'pec' and bool (prestataire_id) and bool (
+                        facture_id) and not police_filter:
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '!=', None),
+                        # ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                        # ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                        # ('facture_id', '!=', None),
+                        # ('pec_id', '!=', None),
+                        ('facture_id', '=', facture_id),
+                        ('prestataire_id', '=', prestataire_id),
+                        ('code_prestation_id', '=', prestation.id),
+                    ])
+                elif filter_type == 'rfm' and bool(adherent_id) and bool (rfm_id) and not police_filter:
+                    # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                    details_pec = self.env['proximas.details.pec'].search ([
+                        ('date_execution', '!=', None),
+                        # ('date_saisie_rfm', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                        # ('date_saisie_rfm', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                        # ('rfm_id', '!=', None),
+                        # ('pec_id', '=', None),
+                        ('rfm_id', '=', rfm_id),
+                        ('adherent_id', '=', adherent_id),
+                        ('police_id', '=', police_id),
+                        ('code_prestation_id', '=', prestation.id),
+                    ])
+                elif filter_type == 'rfm' and bool (adherent_id) and bool (rfm_id) and not police_filter:
+                    # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '!=', None),
+                        # ('date_saisie_rfm', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                        # ('date_saisie_rfm', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                        # ('rfm_id', '!=', None),
+                        # ('pec_id', '=', None),
+                        ('rfm_id', '=', rfm_id),
+                        ('adherent_id', '=', adherent_id),
+                        ('code_prestation_id', '=', prestation.id),
+                    ])
+                else:
+                    raise UserError (_ (
+                        "Proximaas : Rapport - Règlements Sinistres: \n\
+                        Vous n'avez pas renseigné tous les champs concernés pour générer le rapport.\
+                        Veuillez vérifier que les informations ont été fournies. Si c'est le cas, \
+                        Veuillez contacter les administrateurs pour plus détails..."
+                    )
+                    )
+                if bool(details_pec):
+                    prestation_id = prestation.id
+                    name_length = len(prestation.name)
+                    if int(name_length) > 60:
+                        prestation_medicale = prestation.name[:60] + '...'
+                    else:
+                        prestation_medicale = prestation.name
+                    nbre_actes = len(details_pec) or 0
+                    cout_total = sum(item.cout_total for item in details_pec) or 0
+                    total_pc = sum(item.total_pc for item in details_pec) or 0
+                    total_npc = sum(item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int (net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int (net_remboursement)
+                    else:
+                        net_a_payer = 0
+
+                    docs.append({
+                        'prestation_id': prestation_id,
+                        'prestation_medicale': prestation_medicale,
+                        'nbre_actes': int(nbre_actes),
+                        'cout_total': int(cout_total),
+                        'total_pc': int(total_pc),
+                        'total_npc': int(total_npc),
+                        'total_exclusion': int(total_exclusion),
+                        'ticket_moderateur': int(ticket_moderateur),
+                        'net_tiers_payeur': int(net_tiers_payeur),
+                        'net_prestataire': int(net_prestataire),
+                        'net_remboursement': int(net_remboursement),
+                        'net_a_payer': int(net_a_payer),
+                    })
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'report_type': report_type,
+                    'filter_type': filter_type,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'prestataire': prestataire.name,
+                    'adherent': adherent.name,
+                    'code_id': adherent.code_id,
+                    'groupe': adherent.groupe_id.name,
+                    'ref_facture': facture.name,
+                    'ref_interne': facture.ref_interne,
+                    'num_facture': facture.num_facture,
+                    'date_emission': date_emission,
+                    'date_reception': date_reception,
+                    'montant_facture': montant_facture,
+                    'city': facture.city,
+                    'phone': facture.phone,
+                    'mobile': facture.mobile,
+                    'note': facture.note,
+                    'num_rfm': rfm.code_rfm,
+                    'date_saisie': date_saisie,
+                    'date_depot': date_depot,
+                    'montant_rfm': montant_rfm,
+                    'ref_fiche': rfm.num_fiche,
+                    'code_saisi': rfm.code_saisi,
+                    'contrat_id': rfm.contrat_id,
+                    'num_contrat': rfm.num_contrat,
+                    'matricule': rfm.matricule,
+                    'photo': rfm.image,
+                    'docs': docs,
+                }
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        # 2.2. ETAT SYNTHESE PAR RUBRIQUE MEDICALE
+        if report_kpi == 'prestation' and report_type == 'groupe':
+            # Récuperer la liste complète des prestations médicales
+            prestations = self.env['proximas.code.prestation'].search([])
+            police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
+            # factures = []
+            # remboursements = []
+            for prestation in prestations:
+                if filter_type == 'pec':
+                    factures = self.env['proximas.facture'].search ([
+                        ('date_emission', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                        ('date_emission', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                    ])
+                    if factures and police_filter:
+                        for facture in factures:
+                            # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                            details_pec = self.env['proximas.details.pec'].search ([
+                                ('code_prestation_id', '=', prestation.id),
+                                ('facture_id', '!=', facture.id),
+                                ('police_id', '=', police_id),
+                            ])
+                    elif factures and not police_filter:
+                        for facture in factures:
+                            # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                            details_pec = self.env['proximas.details.pec'].search ([
+                                ('code_prestation_id', '=', prestation.id),
+                                ('facture_id', '!=', facture.id),
+                            ])
+                    else:
+                        raise UserError (_ (
+                            "Proximaas : Rapport - Règlements Sinistres: \n\
+                            Aucune facture n'a été enregistrée sur la période indiquée.\
+                            Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                            Veuillez contacter les administrateurs pour plus détails..."
+                        ))
                 elif filter_type == 'rfm':
                     remboursements = self.env['proximas.remboursement.pec'].search ([
                         ('date_saisie', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
                         ('date_saisie', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
                     ])
-                for rubrique in rubriques:
-                    if filter_type == 'pec' and police_filter:
-                        if factures:
-                            for facture in factures:
-                                # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                                details_pec = self.env['proximas.details.pec'].search ([
-                                    ('rubrique_id', '=', rubrique.id),
-                                    ('date_execution', '!=', None),
-                                    ('facture_id', '!=', facture.id),
-                                    ('pec_id', '!=', None),
-                                    ('police_id', '=', police_id),
-                                ])
-                        else:
-                            raise UserError (_ (
-                                "Proximaas : Rapport - Règlements Sinistres: \n\
-                                Aucune facture n'a été enregistrée sur la période indiquée.\
-                                Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                                Veuillez contacter les administrateurs pour plus détails..."
-                            ))
-                    elif filter_type == 'pec' and not police_filter:
-                        if factures:
-                            for facture in factures:
-                                # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                                details_pec = self.env['proximas.details.pec'].search ([
-                                    ('rubrique_id', '=', rubrique.id),
-                                    ('date_execution', '!=', None),
-                                    ('facture_id', '!=', facture.id),
-                                    ('pec_id', '!=', None),
-                                ])
-                        else:
-                            raise UserError (_ (
-                                "Proximaas : Rapport - Règlements Sinistres: \n\
-                                Aucune facture n'a été enregistrée sur la période indiquée.\
-                                Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                                Veuillez contacter les administrateurs pour plus détails..."
-                            ))
-                    elif filter_type == 'rfm' and police_filter:
-                        if remboursements:
-                            for rfm in remboursements:
-                                # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                                details_pec = self.env['proximas.details.pec'].search([
-                                    ('rubrique_id', '=', rubrique.id),
-                                    ('date_execution', '!=', None),
-                                    ('rfm_id', '!=', rfm.id),
-                                    ('police_id', '=', police_id),
-                                ])
-                        else:
-                            raise UserError(_(
-                                "Proximaas : Rapport - Règlements Sinistres: \n\
-                                Aucun Remboursement n'a été enregistrée sur la période indiquée.\
-                                Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                                Veuillez contacter les administrateurs pour plus détails..."
-                            ))
-                    elif filter_type == 'rfm' and not police_filter:
-                        if remboursements:
-                            for rfm in remboursements:
-                                # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                                details_pec = self.env['proximas.details.pec'].search([
-                                    ('rubrique_id', '=', rubrique.id),
-                                    ('date_execution', '!=', None),
-                                    ('rfm_id', '!=', rfm.id),
-                                ])
-                        else:
-                            raise UserError(_(
-                                "Proximaas : Rapport - Règlements Sinistres: \n\
-                                Aucun Remboursement n'a été enregistrée sur la période indiquée.\
-                                Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                                Veuillez contacter les administrateurs pour plus détails..."
-                            ))
-                    if bool(details_pec):
-                        rubrique_id = rubrique.id
-                        rubrique_medicale = rubrique.name
-                        nbre_actes = len(details_pec) or 0
-                        cout_total = sum(item.cout_total for item in details_pec) or 0
-                        total_pc = sum(item.total_pc for item in details_pec) or 0
-                        total_npc = sum(item.total_npc for item in details_pec) or 0
-                        total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                        ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                        net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
-                        net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                        net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                        net_a_payer = 0
-                        if net_prestataire:
-                            net_a_payer = int(net_prestataire)
-                        elif net_remboursement:
-                            net_a_payer = int(net_remboursement)
-                        else:
-                            net_a_payer = 0
+                    if remboursements and police_filter:
+                        for rfm in remboursements:
+                            # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                            details_pec = self.env['proximas.details.pec'].search ([
+                                ('code_prestation_id', '=', prestation.id),
+                                ('date_execution', '!=', None),
+                                ('rfm_id', '!=', rfm.id),
+                                ('police_id', '=', police_id),
+                            ])
 
-                        docs.append({
-                            'rubrique_id': rubrique_id,
-                            'rubrique_medicale': rubrique_medicale,
-                            'nbre_actes': int(nbre_actes),
-                            'cout_total': int(cout_total),
-                            'total_pc': int(total_pc),
-                            'total_npc': int(total_npc),
-                            'total_exclusion': int(total_exclusion),
-                            'ticket_moderateur': int(ticket_moderateur),
-                            'net_tiers_payeur': int(net_tiers_payeur),
-                            'net_prestataire': int(net_prestataire),
-                            'net_remboursement': int(net_remboursement),
-                            'net_a_payer': int(net_a_payer),
-                        })
-                if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
-                    docargs = {
-                        'doc_ids': data['ids'],
-                        'doc_model': data['model'],
-                        'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
-                        'date_diff': date_diff,
-                        'report_kpi': report_kpi,
-                        'report_type': report_type,
-                        'filter_type': filter_type,
-                        'police_filter': police_filter,
-                        'police_id': police_id,
-                        'police': police.name,
-                        'docs': docs,
-                    }
-                else:
-                    raise UserError (_ (
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    )
-                    )
-            # 2.1. ETAT DETAILLE PAR PRESTATION MEDICALE
-            if report_kpi == 'prestation' and report_type == 'detail':
-                now = datetime.now().strftime('%d/%m/%Y')
-                prestations = self.env['proximas.code.prestation'].search([])
-                police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
-                facture = self.env['proximas.facture'].search([('id', '=', facture_id)])
-                rfm = self.env['proximas.remboursement.pec'].search([('id', '=', rfm_id)])
-                adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
-                prestataire = self.env['res.partner'].search([
-                    ('id', '=', prestataire_id), ('is_prestataire', '=', True)], order='name asc')
-                date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y') or now
-                date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
-                montant_facture = facture.montant_en_text()
-                date_saisie = datetime.strptime(rfm.date_saisie, DATETIME_FORMAT).strftime('%d/%m/%Y') or now
-                date_depot = datetime.strptime(rfm.date_depot, DATE_FORMAT).strftime('%d/%m/%Y') or now
-                montant_rfm = rfm.montant_en_text()
-
-                for prestation in prestations:
-                    if filter_type == 'pec' and bool(prestataire_id) and bool(facture_id) and police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        details_pec = self.env['proximas.details.pec'].search([
-                            # ('date_execution', '!=', None),
-                            # ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                            # ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            # ('facture_id', '!=', None),
-                            # ('pec_id', '!=', None),
-                            ('facture_id', '=', facture_id),
-                            ('prestataire_id', '=', prestataire_id),
-                            ('police_id', '=', police_id),
-                            ('code_prestation_id', '=', prestation.id),
-                        ])
-                    elif filter_type == 'pec' and bool (prestataire_id) and bool (
-                            facture_id) and not police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('date_execution', '!=', None),
-                            # ('date_emission', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                            # ('date_emission', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            # ('facture_id', '!=', None),
-                            # ('pec_id', '!=', None),
-                            ('facture_id', '=', facture_id),
-                            ('prestataire_id', '=', prestataire_id),
-                            ('code_prestation_id', '=', prestation.id),
-                        ])
-                    elif filter_type == 'rfm' and bool(adherent_id) and bool (rfm_id) and not police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                        details_pec = self.env['proximas.details.pec'].search ([
-                            ('date_execution', '!=', None),
-                            # ('date_saisie_rfm', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                            # ('date_saisie_rfm', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            # ('rfm_id', '!=', None),
-                            # ('pec_id', '=', None),
-                            ('rfm_id', '=', rfm_id),
-                            ('adherent_id', '=', adherent_id),
-                            ('police_id', '=', police_id),
-                            ('code_prestation_id', '=', prestation.id),
-                        ])
-                    elif filter_type == 'rfm' and bool (adherent_id) and bool (rfm_id) and not police_filter:
-                        # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                        details_pec = self.env['proximas.details.pec'].search([
-                            ('date_execution', '!=', None),
-                            # ('date_saisie_rfm', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                            # ('date_saisie_rfm', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
-                            # ('rfm_id', '!=', None),
-                            # ('pec_id', '=', None),
-                            ('rfm_id', '=', rfm_id),
-                            ('adherent_id', '=', adherent_id),
-                            ('code_prestation_id', '=', prestation.id),
-                        ])
+                    elif remboursements and not police_filter:
+                        for rfm in remboursements:
+                            # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
+                            details_pec = self.env['proximas.details.pec'].search ([
+                                ('code_prestation_id', '=', prestation.id),
+                                ('date_execution', '!=', None),
+                                ('rfm_id', '!=', rfm.id),
+                            ])
                     else:
                         raise UserError (_ (
                             "Proximaas : Rapport - Règlements Sinistres: \n\
-                            Vous n'avez pas renseigné tous les champs concernés pour générer le rapport.\
-                            Veuillez vérifier que les informations ont été fournies. Si c'est le cas, \
+                            Aucun Remboursement n'a été enregistrée sur la période indiquée.\
+                            Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
                             Veuillez contacter les administrateurs pour plus détails..."
-                        )
-                        )
+                        ))
+                if bool(details_pec):
+                    prestation_id = prestation.id
+                    name_length = len(prestation.name)
+                    if int(name_length) > 60:
+                        prestation_medicale = prestation.name[:60] + '...'
+                    else:
+                        prestation_medicale = prestation.name
+                    nbre_actes = len (details_pec) or 0
+                    cout_total = sum (item.cout_total for item in details_pec) or 0
+                    total_pc = sum (item.total_pc for item in details_pec) or 0
+                    total_npc = sum (item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum (item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum (item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum (item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum (item.mt_remboursement for item in details_pec) or 0
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int(net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int(net_remboursement)
+                    else:
+                        net_a_payer = 0
+
+                    docs.append({
+                        'prestation_id': prestation_id,
+                        'prestation_medicale': prestation_medicale,
+                        'nbre_actes': int(nbre_actes),
+                        'cout_total': int(cout_total),
+                        'total_pc': int(total_pc),
+                        'total_npc': int(total_npc),
+                        'total_exclusion': int(total_exclusion),
+                        'ticket_moderateur': int(ticket_moderateur),
+                        'net_tiers_payeur': int(net_tiers_payeur),
+                        'net_prestataire': int(net_prestataire),
+                        'net_remboursement': int(net_remboursement),
+                        'net_a_payer': int(net_a_payer),
+                    })
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'report_type': report_type,
+                    'filter_type': filter_type,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs,
+                }
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                )
+                )
+        # 3.1. ETAT DETAILLE PAR FACTURE/RFM MEDICALE
+        if report_kpi == 'facture' and report_type == 'detail':
+            prestataire = self.env['res.partner'].search([
+                ('id', '=', prestataire_id), ('is_prestataire', '=', True)], order='name asc')
+            police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
+            adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
+            if filter_type == 'pec' and bool(prestataire):
+                factures = self.env['proximas.facture'].search([
+                    ('prestataire_id', '=', prestataire_id),
+                    ('date_emission', '>=', date_debut_obj.strftime(DATE_FORMAT)),
+                    ('date_emission', '<=', date_fin_obj.strftime(DATE_FORMAT)),
+                ])
+                for facture in factures:
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y')
+                    date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
+                    if police_id:
+                        details_pec = self.env['proximas.details.pec'].search([
+                            ('facture_id', '=', facture.id),
+                            # ('prestataire_id', '=', prestataire_id),
+                            ('police_id', '=', police_id),
+                        ])
+                    elif not police_id:
+                        details_pec = self.env['proximas.details.pec'].search([
+                            ('facture_id', '=', facture.id),
+                            # ('prestataire_id', '=', prestataire_id),
+                        ])
                     if bool(details_pec):
-                        prestation_id = prestation.id
-                        name_length = len(prestation.name)
-                        if int(name_length) > 60:
-                            prestation_medicale = prestation.name[:60] + '...'
-                        else:
-                            prestation_medicale = prestation.name
+                        facture_id = facture.id
+                        ref_facture = facture.name
+                        num_facture = facture.num_facture
                         nbre_actes = len(details_pec) or 0
                         cout_total = sum(item.cout_total for item in details_pec) or 0
                         total_pc = sum(item.total_pc for item in details_pec) or 0
                         total_npc = sum(item.total_npc for item in details_pec) or 0
                         total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
                         ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                        net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                        net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
                         net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
                         net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                        #net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
                         net_a_payer = 0
                         if net_prestataire:
                             net_a_payer = int (net_prestataire)
@@ -3321,162 +3598,183 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             net_a_payer = 0
 
                         docs.append({
-                            'prestation_id': prestation_id,
-                            'prestation_medicale': prestation_medicale,
+                            'facture_id': facture_id,
+                            'ref_facture': ref_facture,
+                            'num_facture': num_facture,
+                            'date_emission': date_emission,
+                            'date_reception': date_reception,
                             'nbre_actes': int(nbre_actes),
-                            'cout_total': int(cout_total),
-                            'total_pc': int(total_pc),
-                            'total_npc': int(total_npc),
-                            'total_exclusion': int(total_exclusion),
-                            'ticket_moderateur': int(ticket_moderateur),
-                            'net_tiers_payeur': int(net_tiers_payeur),
-                            'net_prestataire': int(net_prestataire),
-                            'net_remboursement': int(net_remboursement),
-                            'net_a_payer': int(net_a_payer),
+                            'cout_total': int (cout_total),
+                            'total_pc': int (total_pc),
+                            'total_npc': int (total_npc),
+                            'total_exclusion': int (total_exclusion),
+                            'ticket_moderateur': int (ticket_moderateur),
+                            'net_tiers_payeur': int (net_tiers_payeur),
+                            'net_prestataire': int (net_prestataire),
+                            'net_remboursement': int (net_remboursement),
+                            'net_a_payer': int (net_a_payer),
                         })
-                if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
-                    docargs = {
-                        'doc_ids': data['ids'],
-                        'doc_model': data['model'],
-                        'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
-                        'date_diff': date_diff,
-                        'report_kpi': report_kpi,
-                        'report_type': report_type,
-                        'filter_type': filter_type,
-                        'police_filter': police_filter,
-                        'police_id': police_id,
-                        'police': police.name,
-                        'prestataire': prestataire.name,
-                        'adherent': adherent.name,
-                        'code_id': adherent.code_id,
-                        'groupe': adherent.groupe_id.name,
-                        'ref_facture': facture.name,
-                        'ref_interne': facture.ref_interne,
-                        'num_facture': facture.num_facture,
-                        'date_emission': date_emission,
-                        'date_reception': date_reception,
-                        'montant_facture': montant_facture,
-                        'city': facture.city,
-                        'phone': facture.phone,
-                        'mobile': facture.mobile,
-                        'note': facture.note,
-                        'num_rfm': rfm.code_rfm,
-                        'date_saisie': date_saisie,
-                        'date_depot': date_depot,
-                        'montant_rfm': montant_rfm,
-                        'ref_fiche': rfm.num_fiche,
-                        'code_saisi': rfm.code_saisi,
-                        'contrat_id': rfm.contrat_id,
-                        'num_contrat': rfm.num_contrat,
-                        'matricule': rfm.matricule,
-                        'photo': rfm.image,
-                        'docs': docs,
-                    }
-                else:
-                    raise UserError(_(
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    ))
-            # 2.2. ETAT SYNTHESE PAR RUBRIQUE MEDICALE
-            if report_kpi == 'prestation' and report_type == 'groupe':
-                # Récuperer la liste complète des prestations médicales
-                prestations = self.env['proximas.code.prestation'].search([])
-                police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
-                # factures = []
-                # remboursements = []
-                for prestation in prestations:
-                    if filter_type == 'pec':
-                        factures = self.env['proximas.facture'].search ([
-                            ('date_emission', '>=', date_debut_obj.strftime (DATE_FORMAT)),
-                            ('date_emission', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+            elif filter_type == 'rfm' and bool(adherent):
+                rfms = self.env['proximas.remboursement.pec'].search([
+                    ('adherent_id', '=', adherent.id),
+                    ('date_saisie', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
+                    ('date_saisie', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                ])
+                for remboursement in rfms:
+                    date_saisie = datetime.strptime(remboursement.date_saisie, DATETIME_FORMAT).strftime('%d/%m/%Y')
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    if police_id:
+                        details_pec = self.env['proximas.details.pec'].search ([
+                            ('rfm_id', '=', remboursement.id),
+                            # ('adherent_id', '=', adherent_id),
+                            ('police_id', '=', police_id),
                         ])
-                        if factures and police_filter:
-                            for facture in factures:
-                                # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                                details_pec = self.env['proximas.details.pec'].search ([
-                                    ('code_prestation_id', '=', prestation.id),
-                                    ('facture_id', '!=', facture.id),
-                                    ('police_id', '=', police_id),
-                                ])
-                        elif factures and not police_filter:
-                            for facture in factures:
-                                # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                                details_pec = self.env['proximas.details.pec'].search ([
-                                    ('code_prestation_id', '=', prestation.id),
-                                    ('facture_id', '!=', facture.id),
-                                ])
-                        else:
-                            raise UserError (_ (
-                                "Proximaas : Rapport - Règlements Sinistres: \n\
-                                Aucune facture n'a été enregistrée sur la période indiquée.\
-                                Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                                Veuillez contacter les administrateurs pour plus détails..."
-                            ))
-                    elif filter_type == 'rfm':
-                        remboursements = self.env['proximas.remboursement.pec'].search ([
-                            ('date_saisie', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                            ('date_saisie', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                    elif not police_id:
+                        details_pec = self.env['proximas.details.pec'].search([
+                            ('rfm_id', '=', remboursement.id),
+                            # ('adherent_id', '=', adherent_id),
                         ])
-                        if remboursements and police_filter:
-                            for rfm in remboursements:
-                                # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                                details_pec = self.env['proximas.details.pec'].search ([
-                                    ('code_prestation_id', '=', prestation.id),
-                                    ('date_execution', '!=', None),
-                                    ('rfm_id', '!=', rfm.id),
-                                    ('police_id', '=', police_id),
-                                ])
-
-                        elif remboursements and not police_filter:
-                            for rfm in remboursements:
-                                # DETAILS PEC TRAITES ET LIES A UN REMBOURSEMENT ADHERENT
-                                details_pec = self.env['proximas.details.pec'].search ([
-                                    ('code_prestation_id', '=', prestation.id),
-                                    ('date_execution', '!=', None),
-                                    ('rfm_id', '!=', rfm.id),
-                                ])
-                        else:
-                            raise UserError (_ (
-                                "Proximaas : Rapport - Règlements Sinistres: \n\
-                                Aucun Remboursement n'a été enregistrée sur la période indiquée.\
-                                Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                                Veuillez contacter les administrateurs pour plus détails..."
-                            ))
                     if bool(details_pec):
-                        prestation_id = prestation.id
-                        name_length = len(prestation.name)
-                        if int(name_length) > 60:
-                            prestation_medicale = prestation.name[:60] + '...'
-                        else:
-                            prestation_medicale = prestation.name
-                        nbre_actes = len (details_pec) or 0
-                        cout_total = sum (item.cout_total for item in details_pec) or 0
-                        total_pc = sum (item.total_pc for item in details_pec) or 0
-                        total_npc = sum (item.total_npc for item in details_pec) or 0
-                        total_exclusion = sum (item.mt_exclusion for item in details_pec) or 0
-                        ticket_moderateur = sum (item.ticket_moderateur for item in details_pec) or 0
-                        net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
-                        net_prestataire = sum (item.net_prestataire for item in details_pec) or 0
-                        net_remboursement = sum (item.mt_remboursement for item in details_pec) or 0
+                        rfm_id = remboursement.id
+                        ref_fiche = remboursement.num_fiche
+                        num_rfm = remboursement.code_rfm
+                        nbre_actes = len(details_pec) or 0
+                        cout_total = sum(item.cout_total for item in details_pec) or 0
+                        total_pc = sum(item.total_pc for item in details_pec) or 0
+                        total_npc = sum(item.total_npc for item in details_pec) or 0
+                        total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                        ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                        net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                        net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                        net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                        # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
                         net_a_payer = 0
                         if net_prestataire:
-                            net_a_payer = int(net_prestataire)
+                            net_a_payer = int (net_prestataire)
                         elif net_remboursement:
-                            net_a_payer = int(net_remboursement)
+                            net_a_payer = int (net_remboursement)
                         else:
                             net_a_payer = 0
 
                         docs.append({
-                            'prestation_id': prestation_id,
-                            'prestation_medicale': prestation_medicale,
+                            'rfm_id': rfm_id,
+                            'ref_fiche': ref_fiche,
+                            'num_rfm': num_rfm,
+                            'date_saisie': date_saisie,
                             'nbre_actes': int(nbre_actes),
-                            'cout_total': int(cout_total),
-                            'total_pc': int(total_pc),
-                            'total_npc': int(total_npc),
+                            'cout_total': int (cout_total),
+                            'total_pc': int (total_pc),
+                            'total_npc': int (total_npc),
+                            'total_exclusion': int (total_exclusion),
+                            'ticket_moderateur': int (ticket_moderateur),
+                            'net_tiers_payeur': int (net_tiers_payeur),
+                            'net_prestataire': int (net_prestataire),
+                            'net_remboursement': int (net_remboursement),
+                            'net_a_payer': int (net_a_payer),
+                        })
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'report_type': report_type,
+                    'filter_type': filter_type,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'prestataire': prestataire.name,
+                    'adherent': adherent.name,
+                    'code_id': adherent.code_id,
+                    'city': prestataire.city,
+                    'phone': prestataire.phone,
+                    'mobile': prestataire.mobile,
+                    'code_saisi': adherent.code_id,
+                    'contrat_id': adherent.contrat_id,
+                    'groupe': adherent.groupe_id.name,
+                    'num_contrat': adherent.num_contrat,
+                    'matricule': adherent.matricule,
+                    'photo': adherent.image,
+                    'docs': docs,
+                }
+            else:
+                raise UserError (_ (
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        # 3.2. ETAT SYNTHESE PAR FACTURE / REMBOURSEMENT
+        if report_kpi == 'facture' and report_type == 'groupe':
+            police = self.env['proximas.police'].search([
+                ('id', '=', police_id)
+            ], order='name asc')
+            if filter_type == 'pec':
+                factures = self.env['proximas.facture'].search([
+                    ('date_emission', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                    ('date_emission', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                ])
+                for facture in factures:
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y')
+                    date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
+                    if police_id:
+                        details_pec = self.env['proximas.details.pec'].search ([
+                            ('facture_id', '=', facture.id),
+                            ('police_id', '=', police_id),
+                        ])
+                    elif not police_id:
+                        details_pec = self.env['proximas.details.pec'].search ([
+                            ('facture_id', '=', facture.id),
+                        ])
+                    if bool(details_pec):
+                        facture_id = facture.id
+                        name_length = len(facture.prestataire_id.name)
+                        if int(name_length) > 60:
+                            facture_prestataire = facture.prestataire_id.name[:60] + '...'
+                        else:
+                            facture_prestataire = facture.prestataire_id.name
+                        ref_facture = facture.name
+                        num_facture = facture.num_facture
+                        nbre_actes = len(details_pec) or 0
+                        cout_total = sum(item.cout_total for item in details_pec) or 0
+                        total_pc = sum(item.total_pc for item in details_pec) or 0
+                        total_npc = sum(item.total_npc for item in details_pec) or 0
+                        total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                        ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                        net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
+                        net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                        net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                        # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                        net_a_payer = 0
+                        if net_prestataire:
+                            net_a_payer = int (net_prestataire)
+                        elif net_remboursement:
+                            net_a_payer = int (net_remboursement)
+                        else:
+                            net_a_payer = 0
+
+                        docs.append({
+                            'facture_id': facture_id,
+                            'facture_prestataire': facture_prestataire,
+                            'ref_facture': ref_facture,
+                            'num_facture': num_facture,
+                            'date_emission': date_emission,
+                            'date_reception': date_reception,
+                            'nbre_actes': int(nbre_actes),
+                            'cout_total': int (cout_total),
+                            'total_pc': int (total_pc),
+                            'total_npc': int (total_npc),
                             'total_exclusion': int(total_exclusion),
                             'ticket_moderateur': int(ticket_moderateur),
                             'net_tiers_payeur': int(net_tiers_payeur),
@@ -3484,354 +3782,636 @@ class ReportPecDetailsRecap(models.AbstractModel):
                             'net_remboursement': int(net_remboursement),
                             'net_a_payer': int(net_a_payer),
                         })
-                if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
-                    docargs = {
-                        'doc_ids': data['ids'],
-                        'doc_model': data['model'],
-                        'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
-                        'date_diff': date_diff,
-                        'report_kpi': report_kpi,
-                        'report_type': report_type,
-                        'filter_type': filter_type,
-                        'police_filter': police_filter,
-                        'police_id': police_id,
-                        'police': police.name,
-                        'docs': docs,
-                    }
-                else:
-                    raise UserError(_(
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    )
-                    )
-            # 3.1. ETAT DETAILLE PAR FACTURE/RFM MEDICALE
-            if report_kpi == 'facture' and report_type == 'detail':
-                prestataire = self.env['res.partner'].search([
-                    ('id', '=', prestataire_id), ('is_prestataire', '=', True)], order='name asc')
-                police = self.env['proximas.police'].search([('id', '=', police_id)], order='name asc')
-                adherent = self.env['proximas.adherent'].search([('id', '=', adherent_id)])
-                if filter_type == 'pec' and bool(prestataire):
-                    factures = self.env['proximas.facture'].search([
-                        ('prestataire_id', '=', prestataire_id),
-                        ('date_emission', '>=', date_debut_obj.strftime(DATE_FORMAT)),
-                        ('date_emission', '<=', date_fin_obj.strftime(DATE_FORMAT)),
-                    ])
-                    for facture in factures:
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y')
-                        date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
-                        if police_id:
-                            details_pec = self.env['proximas.details.pec'].search([
-                                ('facture_id', '=', facture.id),
-                                # ('prestataire_id', '=', prestataire_id),
-                                ('police_id', '=', police_id),
-                            ])
-                        elif not police_id:
-                            details_pec = self.env['proximas.details.pec'].search([
-                                ('facture_id', '=', facture.id),
-                                # ('prestataire_id', '=', prestataire_id),
-                            ])
-                        if bool(details_pec):
-                            facture_id = facture.id
-                            ref_facture = facture.name
-                            num_facture = facture.num_facture
-                            nbre_actes = len(details_pec) or 0
-                            cout_total = sum(item.cout_total for item in details_pec) or 0
-                            total_pc = sum(item.total_pc for item in details_pec) or 0
-                            total_npc = sum(item.total_npc for item in details_pec) or 0
-                            total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                            ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                            net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
-                            net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                            net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            #net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+            elif filter_type == 'rfm':
+                rfms = self.env['proximas.remboursement.pec'].search([
+                    ('date_saisie', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
+                    ('date_saisie', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                ])
+                for remboursement in rfms:
+                    # fields.Datetime.from_string(remboursement.date_saisie)
+                    date_saisie = datetime.strptime(remboursement.date_saisie, DATETIME_FORMAT).strftime('%d/%m/%Y')
+                    # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
+                    if police_id:
+                        details_pec = self.env['proximas.details.pec'].search ([
+                            ('rfm_id', '=', remboursement.id),
+                            ('police_id', '=', police_id),
+                        ])
+                    elif not police_id:
+                        details_pec = self.env['proximas.details.pec'].search([
+                            ('rfm_id', '=', remboursement.id),
+                        ])
+                    if bool(details_pec):
+                        rfm_id = remboursement.id
+                        name_length = len(remboursement.adherent_id.name)
+                        if int(name_length) > 60:
+                            rfm_adherent = remboursement.adherent_id.name[:60]
+                        else:
+                            rfm_adherent = remboursement.adherent_id.name
+                        ref_fiche = remboursement.num_fiche
+                        num_rfm = remboursement.code_rfm
+                        nbre_actes = len(details_pec) or 0
+                        cout_total = sum(item.cout_total for item in details_pec) or 0
+                        total_pc = sum(item.total_pc for item in details_pec) or 0
+                        total_npc = sum(item.total_npc for item in details_pec) or 0
+                        total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                        ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                        net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                        net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                        net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                        # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                        net_a_payer = 0
+                        if net_prestataire:
+                            net_a_payer = int (net_prestataire)
+                        elif net_remboursement:
+                            net_a_payer = int (net_remboursement)
+                        else:
                             net_a_payer = 0
-                            if net_prestataire:
-                                net_a_payer = int (net_prestataire)
-                            elif net_remboursement:
-                                net_a_payer = int (net_remboursement)
-                            else:
-                                net_a_payer = 0
 
-                            docs.append({
-                                'facture_id': facture_id,
-                                'ref_facture': ref_facture,
-                                'num_facture': num_facture,
-                                'date_emission': date_emission,
-                                'date_reception': date_reception,
-                                'nbre_actes': int(nbre_actes),
-                                'cout_total': int (cout_total),
-                                'total_pc': int (total_pc),
-                                'total_npc': int (total_npc),
-                                'total_exclusion': int (total_exclusion),
-                                'ticket_moderateur': int (ticket_moderateur),
-                                'net_tiers_payeur': int (net_tiers_payeur),
-                                'net_prestataire': int (net_prestataire),
-                                'net_remboursement': int (net_remboursement),
-                                'net_a_payer': int (net_a_payer),
-                            })
-                elif filter_type == 'rfm' and bool(adherent):
-                    rfms = self.env['proximas.remboursement.pec'].search([
-                        ('adherent_id', '=', adherent.id),
-                        ('date_saisie', '>=', date_debut_obj.strftime (DATETIME_FORMAT)),
-                        ('date_saisie', '<=', date_fin_obj.strftime (DATETIME_FORMAT)),
+                        docs.append({
+                            'rfm_id': rfm_id,
+                            'rfm_adherent': rfm_adherent,
+                            'ref_fiche': ref_fiche,
+                            'num_rfm': num_rfm,
+                            'date_saisie': date_saisie,
+                            'nbre_actes': int(nbre_actes),
+                            'cout_total': int (cout_total),
+                            'total_pc': int (total_pc),
+                            'total_npc': int (total_npc),
+                            'total_exclusion': int (total_exclusion),
+                            'ticket_moderateur': int (ticket_moderateur),
+                            'net_tiers_payeur': int (net_tiers_payeur),
+                            'net_prestataire': int (net_prestataire),
+                            'net_remboursement': int (net_remboursement),
+                            'net_a_payer': int (net_a_payer),
+                        })
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'report_type': report_type,
+                    'filter_type': filter_type,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs,
+                }
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport - Règlements Sinistres: \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        return report_obj.render('proximas_medical.report_reglements_sinistres_view', docargs)
+
+
+class ReportSinistrePECWizard(models.TransientModel):
+    _name = 'proximas.pec.report.wizard'
+    _description = 'Details PEC Report Wizard'
+
+    date_debut = fields.Date(
+        string="Date Début",
+        required=True,
+    )
+    date_fin = fields.Date(
+        string="Date Fin",
+        default=fields.Date.today,
+        required=True,
+    )
+    report_kpi = fields.Selection(
+        string="Indicateur",
+        selection=[
+            ('rubrique', 'Rubrique médicale'),
+            ('prestation', 'Prestation Médicale'),
+            ('pathologie', 'Affection (Pathologie)'),
+            ('prestataire', 'Prestataire Soins médicaux'),
+            ('medecin', 'Médecin Traitant'),
+            ('contrat', 'Famille (Contrat)'),
+            ('assure', 'Assuré (Bénéficiare)'),
+            ('groupe', 'Groupe (Organe)'),
+        ],
+        default='rubrique',
+        required=True,
+    )
+    police_filter = fields.Boolean(
+        string="Filtre/Police",
+    )
+    contrat_limit = fields.Boolean (
+        string="20 plus gros contrats sinistrés",
+    )
+    assure_limit = fields.Boolean(
+        string="20 plus gros bénéficiaires sinistrés",
+    )
+    police_id = fields.Many2one(
+        comodel_name="proximas.police",
+        string="Police Couverture",
+        required=False,
+    )
+
+    @api.multi
+    def get_report(self):
+        """"
+            Methode à appeler au clic sur le bouton "Valider" du formulaire Wuzard
+        """
+        data = {
+            'ids': self.ids,
+            'model': self._name,
+            'form': {
+                'date_debut': self.date_debut,
+                'date_fin': self.date_fin,
+                'report_kpi': self.report_kpi,
+                'police_filter': self.police_filter,
+                'assure_limit': self.assure_limit,
+                'contrat_limit': self.contrat_limit,
+                'police_id': self.police_id.id,
+            },
+        }
+
+        return self.env['report'].get_action(self, 'proximas_medical.report_sinistres_pec_view', data=data)
+
+    # CONTRAINTES
+    _sql_constraints = [
+        ('check_dates',
+         'CHECK (date_debut <= date_fin)',
+         '''
+         Erreurs sur les date début et date fin!
+         La date début doit obligatoirement être inférieure (antérieure) à la date de fin...
+         Vérifiez s'il n'y pas d'erreur de saisies sur les dates ou contactez l'administrateur.
+         '''
+         )
+    ]
+
+
+class ReportPecRecap(models.AbstractModel):
+    """
+        Abstract Model for report template.
+        for '_name' model, please use 'report.' as prefix then add 'module_name.report_name'.
+    """
+    _name = 'report.proximas_medical.report_sinistres_pec_view'
+
+    @api.multi
+    def render_html(self, data=None):
+        report_obj = self.env['report']
+        # print'>>>>>>>>>>>>>>>>>......', report_obj
+        report = report_obj._get_report_from_name('proximas_medical.report_sinistres_pec_view')
+        # print'>>>>>>>>>>>>>>>>>......', report
+        date_debut = data['form']['date_debut']
+        date_fin = data['form']['date_fin']
+        report_kpi = data['form']['report_kpi']
+        police_filter = data['form']['police_filter']
+        assure_limit = data['form']['assure_limit']
+        contrat_limit = data['form']['contrat_limit']
+        date_debut_obj = datetime.strptime(date_debut, DATE_FORMAT)
+        date_fin_obj = datetime.strptime(date_fin, DATE_FORMAT)
+        date_diff = (date_fin_obj - date_debut_obj).days + 1
+        police_id = data['form']['police_id']
+
+        docs = []
+        docargs = {}
+        details_pec = []
+        police = self.env['proximas.police'].search([
+            ('id', '=', police_id)
+        ], order='name asc')
+        # 1. RAPPORT SYNTHESE SINISTRALITE PAR RUBRIQUE MEDICALE
+        if report_kpi in ['rubrique']:
+            rubriques = self.env['proximas.rubrique.medicale'].search([], order='name asc')
+            for rubrique in rubriques:
+                # PRISE EN CHERGE TRAITEES SUR LA PERIODE
+                if police_id:
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '>=', date_debut_obj.strftime(DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime(DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('rubrique_id', '=', rubrique.id),
+                        ('police_id', '=', police_id),
                     ])
-                    for remboursement in rfms:
-                        date_saisie = datetime.strptime(remboursement.date_saisie, DATETIME_FORMAT).strftime('%d/%m/%Y')
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        if police_id:
-                            details_pec = self.env['proximas.details.pec'].search ([
-                                ('rfm_id', '=', remboursement.id),
-                                # ('adherent_id', '=', adherent_id),
-                                ('police_id', '=', police_id),
-                            ])
-                        elif not police_id:
-                            details_pec = self.env['proximas.details.pec'].search([
-                                ('rfm_id', '=', remboursement.id),
-                                # ('adherent_id', '=', adherent_id),
-                            ])
-                        if bool(details_pec):
-                            rfm_id = remboursement.id
-                            ref_fiche = remboursement.num_fiche
-                            num_rfm = remboursement.code_rfm
-                            nbre_actes = len(details_pec) or 0
-                            cout_total = sum(item.cout_total for item in details_pec) or 0
-                            total_pc = sum(item.total_pc for item in details_pec) or 0
-                            total_npc = sum(item.total_npc for item in details_pec) or 0
-                            total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                            ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                            net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
-                            net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                            net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
-                            net_a_payer = 0
-                            if net_prestataire:
-                                net_a_payer = int (net_prestataire)
-                            elif net_remboursement:
-                                net_a_payer = int (net_remboursement)
-                            else:
-                                net_a_payer = 0
-
-                            docs.append({
-                                'rfm_id': rfm_id,
-                                'ref_fiche': ref_fiche,
-                                'num_rfm': num_rfm,
-                                'date_saisie': date_saisie,
-                                'nbre_actes': int(nbre_actes),
-                                'cout_total': int (cout_total),
-                                'total_pc': int (total_pc),
-                                'total_npc': int (total_npc),
-                                'total_exclusion': int (total_exclusion),
-                                'ticket_moderateur': int (ticket_moderateur),
-                                'net_tiers_payeur': int (net_tiers_payeur),
-                                'net_prestataire': int (net_prestataire),
-                                'net_remboursement': int (net_remboursement),
-                                'net_a_payer': int (net_a_payer),
-                            })
                 else:
-                    raise UserError(_(
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    ))
-                if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
-                    docargs = {
-                        'doc_ids': data['ids'],
-                        'doc_model': data['model'],
-                        'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
-                        'date_diff': date_diff,
-                        'report_kpi': report_kpi,
-                        'report_type': report_type,
-                        'filter_type': filter_type,
-                        'police_filter': police_filter,
-                        'police_id': police_id,
-                        'police': police.name,
-                        'prestataire': prestataire.name,
-                        'adherent': adherent.name,
-                        'code_id': adherent.code_id,
-                        'city': prestataire.city,
-                        'phone': prestataire.phone,
-                        'mobile': prestataire.mobile,
-                        'code_saisi': adherent.code_id,
-                        'contrat_id': adherent.contrat_id,
-                        'groupe': adherent.groupe_id.name,
-                        'num_contrat': adherent.num_contrat,
-                        'matricule': adherent.matricule,
-                        'photo': adherent.image,
-                        'docs': docs,
-                    }
-                else:
-                    raise UserError (_ (
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    ))
-            # 3.2. ETAT SYNTHESE PAR FACTURE / REMBOURSEMENT
-            if report_kpi == 'facture' and report_type == 'groupe':
-                police = self.env['proximas.police'].search([
-                    ('id', '=', police_id)
-                ], order='name asc')
-                if filter_type == 'pec':
-                    factures = self.env['proximas.facture'].search([
-                        ('date_emission', '>=', date_debut_obj.strftime (DATE_FORMAT)),
-                        ('date_emission', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                    details_pec = self.env['proximas.details.pec'].search([
+                        ('date_execution', '>=', date_debut_obj.strftime(DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime(DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('rubrique_id', '=', rubrique.id),
                     ])
-                    for facture in factures:
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        date_emission = datetime.strptime(facture.date_emission, DATE_FORMAT).strftime('%d/%m/%Y')
-                        date_reception = datetime.strptime(facture.date_reception, DATE_FORMAT).strftime('%d/%m/%Y') or now
-                        if police_id:
-                            details_pec = self.env['proximas.details.pec'].search ([
-                                ('facture_id', '=', facture.id),
-                                ('police_id', '=', police_id),
-                            ])
-                        elif not police_id:
-                            details_pec = self.env['proximas.details.pec'].search ([
-                                ('facture_id', '=', facture.id),
-                            ])
-                        if bool(details_pec):
-                            facture_id = facture.id
-                            name_length = len(facture.prestataire_id.name)
-                            if int(name_length) > 60:
-                                facture_prestataire = facture.prestataire_id.name[:60] + '...'
-                            else:
-                                facture_prestataire = facture.prestataire_id.name
-                            ref_facture = facture.name
-                            num_facture = facture.num_facture
-                            nbre_actes = len(details_pec) or 0
-                            cout_total = sum(item.cout_total for item in details_pec) or 0
-                            total_pc = sum(item.total_pc for item in details_pec) or 0
-                            total_npc = sum(item.total_npc for item in details_pec) or 0
-                            total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                            ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                            net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
-                            net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                            net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
-                            net_a_payer = 0
-                            if net_prestataire:
-                                net_a_payer = int (net_prestataire)
-                            elif net_remboursement:
-                                net_a_payer = int (net_remboursement)
-                            else:
-                                net_a_payer = 0
-
-                            docs.append({
-                                'facture_id': facture_id,
-                                'facture_prestataire': facture_prestataire,
-                                'ref_facture': ref_facture,
-                                'num_facture': num_facture,
-                                'date_emission': date_emission,
-                                'date_reception': date_reception,
-                                'nbre_actes': int(nbre_actes),
-                                'cout_total': int (cout_total),
-                                'total_pc': int (total_pc),
-                                'total_npc': int (total_npc),
-                                'total_exclusion': int(total_exclusion),
-                                'ticket_moderateur': int(ticket_moderateur),
-                                'net_tiers_payeur': int(net_tiers_payeur),
-                                'net_prestataire': int(net_prestataire),
-                                'net_remboursement': int(net_remboursement),
-                                'net_a_payer': int(net_a_payer),
-                            })
-                elif filter_type == 'rfm':
-                    rfms = self.env['proximas.remboursement.pec'].search([
-                        ('date_saisie', '>=', date_debut_obj.strftime(DATETIME_FORMAT)),
-                        ('date_saisie', '<=', date_fin_obj.strftime(DATETIME_FORMAT)),
+                # print details_pec
+                prises_charge = self.env['proximas.prise.charge'].search([
+                    ('details_pec_ids', '!=', None)
+                ], order='date_saisie desc')
+                nbre_pec = 0
+                for pec in prises_charge:
+                    details_pec_list = self.env['proximas.details.pec'].search([
+                        ('date_execution', '>=', date_debut_obj.strftime(DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime(DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('rubrique_id', '=', rubrique.id),
+                        ('pec_id', '=', pec.id),
                     ])
-                    for remboursement in rfms:
-                        # fields.Datetime.from_string(remboursement.date_saisie)
-                        date_saisie = datetime.strptime(remboursement.date_saisie, DATETIME_FORMAT).strftime('%d/%m/%Y')
-                        # DETAILS PEC TRAITES ET LIES A UNE FACTURE PRESTATAIRE
-                        if police_id:
-                            details_pec = self.env['proximas.details.pec'].search ([
-                                ('rfm_id', '=', remboursement.id),
-                                ('police_id', '=', police_id),
-                            ])
-                        elif not police_id:
-                            details_pec = self.env['proximas.details.pec'].search([
-                                ('rfm_id', '=', remboursement.id),
-                            ])
-                        if bool(details_pec):
-                            rfm_id = remboursement.id
-                            name_length = len(remboursement.adherent_id.name)
-                            if int(name_length) > 60:
-                                rfm_adherent = remboursement.adherent_id.name[:60]
-                            else:
-                                rfm_adherent = remboursement.adherent_id.name
-                            ref_fiche = remboursement.num_fiche
-                            num_rfm = remboursement.code_rfm
-                            nbre_actes = len(details_pec) or 0
-                            cout_total = sum(item.cout_total for item in details_pec) or 0
-                            total_pc = sum(item.total_pc for item in details_pec) or 0
-                            total_npc = sum(item.total_npc for item in details_pec) or 0
-                            total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
-                            ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
-                            net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
-                            net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
-                            net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
-                            # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
-                            net_a_payer = 0
-                            if net_prestataire:
-                                net_a_payer = int (net_prestataire)
-                            elif net_remboursement:
-                                net_a_payer = int (net_remboursement)
-                            else:
-                                net_a_payer = 0
+                    if details_pec_list:
+                        nbre_pec += 1
+                if bool (details_pec):
+                    rubrique_medicale = rubrique.name
+                    cout_total = sum(item.cout_total for item in details_pec) or 0
+                    total_pc = sum(item.total_pc for item in details_pec) or 0
+                    total_npc = sum(item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                    cout_moyen_pec = cout_total / nbre_pec
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int(net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int(net_remboursement)
+                    else:
+                        net_a_payer = 0
 
-                            docs.append({
-                                'rfm_id': rfm_id,
-                                'rfm_adherent': rfm_adherent,
-                                'ref_fiche': ref_fiche,
-                                'num_rfm': num_rfm,
-                                'date_saisie': date_saisie,
-                                'nbre_actes': int(nbre_actes),
-                                'cout_total': int (cout_total),
-                                'total_pc': int (total_pc),
-                                'total_npc': int (total_npc),
-                                'total_exclusion': int (total_exclusion),
-                                'ticket_moderateur': int (ticket_moderateur),
-                                'net_tiers_payeur': int (net_tiers_payeur),
-                                'net_prestataire': int (net_prestataire),
-                                'net_remboursement': int (net_remboursement),
-                                'net_a_payer': int (net_a_payer),
-                            })
+                    docs.append({
+                        'rubrique_id': rubrique.id,
+                        'rubrique_medicale': rubrique_medicale,
+                        'nbre_pec': int(nbre_pec),
+                        'cout_total': int(cout_total),
+                        'total_pc': int(total_pc),
+                        'total_npc': int(total_npc),
+                        'total_exclusion': int(total_exclusion),
+                        'ticket_moderateur': int(ticket_moderateur),
+                        'net_tiers_payeur': int(net_tiers_payeur),
+                        'net_prestataire': int(net_prestataire),
+                        'net_remboursement': int(net_remboursement),
+                        'cout_moyen_pec': int(cout_moyen_pec),
+                        'net_a_payer': int(net_a_payer),
+                    })
+                    nbre_pec = 0
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs,
+                }
+            else:
+                raise UserError (_ (
+                    "Proximaas : Rapport Suivi Evolution Sinistres \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        # 2. RAPPORT SYNTHESE SINISTRALITE PAR PRESTATION MEDICALE
+        elif report_kpi in ['prestation']:
+            # prestations = self.env['proximas.code.prestation'].search([], order='name asc')
+            prestations = self.env['proximas.code.prestation'].search([], order='id asc')
+            for prestation in prestations:
+                # PRISE EN CHERGE TRAITEES SUR LA PERIODE
+                prestation_id = prestation.id
+                date_debut = date_debut_obj.strftime(DATE_FORMAT)
+                date_fin = date_fin_obj.strftime(DATE_FORMAT)
+                sql = ""
+                if police_filter:
+                    sql = """
+                            SELECT COUNT(pec_id) AS nbre_pec,
+                            SUM(cout_total) AS cout_total, SUM(total_pc) AS total_pc, SUM(total_npc) AS total_npc,
+                            SUM(mt_exclusion) AS mt_exclusion, SUM(ticket_moderateur) AS ticket_moderateur, 
+                            SUM(net_tiers_payeur) AS net_tiers_payeur, SUM(net_prestataire) AS net_prestataire, 
+                            SUM(mt_remboursement) AS mt_remboursement
+                            FROM proximas_details_pec
+                            WHERE date_execution >= '%%%s%%' AND date_execution <= '%%%s%%' AND 
+                            code_prestation_id = '%d' AND police_id = '%d'
+                            GROUP BY code_prestation_id
+                            ORDER BY net_tiers_payeur;
+                         """ % (date_debut, date_fin, prestation_id, police_id)
                 else:
-                    raise UserError(_(
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    ))
-                if bool(docs):
-                    docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
-                    docargs = {
-                        'doc_ids': data['ids'],
-                        'doc_model': data['model'],
-                        'date_debut': datetime.strftime(date_debut_obj, '%d/%m/%Y'),
-                        'date_fin': datetime.strftime(date_fin_obj, '%d/%m/%Y'),
-                        'date_diff': date_diff,
-                        'report_kpi': report_kpi,
-                        'report_type': report_type,
-                        'filter_type': filter_type,
-                        'police_filter': police_filter,
-                        'police_id': police_id,
-                        'police': police.name,
-                        'docs': docs,
-                    }
+                    sql = """
+                             SELECT COUNT(pec_id) AS nbre_pec,
+                             SUM(cout_total) AS cout_total, SUM(total_pc) AS total_pc, SUM(total_npc) AS total_npc,
+                             SUM(mt_exclusion) AS mt_exclusion, SUM(ticket_moderateur) AS ticket_moderateur, 
+                             SUM(net_tiers_payeur) AS net_tiers_payeur, SUM(net_prestataire) AS net_prestataire, 
+                             SUM(mt_remboursement) AS mt_remboursement
+                             FROM proximas_details_pec
+                             WHERE date_execution >= '%%%s%%' AND date_execution <= '%%%s%%' AND 
+                             code_prestation_id = '%d' 
+                             GROUP BY code_prestation_id
+                             ORDER BY net_tiers_payeur;
+                        """ % (date_debut, date_fin, prestation_id)
+                self.env.cr.execute(sql)
+                details_pec_prestation = self.env.cr.fetchone()
+                if details_pec_prestation:
+                    details_pec = list(details_pec_prestation)
+                    # print details_pec
+                    net_prestataire = int (details_pec[7])
+                    net_remboursement = int (details_pec[8])
+                    net_a_payer = net_remboursement if net_remboursement else net_prestataire
+                    docs.append({
+                        'prestation_medicale': prestation.name,
+                        'nbre_pec': int(details_pec[0]),
+                        'cout_total': int (details_pec[1]),
+                        'total_pc': int (details_pec[2]),
+                        'total_npc': int (details_pec[3]),
+                        'total_exclusion': int (details_pec[4]),
+                        'ticket_moderateur': int (details_pec[5]),
+                        'net_tiers_payeur': int (details_pec[6]),
+                        'net_prestataire': int (details_pec[7]),
+                        'net_remboursement': int (details_pec[8]),
+                        'net_a_payer': net_a_payer,
+                    })
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs,
+                }
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport Suivi Evolution Sinistres \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        # 3. RAPPORT SYNTHESE SINISTRALITE PAR PATHOLOGIE (AFFECTION)
+        elif report_kpi in ['pathologie']:
+            pathologies = self.env['proximas.pathologie'].search([])
+            for pathologie in pathologies:
+                # DETAILS PEC TRAITES ET LIES A LA PATHOLOGIE
+                if police_id:
+                    details_pec = self.env['proximas.details.pec'].search ([
+                        ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('pathologie_id', '=', pathologie.id),
+                        ('police_id', '=', police_id),
+                    ])
                 else:
-                    raise UserError(_(
-                        "Proximaas : Rapport - Règlements Sinistres: \n\
-                        Après recherche, aucun sinistre ne correspond à la période indiquée.\
-                        Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
-                        Veuillez contacter les administrateurs pour plus détails..."
-                    ))
-            return report_obj.render('proximas_medical.report_reglements_sinistres_view', docargs)
+                    details_pec = self.env['proximas.details.pec'].search ([
+                        ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('pathologie_id', '=', pathologie.id),
+                    ])
+                prises_charge = self.env['proximas.prise.charge'].search([
+                    ('pathologie_id', '=', pathologie.id)
+                ], order='date_saisie desc')
+                nbre_pec = 0
+                for pec in prises_charge:
+                    details_pec_list = self.env['proximas.details.pec'].search ([
+                        ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('pathologie_id', '=', pathologie.id),
+                        ('pec_id', '=', pec.id),
+                    ])
+                    if details_pec_list:
+                        nbre_pec += 1
+                if bool(details_pec):
+                    affection = pathologie.libelle
+                    nbre_pec = int(nbre_pec)
+                    nbre_actes = len(details_pec) or 0
+                    cout_total = sum(item.cout_total for item in details_pec) or 0
+                    total_pc = sum(item.total_pc for item in details_pec) or 0
+                    total_npc = sum(item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum(item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum(item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum(item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum(item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum(item.mt_remboursement for item in details_pec) or 0
+                    # net_a_payer = sum(item.net_a_payer for item in details_pec) or 0
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int (net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int (net_remboursement)
+                    else:
+                        net_a_payer = 0
+
+                    docs.append({
+                        'pathologie': affection,
+                        'nbre_pec': nbre_pec,
+                        'nbre_actes': int(nbre_actes),
+                        'cout_total': int (cout_total),
+                        'total_pc': int (total_pc),
+                        'total_npc': int (total_npc),
+                        'total_exclusion': int (total_exclusion),
+                        'ticket_moderateur': int (ticket_moderateur),
+                        'net_tiers_payeur': int (net_tiers_payeur),
+                        'net_prestataire': int (net_prestataire),
+                        'net_remboursement': int (net_remboursement),
+                        'net_a_payer': int (net_a_payer),
+                    })
+                    nbre_pec = 0
+            if bool(docs):
+                docs = sorted (docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs,
+                }
+            else:
+                raise UserError (_ (
+                    "Proximaas : Rapport Suivi Evolution Sinistres \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        # 4. RAPPORT SYNTHESE SINISTRALITE PAR MEDECIN TRAITANT
+        elif report_kpi in ['medecin']:
+            medecins = self.env['proximas.medecin'].search([], order='name asc')
+            for medecin in medecins:
+                # PRISE EN CHERGE TRAITEES SUR LA PERIODE
+                if police_id:
+                    details_pec = self.env['proximas.details.pec'].search ([
+                        ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('medecin_id', '=', medecin.id),
+                        ('police_id', '=', police_id),
+                    ])
+                else:
+                    details_pec = self.env['proximas.details.pec'].search ([
+                        ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('medecin_id', '=', medecin.id),
+                    ])
+                # print details_pec
+                prises_charge = self.env['proximas.prise.charge'].search([
+                    ('details_pec_ids', '!=', None)
+                ], order='date_saisie desc')
+                nbre_pec = 0
+                for pec in prises_charge:
+                    details_pec_list = self.env['proximas.details.pec'].search ([
+                        ('date_execution', '>=', date_debut_obj.strftime (DATE_FORMAT)),
+                        ('date_execution', '<=', date_fin_obj.strftime (DATE_FORMAT)),
+                        ('prestataire', '!=', None),
+                        ('medecin_id', '=', medecin.id),
+                        ('pec_id', '=', pec.id),
+                    ])
+                    if details_pec_list:
+                        nbre_pec += 1
+                if bool(details_pec):
+                    medecin_traitant = medecin.name
+                    cout_total = sum (item.cout_total for item in details_pec) or 0
+                    total_pc = sum (item.total_pc for item in details_pec) or 0
+                    total_npc = sum (item.total_npc for item in details_pec) or 0
+                    total_exclusion = sum (item.mt_exclusion for item in details_pec) or 0
+                    ticket_moderateur = sum (item.ticket_moderateur for item in details_pec) or 0
+                    net_tiers_payeur = sum (item.net_tiers_payeur for item in details_pec) or 0
+                    net_prestataire = sum (item.net_prestataire for item in details_pec) or 0
+                    net_remboursement = sum (item.mt_remboursement for item in details_pec) or 0
+                    cout_moyen_pec = cout_total / nbre_pec
+                    net_a_payer = 0
+                    if net_prestataire:
+                        net_a_payer = int (net_prestataire)
+                    elif net_remboursement:
+                        net_a_payer = int (net_remboursement)
+                    else:
+                        net_a_payer = 0
+
+                    docs.append ({
+                        'medecin_id': medecin.id,
+                        'medecin': medecin_traitant,
+                        'nbre_pec': int (nbre_pec),
+                        'cout_total': int (cout_total),
+                        'total_pc': int (total_pc),
+                        'total_npc': int (total_npc),
+                        'total_exclusion': int (total_exclusion),
+                        'ticket_moderateur': int (ticket_moderateur),
+                        'net_tiers_payeur': int (net_tiers_payeur),
+                        'net_prestataire': int (net_prestataire),
+                        'net_remboursement': int (net_remboursement),
+                        'cout_moyen_pec': int (cout_moyen_pec),
+                        'net_a_payer': int (net_a_payer),
+                    })
+                    nbre_pec = 0
+            if bool(docs):
+                docs = sorted(docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'police_filter': police_filter,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs,
+                }
+            else:
+                raise UserError(_(
+                    "Proximaas : Rapport Suivi Evolution Sinistres \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        # 5 . RAPPORT SYNTHESE SINISTRALITE PAR ASSURE
+        elif report_kpi in ['assure']:
+            assures = self.env['proximas.assure'].search([], order='id asc')
+            sql = ""
+            if police_filter:
+                assures = self.env['proximas.assure'].search ([
+                    ('police_id', '=', police_id),
+                ], order='id asc')
+            for assure in assures:
+                # Selection de prise_charge pour l'assure : L'inclure que lorsque celui-ci à au moins 1 prise en charge
+                assure_id = assure.id
+                date_debut = date_debut_obj.strftime(DATE_FORMAT)
+                date_fin = date_fin_obj.strftime(DATE_FORMAT)
+                sql = """
+                          SELECT COUNT(pec_id) AS nbre_pec,
+                          SUM(cout_total) AS cout_total, SUM(total_pc) AS total_pc, SUM(total_npc) AS total_npc,
+                          SUM(mt_exclusion) AS mt_exclusion, SUM(ticket_moderateur) AS ticket_moderateur, 
+                          SUM(net_tiers_payeur) AS net_tiers_payeur, SUM(net_prestataire) AS net_prestataire, 
+                          SUM(mt_remboursement) AS mt_remboursement
+                          FROM proximas_details_pec
+                          WHERE date_execution >= '%%%s%%' AND date_execution <= '%%%s%%' AND assure_id = '%d'
+                          GROUP BY assure_id
+                          ORDER BY net_tiers_payeur;
+                      """ % (date_debut, date_fin, assure_id)
+                self.env.cr.execute(sql)
+                details_pec_assure = self.env.cr.fetchone()
+                if details_pec_assure:
+                    details_pec = list (details_pec_assure)
+                    # print details_pec
+                    net_prestataire = int (details_pec[7])
+                    net_remboursement = int (details_pec[8])
+                    net_a_payer = net_remboursement if net_remboursement else net_prestataire
+                    docs.append({
+                        'adherent': assure.contrat_id.adherent_id.name,
+                        'code_id': assure.code_id,
+                        'beneficiaire': assure.name,
+                        'code_id_externe': assure.code_id_externe,
+                        'date_naissance': datetime.strptime (assure.date_naissance, DATE_FORMAT).strftime (
+                            '%d/%m/%Y'),
+                        'statut_familial': assure.statut_familial.capitalize (),
+                        'genre': assure.genre.capitalize (),
+                        'num_contrat': assure.contrat_id.num_contrat,
+                        'matricule': assure.contrat_id.matricule,
+                        'groupe_name': assure.contrat_id.groupe_id.name,
+                        'date_activation': datetime.strptime (assure.date_activation, DATE_FORMAT).strftime (
+                            '%d/%m/%Y'),
+                        'nbre_actes': int (details_pec[0]),
+                        'cout_total': int (details_pec[1]),
+                        'total_pc': int (details_pec[2]),
+                        'total_npc': int (details_pec[3]),
+                        'total_exclusion': int (details_pec[4]),
+                        'ticket_moderateur': int (details_pec[5]),
+                        'net_tiers_payeur': int (details_pec[6]),
+                        'net_prestataire': int (details_pec[7]),
+                        'net_remboursement': int (details_pec[8]),
+                        'net_a_payer': net_a_payer,
+                    })
+            if bool(docs):
+                docs = sorted (docs, key=lambda x: x['net_a_payer'], reverse=True)
+                docargs = {
+                    'doc_ids': data['ids'],
+                    'doc_model': data['model'],
+                    'date_debut': datetime.strftime (date_debut_obj, '%d/%m/%Y'),
+                    'date_fin': datetime.strftime (date_fin_obj, '%d/%m/%Y'),
+                    'date_diff': date_diff,
+                    'report_kpi': report_kpi,
+                    'police_filter': police_filter,
+                    'assure_limit': assure_limit,
+                    'police_id': police_id,
+                    'police': police.name,
+                    'docs': docs[0:20] if assure_limit else docs,
+                }
+            else:
+                raise UserError (_ (
+                    "Proximaas : Rapport Suivi Evolution Sinistres \n\
+                    Après recherche, aucun sinistre ne correspond à la période indiquée.\
+                    Par conséquent, le système ne peut vous fournir un rapport dont le contenu est vide. \
+                    Veuillez contacter les administrateurs pour plus détails..."
+                ))
+        return report_obj.render('proximas_medical.report_sinistres_pec_view', docargs)

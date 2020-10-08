@@ -55,8 +55,9 @@
                                médicaux pour règlement."
                                class="oe_highlight"
                                confirm="TERMINE: Vous êtes sur le point de mettre fin au processus de traitement du
-                               dossier de remboursement des frais médicaux. Par conséquent, Vous risquez de ne plus
-                               pouvoir acceder au dossier concerné. Voulez-vous confirmer la clôture/terminer?"
+                               dossier de remboursement des frais médicaux en validant définitivement les données.
+                               Par conséquent, aucune modification ne sera possible sur le dossier concerné.
+                               Voulez-vous confirmer la clôture et y mettre Fin au processus?"
                        />
                                <!--states="cours,valide"-->
                        <!--<button name="Cloture" type="workflow" icon="fa-check-circle"
@@ -231,23 +232,31 @@
                                                            options='{"no_open": True, "no_create": True}'
                                                            />
                                                        <!--context="{'default_prestataire_rembourse_id':prestataire_id}"-->
-                                                       <field name="date_execution" required="1"/>
-                                                       <!--<field name="exercice_id" invisible="0"/>-->
+                                                       <field name="code_id_rfm" required="1"/>
                                                        <field name="prestation_rembourse_id"
                                                               required="1"
                                                               options='{"no_open": True, "no_create": True}'
                                                               class="text-primary"
                                                               domain="[('prestataire_id', '=', prestataire_rembourse_id),
                                                               ('active', '=', True)]"/>
-                                                       <field name="code_id_rfm" required="1"/>
+                                                       <field name="date_execution" required="1"/>
+                                                       <field name="exercice_id"
+                                                              options='{"no_open": True, "no_create": True}'
+                                                              readonly="1"
+                                                       />
                                                        <field name="name" readonly="1"/>
+                                                       <field name="age"/>
+                                                   </group>
+                                                   <hr/>
+                                                   <group col="6" colspan="2">
                                                        <field name="genre"/>
                                                        <field name="date_naissance"/>
-                                                       <field name="age"/>
                                                        <field name="statut_familial"/>
                                                    </group>
-                                                   <group>
-                                                       <field name="adherent_id" invisible="1"/>
+                                                   <hr/>
+                                                   <group invisible="1">
+                                                       <field name="prestation_id"/>
+                                                       <field name="adherent_id"/>
                                                    </group>
                                                    <group col="6" colspan="2" invisible="1">
                                                        <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
