@@ -1519,7 +1519,7 @@ class PriseEnCharge(models.Model):
         code_pec = u'%s%06d' % (annee_format, code_genere)
         # code_pec = str(annee_format) + str(code_genere)
         check_code_pec = self.search_count([('code_pec', '=', code_pec)])
-        if check_code_pec >= 1:
+        while check_code_pec:
             code_regenere = int(randint(1, 1e6))
             code_pec = u'%s%06d' % (annee_format, code_regenere)
             # code_pec = str(annee_format) + str(code_regenere)
@@ -2239,6 +2239,7 @@ class DetailsPec(models.Model):
     groupe_id = fields.Many2one(
         string="Groupe",
         related="contrat_id.groupe_id",
+        store=True,
         required=False,
     )
     adherent_id = fields.Many2one(
@@ -4177,7 +4178,7 @@ class DetailsPec(models.Model):
     #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
     #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
     @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
-                 'mt_exclusion')
+                 'prestataire_public', 'zone_couverte', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         self.ensure_one()
         if bool(self.prestation_id):
@@ -4198,26 +4199,26 @@ class DetailsPec(models.Model):
             ############################################################################################################
             ############################################################################################################
             # Taux de couverture PEC Ou Temboursement
-            if bool (self.rfm_id):
-                if bool (self.zone_couverte) and bool (self.prestataire_public):
-                    self.taux_couvert = int (self.police_id.tx_couv_public_couvert)
+            if bool(self.rfm_id):
+                if bool (self.zone_couverte) and bool(self.prestataire_public):
+                    self.taux_couvert = int(self.police_id.tx_couv_public_couvert)
                 # Taux Couverture (Remboursement) Zone Non Couverte et prestataire public
-                elif not bool (self.zone_couverte) and bool (self.prestataire_public):
-                    self.taux_couvert = int (self.police_id.tx_couv_public)
+                elif not bool(self.zone_couverte) and bool(self.prestataire_public):
+                    self.taux_couvert = int(self.police_id.tx_couv_public)
                 # Taux Couverture (Remboursement) Zone Couverte et prestataire privé
-                elif bool (self.zone_couverte) and not bool (self.prestataire_public):
-                    self.taux_couvert = int (self.police_id.tx_couv_prive_couvert)
-                elif not bool (self.zone_couverte) and not bool (self.prestataire.is_public):
-                    self.taux_couvert = int (self.police_id.tx_couv_prive)
-            elif bool (code_medical_police):
-                if bool (self.prestataire.is_public) or bool (self.prestataire_public):
-                    self.taux_couvert = int (code_medical_police.tx_public)
-                elif not bool (self.prestataire.is_public) or not bool (self.prestataire_public):
-                    self.taux_couvert = int (code_medical_police.tx_prive)
-            elif bool (self.prestataire.is_public):
-                self.taux_couvert = int (self.police_id.tx_couv_public)
+                elif bool(self.zone_couverte) and not bool(self.prestataire_public):
+                    self.taux_couvert = int(self.police_id.tx_couv_prive_couvert)
+                elif not bool(self.zone_couverte) and not bool(self.prestataire.is_public):
+                    self.taux_couvert = int(self.police_id.tx_couv_prive)
+            elif bool(code_medical_police):
+                if bool(self.prestataire.is_public) or bool(self.prestataire_public):
+                    self.taux_couvert = int(code_medical_police.tx_public)
+                elif not bool(self.prestataire.is_public) or not bool(self.prestataire_public):
+                    self.taux_couvert = int(code_medical_police.tx_prive)
+            elif bool(self.prestataire.is_public):
+                self.taux_couvert = int(self.police_id.tx_couv_public)
             else:
-                self.taux_couvert = int (self.police_id.tx_couv_prive)
+                self.taux_couvert = int(self.police_id.tx_couv_prive)
             ##################################################################
             # Récupérer le coût unitaire
             # if bool(self.cout_unit):
@@ -4341,7 +4342,7 @@ class DetailsPec(models.Model):
                         self.total_pc = self.cout_total  # - self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
             # 1. Prestation Cas de cout modifiable et quantité exigé
-            elif bool (self.cout_modifiable) and bool (self.quantite_exige):
+            elif bool(self.cout_modifiable) and bool(self.quantite_exige):
                 quantite = self.quantite_livre
                 cout_unitaire = self.cout_unite
                 code_non_controle = self.code_non_controle
@@ -4465,6 +4466,28 @@ class DetailsPec(models.Model):
                             self.mt_rabais)
                         self.total_pc = int (plafond * self.coefficient * quantite) - int (
                             self.mt_rabais)  # + self.mt_exclusion
+                        self.total_npc = self.cout_total - self.total_pc
+                    elif self.remise_prestation > 0:
+                        # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
+                        cout_total = int (cout_unitaire * self.coefficient * quantite)
+                        taux_remise = int (self.remise_prestation)
+                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        self.cout_total = cout_total - remise
+                        self.total_pc = int (self.plafond * self.coefficient * quantite) - int(remise)  # + self.mt_exclusion
+                        self.total_npc = self.cout_total - self.total_pc
+                    else:
+                        # Sinon, alors il y a ni rabais, ni remise
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        self.total_pc = int(plafond * self.coefficient * quantite)  # - int(self.mt_exclusion)
+                        self.total_npc = self.cout_total - self.total_pc
+
+                elif not code_non_controle and 0 < plafond < cout_unitaire:
+                    # Si OUI, alors vérifier le montant plafond n'est pas nulle et est inférieur au cout unitaire
+                    # donné par l'utilisateur
+                    if self.mt_rabais > 0:
+                        # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite) - int(self.mt_rabais)
+                        self.total_pc = int(plafond * self.coefficient * quantite) - int(self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     elif self.remise_prestation > 0:
                         # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
@@ -6117,7 +6140,7 @@ class RemboursementPEC(models.Model):
         code_genere = int(randint(1, 1e6))
         code_rfm = u'%s%06d' % (annee_format, code_genere)
         check_code_rfm = self.search_count([('code_rfm', '=', code_rfm)])
-        if check_code_rfm >= 1:
+        while check_code_rfm:
             code_regenere = int(randint(1, 1e6))
             code_rfm = u'%s%06d' % (annee_format, code_regenere)
             self.code_rfm = code_rfm
