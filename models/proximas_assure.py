@@ -698,7 +698,7 @@ class Assure (models.Model):
         # rec_id.code_id = u'%04d%s%s' % (code_genere, rec_id.nom[:1], upper_prenoms[:1])
         code_id = u'%06d%s%s' % (code_genere, self.nom[:1], upper_prenoms[:1])
         check_code_id = self.search_count ([('code_id', '=', code_id)])
-        while check_code_id:
+        if check_code_id:
             code_regenere = randint (1, 1e6)
             code_id = u'%06d%s%s' % (code_regenere, self.nom[:1], upper_prenoms[:1])
             self.code_id = code_id
