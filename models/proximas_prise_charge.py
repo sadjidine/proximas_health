@@ -1519,7 +1519,7 @@ class PriseEnCharge(models.Model):
         code_pec = u'%s%06d' % (annee_format, code_genere)
         # code_pec = str(annee_format) + str(code_genere)
         check_code_pec = self.search_count([('code_pec', '=', code_pec)])
-        while check_code_pec:
+        if check_code_pec:
             code_regenere = int(randint(1, 1e6))
             code_pec = u'%s%06d' % (annee_format, code_regenere)
             # code_pec = str(annee_format) + str(code_regenere)
@@ -6140,7 +6140,7 @@ class RemboursementPEC(models.Model):
         code_genere = int(randint(1, 1e6))
         code_rfm = u'%s%06d' % (annee_format, code_genere)
         check_code_rfm = self.search_count([('code_rfm', '=', code_rfm)])
-        while check_code_rfm:
+        if check_code_rfm:
             code_regenere = int(randint(1, 1e6))
             code_rfm = u'%s%06d' % (annee_format, code_regenere)
             self.code_rfm = code_rfm
