@@ -5368,7 +5368,10 @@ class DetailsPec(models.Model):
     # @api.multi
     @api.onchange('date_execution', 'date_demande')
     def _check_exo_sam(self):
-        if bool (self.date_execution) and not bool(self.exercice_id):
+        exo = self.exercice_id
+        date_demande_acte = self.date_demande
+        date_execution_acte = self.date_execution
+        if date_execution_acte and not exo:
             date_execution = fields.Datetime.from_string (self.date_execution)
             date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
             raise UserError (_ (
@@ -5379,7 +5382,7 @@ class DetailsPec(models.Model):
                 Pour plus d'informations, veuillez contactez l'administrateur..."
             ) % date_execution_format
                              )
-        elif bool(self.date_demande) and not bool(self.exercice_id):
+        elif date_demande_acte and not exo:
             date_demande = fields.Datetime.from_string (self.date_demande)
             date_demande_format = datetime.strftime (date_demande, '%d/%m/%Y')
             raise UserError (_ (
