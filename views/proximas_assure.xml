@@ -650,6 +650,31 @@
                                     string="I don't want to receive commercial messages" />
                             </group>-->
                         </page>
+                        <page string="ANTECEDENTS MEDICAUX">
+                            <field name="antecedent_ids"
+                                   options='{"no_create": True}'
+                                   widget="many2many">
+                                <form>
+                                    <sheet>
+                                        <group col="4" colspan="2">
+                                            <field name="name" readonly="1"
+                                                   string="Code"/>
+                                            <field name="libelle" readonly="1"/>
+                                            <field name="specialite_id"
+                                                   options='{"no_open": True, "no_create": True}'
+                                                   string="Spécialité médicale" readonly="1"/>
+                                            <field name="est_risque"  readonly="1"
+                                                   string="Chronique?"/>
+                                        </group>
+                                    </sheet>
+                                </form>
+                                <tree>
+                                    <!--<field name="name" string="Code"/>-->
+                                    <field name="libelle"/>
+                                    <field name="specialite_id" string="Spécialité médicale"/>
+                                </tree>
+                            </field>
+                        </page>
                         <page string="CONTROLES SECURITE">
                             <group col="4" colspan="2">
                                     <field name="code_perso"/>

@@ -385,6 +385,16 @@ class Assure (models.Model):
         compute='_compute_debut_fin_assure',
         help="Date de fin prévue de la couverture en rapport avec le délai de validité de la police."
     )
+    # ANTECEDANTS MEDICAUX
+    antecedent_ids = fields.Many2many(
+        comodel_name="proximas.pathologie",
+        relation='antecedents_assure',
+        string="Antécédents médicaux",
+        domain=[
+            ('est_risque', '=', True),
+        ],
+        help="Veuillez Indiquer le/les pathologie(s) à risque liées à l'assuré.",
+    )
     # DETAILS SINISTRES ASSURE
     prise_charge_ids = fields.One2many(
         comodel_name="proximas.prise.charge",

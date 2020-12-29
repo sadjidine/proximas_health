@@ -359,6 +359,28 @@
                </form>
            </field>
         </record>
+        <!-- PATHOLOGIE Search view -->
+        <record id="proximas_pathologie_search_view" model="ir.ui.view">
+            <field name="name">proximas pathologie search</field>
+            <field name="model">proximas.pathologie</field>
+            <field name="arch" type="xml">
+                <search string="Pathologie Médicales">
+                    <field name="name"/>
+                    <field name="libelle"/>
+                    <field name="specialite_id"/>
+                    <field name="est_risque"/>
+                    <newline />
+                    <group expand="0" string="Groupé par...">
+                        <filter string="Spécialité"
+                                domain="[]"
+                                context="{'group_by':'specialite_id'}" />
+                        <filter string="Chronique"
+                                domain="[]"
+                                context="{'est_risque':True}" />
+                    </group>
+                </search>
+            </field>
+        </record>
         <!-- PATHOLOGIE List view -->
         <record id="proximas_pathologie_view_list" model="ir.ui.view">
            <field name="name">pathologie list view</field>

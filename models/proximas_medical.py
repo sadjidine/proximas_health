@@ -171,10 +171,10 @@ class Pathologie(models.Model):
         string="Specialité",
     )
     est_risque = fields.Boolean(
-        string="Pathologie à risque?",
-        help="Cochez si la pathologie est à risque",
+        string="Pathologie chronique?",
+        help="Cochez si la pathologie est considérée comme à risque (chronique)",
     )
-    active = fields.Boolean (default=True)
+    active = fields.Boolean(default=True)
     note = fields.Text(
         string="Notes et Observations",
     )

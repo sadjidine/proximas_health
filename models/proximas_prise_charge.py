@@ -69,6 +69,7 @@ class PriseEnCharge(models.Model):
     )
     pathologie_ids = fields.Many2many(
         comodel_name="proximas.pathologie",
+        relation='pathologies_prise_charge',
         string="Affections Associées",
         help='Veuillez Indiquer les affections associées à la pathologie principale.',
         required=False,
