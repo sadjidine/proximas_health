@@ -64,7 +64,7 @@
                 <field name="police_id"/>
                 <field name="prestataire"/>
                 <field name="date_execution"/>
-                <field name="exercice_id"/>
+                <!--<field name="exercice_id"/>-->
                 <field name="code_id" />
                 <field name="nom"/>
                 <field name="prenoms"/>
@@ -492,6 +492,46 @@
                                 </group>
                             </group>
                         </page>
+                        <page string="ANTECEDENTS MEDICAUX - ASSURE">
+                            <group col="4" colspan="2">
+                                <field name="antecedent_pathologies_ids"
+                                       string="Pathologies Chroniques"
+                                       widget="many2many_list"
+                                       class="bg-success">
+                                    <form>
+                                        <sheet>
+                                            <group col="4" colspan="2">
+                                                <field name="name" readonly="1"
+                                                       string="Code"/>
+                                                <field name="libelle" readonly="1"/>
+                                                <field name="specialite_id"
+                                                       options='{"no_open": True, "no_create": True}'
+                                                       string="Spécialité médicale" readonly="1"/>
+                                                <field name="est_risque"  readonly="1"
+                                                       string="Chronique?"/>
+                                            </group>
+                                        </sheet>
+                                    </form>
+                                    <tree create="0" edit="0" delete="0">
+                                        <!--<field name="name" string="Code"/>-->
+                                        <field name="libelle"/>
+                                        <!--<field name="specialite_id" string="Spécialité médicale"/>-->
+                                    </tree>
+                                </field>
+                            </group>
+                            <group>
+                                <field name="historique_assure_ids"
+                                       string="Antécédents (Historique)"
+                                       widget="one2many_list" class="bg-info text-primary">
+                                    <tree>
+                                         <field name="date_execution" string="Date Prestation "/>
+                                        <field name="details_prestation" string="Soins médicaux / paramédicaux"/>
+                                        <field name="medecin_id" string="Médecin Praticien"/>
+                                        <field name="prestataire" string="Ets. Médical"/>
+                                    </tree>
+                                </field>
+                            </group>
+                        </page>
                         <!--<page string="CONTRÔLE NIVEAU SINISTRALITE / PLAFOND"
                               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin,
                               proximas_medical.group_operator" >
@@ -563,9 +603,9 @@
                                                 <hr/>
                                                 <group col="6" colspan="2" class="bg-info">
                                                     <field name="date_dernier_acte" string="Date Dernier Acte "/>
-                                                    <field name="exercice_id"
-                                                           string="Exercice SAM"
-                                                           options='{"no_open": True, "no_create": True}'/>
+                                                    <!--<field name="exercice_id"-->
+                                                           <!--string="Exercice SAM"-->
+                                                           <!--options='{"no_open": True, "no_create": True}'/>-->
                                                      <field name="delai_prestation"/>
                                                 </group>
                                                 <hr/>
@@ -642,7 +682,7 @@
                                         </notebook>
                                     </sheet>
                                 </form>
-                                <tree default_order="date_execution asc">
+                                <tree default_order="date_execution desc">
                                     <!--<field name="pec_id"/>-->
                                     <field name="date_execution"/>
                                     <!--<field name="pool_medical_id"/>-->
@@ -753,7 +793,7 @@
                                         </notebook>
                                     </sheet>
                                 </form>
-                                <tree default_order="date_demande asc">
+                                <tree default_order="date_demande desc">
                                     <!--<field name="pec_id"/>-->
                                     <field name="date_demande"/>
                                     <!--<field name="pool_medical_id"/>-->
@@ -870,9 +910,9 @@
                                                 <hr/>
                                                 <group col="6" colspan="2" class="bg-warning">
                                                     <field name="date_dernier_acte" string="Date Dernier Acte"/>
-                                                    <field name="exercice_id"
-                                                           string="Exercice SAM"
-                                                           options='{"no_open": True, "no_create": True}'/>
+                                                    <!--<field name="exercice_id"-->
+                                                           <!--string="Exercice SAM"-->
+                                                           <!--options='{"no_open": True, "no_create": True}'/>-->
                                                     <field name="arret_prestation" readonly="1"/>
                                                 </group>
                                                 <hr/>
@@ -961,7 +1001,7 @@
                                         </div>
                                     </sheet>-->
                                 </form>
-                                <tree default_order="date_execution asc" create="0">
+                                <tree default_order="date_execution desc" create="0">
                                     <!--<field name="date_demande"/>-->
                                     <field name="date_execution"/>
                                     <field name="prestation_demande_id"/>
@@ -1147,9 +1187,9 @@
                                                            readonly="1"
                                                     />
                                                     <field name="date_dernier_acte" string="Date Dernier Acte"/>
-                                                    <field name="exercice_id"
-                                                           string="Exercice SAM"
-                                                           options='{"no_open": True, "no_create": True}'/>
+                                                    <!--<field name="exercice_id"-->
+                                                           <!--string="Exercice SAM"-->
+                                                           <!--options='{"no_open": True, "no_create": True}'/>-->
                                                 </group>
                                                 <group col="6" colspan="2">
                                                     <field name="quantite_livre" required="1"/>
@@ -1303,9 +1343,9 @@
                                                            readonly="1"
                                                     />
                                                     <field name="date_dernier_acte" string="Date Dernier Acte"/>
-                                                    <field name="exercice_id"
-                                                           string="Exercice SAM"
-                                                           options='{"no_open": True, "no_create": True}'/>
+                                                    <!--<field name="exercice_id"-->
+                                                           <!--string="Exercice SAM"-->
+                                                           <!--options='{"no_open": True, "no_create": True}'/>-->
                                                 </group>
                                                 <group col="6" colspan="2" string="Détails Coûts du Médicament &amp; Montants annexes">
                                                     <field name="quantite_livre" required="1"/>

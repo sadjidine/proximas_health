@@ -146,12 +146,22 @@ class PriseEnCharge(models.Model):
             ('date_execution', '!=', None),
         ]
     )
-    # details_pec_assure_ids = fields.One2many (
-    #     comodel_name="proximas.details.pec",
-    #     string="Détails PEC - Assuré",
-    #     related='assure_id.details_pec_ids',
-    #     readonly=True,
-    # )
+    antecedent_pathologies_ids = fields.Many2many(
+        related="assure_id.antecedent_pathologies_ids",
+        readonly=True,
+    )
+    historique_assure_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        string="Antécédents Médicaux - Assuré",
+        related='assure_id.historique_assure_ids',
+        readonly=True,
+    )
+    details_pec_assure_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        string="Détails PEC - Contrat",
+        related='assure_id.details_pec_ids',
+        readonly=True,
+    )
     # details_pec_contrat_ids = fields.One2many(
     #     comodel_name="proximas.details.pec",
     #     string="Détails PEC - Contrat",
@@ -349,12 +359,6 @@ class PriseEnCharge(models.Model):
         related='adherent.matricule',
         readonly=True,
     )
-    # Compteur de suivi de prises en charges (individu / famille)
-    # structure_id = fields.Many2one(
-    #     comodel_name="res.company",
-    #     string="Organisation",
-    #     related='police_id.structure_id',
-    # )
     plafond_individu = fields.Float(
         string="Plafond individu",
         digits=(9, 0),
@@ -2278,7 +2282,7 @@ class DetailsPec(models.Model):
     )
     structure_id = fields.Many2one(
         string="Organisation",
-        related='contrat_id.structure_id',
+        related='pec_id.structure_id',
         readonly=True,
     )
     mt_encaisse_cro = fields.Float(
@@ -2666,48 +2670,43 @@ class DetailsPec(models.Model):
         required=False,
     )
     # Champs relatifs à l'exercice
-    exercice_id = fields.Many2one(
-        comodel_name="proximas.exercice",
-        string="Exercice SAM",
-        compute='_get_exo_sam',
-        # store=True,
-    )
-    date_debut_exo = fields.Date(
-        string="Date début Exo.",
-        related='exercice_id.date_debut',
-        readonly=True,
-    )
-    date_fin_exo = fields.Date(
-        string="Date fin Exo.",
-        related='exercice_id.date_fin',
-        readonly=True,
-    )
-    cloture_exo = fields.Boolean(
-        string="Cloturé?",
-        related='exercice_id.cloture',
-        readonly=True,
-    )
-    en_cours_exo = fields.Boolean(
-        string="En Cours?",
-        related='exercice_id.en_cours',
-        readonly=True,
-    )
-    # exo_id = fields.Integer(
-    #     string="Exo. SAM",
-    #     related='exercice_id.id',
+    # exercice_id = fields.Many2one(
+    #     comodel_name="proximas.exercice",
+    #     string="Exercice SAM",
+    #     compute='_get_exercice_sam',
+    #     # store=True,
+    # )
+    # date_debut_exo = fields.Date(
+    #     string="Date début Exo.",
+    #     related='exercice_id.date_debut',
+    #     readonly=True,
+    # )
+    # date_fin_exo = fields.Date(
+    #     string="Date fin Exo.",
+    #     related='exercice_id.date_fin',
+    #     readonly=True,
+    # )
+    # cloture_exo = fields.Boolean(
+    #     string="Cloturé?",
+    #     related='exercice_id.cloture',
+    #     readonly=True,
+    # )
+    # en_cours_exo = fields.Boolean(
+    #     string="En Cours?",
+    #     related='exercice_id.en_cours',
+    #     readonly=True,
+    # )
+    # exo_name = fields.Char(
+    #     string="Exercice",
+    #     related='exercice_id.name',
+    #     readonly=True,
     #     store=True,
     # )
-    exo_name = fields.Char(
-        string="Exercice",
-        related='exercice_id.name',
-        readonly=True,
-        store=True,
-    )
-    res_company_id = fields.Many2one(
-        string="Structure",
-        related='exercice_id.res_company_id',
-        readonly=True,
-    )
+    # res_company_id = fields.Many2one(
+    #     string="Structure",
+    #     related='exercice_id.res_company_id',
+    #     readonly=True,
+    # )
     totaux_rubrique_assure = fields.Float (
         string="S/Totaux/Rubrique - Asuré",
         digits=(6, 0),
@@ -5339,39 +5338,60 @@ class DetailsPec(models.Model):
                     ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
                 )
 
-    @api.one
-    @api.depends('date_execution', 'date_demande')
-    def _get_exo_sam(self):
+    # @api.one
+    # @api.depends('police_id', 'structure_id', 'prestation_id', 'date_execution', 'date_demande')
+    # def _get_exercice_sam(self):
+    #     exercices = self.env['proximas.exercice'].search ([
+    #         ('res_company_id', '=', self.structure_id.id),
+    #         ('cloture', '=', False),
+    #     ])
+    #     if bool (exercices):
+    #         for exo in exercices:
+    #             date_debut = fields.Date.from_string (exo.date_debut)
+    #             date_fin = fields.Date.from_string (exo.date_fin)
+    #             if bool (self.date_execution) and not bool (self.date_demande):
+    #                 date_execution = fields.Date.from_string (self.date_execution)
+    #                 if date_debut <= date_execution <= date_fin:
+    #                     self.exercice_id = exo.id
+    #             elif bool (self.date_execution) and bool (self.date_demande):
+    #                 date_execution = fields.Date.from_string (self.date_execution)
+    #                 if date_debut <= date_execution <= date_fin:
+    #                     self.exercice_id = exo.id
+    #             elif bool (self.date_demande):
+    #                 date_demande = fields.Date.from_string (self.date_demande)
+    #                 if date_debut <= date_demande <= date_fin:
+    #                     self.exercice_id = exo.id
+    #             elif bool (exo.en_cours):
+    #                 self.exercice_id = exo.id
+
+    @api.onchange('date_execution', 'date_demande')
+    def _check_exo_sam(self):
         exercices = self.env['proximas.exercice'].search ([
             ('res_company_id', '=', self.structure_id.id),
             ('cloture', '=', False),
         ])
+        exercice_id = 0
         if bool(exercices):
             for exo in exercices:
                 date_debut = fields.Date.from_string(exo.date_debut)
                 date_fin = fields.Date.from_string(exo.date_fin)
-                if bool(self.date_execution) and not bool(self.date_demande):
+                if self.date_execution and not self.date_demande:
                     date_execution = fields.Date.from_string(self.date_execution)
                     if date_debut <= date_execution <= date_fin:
-                        self.exercice_id = exo.id
-                elif bool(self.date_execution) and bool(self.date_demande):
+                        exercice_id = exo.id
+                elif self.date_execution and self.date_demande:
                     date_execution = fields.Date.from_string(self.date_execution)
                     if date_debut <= date_execution <= date_fin:
-                        self.exercice_id = exo.id
-                elif bool(self.date_demande):
+                        exercice_id = exo.id
+                elif self.date_demande and not self.date_execution:
                     date_demande = fields.Date.from_string(self.date_demande)
                     if date_debut <= date_demande <= date_fin:
-                        self.exercice_id = exo.id
-
-    # @api.depends('police_id', 'structure_id', 'prestation_id')
-    #@api.onchange('date_execution', 'date_demande')
-    # @api.multi
-    @api.onchange('date_execution', 'date_demande')
-    def _check_exo_sam(self):
-        exo = self.exercice_id
+                        exercice_id = exo.id
+                elif bool(exo.en_cours):
+                    exercice_id = exo.id
         date_demande_acte = self.date_demande
         date_execution_acte = self.date_execution
-        if date_execution_acte and not exo:
+        if date_execution_acte and not exercice_id:
             date_execution = fields.Datetime.from_string (self.date_execution)
             date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
             raise UserError (_ (
@@ -5382,7 +5402,7 @@ class DetailsPec(models.Model):
                 Pour plus d'informations, veuillez contactez l'administrateur..."
             ) % date_execution_format
                              )
-        elif date_demande_acte and not exo:
+        elif date_demande_acte and not exercice_id:
             date_demande = fields.Datetime.from_string (self.date_demande)
             date_demande_format = datetime.strftime (date_demande, '%d/%m/%Y')
             raise UserError (_ (
@@ -5394,32 +5414,56 @@ class DetailsPec(models.Model):
             ) % date_demande_format
                              )
 
-    # @api.constrains('exercice_id', 'date_execution', 'date_demande')
-    # def validate_exo_sam(self):
-    #     for rec in self:
-    #         if rec.date_execution and not bool(rec.exercice_id):
-    #             date_execution = fields.Datetime.from_string(self.date_execution)
-    #             date_execution_format = datetime.strftime(date_execution, '%d-%m-%Y')
-    #             raise ValidationError (_ (
-    #                 u"Proximaas : Contrôle de Règles de Gestion:\n \
-    #                 La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
-    #                 paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
-    #                 offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-    #                 Pour plus d'informations, veuillez contactez l'administrateur..."
-    #             ) % date_execution_format
-    #                                    )
-    #         elif rec.date_demande and not bool (rec.exercice_id):
-    #             date_demande = fields.Datetime.from_string (self.date_demande)
-    #             date_demande_format = datetime.strftime (date_demande, '%d-%m-%Y')
-    #             raise ValidationError (_ (
-    #                 u"Proximaas : Contrôle de Règles de Gestion:\n \
-    #                 La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
-    #                 paramétrés à cet effet ou l'exercice concerné est  clôturé. Par conséquent, les prestations\
-    #                 offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
-    #                 Pour plus d'informations, veuillez contactez l'administrateur..."
-    #             ) % date_demande_format
-    #                                    )
-
+    @api.constrains('date_demande', 'date_execution')
+    def _validate_exo_sam(self):
+        for rec in self:
+            exercices = self.env['proximas.exercice'].search ([
+                ('res_company_id', '=', rec.structure_id.id),
+                ('cloture', '=', False),
+            ])
+            exercice_id = 0
+            if bool (exercices):
+                for exo in exercices:
+                    date_debut = fields.Date.from_string (exo.date_debut)
+                    date_fin = fields.Date.from_string (exo.date_fin)
+                    if rec.date_execution and not rec.date_demande:
+                        date_execution = fields.Date.from_string (rec.date_execution)
+                        if date_debut <= date_execution <= date_fin:
+                            exercice_id = exo.id
+                    elif rec.date_execution and rec.date_demande:
+                        date_execution = fields.Date.from_string (rec.date_execution)
+                        if date_debut <= date_execution <= date_fin:
+                            exercice_id = exo.id
+                    elif rec.date_demande and not rec.date_execution:
+                        date_demande = fields.Date.from_string (rec.date_demande)
+                        if date_debut <= date_demande <= date_fin:
+                            exercice_id = exo.id
+                    elif bool (exo.en_cours):
+                        exercice_id = exo.id
+            date_demande_acte = rec.date_demande
+            date_execution_acte = rec.date_execution
+            if date_execution_acte and not exercice_id:
+                date_execution = fields.Datetime.from_string (rec.date_execution)
+                date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion:\n \
+                    La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
+                    paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
+                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % date_execution_format
+                                 )
+            elif date_demande_acte and not exercice_id:
+                date_demande = fields.Datetime.from_string (rec.date_demande)
+                date_demande_format = datetime.strftime (date_demande, '%d/%m/%Y')
+                raise UserError (_ (
+                    u"Proximaas : Contrôle de Règles de Gestion:\n \
+                    La date de la demande renseignée ici: %s n'est conforme à aucun des exercices \
+                    paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
+                    offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
+                    Pour plus d'informations, veuillez contactez l'administrateur..."
+                ) % date_demande_format
+                                 )
 
     sql_constraints = [
         (

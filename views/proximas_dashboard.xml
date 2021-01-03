@@ -131,7 +131,7 @@
                 >
                     <field name="num_pec"/>
                     <field name="facture_id"/>
-                    <field name="exercice_id"/>
+                    <!--<field name="exercice_id"/>-->
                     <field name="police_id"/>
                     <field name="date_execution"/>
                     <field name="code_id"/>
@@ -173,7 +173,7 @@
                     <field name="police_id"/>
                     <field name="num_pec"/>
                     <field name="date_execution"/>
-                    <field name="exo_name"/>
+                    <!--<field name="exo_name"/>-->
                     <field name="prestataire"/>
                     <field name="medecin_traitant"/>
                     <field name="prestation_id"/>
@@ -222,11 +222,6 @@
                             icon="terp-partner"
                             domain="[]"
                             context="{'group_by':'police_id'}"
-                    />
-                    <filter string="Exercice"
-                            icon="terp-partner"
-                            domain="[]"
-                            context="{'group_by':'exo_name'}"
                     />
                     <filter string="Prestation"
                             icon="terp-partner"

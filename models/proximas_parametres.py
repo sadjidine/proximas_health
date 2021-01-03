@@ -22,7 +22,6 @@ class ResCompany(models.Model):
         comodel_name="proximas.exercice",
         inverse_name="res_company_id",
         string="Exercices",
-        required=True,
     )
     note = fields.Text(
         string="Notes et Observations",
@@ -181,11 +180,10 @@ class Exercice(models.Model):
         string="Notes et Observations",
     )
 
-
     @api.onchange('en_cours')
     def _check_en_cours(self):
         nbre_encours = self.search_count([('en_cours', '=', True)])
-        if nbre_encours >= 1:
+        if nbre_encours > 1:
             raise UserError(_(
                 "Proximaas: Contrôle Règles de Gestion - Exercice en cours:\n Il ne peut y avoir plus d'un exercice \
                  en cours. Vérifiez si vous n'avez pas fixé plus d'un exercice en cours. Pour plus d'informations, \

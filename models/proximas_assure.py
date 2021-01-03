@@ -242,7 +242,7 @@ class Assure (models.Model):
     age_entier = fields.Integer(
         string='Age assuré',
         compute='_compute_age_entier',
-        store=True,
+        # store=True,
     )
     tranche_age = fields.Selection(
         string="Tranche d'âge",
@@ -260,7 +260,7 @@ class Assure (models.Model):
             ('10', '+60'),
         ],
         compute='_check_tranche_age',
-        store=True,
+        # store=True,
     )
     est_invalide = fields.Boolean(
         # disponible uniquement pour le statut_familial = Enfant
@@ -386,14 +386,23 @@ class Assure (models.Model):
         help="Date de fin prévue de la couverture en rapport avec le délai de validité de la police."
     )
     # ANTECEDANTS MEDICAUX
-    antecedent_ids = fields.Many2many(
+    antecedent_pathologies_ids = fields.Many2many(
         comodel_name="proximas.pathologie",
-        relation='antecedents_assure',
-        string="Antécédents médicaux",
+        relation='antecedents_pathologie_assure',
+        string="Pathologie(s) Chronique(s)",
         domain=[
             ('est_risque', '=', True),
         ],
         help="Veuillez Indiquer le/les pathologie(s) à risque liées à l'assuré.",
+    )
+    historique_assure_ids = fields.One2many(
+        comodel_name="proximas.details.pec",
+        inverse_name="assure_id",
+        string="Détails PEC",
+        domain=[
+            ('date_execution', '!=', None),
+            ('produit_phcie_id', '=', None),
+        ], ordrer="date_execution desc", limit=10,
     )
     # DETAILS SINISTRES ASSURE
     prise_charge_ids = fields.One2many(
@@ -401,7 +410,7 @@ class Assure (models.Model):
         inverse_name="assure_id",
         string="Prises en charge",
     )
-    details_pec_ids = fields.One2many(
+    details_pec_ids = fields.One2many (
         comodel_name="proximas.details.pec",
         inverse_name="assure_id",
         string="Détails PEC",
@@ -612,7 +621,7 @@ class Assure (models.Model):
             self.jours_activation = int (delta.days)
 
     @api.one
-    @api.depends('prise_charge_ids', 'details_pec_ids', 'details_phcie_ids')
+    # @api.depends('prise_charge_ids', 'details_pec_ids', 'details_phcie_ids')
     def _compute_sinistres_assure(self):
         self.ensure_one()
         if self.details_pec_ids:
@@ -647,31 +656,32 @@ class Assure (models.Model):
         if self.plafond_individu:
             self.taux_sinistre_plafond_assure = self.mt_sinistres_assure_encours * 100 / self.plafond_individu
 
-    #@api.depends('date_naissance', 'age')
+    @api.one
+    @api.depends('age', 'age_entier')
     def _check_tranche_age(self):
-        if bool(self.age):
-            if self.age <= 0:
-                self.tranche_age = '0'
-            elif self.age == 1:
-                self.tranche_age = '1'
-            elif 2 <= self.age <= 5:
-                self.tranche_age = '2'
-            elif 6 <= self.age <= 10:
-                self.tranche_age = '3'
-            elif 11 <= self.age <= 15:
-                self.tranche_age = '4'
-            elif 16 <= self.age <= 20:
-                self.tranche_age = '5'
-            elif 21 <= self.age <= 30:
-                self.tranche_age = '6'
-            elif 31 <= self.age <= 40:
-                self.tranche_age = '7'
-            elif 41 <= self.age <= 50:
-                self.tranche_age = '8'
-            elif 51 <= self.age <= 60:
-                self.tranche_age = '9'
-            elif self.age > 60:
-                self.tranche_age = '10'
+        age = int (self.age)
+        if age <= 0:
+            self.tranche_age = '0'
+        elif age == 1:
+            self.tranche_age = '1'
+        elif 2 <= age <= 5:
+            self.tranche_age = '2'
+        elif 6 <= age <= 10:
+            self.tranche_age = '3'
+        elif 11 <= age <= 15:
+            self.tranche_age = '4'
+        elif 16 <= age <= 20:
+            self.tranche_age = '5'
+        elif 21 <= age <= 30:
+            self.tranche_age = '6'
+        elif 31 <= age <= 40:
+            self.tranche_age = '7'
+        elif 41 <= age <= 50:
+            self.tranche_age = '8'
+        elif 51 <= age <= 60:
+            self.tranche_age = '9'
+        elif age > 60:
+            self.tranche_age = '10'
 
     @api.multi
     def _check_details_pec(self):
@@ -871,11 +881,10 @@ class Assure (models.Model):
                 rec_id.age_details = years_months_days
 
     @api.multi
-    @api.depends ('age')
+    #@api.depends ('age')
     def _compute_age_entier(self):
         for rec in self:
-            if bool (rec.age):
-                rec.age_entier = int (rec.age)
+            rec.age_entier = int(rec.age)
 
     @api.multi
     def action_invalidate(self):

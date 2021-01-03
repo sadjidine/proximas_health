@@ -565,7 +565,7 @@
                         <page string="INFOS DETAILS ASSURE">
                             <group col="6" colspan="2">
                                <field name="date_naissance"/>
-                               <field name="age"/>
+                               <field name="age_entier"/>
                                <field name="genre" widget="radio" options="{'horizontal': true}"/>
                                <field name="groupe_sanguin"/>
                                <field name="quartier"/>
@@ -651,19 +651,19 @@
                             </group>-->
                         </page>
                         <page string="ANTECEDENTS MEDICAUX">
-                            <field name="antecedent_ids"
+                            <field name="antecedent_pathologies_ids"
                                    options='{"no_create": True}'
                                    widget="many2many">
                                 <form>
                                     <sheet>
                                         <group col="4" colspan="2">
-                                            <field name="name" readonly="1"
-                                                   string="Code"/>
+                                            <field name="name"
+                                                   string="Code" readonly="1"/>
                                             <field name="libelle" readonly="1"/>
-                                            <field name="specialite_id"
+                                            <field name="specialite_id" readonly="1"
                                                    options='{"no_open": True, "no_create": True}'
-                                                   string="Spécialité médicale" readonly="1"/>
-                                            <field name="est_risque"  readonly="1"
+                                                   string="Spécialité médicale" />
+                                            <field name="est_risque" readonly="1"
                                                    string="Chronique?"/>
                                         </group>
                                     </sheet>
