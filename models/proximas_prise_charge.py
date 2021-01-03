@@ -2676,37 +2676,6 @@ class DetailsPec(models.Model):
     #     compute='_get_exercice_sam',
     #     # store=True,
     # )
-    # date_debut_exo = fields.Date(
-    #     string="Date début Exo.",
-    #     related='exercice_id.date_debut',
-    #     readonly=True,
-    # )
-    # date_fin_exo = fields.Date(
-    #     string="Date fin Exo.",
-    #     related='exercice_id.date_fin',
-    #     readonly=True,
-    # )
-    # cloture_exo = fields.Boolean(
-    #     string="Cloturé?",
-    #     related='exercice_id.cloture',
-    #     readonly=True,
-    # )
-    # en_cours_exo = fields.Boolean(
-    #     string="En Cours?",
-    #     related='exercice_id.en_cours',
-    #     readonly=True,
-    # )
-    # exo_name = fields.Char(
-    #     string="Exercice",
-    #     related='exercice_id.name',
-    #     readonly=True,
-    #     store=True,
-    # )
-    # res_company_id = fields.Many2one(
-    #     string="Structure",
-    #     related='exercice_id.res_company_id',
-    #     readonly=True,
-    # )
     totaux_rubrique_assure = fields.Float (
         string="S/Totaux/Rubrique - Asuré",
         digits=(6, 0),
@@ -5337,32 +5306,6 @@ class DetailsPec(models.Model):
                     veuillez contactez l'administrateur..."
                     ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
                 )
-
-    # @api.one
-    # @api.depends('police_id', 'structure_id', 'prestation_id', 'date_execution', 'date_demande')
-    # def _get_exercice_sam(self):
-    #     exercices = self.env['proximas.exercice'].search ([
-    #         ('res_company_id', '=', self.structure_id.id),
-    #         ('cloture', '=', False),
-    #     ])
-    #     if bool (exercices):
-    #         for exo in exercices:
-    #             date_debut = fields.Date.from_string (exo.date_debut)
-    #             date_fin = fields.Date.from_string (exo.date_fin)
-    #             if bool (self.date_execution) and not bool (self.date_demande):
-    #                 date_execution = fields.Date.from_string (self.date_execution)
-    #                 if date_debut <= date_execution <= date_fin:
-    #                     self.exercice_id = exo.id
-    #             elif bool (self.date_execution) and bool (self.date_demande):
-    #                 date_execution = fields.Date.from_string (self.date_execution)
-    #                 if date_debut <= date_execution <= date_fin:
-    #                     self.exercice_id = exo.id
-    #             elif bool (self.date_demande):
-    #                 date_demande = fields.Date.from_string (self.date_demande)
-    #                 if date_debut <= date_demande <= date_fin:
-    #                     self.exercice_id = exo.id
-    #             elif bool (exo.en_cours):
-    #                 self.exercice_id = exo.id
 
     @api.onchange('date_execution', 'date_demande')
     def _check_exo_sam(self):
