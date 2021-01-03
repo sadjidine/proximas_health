@@ -843,8 +843,7 @@ class PriseEnCharge(models.Model):
             self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
         elif self.mt_encaisse_phcie_dispense:
             self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
-        self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense if self.mt_encaisse_phcie_dispense \
-            else self.mt_encaisse_phcie
+        self.tot_encaisse_phcie = self.mt_encaisse_phcie if self.mt_encaisse_phcie else self.mt_encaisse_phcie_dispense
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
