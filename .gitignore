@@ -116,6 +116,7 @@ venv.bak/
 
 # IntelliJ Idea project settings
 .idea
+.idea/
 
 # Rope project settings
 .ropeproject
