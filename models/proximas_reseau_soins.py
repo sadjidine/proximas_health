@@ -605,7 +605,7 @@ class SmsUser(models.Model):
     )
     mobile = fields.Char(
         string="Num. Mobile",
-        size=11,
+        size=13,
         required=True,
         help="Numéro de téléphone mobile pour l'envoi et la réception de SMS. format international:- Ex.(:22501010101).",
     )

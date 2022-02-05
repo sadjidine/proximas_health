@@ -171,10 +171,10 @@ class Pathologie(models.Model):
         string="Specialité",
     )
     est_risque = fields.Boolean(
-        string="Pathologie chronique?",
-        help="Cochez si la pathologie est considérée comme à risque (chronique)",
+        string="Pathologie à risque?",
+        help="Cochez si la pathologie est à risque",
     )
-    active = fields.Boolean(default=True)
+    active = fields.Boolean (default=True)
     note = fields.Text(
         string="Notes et Observations",
     )
@@ -400,7 +400,6 @@ class FormeGalenique(models.Model):
 class VoieTherapeutique(models.Model):
     _name = 'proximas.voie.therapeutique'
     _description = 'Voie therapeutique'
-
 
     sequence = fields.Integer(
         string="Sequence"

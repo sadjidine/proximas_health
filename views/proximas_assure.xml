@@ -105,6 +105,7 @@
                         <page string="DETAILS INFOS - AYANT-DROIT">
                             <group name="data">
                                 <group name="main">
+                                    <field name="contrat_id"/>
                                     <field name="statut" required="1"/>
                                     <field name="date_naissance" required="1"/>
                                     <field name="age" />

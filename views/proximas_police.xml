@@ -806,7 +806,7 @@
                                   <group col="8" colspan="2">
                                      <field name="mode_controle_plafond" required="1"/>
                                      <field name="mt_droit_adhesion"/>
-                                     <field name="droit_adhesion_individu"/>
+                                      <!--<field name="droit_adhesion_individu"/>-->
                                      <field name="mt_prime_police" string="Prime Contrat"/>
                                      <field name="retard_cotisation"/>
                                      <field name="mt_forfait_accouchement"/>
@@ -818,8 +818,6 @@
                                      <field name="controle_genre"/>
                                      <field name="controle_retard_cotisation" string="Contrôle/retard cotisation"/>
                                      <field name="validite_pec" string="Délai validité PEC"/>
-                                     <field name="nbre_prescription_maxi"/>
-                                     <field name="mt_plafond_prescription"/>
                                      <field name="tx_couv_public_couvert" string="Taux Remb. Public Couvert"/>
                                      <field name="tx_couv_public" string="Taux Couv. Public"/>
                                      <field name="tx_couv_prive_couvert" string="Taux Remb. Privé Couvert"/>
@@ -830,6 +828,9 @@
                                      <field name="mt_plafond_remb_individu" string="Plafonc/individu Remb."/>
                                      <field name="mt_plafond_remb_famille" string="Plafond Remb./Famille"/>
                                      <field name="mt_plafond_remb_demande" string="Plafond Remb./Demande"/>
+                                     <field name="nbre_prescription_maxi"/>
+                                     <field name="mt_plafond_prescription"/>
+                                     <field name="mt_plafond_produit_phcie"/>
                                      <field name="marge_medicament"/>
                                      <field name="age_limite_adherent"/>
                                      <field name="age_limite_conjoint"/>

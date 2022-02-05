@@ -240,15 +240,13 @@
                                                               domain="[('prestataire_id', '=', prestataire_rembourse_id),
                                                               ('active', '=', True)]"/>
                                                        <field name="date_execution" required="1"/>
-                                                       <!--<field name="exercice_id"-->
-                                                              <!--options='{"no_open": True, "no_create": True}'-->
-                                                              <!--readonly="1"-->
-                                                       <!--/>-->
+                                                       <field name="exo_sam"/>
                                                        <field name="name" readonly="1"/>
                                                        <field name="age"/>
                                                    </group>
                                                    <hr/>
                                                    <group col="6" colspan="2">
+                                                       <!--<field name="structure_id"/>-->
                                                        <field name="genre"/>
                                                        <field name="date_naissance"/>
                                                        <field name="statut_familial"/>

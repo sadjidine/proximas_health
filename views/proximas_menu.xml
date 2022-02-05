@@ -446,11 +446,11 @@
               parent="proximas_misc_parametrage"
               sequence="4032"
               action="proximas_groupe_action" />
-    <menuitem id="proximas_parametrage_district"
-              name=">> Gestion de Districts"
-              parent="proximas_misc_parametrage"
-              sequence="4033"
-              action="proximas_district_action" />
+    <!--<menuitem id="proximas_parametrage_district"-->
+              <!--name=">> Gestion de Districts"-->
+              <!--parent="proximas_misc_parametrage"-->
+              <!--sequence="4033"-->
+              <!--action="proximas_district_action" />-->
     <menuitem id="proximas_parametrage_region"
               name=">> Gestion de Régions"
               parent="proximas_misc_parametrage"

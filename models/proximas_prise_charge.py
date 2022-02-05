@@ -1996,6 +1996,13 @@ class DetailsPec(models.Model):
         related='pec_id.marge_medicament',
         readonly=True,
     )
+    mt_plafond_produit_phcie = fields.Float(
+        string='Mt. Plafond/Médicament',
+        help="Montant du plafond sur le coût des produits pharmaceutiques",
+        digits=(5, 0),
+        related='police_id.mt_plafond_produit_phcie',
+        readonly=True,
+    )
     marge_medicament_produit = fields.Float (
         string='Marge/Produit Phcie.',
         help="Marge tolérée sur le coût du médicament",
@@ -2281,7 +2288,7 @@ class DetailsPec(models.Model):
     )
     structure_id = fields.Many2one(
         string="Organisation",
-        related='pec_id.structure_id',
+        related='police_id.structure_id',
         readonly=True,
     )
     mt_encaisse_cro = fields.Float(
@@ -2675,6 +2682,17 @@ class DetailsPec(models.Model):
     #     compute='_get_exercice_sam',
     #     # store=True,
     # )
+    exo_sam = fields.Char(
+        string="Exercice SAM",
+        compute='_get_exercice_sam',
+        store=True,
+        required=False,
+    )
+    en_cours_exo = fields.Boolean (
+        string="Exo en cours",
+        compute='_get_exercice_sam',
+        store=True,
+    )
     totaux_rubrique_assure = fields.Float (
         string="S/Totaux/Rubrique - Asuré",
         digits=(6, 0),
@@ -3079,7 +3097,7 @@ class DetailsPec(models.Model):
                 }
                 return action
 
-    @api.constrains('accord_prealable')
+    @api.constrains('accorde', 'non_accorde')
     def _validate_accord_prealable(self):
         for rec_id in self:
             if bool(rec_id.accord_prealable):
@@ -3239,7 +3257,7 @@ class DetailsPec(models.Model):
                 )
 
     @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                    'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id', 'prestataire_rembourse_id')
+                    'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id')
     def _valide_prestation_id(self):
         for rec in self:
             if bool(rec.prestation_demande_id) and bool (rec.prestataire_crs_id) and bool(rec.pool_medical_crs_id):
@@ -4147,7 +4165,7 @@ class DetailsPec(models.Model):
     @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
                  'prestataire_public', 'zone_couverte', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
-        self.ensure_one()
+        # self.ensure_one()
         if bool(self.prestation_id):
             # Vérifier si la prestation est identifiée
             controle_rubrique = self.env['proximas.controle.rubrique'].search([
@@ -4201,8 +4219,9 @@ class DetailsPec(models.Model):
             if bool (code_medical_police):
                 plafond = int (code_medical_police.mt_plafond)
             self.mt_plafond = plafond
+            plafond_produit_phcie = int(self.mt_plafond_produit_phcie)
 
-            if bool (self.substitut_phcie_id):
+            if bool(self.substitut_phcie_id):
                 # Cas de substitution de produit pharmacie (médicaments)
                 prix_substitut = int (self.prix_indicatif_substitut)
                 prix_produit = int (self.prix_indicatif_produit)
@@ -4220,9 +4239,13 @@ class DetailsPec(models.Model):
                 quantite = int (self.quantite_livre)
                 quantite_reste = int (quantite_prescrite) - int (quantite)
                 marge_police = int (self.marge_medicament_police)
-                marge_substitut = int (self.marge_medicament_substitut)
+                marge_substitut = int(self.marge_medicament_substitut)
                 prix_majore = 0
-                if 0 < marge_substitut:
+                if 0 < plafond_produit_phcie < cout_produit:
+                    self.cout_total = cout_produit * quantite
+                    self.total_pc = (plafond_produit_phcie * quantite)
+                    self.total_npc = self.cout_total - self.total_pc
+                elif 0 < marge_substitut:
                     prix_majore = int (prix_substitut + marge_substitut)
                 elif 0 < marge_police:
                     prix_majore = int (prix_substitut + marge_police)
@@ -4260,7 +4283,7 @@ class DetailsPec(models.Model):
                         self.cout_total = cout_produit * quantite
                         self.total_pc = self.cout_total  # - self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
-            elif bool (self.produit_phcie_id):
+            elif bool(self.produit_phcie_id):
                 # Cas de produit pharmacie (médicaments)
                 cout_produit = int (self.cout_unite)
                 prix_produit = int (self.prix_indicatif_produit)
@@ -4270,7 +4293,13 @@ class DetailsPec(models.Model):
                 marge_police = int (self.marge_medicament_police)
                 marge_produit = int (self.marge_medicament_produit)
                 prix_majore = 0
-                if 0 < marge_produit:
+                # print(0 < plafond_produit_phcie < cout_produit)
+                if 0 < plafond_produit_phcie < cout_produit:
+                    self.cout_total = cout_produit * quantite
+                    self.total_pc = int(plafond_produit_phcie * quantite)
+                    print(self.total_pc)
+                    self.total_npc = self.cout_total - self.total_pc
+                elif 0 < marge_produit:
                     prix_majore = int (prix_produit + marge_produit)
                 elif 0 < marge_police:
                     prix_majore = int (prix_produit + marge_police)
@@ -4606,24 +4635,24 @@ class DetailsPec(models.Model):
                 self.net_prestataire -= self.mt_exclusion
                 self.net_a_payer = self.net_prestataire
 
-    @api.multi
-    def write(self, values):
-        if self.prestation_id:
-            if self.mt_remboursement:
-                values['net_a_payer'] = self.mt_remboursement
-            elif self.net_prestataire:
-                values['net_a_payer'] = self.net_prestataire
-            else:
-                values['net_a_payer'] = 0
-            # Récupérer le coût unitaire
-            if self.cout_unitaire:
-                values['cout_unite'] = self.cout_unitaire
-            elif self.cout_unit:
-                values['cout_unite'] = self.cout_unit
-            else:
-                values['cout_unite'] = 0
-        res = super(DetailsPec, self).write(values)
-        return res
+    # @api.multi
+    # def write(self, values):
+    #     if self.prestation_id:
+    #         if self.mt_remboursement:
+    #             values['net_a_payer'] = self.mt_remboursement
+    #         elif self.net_prestataire:
+    #             values['net_a_payer'] = self.net_prestataire
+    #         else:
+    #             values['net_a_payer'] = 0
+    #         # Récupérer le coût unitaire
+    #         if self.cout_unitaire:
+    #             values['cout_unite'] = self.cout_unitaire
+    #         elif self.cout_unit:
+    #             values['cout_unite'] = self.cout_unit
+    #         else:
+    #             values['cout_unite'] = 0
+    #     res = super(DetailsPec, self).write(values)
+    #     return res
 
     @api.onchange('substitut_phcie_id', 'cout_unit', 'date_execution', 'quantite_livre', 'mt_paye_assure', 'quantite')
     def _check_quantite_prescription(self):
@@ -4898,7 +4927,7 @@ class DetailsPec(models.Model):
                                     }
                         }
 
-    @api.constrains('prestation_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestataire_rembourse_id')
+    @api.constrains('prestation_id', 'produit_phcie_id', 'substitut_phcie_id')
     def _validate_age_acces_prestation(self):
         # CONTRÖLE AGE MINIMUM & MAXIMUM PRODUITS PHCIE / PRESTATION MEDICALE
         for rec in self:
@@ -4943,51 +4972,198 @@ class DetailsPec(models.Model):
                     ) % (rec.assure_id.name, details_prestation, age_minimum, age_maximum)
                                            )
 
-    @api.one
-    @api.depends('prestation_id', 'date_demande', 'date_execution', 'delai_prestation')
+    @api.mutli
+    @api.onchange('prestation_id', 'date_demande', 'date_execution', 'delai_prestation')
     def _check_delai_attente_prestation(self):
         # Contrôle du délai d'attente Substitut Médicament
-        if bool(self.substitut_phcie_id):
-            # Récupère la date du jour
-            now = datetime.now()
-            substitut_phcie = self.substitut_phcie
-            # Si OUI, y a-t-il un délai d'attente à observer pour le substitut?
-            if 0 < int(self.delai_attente_substitut):
-                # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.env['proximas.details.pec'].search(
+        for rec in self:
+            if bool(self.substitut_phcie_id):
+                # Récupère la date du jour
+                now = datetime.now()
+                substitut_phcie = self.substitut_phcie
+                # Si OUI, y a-t-il un délai d'attente à observer pour le substitut?
+                if 0 < int(self.delai_attente_substitut):
+                    # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                    pec_produit_phcie_assure = self.env['proximas.details.pec'].search(
+                        [
+                            ('date_execution', '!=', None),
+                            ('assure_id', '=', self.assure_id.id),
+                            '|', ('produit_phcie_id', '=', self.substitut_phcie_id.id),
+                            ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
+                        ]
+                    )
+                    if bool(pec_produit_phcie_assure):
+                        # Récupérer la dernière fourniture du médicament prescrit ou substituer
+                        dernier_acte_assure = pec_produit_phcie_assure[0]
+                        # Récupérer la date de la dernière prescription ou substitution liée au médicament
+                        date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution) or \
+                                            fields.Datetime.from_string(fields.Date.today())
+                        self.date_dernier_acte = dernier_acte_assure.date_execution
+                        # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
+                        nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                        # => différence en les 2 dates en nombre de jours.
+                        self.delai_prestation = int(nbre_jours_dernier_acte)
+                        # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
+                        if int(nbre_jours_dernier_acte) <= int(self.delai_attente_substitut):
+                            # Sinon, rejeter la prescription
+                            return {'value': {},
+                                    'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
+                                                'message': u"L'assuré(e) concerné(e): %s ne peut bénéficier de cette \
+                                                prescription commme substitut médicament. Le délai d'attente à observer\
+                                                 pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit a été \
+                                                 prescrit à l'assuré  concerné il y a de cela : (%d) jours. Pour plus \
+                                                 d'informations, veuillez contactez l'administrateur..."
+                                                           % (self.assure_id.name, substitut_phcie,
+                                                              self.delai_attente_substitut,
+                                                              int(nbre_jours_dernier_acte))
+                                                }
+                                    }
+                        else:
+                            pass
+                    else:
+                        # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                        self.date_dernier_acte = self.date_execution
+                        self.delai_prestation = 0
+                else:
+                    # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                    pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
+                        [
+                            ('date_execution', '!=', None),
+                            ('assure_id', '=', self.assure_id.id),
+                            '|', ('produit_phcie_id', '=', self.substitut_phcie_id.id),
+                            ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
+                        ]
+                    )
+                    if bool (pec_produit_phcie_assure):
+                        # Récupérer la dernière fourniture du médicament prescrit ou substituer
+                        dernier_acte_assure = pec_produit_phcie_assure[0]
+                        # Récupérer la date de la dernière prescription ou substitution liée au médicament
+                        date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
+                                            fields.Datetime.from_string (fields.Date.today ())
+                        self.date_dernier_acte = dernier_acte_assure.date_execution
+                        # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
+                        nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                        # => différence en les 2 dates en nombre de jours.
+                        self.delai_prestation = int (nbre_jours_dernier_acte)
+                    else:
+                        # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                        self.date_dernier_acte = self.date_execution
+                        self.delai_prestation = 0
+            # 2. Vérifier s'il s'agit d'une prescription de médicament?
+            elif bool(self.produit_phcie_id):
+                # Récupère la date du jour
+                now = datetime.now ()
+                produit_phcie = self.produit_phcie
+                # Si OUI, y a-t-il un délai d'attente à observer pour le produit prescrit?
+                if 0 < int(self.delai_attente_produit):
+                    # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                    pec_produit_phcie_assure = self.search(
+                        [
+                            ('date_execution', '!=', None),
+                            ('assure_id', '=', self.assure_id.id),
+                            '|', ('produit_phcie_id', '=', self.produit_phcie_id.id),
+                            ('substitut_phcie_id', '=', self.produit_phcie_id.id),
+                        ]
+                    )
+                    if bool(pec_produit_phcie_assure):
+                        # Récupérer la dernière fourniture du médicament prescrit ou substituer
+                        dernier_acte_assure = pec_produit_phcie_assure[0]
+                        # Récupérer la date de la dernière prescription ou substitution liée au médicament
+                        date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
+                                            fields.Datetime.from_string (fields.Date.today ())
+                        self.date_dernier_acte = dernier_acte_assure.date_execution
+                        # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
+                        nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                        # => différence en les 2 dates en nombre de jours.
+                        self.delai_prestation = int (nbre_jours_dernier_acte)
+                        # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
+                        if int(nbre_jours_dernier_acte) <= int(self.delai_attente_produit):
+                            # Sinon, rejeter la prescription
+                            return {'value': {},
+                                    'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
+                                                'message': u"Proximaas : Contrôle de Règles de Gestion.\n \
+                                L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. \
+                                Le délai d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit\
+                                a été prescrit à l'assuré il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
+                                contactez l'administrateur..." % (self.assure_id.name, produit_phcie,
+                                                                  self.delai_attente_produit,
+                                                                  int(nbre_jours_dernier_acte))
+                                                }
+                                    }
+                        else:
+                            pass
+                    else:
+                        # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                        self.date_dernier_acte = self.date_execution
+                        self.delai_prestation = 0
+                else:
+                    # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                    pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
+                        [
+                            ('date_execution', '!=', None),
+                            ('assure_id', '=', self.assure_id.id),
+                            '|', ('produit_phcie_id', '=', self.produit_phcie_id.id),
+                            ('substitut_phcie_id', '=', self.produit_phcie_id.id),
+                        ]
+                    )
+                    if bool (pec_produit_phcie_assure):
+                        # Récupérer la dernière fourniture du médicament prescrit ou substituer
+                        dernier_acte_assure = pec_produit_phcie_assure[0]
+                        # Récupérer la date de la dernière prescription ou substitution liée au médicament
+                        date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
+                                            fields.Datetime.from_string (fields.Date.today())
+                        self.date_dernier_acte = dernier_acte_assure.date_execution
+                        # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
+                        nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                        # => différence en les 2 dates en nombre de jours.
+                        self.delai_prestation = int (nbre_jours_dernier_acte)
+                    else:
+                        # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                        self.date_dernier_acte = self.date_execution
+                        self.delai_prestation = 0
+            # 3. Vérifier s'il s'agit d'une prestation médicale?
+            # delai_attente = int(self.delai_attente_prestation)
+            elif int(self.delai_attente_prestation) > 0 and self.pec_state in ['cours', 'oriente']:
+                # Si OUI, Récupère la date du jour
+                now = datetime.now()
+                # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
+                # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
+                pec_prestations_assure = self.search([
+                    ('date_execution', '!=', False),
+                    ('assure_id', '=', self.assure_id.id),
+                    ('prestation_id', '=', self.prestation_id.id),
+                ])
+                count_pec_prestations_assure = self.search_count(
                     [
-                        ('date_execution', '!=', None),
+                        ('date_execution', '!=', False),
                         ('assure_id', '=', self.assure_id.id),
-                        '|', ('produit_phcie_id', '=', self.substitut_phcie_id.id),
-                        ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
+                        ('prestation_id', '=', self.prestation_id.id),
                     ]
                 )
-                if bool(pec_produit_phcie_assure):
-                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
-                    dernier_acte_assure = pec_produit_phcie_assure[0]
+                if int(count_pec_prestations_assure) >= 1:
+                    # Récupérer la dernier acte liée à la prestation offerte à l'assuré
+                    dernier_acte_assure = pec_prestations_assure[0]
                     # Récupérer la date de la dernière prescription ou substitution liée au médicament
                     date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string(fields.Date.today())
+                                        fields.Datetime.from_string (fields.Date.today())
+                    date_acte_format = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
                     self.date_dernier_acte = dernier_acte_assure.date_execution
                     # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                     nbre_jours_dernier_acte = (now - date_dernier_acte).days
                     # => différence en les 2 dates en nombre de jours.
                     self.delai_prestation = int(nbre_jours_dernier_acte)
-                    # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
-                    if int(nbre_jours_dernier_acte) <= int(self.delai_attente_substitut):
-                        # Sinon, rejeter la prescription
-                        return {'value': {},
-                                'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
-                                            'message': u"L'assuré(e) concerné(e): %s ne peut bénéficier de cette \
-                                            prescription commme substitut médicament. Le délai d'attente à observer\
-                                             pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit a été \
-                                             prescrit à l'assuré  concerné il y a de cela : (%d) jours. Pour plus \
-                                             d'informations, veuillez contactez l'administrateur..."
-                                                       % (self.assure_id.name, substitut_phcie,
-                                                          self.delai_attente_substitut,
-                                                          int(nbre_jours_dernier_acte))
-                                            }
-                                }
+                    # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
+                    if 0 < int(nbre_jours_dernier_acte) <= int(self.delai_attente_prestation):
+                        # Sinon, rejeter la prestation
+                        raise UserError (_ (
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                            L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
+                            Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
+                            La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
+                            (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
+                             date_acte_format, int (nbre_jours_dernier_acte))
+                                         )
                     else:
                         pass
                 else:
@@ -4995,182 +5171,36 @@ class DetailsPec(models.Model):
                     self.date_dernier_acte = self.date_execution
                     self.delai_prestation = 0
             else:
-                # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
-                    [
-                        ('date_execution', '!=', None),
-                        ('assure_id', '=', self.assure_id.id),
-                        '|', ('produit_phcie_id', '=', self.substitut_phcie_id.id),
-                        ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
-                    ]
-                )
-                if bool (pec_produit_phcie_assure):
-                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
-                    dernier_acte_assure = pec_produit_phcie_assure[0]
-                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                    date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today ())
-                    self.date_dernier_acte = dernier_acte_assure.date_execution
-                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                    # => différence en les 2 dates en nombre de jours.
-                    self.delai_prestation = int (nbre_jours_dernier_acte)
-                else:
-                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                    self.date_dernier_acte = self.date_execution
-                    self.delai_prestation = 0
-        # 2. Vérifier s'il s'agit d'une prescription de médicament?
-        elif bool(self.produit_phcie_id):
-            # Récupère la date du jour
-            now = datetime.now ()
-            produit_phcie = self.produit_phcie
-            # Si OUI, y a-t-il un délai d'attente à observer pour le produit prescrit?
-            if 0 < int(self.delai_attente_produit):
-                # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.search(
-                    [
-                        ('date_execution', '!=', None),
-                        ('assure_id', '=', self.assure_id.id),
-                        '|', ('produit_phcie_id', '=', self.produit_phcie_id.id),
-                        ('substitut_phcie_id', '=', self.produit_phcie_id.id),
-                    ]
-                )
-                if bool(pec_produit_phcie_assure):
-                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
-                    dernier_acte_assure = pec_produit_phcie_assure[0]
-                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                    date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today ())
-                    self.date_dernier_acte = dernier_acte_assure.date_execution
-                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                    # => différence en les 2 dates en nombre de jours.
-                    self.delai_prestation = int (nbre_jours_dernier_acte)
-                    # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
-                    if int(nbre_jours_dernier_acte) <= int(self.delai_attente_produit):
-                        # Sinon, rejeter la prescription
-                        return {'value': {},
-                                'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                            'message': u"Proximaas : Contrôle de Règles de Gestion.\n \
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. \
-                        Le délai d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit\
-                        a été prescrit à l'assuré il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
-                        contactez l'administrateur..." % (self.assure_id.name, produit_phcie,
-                                                          self.delai_attente_produit,
-                                                          int(nbre_jours_dernier_acte))
-                                            }
-                                }
-                    else:
-                        pass
-                else:
-                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                    self.date_dernier_acte = self.date_execution
-                    self.delai_prestation = 0
-            else:
-                # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
-                    [
-                        ('date_execution', '!=', None),
-                        ('assure_id', '=', self.assure_id.id),
-                        '|', ('produit_phcie_id', '=', self.produit_phcie_id.id),
-                        ('substitut_phcie_id', '=', self.produit_phcie_id.id),
-                    ]
-                )
-                if bool (pec_produit_phcie_assure):
-                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
-                    dernier_acte_assure = pec_produit_phcie_assure[0]
-                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                    date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today())
-                    self.date_dernier_acte = dernier_acte_assure.date_execution
-                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                    # => différence en les 2 dates en nombre de jours.
-                    self.delai_prestation = int (nbre_jours_dernier_acte)
-                else:
-                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                    self.date_dernier_acte = self.date_execution
-                    self.delai_prestation = 0
-        # 3. Vérifier s'il s'agit d'une prestation médicale?
-        # delai_attente = int(self.delai_attente_prestation)
-        elif int(self.delai_attente_prestation) > 0 and self.pec_state in ['cours', 'oriente']:
-            # Si OUI, Récupère la date du jour
-            now = datetime.now()
-            # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
-            # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
-            pec_prestations_assure = self.search([
-                ('date_execution', '!=', False),
-                ('assure_id', '=', self.assure_id.id),
-                ('prestation_id', '=', self.prestation_id.id),
-            ])
-            count_pec_prestations_assure = self.search_count(
-                [
+                # Si NON, Récupère la date du jour
+                now = datetime.now ()
+                # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
+                # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
+                pec_prestations_assure = self.search([
                     ('date_execution', '!=', False),
                     ('assure_id', '=', self.assure_id.id),
                     ('prestation_id', '=', self.prestation_id.id),
-                ]
-            )
-            if int(count_pec_prestations_assure) >= 1:
-                # Récupérer la dernier acte liée à la prestation offerte à l'assuré
-                dernier_acte_assure = pec_prestations_assure[0]
-                # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution) or \
+                ])
+                count_pec_prestations_assure = self.search_count (
+                    [
+                        ('date_execution', '!=', False),
+                        ('assure_id', '=', self.assure_id.id),
+                        ('prestation_id', '=', self.prestation_id.id),
+                    ]
+                )
+                if int(count_pec_prestations_assure) >= 1:
+                    # Récupérer la dernier acte liée à la prestation offerte à l'assuré
+                    dernier_acte_assure = pec_prestations_assure[0]
+                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
+                    date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)or \
                                         fields.Datetime.from_string (fields.Date.today())
-                date_acte_format = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
-                self.date_dernier_acte = dernier_acte_assure.date_execution
-                # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-                nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                # => différence en les 2 dates en nombre de jours.
-                self.delai_prestation = int(nbre_jours_dernier_acte)
-                # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
-                if 0 < int(nbre_jours_dernier_acte) <= int(self.delai_attente_prestation):
-                    # Sinon, rejeter la prestation
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
-                        Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
-                        La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
-                        (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
-                         date_acte_format, int (nbre_jours_dernier_acte))
-                                     )
+                    self.date_dernier_acte = dernier_acte_assure.date_execution
+                    # Calcul le nombre de jours écoulés entre la dernière prestation liée et aujourd'hui
+                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                    self.delai_prestation = int (nbre_jours_dernier_acte)
                 else:
-                    pass
-            else:
-                # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                self.date_dernier_acte = self.date_execution
-                self.delai_prestation = 0
-        else:
-            # Si NON, Récupère la date du jour
-            now = datetime.now ()
-            # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
-            # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
-            pec_prestations_assure = self.search([
-                ('date_execution', '!=', False),
-                ('assure_id', '=', self.assure_id.id),
-                ('prestation_id', '=', self.prestation_id.id),
-            ])
-            count_pec_prestations_assure = self.search_count (
-                [
-                    ('date_execution', '!=', False),
-                    ('assure_id', '=', self.assure_id.id),
-                    ('prestation_id', '=', self.prestation_id.id),
-                ]
-            )
-            if int(count_pec_prestations_assure) >= 1:
-                # Récupérer la dernier acte liée à la prestation offerte à l'assuré
-                dernier_acte_assure = pec_prestations_assure[0]
-                # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)or \
-                                        fields.Datetime.from_string (fields.Date.today())
-                self.date_dernier_acte = dernier_acte_assure.date_execution
-                # Calcul le nombre de jours écoulés entre la dernière prestation liée et aujourd'hui
-                nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                self.delai_prestation = int (nbre_jours_dernier_acte)
-            else:
-                # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                self.date_dernier_acte = self.date_execution
-                self.delai_prestation = 0
+                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                    self.date_dernier_acte = self.date_execution
+                    self.delai_prestation = 0
 
     @api.constrains('prestation_id', 'date_demande', 'date_execution')
     # ('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
@@ -5305,6 +5335,36 @@ class DetailsPec(models.Model):
                     veuillez contactez l'administrateur..."
                     ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
                 )
+
+    @api.depends('date_demande', 'date_execution')
+    def _get_exercice_sam(self):
+        for rec in self:
+            exercices = self.env['proximas.exercice'].search([
+                ('res_company_id', '=', rec.structure_id.id),
+                ('cloture', '=', False),
+            ])
+            if bool(exercices):
+                for exo in exercices:
+                    date_debut = fields.Date.from_string (exo.date_debut)
+                    date_fin = fields.Date.from_string (exo.date_fin)
+                    if rec.date_execution and not rec.date_demande:
+                        date_execution = fields.Date.from_string (rec.date_execution)
+                        if date_debut <= date_execution <= date_fin:
+                            rec.exo_sam = exo.name
+                            rec.en_cours_exo = exo.en_cours
+                    elif rec.date_execution and rec.date_demande:
+                        date_execution = fields.Date.from_string (rec.date_execution)
+                        if date_debut <= date_execution <= date_fin:
+                            rec.exo_sam = exo.name
+                            rec.en_cours_exo = exo.en_cours
+                    elif rec.date_demande and not rec.date_execution:
+                        date_demande = fields.Date.from_string (rec.date_demande)
+                        if date_debut <= date_demande <= date_fin:
+                            rec.exo_sam = exo.name
+                            rec.en_cours_exo = exo.en_cours
+                    elif bool(exo.en_cours):
+                        rec.exo_sam = exo.name
+                        rec.en_cours_exo = exo.en_cours
 
     @api.onchange('date_execution', 'date_demande')
     def _check_exo_sam(self):
@@ -5629,7 +5689,7 @@ class RemboursementPEC(models.Model):
     structure_id = fields.Many2one(
         omodel_name="res.company",
         string="Organisation(SAM)",
-        related='contrat_id.structure_id',
+        related='police_id.structure_id',
         readonly=True,
     )
     matricule = fields.Char (
@@ -6202,14 +6262,14 @@ class RemboursementWizard(models.TransientModel):
         # prestations = self.env['proximas.prestation'].search([('prestataire_id', '=', user.partner_id.id)])
         # 1. Vérifier si le code saisi correspond à un assure
         assure = self.env['proximas.assure'].search([
-            '|', ('code_id_externe', '=', self.code_saisi),
-            ('code_id', '=', self.code_saisi)
+            '|', ('code_id_externe', '=ilike', self.code_saisi),
+            ('code_id', '=ilike', self.code_saisi)
         ])
         info_assure = assure.name
         # 2. Vérifier si le code saisi correspond à un adhérent
         adherent = self.env['proximas.adherent'].search([
-            '|', ('code_id_externe', '=', self.code_saisi),
-            ('code_id', '=', self.code_saisi)
+            '|', ('code_id_externe', '=ilike', self.code_saisi),
+            ('code_id', '=ilike', self.code_saisi)
         ])
         info_adherent = adherent.name
         # recupérer le contrat de couverture maladie de l'adherent
