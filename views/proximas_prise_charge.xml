@@ -1490,6 +1490,31 @@
             </tree>
         </field>
     </record>
+    <!-- ACTES MEDICAUX/PRESTATIONS DEMANDEEES -CRS - LIST-->
+    <record id="validation_details_pec_demande_tree_view" model="ir.ui.view">
+        <field name="name">Acts/Médicaux Demandés - CRS</field>
+        <field name="model">proximas.details.pec</field>
+        <field name="arch" type="xml">
+            <tree string="Listing Détaillé Acts/Prestations" create="0" >
+                <field name="code_id" />
+                <field name="name" string="Assuré"/>
+                <field name="age" />
+                <field name="genre" />
+                <field name="statut_familial"/>
+                <field name="num_pec"/>
+                <field name="date_execution"/>
+                <field name="prestataire"/>
+                <field name="details_prestation" string="Prestation/Acte"/>
+                <field name="cout_total" sum="Cout Total"/>
+                <field name="total_pc" sum="S/Total PC"/>
+                <field name="total_npc" sum="S/Total NPC"/>
+                <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod."/>
+                <field name="net_tiers_payeur" sum="Part SAM"/>
+                <field name="net_prestataire" sum="Net à payer"/>
+                <field name="is_valide"/>
+            </tree>
+        </field>
+    </record>
     <!-- VALIDATION ACTES MEDICAUX/PRESTATIONS CRS - LIST-->
     <record id="validation_details_pec_crs_tree_view" model="ir.ui.view">
         <field name="name">Validation Acts/Médicaux CRS</field>
@@ -1640,7 +1665,7 @@
        <field name="model">proximas.details.pec</field>
        <field name="arch" type="xml">
            <form string="Détails de Prise en charge CRS" create="0" edit="1" delete="0">
-               <header></header>
+               <header> </header>
                <sheet>
                     <field name="image"
                            widget='image'
@@ -1955,6 +1980,15 @@
         <field name="view_id" ref="validation_details_pec_crs_tree_view"/>
         <field name="domain">[('date_execution','!=',None),('date_demande','=', None),('en_cours_exo','=',True),('prestation_crs_id','!=',None),('facture_id','=',None)]</field>
         <field name="context">{'default_user_id':uid,'form_view_ref':'proximas_medical.validation_details_pec_crs_form'}</field>
+    </record>
+    <record model="ir.actions.act_window" id="proximas_details_pec_demande_action">
+        <field name="name">Proximaas: Prestations Demandées Non Traitées - CRS</field>
+        <field name="res_model">proximas.details.pec</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="validation_details_pec_demande_tree_view"/>
+        <field name="domain">[('date_execution','=',None),('date_demande','!=', None),('en_cours_exo','=',True),('facture_id','=',None)]</field>
+        <field name="context">{'default_user_id':uid}</field>
     </record>
     <record model="ir.actions.act_window" id="proximas_details_pec_action">
         <field name="name">Proximaas: Gestion Prestations - Prise en charge</field>

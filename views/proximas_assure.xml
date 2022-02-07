@@ -577,7 +577,7 @@
                                <field name="decede"/>
                                <field name="matricule"/>
                                <field name="code_id_externe"/>
-                               <field name="contrat_id" readonly="0" options ='{"no_open": False, "no_create": True}/>
+                               <field name="contrat_id" readonly="0" options ='{"no_open": False, "no_create": True}'/>
                                <field name="num_contrat"/>
                                <field name="tranche_age"/>
                                <field name="date_debut_assure"/>
