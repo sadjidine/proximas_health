@@ -22,7 +22,6 @@ class ResCompany(models.Model):
         comodel_name="proximas.exercice",
         inverse_name="res_company_id",
         string="Exercices",
-        required=True,
     )
     note = fields.Text(
         string="Notes et Observations",
@@ -80,12 +79,21 @@ class Groupe(models.Model):
         string="Est Groupe?",
         default=True
     )
+    est_suspendu = fields.Boolean(
+        string="Suspendu?",
+        default=True,
+        help="Indique si le groupe concerné est actif ou non."
+    )
     general_info = fields.Text(
         string='Information General',
     )
     note = fields.Text(
         string="Notes et Observations",
     )
+
+    @api.multi
+    def toggle_suspension(self):
+        self.est_suspendu = not self.est_suspendu
 
     # @api.one
     @api.depends('parent_id', 'name')
@@ -172,11 +180,10 @@ class Exercice(models.Model):
         string="Notes et Observations",
     )
 
-
     @api.onchange('en_cours')
     def _check_en_cours(self):
         nbre_encours = self.search_count([('en_cours', '=', True)])
-        if nbre_encours >= 1:
+        if nbre_encours > 1:
             raise UserError(_(
                 "Proximaas: Contrôle Règles de Gestion - Exercice en cours:\n Il ne peut y avoir plus d'un exercice \
                  en cours. Vérifiez si vous n'avez pas fixé plus d'un exercice en cours. Pour plus d'informations, \
@@ -215,43 +222,44 @@ class Exercice(models.Model):
          )
     ]
 
-class District(models.Model):
-    _name = 'proximas.district'
-    _description = 'District geographique'
+# class District(models.Model):
+#     _name = 'proximas.district'
+#     _description = 'District geographique'
+#
+#     sequence = fields.Integer(
+#         string="Sequence"
+#     )
+#     name = fields.Char(
+#         string="District Géographique",
+#         help="indiquer le libellé du district selon le découpage administratif en vigeur",
+#         required=True,
+#         size=64,
+#     )
+#     chef_lieu = fields.Char(
+#         string="Chef lieu District",
+#         help="indiquer le chef-lieu de la région selon le découpage administratif en vigeur",
+#         size=64,
+#     )
+#     country_id = fields.Many2one (
+#         comodel_name="res.country",
+#         string="Pays de Rattachement",
+#         required=True,
+#     )
+#     note = fields.Text(
+#         string="Notes et Observations",
+#     )
+#     # CONTRAINTES
+#     _sql_constraints = [
+#         ('name_district',
+#          'UNIQUE (name, country_id)',
+#          '''
+#          Risque de doublon sur le nom de district/pays!
+#          Il semble que cet enregistrement existe déjà dans la base de données...
+#          Vérifiez s'il n'y pas de doublon ou contactez l'administrateur.
+#          '''
+#          )
+#     ]
 
-    sequence = fields.Integer(
-        string="Sequence"
-    )
-    name = fields.Char(
-        string="District Géographique",
-        help="indiquer le libellé du district selon le découpage administratif en vigeur",
-        required=True,
-        size=64,
-    )
-    chef_lieu = fields.Char(
-        string="Chef lieu District",
-        help="indiquer le chef-lieu de la région selon le découpage administratif en vigeur",
-        size=64,
-    )
-    country_id = fields.Many2one (
-        comodel_name="res.country",
-        string="Pays de Rattachement",
-        required=True,
-    )
-    note = fields.Text(
-        string="Notes et Observations",
-    )
-    # CONTRAINTES
-    _sql_constraints = [
-        ('name_district',
-         'UNIQUE (name, country_id)',
-         '''
-         Risque de doublon sur le nom de district/pays!
-         Il semble que cet enregistrement existe déjà dans la base de données...
-         Vérifiez s'il n'y pas de doublon ou contactez l'administrateur.
-         '''
-         )
-    ]
 
 class Region(models.Model):
     _name = 'proximas.region'
@@ -271,15 +279,20 @@ class Region(models.Model):
         help="indiquer le chef-lieu de la région selon le découpage géographique en vigeur",
         size=64,
     )
-    district_id = fields.Many2one(
-        comodel_name="proximas.district",
-        string="District de Rattachement",
-        required=True,
-    )
-    country_id = fields.Many2one (
-        related='district_id.country_id',
-        string="Pays de Rattachement",
-        readonly=True,
+    # district_id = fields.Many2one(
+    #     comodel_name="proximas.district",
+    #     string="District de Rattachement",
+    #     required=False,
+    # )
+    # country_id = fields.Many2one (
+    #     related='district_id.country_id',
+    #     string="Pays de Rattachement",
+    #     readonly=True,
+    # )
+    country_id = fields.Many2one(
+            comodel_name="res.country",
+            string="Pays de Rattachement",
+            required=True,
     )
     note = fields.Text(
         string="Notes et Observations",
@@ -287,7 +300,7 @@ class Region(models.Model):
     # CONTRAINTES
     _sql_constraints = [
         ('name_region_district',
-         'UNIQUE (name, district_id)',
+         'UNIQUE (name, country_id)',
          '''
          Risque de doublon sur Region/District!
          Il semble que cet enregistrement existe déjà dans la base de données...
@@ -295,6 +308,7 @@ class Region(models.Model):
          '''
          )
     ]
+
 
 class Zone(models.Model):
     _name = 'proximas.zone'
@@ -357,13 +371,13 @@ class Localite(models.Model):
         string="Région de Rattachement",
         readonly=True,
     )
-    district_id = fields.Many2one(
-        related='region_id.district_id',
-        string="District de Rattachement",
-        readonly=True,
-    )
+    # district_id = fields.Many2one(
+    #     related='region_id.district_id',
+    #     string="District de Rattachement",
+    #     readonly=True,
+    # )
     country_id = fields.Many2one(
-        related='district_id.country_id',
+        related='region_id.country_id',
         string="Pays de Rattachement",
         readonly=True,
     )

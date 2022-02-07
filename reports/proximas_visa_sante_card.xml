@@ -8,7 +8,7 @@
             name="proximas_medical.report_assure_visa_sante_card"
             file="proximas_medical.report_assure_visa_sante_card"
             attachment_use="True"
-            attachment="'VISA-SANTE - %s - %s' %(object.name,time.strftime('%d-%m-%Y'))+'.pdf'"
+            attachment="('VISA-SANTE - %s - %s' %(object.name,time.strftime('%d-%m-%Y'))+'.pdf')"
             report_type="qweb-pdf"
         />
         <!--file="proximas_medical.assure_visa_sante_card"-->

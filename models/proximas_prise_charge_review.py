@@ -7,8 +7,8 @@
 from openerp.tools.translate import _
 from openerp import api, fields, models
 from openerp.exceptions import ValidationError, UserError
-from datetime import datetime # timedelta
-# from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from random import randint
 from openerp.tools import amount_to_text_fr
 
@@ -308,7 +308,7 @@ class PriseEnCharge(models.Model):
     )
     num_contrat = fields.Char(
         string="Num. Contrat",
-        related='assure_id.num_contrat',
+        related='contrat_id.num_contrat',
         readonly=True,
     )
     date_debut_assure = fields.Date (
@@ -325,7 +325,7 @@ class PriseEnCharge(models.Model):
     )
     groupe_id = fields.Many2one(
         string="Groupe",
-        related="assure_id.groupe_id",
+        related="contrat_id.groupe_id",
         required=False,
     )
     police_id = fields.Many2one(
@@ -349,7 +349,7 @@ class PriseEnCharge(models.Model):
     adherent = fields.Many2one(
         comodel_name="proximas.adherent",
         string="Adhérent",
-        related='assure_id.adherent_id',
+        related='contrat_id.adherent_id',
         require=False,
         store=True,
         readonly=True,
@@ -747,13 +747,6 @@ class PriseEnCharge(models.Model):
         related='police_id.mt_plafond_prescription',
         readonly=True,
     )
-    mt_plafond_produit_phcie = fields.Float(
-        string="Mt. Plafond/Médicament",
-        digits=(9, 0),
-        related='police_id.mt_plafond_produit_phcie',
-        default=0,
-        help="Montant du plafond sur le coût unitaire des produits pharmaceutiques"
-    )
     leve_plafond_prescription = fields.Boolean(
         string="Lever Plafond Prescription",
         help='Attention! En cochant, cela permet de lever le plafond pour les prescriptions. le système ne contrôlera \
@@ -836,20 +829,21 @@ class PriseEnCharge(models.Model):
             else:
                 rec.is_termine = False
 
-    # @api.one
-    # @api.depends('pathologie_ids')
-    # def _get_pathologie_pec(self):
-    #     if not self.pathologie_id and self.pathologie_ids:
-    #         pathologie = self.pathologie_ids[0]
-    #         self.pathologie_id = pathologie.id
+    @api.one
+    @api.depends('pathologie_ids')
+    def _get_pathologie_pec(self):
+        if not self.pathologie_id and self.pathologie_ids:
+            pathologie = self.pathologie_ids[0]
+            self.pathologie_id = pathologie.id
 
     @api.one
     @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
     def _get_encaisse_phcie(self):
-        self.ensure_one()
-        if 0 < self.mt_encaisse_phcie:
+        if self.mt_encaisse_phcie:
             self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
-        self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
+        elif self.mt_encaisse_phcie_dispense:
+            self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
+        self.tot_encaisse_phcie = self.mt_encaisse_phcie if self.mt_encaisse_phcie else self.mt_encaisse_phcie_dispense
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
@@ -992,13 +986,13 @@ class PriseEnCharge(models.Model):
             self.ticket_moderateur_phcie_dispense = self.ticket_moderateur_phcie
             # 4. Ticket Exigible
             self.ticket_exigible_cro = sum(
-                item.montant_exigible for item in totaux_details_pec_cro
+                item.ticket_moderateur for item in totaux_details_pec_cro if bool (item.ticket_exigible) or 0
             )
             self.ticket_exigible_crs = sum(
-                item.montant_exigible for item in totaux_details_pec_crs
+                item.ticket_moderateur for item in totaux_details_pec_crs if bool (item.ticket_exigible) or 0
             )
             self.ticket_exigible_phcie = sum(
-                item.montant_exigible for item in totaux_details_pec_phcie
+                item.ticket_moderateur for item in totaux_details_pec_phcie if bool (item.ticket_exigible) or 0
             )
             self.ticket_exigible_phcie_dispense = self.ticket_exigible_phcie
             # 5. Net à Payer
@@ -2016,14 +2010,6 @@ class DetailsPec(models.Model):
         related='substitut_phcie_id.marge_medicament',
         readonly=True,
     )
-    mt_plafond_produit_phcie = fields.Float(
-        string="Mt. Plafond/Médicament",
-        digits=(9, 0),
-        related='pec_id.mt_plafond_produit_phcie',
-        default=0,
-        readonly=True,
-        help="Montant du plafond sur le coût unitaire des produits pharmaceutiques"
-    )
     arret_produit = fields.Boolean(
         string="Produit en arrêt?",
         related='produit_phcie_id.arret_medicament',
@@ -2233,7 +2219,7 @@ class DetailsPec(models.Model):
     contrat_id = fields.Many2one(
         # comodel_name="proximas.contrat",
         string="Contrat Assuré",
-        related='pec_id.contrat_id',
+        related='assure_id.contrat_id',
         store=True,
     )
     num_contrat = fields.Char(
@@ -2603,12 +2589,6 @@ class DetailsPec(models.Model):
         compute='_calcul_couts_details_pec',
         store=True,
     )   # total_pc - tiers_payeur
-    montant_exigible = fields.Float(
-        string="Montant Exigible",
-        default=0,
-        digits=(6, 0),
-        compute='_calcul_couts_details_pec',
-    )
     net_prestataire = fields.Float(
         string="S/Total Net Prestataire",
         default=0,
@@ -2776,24 +2756,23 @@ class DetailsPec(models.Model):
 
     @api.onchange('accorde', 'non_accorde')
     def _check_action_accorder(self):
-        for rec in self:
-            if bool (rec.accorde) and bool (rec.non_accorde):
-                warning = {
-                    'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                    'message': _ (u"Attention! Vous ne pouvez pas à la fois, autoriser et rejeter la demande  \
-                     d'exécution de la prestation : %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                                  ) % rec.prestation_demande_id.name
-                }
-                return {'warning': warning}
-            elif bool (rec.non_accorde) and not bool (rec.motif_non_accord):
-                warning = {
-                    'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                    'message': _ (u"Attention! Vous devez absolument motiver le rejet (refus) de l'exécution de la\
-                         prestation : %s. En cas de refus, le champ motif de refus doit impérativement être renseigné.\
-                          Pour plus d'informations, veuillez contactez l'administrateur...")
-                               % rec.prestation_demande_id.name
-                }
-                return {'warning': warning}
+        if bool(self.accorde) and bool (self.non_accorde):
+            warning = {
+                'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
+                'message': _ (u"Attention! Vous ne pouvez pas à la fois, autoriser et rejeter la demande  \
+                 d'exécution de la prestation : %s. Pour plus d'informations, veuillez contactez l'administrateur..."
+                              ) % self.prestation_demande_id.name
+            }
+            return {'warning': warning}
+        elif bool (self.non_accorde) and not bool (self.motif_non_accord):
+            warning = {
+                'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
+                'message': _ (u"Attention! Vous devez absolument motiver le rejet (refus) de l'exécution de la\
+                     prestation : %s. En cas de refus, le champ motif de refus doit impérativement être renseigné.\
+                      Pour plus d'informations, veuillez contactez l'administrateur...")
+                           % self.prestation_demande_id.name
+            }
+            return {'warning': warning}
 
     @api.constrains('accorde', 'non_accorde')
     def _validate_action_accorder(self):
@@ -2830,7 +2809,7 @@ class DetailsPec(models.Model):
                 prestation = rec_id.code_prestation_id.name
                 rec_id.details_prestation = prestation
 
-    @api.multi
+    #@api.multi
     @api.depends('pool_medical_id', 'pool_medical_crs_id')
     def _get_pool_medical(self):
         for rec in self:
@@ -2850,7 +2829,6 @@ class DetailsPec(models.Model):
     #         rec.medecin_id = medecin_id
 
 
-    # @api.multi
     @api.onchange('date_execution', 'date_demande')
     def _check_date_details_pec(self):
         now = datetime.now ()
@@ -2907,7 +2885,6 @@ class DetailsPec(models.Model):
                     ) % date
                 )
 
-    # @api.multi
     @api.onchange('produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'prestation_crs_id',
                   'prestation_demande_id')
     def _check_nbre_prestations(self):
@@ -3076,39 +3053,39 @@ class DetailsPec(models.Model):
                 }
                 return action
 
-    # @api.multi
-    @api.onchange('date_demande', 'prestation_id', 'date_execution', 'pool_medical_crs_id')
-    def _check_accord_prealable(self):
-        if bool(self.accord_prealable):
-            if not bool(self.accorde) and self.pec_state == 'cours':
-                action = {
-                    'warning': {
-                        'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
-                        'message': _(u"La prestation: %s est soumise à l'accord préalable du médecin conseil. \
-                                     A cet effet, il faudra impérativement l'autorisation expresse du médecin avant\
-                                     l'exécution de la prestation concernée. Une notification est envoyée au médecin\
-                                     pour validation. Pour plus d'informations, veuillez contactez \
-                                     l'administrateur."
-                                      ) % self.prestation_id.name
-                    },
-                }
-                return action
-
-    @api.onchange('prestation_crs_id',)
-    def _warning_crs_prestation(self):
-        for rec in self:
-            if bool(rec.prestation_crs_id) and not bool(rec.prestation_demande_id):
-                action = {
-                    'warning': {
-                        'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                        'message': _ (u"La prestation: %s que vous allez fournir est soumise à la validation  \
-                                     du médecin conseil. \n A cet effet, il faudra impérativement l'autorisation \
-                                     expresse de celui-ci. Sans cela, la prestation concernée ne figurera pas dans \
-                                     votre facture. Pour plus d'informations, veuillez contactez l'administrateur."
-                                      ) % rec.prestation_id.name
-                    },
-                }
-                return action
+    # @api.one
+    # @api.onchange('date_demande', 'prestation_id', 'date_execution', 'pool_medical_crs_id')
+    # def _check_accord_prealable(self):
+    #     if bool(self.accord_prealable):
+    #         if not bool(self.accorde) and self.pec_state == 'cours':
+    #             action = {
+    #                 'warning': {
+    #                     'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
+    #                     'message': _(u"La prestation: %s est soumise à l'accord préalable du médecin conseil. \
+    #                                  A cet effet, il faudra impérativement l'autorisation expresse du médecin avant\
+    #                                  l'exécution de la prestation concernée. Une notification est envoyée au médecin\
+    #                                  pour validation. Pour plus d'informations, veuillez contactez \
+    #                                  l'administrateur."
+    #                                   ) % self.prestation_id.name
+    #                 },
+    #             }
+    #             return action
+    #
+    # @api.onchange('prestation_crs_id',)
+    # def _warning_crs_prestation(self):
+    #     for rec in self:
+    #         if bool(rec.prestation_crs_id) and not bool(rec.prestation_demande_id):
+    #             action = {
+    #                 'warning': {
+    #                     'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
+    #                     'message': _ (u"La prestation: %s que vous allez fournir est soumise à la validation  \
+    #                                  du médecin conseil. \n A cet effet, il faudra impérativement l'autorisation \
+    #                                  expresse de celui-ci. Sans cela, la prestation concernée ne figurera pas dans \
+    #                                  votre facture. Pour plus d'informations, veuillez contactez l'administrateur."
+    #                                   ) % rec.prestation_id.name
+    #                 },
+    #             }
+    #             return action
 
     @api.constrains('accorde', 'non_accorde')
     def _validate_accord_prealable(self):
@@ -4172,6 +4149,9 @@ class DetailsPec(models.Model):
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
+    # @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
+    #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
+    #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
     @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
                  'prestataire_public', 'zone_couverte', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
@@ -4226,7 +4206,6 @@ class DetailsPec(models.Model):
             taux_couvert = self.taux_couvert
             plafond = 0
             forfait = 0
-            plafond_medicament = self.mt_plafond_produit_phcie
             if bool (code_medical_police):
                 plafond = int (code_medical_police.mt_plafond)
             self.mt_plafond = plafond
@@ -4251,15 +4230,11 @@ class DetailsPec(models.Model):
                 marge_police = int (self.marge_medicament_police)
                 marge_substitut = int (self.marge_medicament_substitut)
                 prix_majore = 0
-                if 0 < plafond_medicament < cout_produit:
-                    self.cout_total = cout_produit * quantite
-                    self.total_pc = int(plafond_medicament * quantite)
-                    self.total_npc = self.cout_total - self.total_pc
-                elif 0 < marge_substitut:
+                if 0 < marge_substitut:
                     prix_majore = int (prix_substitut + marge_substitut)
                 elif 0 < marge_police:
                     prix_majore = int (prix_substitut + marge_police)
-                elif 0 < prix_majore < cout_produit:
+                if 0 < prix_majore < cout_produit:
                     if quantite_prescrite > quantite:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
@@ -4303,15 +4278,11 @@ class DetailsPec(models.Model):
                 marge_police = int (self.marge_medicament_police)
                 marge_produit = int (self.marge_medicament_produit)
                 prix_majore = 0
-                if 0 < plafond_medicament < cout_produit:
-                    self.cout_total = cout_produit * quantite
-                    self.total_pc = int(plafond_medicament * quantite)
-                    self.total_npc = self.cout_total - self.total_pc
-                elif 0 < marge_produit:
-                    prix_majore = int(prix_produit + marge_produit)
+                if 0 < marge_produit:
+                    prix_majore = int (prix_produit + marge_produit)
                 elif 0 < marge_police:
-                    prix_majore = int(prix_produit + marge_police)
-                elif 0 < prix_majore < cout_produit:
+                    prix_majore = int (prix_produit + marge_police)
+                if 0 < prix_majore < cout_produit:
                     if quantite_prescrite > quantite:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
@@ -4610,7 +4581,7 @@ class DetailsPec(models.Model):
             if bool(forfait):
                 self.net_tiers_payeur = int (self.forfait_sam)
                 self.ticket_moderateur = int (self.forfait_ticket)
-                # self.montant_exigible = self.ticket_moderateur + total_npc
+                # self.ticket_exigible = bool (controle_rubrique.ticket_exigible)
                 diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
                 # Calculs détails pour le remboursements
                 if bool (self.rfm_id):
@@ -4621,10 +4592,10 @@ class DetailsPec(models.Model):
                 self.net_tiers_payeur = total_pc * int (taux_couvert) / 100
                 taux_ticket = 100 - int (taux_couvert)
                 self.ticket_moderateur = total_pc * int (taux_ticket) / 100
-                # self.montant_exigible = self.ticket_moderateur + total_npc
+                # self.ticket_exigible = bool (controle_rubrique.ticket_exigible)
                 diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
 
-            if bool(ticket_exigible):
+            if bool (ticket_exigible):
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.debit_ticket = int (self.ticket_moderateur + self.total_npc) - int (self.mt_paye_assure)
             elif not bool (self.ticket_exigible) and (diff_ticket_mt_paye >= 0):
@@ -4636,11 +4607,9 @@ class DetailsPec(models.Model):
                 self.mt_remboursement = self.net_tiers_payeur
                 self.net_prestataire = 0
                 self.debit_ticket = 0
-                self.montant_exigible = self.ticket_moderateur + self.total_npc
                 self.mt_remboursement -= self.mt_exclusion
                 self.net_a_payer = self.mt_remboursement
             else:
-                self.montant_exigible = self.ticket_moderateur + self.total_npc
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.net_prestataire -= self.mt_exclusion
                 self.net_a_payer = self.net_prestataire
@@ -4664,7 +4633,8 @@ class DetailsPec(models.Model):
         res = super(DetailsPec, self).write(values)
         return res
 
-    @api.onchange('substitut_phcie_id', 'cout_unit', 'date_execution', 'quantite_livre', 'mt_paye_assure', 'quantite')
+    # @api.onchange ('substitut_phcie_id', 'cout_unit', 'date_execution', 'quantite_livre', 'mt_paye_assure', 'quantite')
+    @api.onchange('quantite_livre', 'quantite')
     def _check_quantite_prescription(self):
         if bool (self.produit_phcie_id) and self.quantite == 0:
             return {'value': {},
@@ -4889,7 +4859,6 @@ class DetailsPec(models.Model):
     #                     }
     #                 }
 
-    # @api.one
     @api.onchange('prestation_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestataire_rembourse_id')
     def _track_age_acces_prestation(self):
         # CONTRÖLE AGE MINIMUM & MAXIMUM PRODUITS PHCIE / PRESTATION MEDICALE
@@ -6115,7 +6084,7 @@ class RemboursementPEC(models.Model):
         self.net_remb_texte = montant_text.upper()
         return montant_text.upper()
 
-    @api.one
+    # @api.one
     @api.onchange('nbre_actes_remb', 'net_remboursement_rfm', 'details_rfm_soins_ids', 'details_rfm_phcie_ids')
     # @api.onchange('net_remboursement_rfm', 'details_rfm_soins_ids', 'details_rfm_phcie_ids')
     def _computed_details_rfm(self):

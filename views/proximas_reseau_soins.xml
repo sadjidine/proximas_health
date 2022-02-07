@@ -79,7 +79,7 @@
                </tree>
            </field>
         </record>
-        <!-- PRESTATIONS FOUNIES Search & Filter View-->
+        <!-- PRESTATIONS FOURNIES Search & Filter View-->
         <record id="proximas_prestation_fournie_search_view" model="ir.ui.view">
             <field name="model">proximas.prestation</field>
             <field name="arch" type="xml">
@@ -180,6 +180,7 @@
                     <field name="categorie_id"/>
                     <field name="date_convention"/>
                     <field name="ref"/>
+                    <field name="create_date"/>
                 </field>
             </field>
         </record>

@@ -85,45 +85,45 @@
        </field>
     </record>
     <!-- DISTRICT List view -->
-    <record id="proximas_district_view_list" model="ir.ui.view">
-       <field name="name">district list view</field>
-       <field name="model">proximas.district</field>
-       <field name="arch" type="xml">
-           <tree>
-               <field name="id"/>
-               <field name="name"/>
-               <field name="country_id"/>
-               <field name="note"/>
-           </tree>
-       </field>
-    </record>
+    <!--<record id="proximas_district_view_list" model="ir.ui.view">-->
+       <!--<field name="name">district list view</field>-->
+       <!--<field name="model">proximas.district</field>-->
+       <!--<field name="arch" type="xml">-->
+           <!--<tree>-->
+               <!--<field name="id"/>-->
+               <!--<field name="name"/>-->
+               <!--<field name="country_id"/>-->
+               <!--<field name="note"/>-->
+           <!--</tree>-->
+       <!--</field>-->
+    <!--</record>-->
     <!-- DISTRICT Form view-->
-    <record id="proximas_district_view_form" model="ir.ui.view">
-       <field name="name">district form view</field>
-       <field name="model">proximas.district</field>
-       <field name="arch" type="xml">
-           <form>
-               <sheet>
-                   <div class="oe_title oe_left" name="title">
-                       <label for="name" string="District :" class="oe_edit_only"/>
-                       <h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé du district"/></h2>
-                       <label for="chef_lieu" string="Chef-lieu :" class="oe_edit_only"/>
-                       <h3 class="text-primary"><field name="chef_lieu" default_focus="1" placeholder="chef-lieu de district"/></h3>
-                       <label for="country_id" string="Pays :" class="oe_edit_only"/>
-                       <h3 class="text-primary"><field name="country_id"
-                                  placeholder="Pays de rattachement de la zone"
-                                  options='{"no_open": True, "no_create": True}'/></h3>
-                   </div>
-                   <separator/>
-                   <notebook>
-                       <page string="NOTES / OBSERVATION:">
-                           <field name="note"/>
-                       </page>
-                   </notebook>
-               </sheet>
-           </form>
-       </field>
-    </record>
+    <!--<record id="proximas_district_view_form" model="ir.ui.view">-->
+       <!--<field name="name">district form view</field>-->
+       <!--<field name="model">proximas.district</field>-->
+       <!--<field name="arch" type="xml">-->
+           <!--<form>-->
+               <!--<sheet>-->
+                   <!--<div class="oe_title oe_left" name="title">-->
+                       <!--<label for="name" string="District :" class="oe_edit_only"/>-->
+                       <!--<h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé du district"/></h2>-->
+                       <!--<label for="chef_lieu" string="Chef-lieu :" class="oe_edit_only"/>-->
+                       <!--<h3 class="text-primary"><field name="chef_lieu" default_focus="1" placeholder="chef-lieu de district"/></h3>-->
+                       <!--<label for="country_id" string="Pays :" class="oe_edit_only"/>-->
+                       <!--<h3 class="text-primary"><field name="country_id"-->
+                                  <!--placeholder="Pays de rattachement de la zone"-->
+                                  <!--options='{"no_open": True, "no_create": True}'/></h3>-->
+                   <!--</div>-->
+                   <!--<separator/>-->
+                   <!--<notebook>-->
+                       <!--<page string="NOTES / OBSERVATION:">-->
+                           <!--<field name="note"/>-->
+                       <!--</page>-->
+                   <!--</notebook>-->
+               <!--</sheet>-->
+           <!--</form>-->
+       <!--</field>-->
+    <!--</record>-->
     <!-- REGION List view -->
     <record id="proximas_region_view_list" model="ir.ui.view">
        <field name="name">region list view</field>
@@ -132,7 +132,7 @@
            <tree>
                <field name="id"/>
                <field name="name"/>
-               <field name="district_id"/>
+               <!--<field name="district_id"/>-->
                <field name="country_id"/>
                <field name="note"/>
            </tree>
@@ -150,10 +150,10 @@
                        <h2 class="text-primary"><field name="name" default_focus="1" placeholder="libellé de la région "/></h2>
                        <label for="chef_lieu" string="Chef-lieu :" class="oe_edit_only"/>
                        <h3 class="text-primary"><field name="chef_lieu" default_focus="1" placeholder="chef-lieu de région"/></h3>
-                       <label for="district_id" string="District :" class="oe_edit_only"/>
-                       <h3 class="text-primary"><field name="district_id"
-                                  placeholder="District de rattachement de la zone"
-                                  options='{"no_open": True, "no_create": True}'/></h3>
+                       <!--<label for="district_id" string="District :" class="oe_edit_only"/>-->
+                       <!--<h3 class="text-primary"><field name="district_id"-->
+                                  <!--placeholder="District de rattachement de la zone"-->
+                                  <!--options='{"no_open": True, "no_create": True}'/></h3>-->
                        <label for="country_id" string="Pays :" class="oe_edit_only"/>
                        <h3 class="text-primary"><field name="country_id"
                                   placeholder="Pays de rattachement de la zone"
@@ -223,7 +223,7 @@
                <field name="name"/>
                <field name="zone_id"/>
                <field name="region_id"/>
-               <field name="district_id"/>
+               <!--<field name="district_id"/>-->
                <field name="country_id"/>
                <field name="note"/>
            </tree>
@@ -300,6 +300,7 @@
                <field name="name"/>
                <field name="parent_id"/>
                <field name="ref"/>
+               <field name="est_suspendu"/>
                <field name="note"/>
            </tree>
        </field>
@@ -312,6 +313,11 @@
        <field name="arch" type="xml">
            <form>
                <sheet>
+                   <div class="oe_button_box" name="button_box">
+                       <button name="toggle_suspension" type="object" class="oe_stat_button" icon="fa-check">
+                           <field name="est_suspendu" widget="boolean_button" options='{"terminology": "active"}'/>
+                       </button>
+                   </div>
                    <div class="oe_right oe_button_box" name="buttons" />
                             <field name="is_groupe" invisible="1"/>
                             <field name="is_company" invisible="1"/>
@@ -379,11 +385,11 @@
         <field name="res_model">proximas.exercice</field>
         <field name="view_mode">tree,form</field>
     </record>
-    <record model="ir.actions.act_window" id="proximas_district_action">
-        <field name="name">Proximaas: Paramétrage District</field>
-        <field name="res_model">proximas.district</field>
-        <field name="view_mode">tree,form</field>
-    </record>
+    <!--<record model="ir.actions.act_window" id="proximas_district_action">-->
+        <!--<field name="name">Proximaas: Paramétrage District</field>-->
+        <!--<field name="res_model">proximas.district</field>-->
+        <!--<field name="view_mode">tree,form</field>-->
+    <!--</record>-->
     <record model="ir.actions.act_window" id="proximas_region_action">
         <field name="name">Proximaas: Paramétrage Région</field>
         <field name="res_model">proximas.region</field>

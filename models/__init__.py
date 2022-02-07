@@ -12,5 +12,5 @@ from . import proximas_medical
 from . import proximas_police
 from . import proximas_prise_charge
 from . import proximas_facture
-# from . import res_partner
+from . import proximas_reporting
 # from . import proximas_dashboard

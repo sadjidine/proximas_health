@@ -9,6 +9,7 @@ from openerp import _, fields, models, api
 
 class ResPartner(models.Model):
     _inherit = 'res.partner'
+    _order = 'create_date desc'
 
     relationship = fields.Char(
         size=25,

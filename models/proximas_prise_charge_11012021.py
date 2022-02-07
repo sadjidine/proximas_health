@@ -7,8 +7,8 @@
 from openerp.tools.translate import _
 from openerp import api, fields, models
 from openerp.exceptions import ValidationError, UserError
-from datetime import datetime # timedelta
-# from dateutil.relativedelta import relativedelta
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 from random import randint
 from openerp.tools import amount_to_text_fr
 
@@ -308,7 +308,7 @@ class PriseEnCharge(models.Model):
     )
     num_contrat = fields.Char(
         string="Num. Contrat",
-        related='assure_id.num_contrat',
+        related='contrat_id.num_contrat',
         readonly=True,
     )
     date_debut_assure = fields.Date (
@@ -325,7 +325,7 @@ class PriseEnCharge(models.Model):
     )
     groupe_id = fields.Many2one(
         string="Groupe",
-        related="assure_id.groupe_id",
+        related="contrat_id.groupe_id",
         required=False,
     )
     police_id = fields.Many2one(
@@ -349,7 +349,7 @@ class PriseEnCharge(models.Model):
     adherent = fields.Many2one(
         comodel_name="proximas.adherent",
         string="Adhérent",
-        related='assure_id.adherent_id',
+        related='contrat_id.adherent_id',
         require=False,
         store=True,
         readonly=True,
@@ -747,13 +747,6 @@ class PriseEnCharge(models.Model):
         related='police_id.mt_plafond_prescription',
         readonly=True,
     )
-    mt_plafond_produit_phcie = fields.Float(
-        string="Mt. Plafond/Médicament",
-        digits=(9, 0),
-        related='police_id.mt_plafond_produit_phcie',
-        default=0,
-        help="Montant du plafond sur le coût unitaire des produits pharmaceutiques"
-    )
     leve_plafond_prescription = fields.Boolean(
         string="Lever Plafond Prescription",
         help='Attention! En cochant, cela permet de lever le plafond pour les prescriptions. le système ne contrôlera \
@@ -836,20 +829,22 @@ class PriseEnCharge(models.Model):
             else:
                 rec.is_termine = False
 
-    # @api.one
-    # @api.depends('pathologie_ids')
-    # def _get_pathologie_pec(self):
-    #     if not self.pathologie_id and self.pathologie_ids:
-    #         pathologie = self.pathologie_ids[0]
-    #         self.pathologie_id = pathologie.id
+    @api.one
+    @api.depends('pathologie_ids')
+    def _get_pathologie_pec(self):
+        if not self.pathologie_id and self.pathologie_ids:
+            pathologie = self.pathologie_ids[0]
+            self.pathologie_id = pathologie.id
 
     @api.one
     @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
     def _get_encaisse_phcie(self):
-        self.ensure_one()
-        if 0 < self.mt_encaisse_phcie:
+        if self.mt_encaisse_phcie:
             self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
-        self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
+        elif self.mt_encaisse_phcie_dispense:
+            self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
+        self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense if self.mt_encaisse_phcie_dispense \
+            else self.mt_encaisse_phcie
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
@@ -992,13 +987,13 @@ class PriseEnCharge(models.Model):
             self.ticket_moderateur_phcie_dispense = self.ticket_moderateur_phcie
             # 4. Ticket Exigible
             self.ticket_exigible_cro = sum(
-                item.montant_exigible for item in totaux_details_pec_cro
+                item.ticket_moderateur for item in totaux_details_pec_cro if bool (item.ticket_exigible) or 0
             )
             self.ticket_exigible_crs = sum(
-                item.montant_exigible for item in totaux_details_pec_crs
+                item.ticket_moderateur for item in totaux_details_pec_crs if bool (item.ticket_exigible) or 0
             )
             self.ticket_exigible_phcie = sum(
-                item.montant_exigible for item in totaux_details_pec_phcie
+                item.ticket_moderateur for item in totaux_details_pec_phcie if bool (item.ticket_exigible) or 0
             )
             self.ticket_exigible_phcie_dispense = self.ticket_exigible_phcie
             # 5. Net à Payer
@@ -2016,14 +2011,6 @@ class DetailsPec(models.Model):
         related='substitut_phcie_id.marge_medicament',
         readonly=True,
     )
-    mt_plafond_produit_phcie = fields.Float(
-        string="Mt. Plafond/Médicament",
-        digits=(9, 0),
-        related='pec_id.mt_plafond_produit_phcie',
-        default=0,
-        readonly=True,
-        help="Montant du plafond sur le coût unitaire des produits pharmaceutiques"
-    )
     arret_produit = fields.Boolean(
         string="Produit en arrêt?",
         related='produit_phcie_id.arret_medicament',
@@ -2233,7 +2220,7 @@ class DetailsPec(models.Model):
     contrat_id = fields.Many2one(
         # comodel_name="proximas.contrat",
         string="Contrat Assuré",
-        related='pec_id.contrat_id',
+        related='assure_id.contrat_id',
         store=True,
     )
     num_contrat = fields.Char(
@@ -2295,7 +2282,7 @@ class DetailsPec(models.Model):
     )
     structure_id = fields.Many2one(
         string="Organisation",
-        related='police_id.structure_id',
+        related='pec_id.structure_id',
         readonly=True,
     )
     mt_encaisse_cro = fields.Float(
@@ -2603,12 +2590,6 @@ class DetailsPec(models.Model):
         compute='_calcul_couts_details_pec',
         store=True,
     )   # total_pc - tiers_payeur
-    montant_exigible = fields.Float(
-        string="Montant Exigible",
-        default=0,
-        digits=(6, 0),
-        compute='_calcul_couts_details_pec',
-    )
     net_prestataire = fields.Float(
         string="S/Total Net Prestataire",
         default=0,
@@ -2695,17 +2676,37 @@ class DetailsPec(models.Model):
     #     compute='_get_exercice_sam',
     #     # store=True,
     # )
-    exo_sam = fields.Char(
-        string="Exercice SAM",
-        compute='_get_exercice_sam',
-        store=True,
-        required=False,
-    )
-    en_cours_exo = fields.Boolean (
-        string="Exo en cours",
-        compute='_get_exercice_sam',
-        store=True,
-    )
+    # date_debut_exo = fields.Date(
+    #     string="Date début Exo.",
+    #     related='exercice_id.date_debut',
+    #     readonly=True,
+    # )
+    # date_fin_exo = fields.Date(
+    #     string="Date fin Exo.",
+    #     related='exercice_id.date_fin',
+    #     readonly=True,
+    # )
+    # cloture_exo = fields.Boolean(
+    #     string="Cloturé?",
+    #     related='exercice_id.cloture',
+    #     readonly=True,
+    # )
+    # en_cours_exo = fields.Boolean(
+    #     string="En Cours?",
+    #     related='exercice_id.en_cours',
+    #     readonly=True,
+    # )
+    # exo_name = fields.Char(
+    #     string="Exercice",
+    #     related='exercice_id.name',
+    #     readonly=True,
+    #     store=True,
+    # )
+    # res_company_id = fields.Many2one(
+    #     string="Structure",
+    #     related='exercice_id.res_company_id',
+    #     readonly=True,
+    # )
     totaux_rubrique_assure = fields.Float (
         string="S/Totaux/Rubrique - Asuré",
         digits=(6, 0),
@@ -3110,7 +3111,7 @@ class DetailsPec(models.Model):
                 }
                 return action
 
-    @api.constrains('accorde', 'non_accorde')
+    @api.constrains('accord_prealable')
     def _validate_accord_prealable(self):
         for rec_id in self:
             if bool(rec_id.accord_prealable):
@@ -3270,7 +3271,7 @@ class DetailsPec(models.Model):
                 )
 
     @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                    'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id')
+                    'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id', 'prestataire_rembourse_id')
     def _valide_prestation_id(self):
         for rec in self:
             if bool(rec.prestation_demande_id) and bool (rec.prestataire_crs_id) and bool(rec.pool_medical_crs_id):
@@ -4172,6 +4173,9 @@ class DetailsPec(models.Model):
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
+    # @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
+    #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
+    #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
     @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
                  'prestataire_public', 'zone_couverte', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
@@ -4226,7 +4230,6 @@ class DetailsPec(models.Model):
             taux_couvert = self.taux_couvert
             plafond = 0
             forfait = 0
-            plafond_medicament = self.mt_plafond_produit_phcie
             if bool (code_medical_police):
                 plafond = int (code_medical_police.mt_plafond)
             self.mt_plafond = plafond
@@ -4251,15 +4254,11 @@ class DetailsPec(models.Model):
                 marge_police = int (self.marge_medicament_police)
                 marge_substitut = int (self.marge_medicament_substitut)
                 prix_majore = 0
-                if 0 < plafond_medicament < cout_produit:
-                    self.cout_total = cout_produit * quantite
-                    self.total_pc = int(plafond_medicament * quantite)
-                    self.total_npc = self.cout_total - self.total_pc
-                elif 0 < marge_substitut:
+                if 0 < marge_substitut:
                     prix_majore = int (prix_substitut + marge_substitut)
                 elif 0 < marge_police:
                     prix_majore = int (prix_substitut + marge_police)
-                elif 0 < prix_majore < cout_produit:
+                if 0 < prix_majore < cout_produit:
                     if quantite_prescrite > quantite:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
@@ -4303,15 +4302,11 @@ class DetailsPec(models.Model):
                 marge_police = int (self.marge_medicament_police)
                 marge_produit = int (self.marge_medicament_produit)
                 prix_majore = 0
-                if 0 < plafond_medicament < cout_produit:
-                    self.cout_total = cout_produit * quantite
-                    self.total_pc = int(plafond_medicament * quantite)
-                    self.total_npc = self.cout_total - self.total_pc
-                elif 0 < marge_produit:
-                    prix_majore = int(prix_produit + marge_produit)
+                if 0 < marge_produit:
+                    prix_majore = int (prix_produit + marge_produit)
                 elif 0 < marge_police:
-                    prix_majore = int(prix_produit + marge_police)
-                elif 0 < prix_majore < cout_produit:
+                    prix_majore = int (prix_produit + marge_police)
+                if 0 < prix_majore < cout_produit:
                     if quantite_prescrite > quantite:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
@@ -4610,7 +4605,7 @@ class DetailsPec(models.Model):
             if bool(forfait):
                 self.net_tiers_payeur = int (self.forfait_sam)
                 self.ticket_moderateur = int (self.forfait_ticket)
-                # self.montant_exigible = self.ticket_moderateur + total_npc
+                # self.ticket_exigible = bool (controle_rubrique.ticket_exigible)
                 diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
                 # Calculs détails pour le remboursements
                 if bool (self.rfm_id):
@@ -4621,10 +4616,10 @@ class DetailsPec(models.Model):
                 self.net_tiers_payeur = total_pc * int (taux_couvert) / 100
                 taux_ticket = 100 - int (taux_couvert)
                 self.ticket_moderateur = total_pc * int (taux_ticket) / 100
-                # self.montant_exigible = self.ticket_moderateur + total_npc
+                # self.ticket_exigible = bool (controle_rubrique.ticket_exigible)
                 diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
 
-            if bool(ticket_exigible):
+            if bool (ticket_exigible):
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.debit_ticket = int (self.ticket_moderateur + self.total_npc) - int (self.mt_paye_assure)
             elif not bool (self.ticket_exigible) and (diff_ticket_mt_paye >= 0):
@@ -4636,11 +4631,9 @@ class DetailsPec(models.Model):
                 self.mt_remboursement = self.net_tiers_payeur
                 self.net_prestataire = 0
                 self.debit_ticket = 0
-                self.montant_exigible = self.ticket_moderateur + self.total_npc
                 self.mt_remboursement -= self.mt_exclusion
                 self.net_a_payer = self.mt_remboursement
             else:
-                self.montant_exigible = self.ticket_moderateur + self.total_npc
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.net_prestataire -= self.mt_exclusion
                 self.net_a_payer = self.net_prestataire
@@ -4937,7 +4930,7 @@ class DetailsPec(models.Model):
                                     }
                         }
 
-    @api.constrains('prestation_id', 'produit_phcie_id', 'substitut_phcie_id')
+    @api.constrains('prestation_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestataire_rembourse_id')
     def _validate_age_acces_prestation(self):
         # CONTRÖLE AGE MINIMUM & MAXIMUM PRODUITS PHCIE / PRESTATION MEDICALE
         for rec in self:
@@ -5345,35 +5338,31 @@ class DetailsPec(models.Model):
                     ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
                 )
 
-    @api.depends('date_demande', 'date_execution')
-    def _get_exercice_sam(self):
-        for rec in self:
-            exercices = self.env['proximas.exercice'].search([
-                ('res_company_id', '=', rec.structure_id.id),
-                ('cloture', '=', False),
-            ])
-            if bool(exercices):
-                for exo in exercices:
-                    date_debut = fields.Date.from_string (exo.date_debut)
-                    date_fin = fields.Date.from_string (exo.date_fin)
-                    if rec.date_execution and not rec.date_demande:
-                        date_execution = fields.Date.from_string (rec.date_execution)
-                        if date_debut <= date_execution <= date_fin:
-                            rec.exo_sam = exo.name
-                            rec.en_cours_exo = exo.en_cours
-                    elif rec.date_execution and rec.date_demande:
-                        date_execution = fields.Date.from_string (rec.date_execution)
-                        if date_debut <= date_execution <= date_fin:
-                            rec.exo_sam = exo.name
-                            rec.en_cours_exo = exo.en_cours
-                    elif rec.date_demande and not rec.date_execution:
-                        date_demande = fields.Date.from_string (rec.date_demande)
-                        if date_debut <= date_demande <= date_fin:
-                            rec.exo_sam = exo.name
-                            rec.en_cours_exo = exo.en_cours
-                    elif bool(exo.en_cours):
-                        rec.exo_sam = exo.name
-                        rec.en_cours_exo = exo.en_cours
+    # @api.one
+    # @api.depends('police_id', 'structure_id', 'prestation_id', 'date_execution', 'date_demande')
+    # def _get_exercice_sam(self):
+    #     exercices = self.env['proximas.exercice'].search ([
+    #         ('res_company_id', '=', self.structure_id.id),
+    #         ('cloture', '=', False),
+    #     ])
+    #     if bool (exercices):
+    #         for exo in exercices:
+    #             date_debut = fields.Date.from_string (exo.date_debut)
+    #             date_fin = fields.Date.from_string (exo.date_fin)
+    #             if bool (self.date_execution) and not bool (self.date_demande):
+    #                 date_execution = fields.Date.from_string (self.date_execution)
+    #                 if date_debut <= date_execution <= date_fin:
+    #                     self.exercice_id = exo.id
+    #             elif bool (self.date_execution) and bool (self.date_demande):
+    #                 date_execution = fields.Date.from_string (self.date_execution)
+    #                 if date_debut <= date_execution <= date_fin:
+    #                     self.exercice_id = exo.id
+    #             elif bool (self.date_demande):
+    #                 date_demande = fields.Date.from_string (self.date_demande)
+    #                 if date_debut <= date_demande <= date_fin:
+    #                     self.exercice_id = exo.id
+    #             elif bool (exo.en_cours):
+    #                 self.exercice_id = exo.id
 
     @api.onchange('date_execution', 'date_demande')
     def _check_exo_sam(self):
@@ -5698,7 +5687,7 @@ class RemboursementPEC(models.Model):
     structure_id = fields.Many2one(
         omodel_name="res.company",
         string="Organisation(SAM)",
-        related='police_id.structure_id',
+        related='contrat_id.structure_id',
         readonly=True,
     )
     matricule = fields.Char (
@@ -6271,14 +6260,14 @@ class RemboursementWizard(models.TransientModel):
         # prestations = self.env['proximas.prestation'].search([('prestataire_id', '=', user.partner_id.id)])
         # 1. Vérifier si le code saisi correspond à un assure
         assure = self.env['proximas.assure'].search([
-            '|', ('code_id_externe', '=ilike', self.code_saisi),
-            ('code_id', '=ilike', self.code_saisi)
+            '|', ('code_id_externe', '=', self.code_saisi),
+            ('code_id', '=', self.code_saisi)
         ])
         info_assure = assure.name
         # 2. Vérifier si le code saisi correspond à un adhérent
         adherent = self.env['proximas.adherent'].search([
-            '|', ('code_id_externe', '=ilike', self.code_saisi),
-            ('code_id', '=ilike', self.code_saisi)
+            '|', ('code_id_externe', '=', self.code_saisi),
+            ('code_id', '=', self.code_saisi)
         ])
         info_adherent = adherent.name
         # recupérer le contrat de couverture maladie de l'adherent

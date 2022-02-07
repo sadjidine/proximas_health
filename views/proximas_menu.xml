@@ -90,6 +90,130 @@
               name="Prises en Charge Médicales"
               parent="proximas_root"
               sequence="20"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro,proximas_medical.group_crs,proximas_medical.group_pharmacy,proximas_medical.group_medecin"
+     />
+    <menuitem id="proximas_pec"
+              name="1. Gestion Prises en Charge"
+              parent="proximas_prise_en_charge_root"
+              sequence="201" />
+    <menuitem id="proximas_details_pec_user_rapport"
+              name=">> Détails Prises en Charge Traitées"
+              parent="proximas_pec"
+              sequence="2010"
+              action="proximas_details_pec_user_action"
+    />
+    <menuitem id="proximas_create_pec"
+              name=">> Nouvelle Prise en Charge"
+              parent="proximas_pec"
+              sequence="2011"
+              action="proximas_crea_pec_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro,proximas_medical.group_medecin"
+    />
+     <menuitem id="proximas_maj_crs_pec"
+              name=">> Poursuivre Prise en Charge"
+              parent="proximas_pec"
+              sequence="2012"
+              action="proximas_maj_crs_pec_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro,proximas_medical.group_crs,proximas_medical.group_medecin"/>
+    <menuitem id="proximas_maj_phcie_pec"
+              name=">> Dispensation Médicaments (Pharmacie)"
+              parent="proximas_pec"
+              sequence="2013"
+              action="proximas_maj_phcie_pec_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_pharmacy"
+    />
+    <menuitem id="proximas_list_cours_pec"
+              name=">> Prises en Charge (En cours)"
+              parent="proximas_pec"
+              sequence="2014"
+              action="proximas_prestataire_pec_list_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro"
+    />
+    <menuitem id="proximas_list_pec"
+              name=">> Liste Complète Prises en Charge"
+              parent="proximas_pec"
+              sequence="2015"
+              action="proximas_list_pec_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
+    <menuitem id="proximas_facture_remb"
+              name="2. Gestion Factures / Remboursements"
+              parent="proximas_prise_en_charge_root"
+              sequence="202" />
+    <menuitem id="proximas_list_facture"
+              name=">> Liste Factures (En attente)"
+              parent="proximas_facture_remb"
+              sequence="2020"
+              action="proximas_list_facture_action"/>
+    <menuitem id="proximas_create_facture"
+              name=">> Création Nouvelle Facture"
+              parent="proximas_facture_remb"
+              sequence="2021"
+              action="proximas_create_facture_action"/>
+    <menuitem id="proximas_facture_list_all"
+              name=">> Liste Complète Factures "
+              parent="proximas_facture_remb"
+              sequence="2022"
+              action="proximas_facture_list_all_action"
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
+    <menuitem id="proximas_create_rfm_pec"
+              name=">> Nouvelle Fiche Remboursement Adhérent"
+              parent="proximas_facture_remb"
+              sequence="2023"
+              action="proximas_create_rfm_action"
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
+    <menuitem id="proximas_list_rfm"
+              name=">> Liste Remboursements Frais Médicaux"
+              parent="proximas_facture_remb"
+              sequence="2024"
+              action="proximas_list_rfm_action"
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
+    <menuitem id="proximas_details_pec"
+              name="3. Suivi &amp; Contrôles Prestations/Actes"
+              parent="proximas_prise_en_charge_root"
+              sequence="203"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
+    <!--groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"-->
+    <menuitem id="proximas_accord_details_pec_crs"
+              name=">> Traitement Accords Préalables Actes/Prestations"
+              parent="proximas_details_pec"
+              sequence="2030"
+              action="proximas_accord_details_pec_crs_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
+    <menuitem id="proximas_list_accord_details_pec_crs"
+              name=">> Demandes Traitées - Accords Préalables"
+              parent="proximas_details_pec"
+              sequence="2031"
+              action="proximas_list_accord_details_pec_crs_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
+    <menuitem id="proximas_validitation_details_pec_crs"
+              name=">> Validation Prestations CRS"
+              parent="proximas_details_pec"
+              sequence="2033"
+              action="proximas_validation_details_pec_crs_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_medecin"
+    />
+    <menuitem id="proximas_gestion_details_pec"
+              name=">> Gestion Sinistres (Prestations)"
+              parent="proximas_details_pec"
+              sequence="2034"
+              action="proximas_details_pec_action"
+              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator"
+    />
+    <menuitem id="proximas_gestion_details_pec_demande"
+              name=">> Gestion Prestations Demandées - CRS"
+              parent="proximas_details_pec"
+              sequence="2035"
+              action="proximas_details_pec_demande_action"
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
+    <!--<menuitem id="proximas_prise_en_charge_root"
+              name="Prises en Charge Médicales"
+              parent="proximas_root"
+              sequence="20"
               groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_operator,proximas_medical.group_cro,proximas_medical.group_crs,proximas_medical.group_pharmacy"
      />
     <menuitem id="proximas_pec"
@@ -174,7 +298,7 @@
               parent="proximas_facture_remb"
               sequence="2023"
               action="proximas_list_rfm_action"
-              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>-->
     <menuitem id="proximas_portefeuille_risque"
               name="Portefeille de Risques"
               parent="proximas_root"
@@ -216,7 +340,8 @@
               name=">> Paramétrage Utilisateurs SMS-API"
               parent="proximas_reseau_soin"
               sequence="3021"
-              action="proximas_sms_users_action"/>
+              action="proximas_sms_users_action"
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
     <menuitem id="proximas_prestation_fournies"
               name=">> Offres Prestations (Conventions)"
               parent="proximas_reseau_soin"
@@ -328,11 +453,11 @@
               parent="proximas_misc_parametrage"
               sequence="4032"
               action="proximas_groupe_action" />
-    <menuitem id="proximas_parametrage_district"
-              name=">> Gestion de Districts"
-              parent="proximas_misc_parametrage"
-              sequence="4033"
-              action="proximas_district_action" />
+    <!--<menuitem id="proximas_parametrage_district"-->
+              <!--name=">> Gestion de Districts"-->
+              <!--parent="proximas_misc_parametrage"-->
+              <!--sequence="4033"-->
+              <!--action="proximas_district_action" />-->
     <menuitem id="proximas_parametrage_region"
               name=">> Gestion de Régions"
               parent="proximas_misc_parametrage"

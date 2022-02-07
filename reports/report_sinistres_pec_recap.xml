@@ -1,0 +1,442 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Copyright 2017 SIGEM.
+     Auteur : Sadjidine Salifou OMBOTIMBE
+     License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
+
+<odoo>
+    <record model="report.paperformat" id="paperformat_report_suivi_sinistres">
+        <field name="name">European A4 Landscape</field>
+        <field name="default" eval="True"/>
+        <field name="format">A4</field>
+        <field name="page_width">0</field>
+        <field name="page_width">0</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">35</field>
+        <field name="margin_right">5</field>
+        <field name="margin_bottom">10</field>
+        <field name="margin_left">5</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">30</field>
+        <field name="dpi">90</field>
+    </record>
+    <report id="report_sinistres_pec_template"
+            string="Rapports Suivi Sinsitres - PEC"
+            model="proximas.pec.report.wizard"
+            name="proximas_medical.report_sinistres_pec_view"
+            report_type="qweb-pdf"
+            paperformat="paperformat_report_suivi_sinistres"
+            menu="False"
+    />
+    <template id="report_sinistres_pec_view">
+        <t t-call="report.html_container">
+            <t t-call="report.external_layout">
+                <div class="page">
+                    <!--1. RAPPORT SINISTRALITE SYNTHESE SINISTRES PAR RUBRIQUE -->
+                    <t t-if="report_kpi in ['rubrique']">
+                        <div class="header">
+                            <h6 class="bg-primary invisible">...</h6>
+                            <h4 class="bg-info text-primary">
+                                <strong>
+                                     RAPPORT SUIVI EVOLUTION DE LA SINISTRALITE: SYNTHESE SINISTRES / RUBRIQUE
+                                </strong>
+                            </h4>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <p>
+                                       <span>Période du: </span> <strong><t t-esc="date_debut"/> - </strong>
+                                       <span>Au: </span><strong><t t-esc="date_fin"/></strong>
+                                    </p>
+                                </div>
+                                <div class="col-xs-6">
+                                     <t t-if="police_filter">
+                                         <p class="text-right"> Police Couverture: <strong class="text-primary"><t t-esc="police"/></strong></p>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped table-xs h6"
+                                   style="width: 100% border-bottom: 2px solid black">
+                                <caption>IMPORTANT: Le tableau ci-dessous présente la synthèse des actes médicaux qui ont été fournis par les prestataires de soins.
+                                    Ces prestations ont été traitées sur la plateforme et n'ont, cependant pas fait l'objet de validation définitive. Les montants
+                                    indiqués peuvent variés en fonction des possibles exclusions et autres modifications, après les étapes de contrôles  adminstratifs
+                                    et médicaux effectués sur les factures concernées.
+                                </caption>
+                                <thead class="bg-primary" >
+                                    <th class="text-right"><strong>N°</strong></th>
+                                    <th class="text-left"><strong>Rubrique Médicale</strong></th>
+                                    <th class="text-right"><strong>Coût moyen</strong></th>
+                                    <th class="text-right"><strong>Nbre. PEC</strong></th>
+                                    <th class="text-right"><strong>Totaux</strong></th>
+                                    <th class="text-right"><strong>Totaux PC</strong></th>
+                                    <th class="text-right"><strong>Totaux NPC</strong></th>
+                                    <th class="text-right"><strong>Exclusions</strong></th>
+                                    <th class="text-right"><strong>Ticket mod.</strong></th>
+                                    <th class="text-right"><strong>Part SAM</strong></th>
+                                    <th class="text-right"><strong>Net A Payer</strong></th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="num" t-value="0"/>
+                                    <t t-set="tot_cout_moyen" t-value="0"/>
+                                    <t t-set="tot_nbre_pec" t-value="0"/>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-set="tot_net_a_payer" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="num" t-value="num + 1"/>
+                                        <t t-set="cout_moyen" t-value="0"/>
+                                        <t t-if="int(doc['nbre_pec']) != 0">
+                                            <t t-set="cout_moyen" t-value="int(doc['cout_total'])/int(doc['nbre_pec'])"/>
+                                        </t>
+                                        <t t-set="tot_cout_moyen" t-value="tot_cout_moyen + cout_moyen"/>
+                                        <t t-set="tot_nbre_pec" t-value="tot_nbre_pec + int(doc['nbre_pec'])"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['total_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
+                                        <tr>
+                                            <td class="text-center"><strong><span t-esc="num"/></strong></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['rubrique_medicale']"/></strong></td>
+                                            <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_pec']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></td>
+                                            <td class="text-right bg-info"><strong><span t-esc="'{0:,.0f}'.format(doc['net_a_payer']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="3"><strong> TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_nbre_pec).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_a_payer).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <div class="row"> -
+                                <div class="col-xs-12">
+                                    <p><b>CADRE RESERVE COMITE DE GESTION:</b></p>
+                                    <table class="table table-condensed table-bordered table-striped h6" style="border:1px solid black;">
+                                        <tr>
+                                            <td class="col-xs-4">
+                                                <p>Rapport demandé par :________________________________</p>
+                                                <p>Service/Direction   :___________________________________</p>
+                                                <p>Date Demande        :___________/_____________/___________</p>
+                                                <p>Référence/demande   :__________________________________</p>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <strong>Visa &amp; Cachet - Comité de Gestion</strong>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <b>Visa Correspondance</b>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+                                                % ('Code128', police_id, 320,  60)" style="width:320;height:60;"
+                                                />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <!--2. RAPPORT SINISTRALITE SYNTHESE SINISTRES PAR PRESTATION MEDICALE-->
+                    <t t-if="report_kpi in ['prestation']">
+                        <div class="header">
+                            <h6 class="bg-primary invisible">...</h6>
+                            <h4 class="bg-info text-primary">
+                                <strong>
+                                     RAPPORT SUIVI - PRISES EN CHARGE: SYNTHESE DES SINISTRES / PRESTATION MEDICALE
+                                </strong>
+                            </h4>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <p>
+                                       <span>Période du: </span> <strong><t t-esc="date_debut"/> - </strong>
+                                       <span>Au: </span><strong><t t-esc="date_fin"/></strong>
+                                    </p>
+                                </div>
+                                <div class="col-xs-6">
+                                     <t t-if="police_filter">
+                                         <p class="text-right"> Police Couverture: <strong class="text-primary"><t t-esc="police"/></strong></p>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped table-xs h6"
+                                   style="width: 100% border-bottom: 2px solid black">
+                                <caption>IMPORTANT: Le tableau ci-dessous présente la synthèse des actes médicaux qui ont été fournis par les prestataires de soins.
+                                    Ces prestations ont été traitées sur la plateforme et n'ont, cependant pas fait l'objet de validation définitive. Les montants
+                                    indiqués peuvent variés en fonction des possibles exclusions et autres modifications, après les étapes de contrôles  adminstratifs
+                                    et médicaux effectués sur les factures concernées.
+                                </caption>
+                                <thead class="bg-primary" >
+                                    <th class="text-right"><strong>N°</strong></th>
+                                    <th class="text-left"><strong>Prestation Médicale</strong></th>
+                                    <th class="text-right"><strong>Coût moyen</strong></th>
+                                    <th class="text-right"><strong>Nbre. PEC</strong></th>
+                                    <th class="text-right"><strong>Totaux</strong></th>
+                                    <th class="text-right"><strong>Totaux PC</strong></th>
+                                    <th class="text-right"><strong>Totaux NPC</strong></th>
+                                    <th class="text-right"><strong>Exclusions</strong></th>
+                                    <th class="text-right"><strong>Ticket mod.</strong></th>
+                                    <th class="text-right"><strong>Part SAM</strong></th>
+                                    <th class="text-right"><strong>Net A Payer</strong></th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="num" t-value="0"/>
+                                    <t t-set="tot_cout_moyen" t-value="0"/>
+                                    <t t-set="tot_nbre_pec" t-value="0"/>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-set="tot_net_a_payer" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="num" t-value="num + 1"/>
+                                        <t t-set="cout_moyen" t-value="0"/>
+                                        <t t-if="int(doc['nbre_pec']) != 0">
+                                            <t t-set="cout_moyen" t-value="int(doc['cout_total'])/int(doc['nbre_pec'])"/>
+                                        </t>
+                                        <t t-set="tot_cout_moyen" t-value="tot_cout_moyen + cout_moyen"/>
+                                        <t t-set="tot_nbre_pec" t-value="tot_nbre_pec + int(doc['nbre_pec'])"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['total_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
+                                        <tr>
+                                            <td class="text-center"><strong><span t-esc="num"/></strong></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['prestation_medicale']"/></strong></td>
+                                            <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_pec']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></td>
+                                            <td class="text-right bg-info"><strong><span t-esc="'{0:,.0f}'.format(doc['net_a_payer']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="3"><strong> TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_nbre_pec).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_a_payer).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <div class="row"> -
+                                <div class="col-xs-12">
+                                    <p><b>CADRE RESERVE COMITE DE GESTION:</b></p>
+                                    <table class="table table-condensed table-bordered table-striped h6" style="border:1px solid black;">
+                                        <tr>
+                                            <td class="col-xs-4">
+                                                <p>Rapport demandé par :________________________________</p>
+                                                <p>Service/Direction   :___________________________________</p>
+                                                <p>Date Demande        :___________/_____________/___________</p>
+                                                <p>Référence/demande   :__________________________________</p>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <strong>Visa &amp; Cachet - Comité de Gestion</strong>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <b>Visa Correspondance</b>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+                                                % ('Code128', police_id, 320,  60)" style="width:320;height:60;"
+                                                />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <!--3. RAPPORT SINISTRALITE SYNTHESE SINISTRES PAR AFFECTION (PATHOLOGIE) -->
+                    <t t-if="report_kpi in ['pathologie']">
+                        <div class="header">
+                            <h6 class="bg-primary invisible">...</h6>
+                            <h4 class="bg-info text-primary">
+                                <strong>
+                                     RAPPORT SUIVI - PRISES EN CHARGE: SYNTHESE DES SINISTRES / AFFECTION (PATHOLOGIE)
+                                </strong>
+                            </h4>
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <p>
+                                       <span>Période du: </span> <strong><t t-esc="date_debut"/> - </strong>
+                                       <span>Au: </span><strong><t t-esc="date_fin"/></strong>
+                                    </p>
+                                </div>
+                                <div class="col-xs-6">
+                                     <t t-if="police_filter">
+                                         <p class="text-right"> Police Couverture: <strong class="text-primary"><t t-esc="police"/></strong></p>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="article">
+                            <table class="table table-condensed table-bordered table-striped table-xs h6"
+                                   style="width: 100% border-bottom: 2px solid black">
+                                <caption>IMPORTANT: Le tableau ci-dessous présente la synthèse des actes médicaux qui ont été fournis par les prestataires de soins.
+                                    Ces prestations ont été traitées sur la plateforme et n'ont, cependant pas fait l'objet de validation définitive. Les montants
+                                    indiqués peuvent variés en fonction des possibles exclusions et autres modifications, après les étapes de contrôles  adminstratifs
+                                    et médicaux effectués sur les factures concernées.
+                                </caption>
+                                <thead class="bg-primary" >
+                                    <th class="text-right"><strong>N°</strong></th>
+                                    <th class="text-left"><strong>Pathologie Médicale</strong></th>
+                                    <th class="text-right"><strong>Coût moyen</strong></th>
+                                    <th class="text-right"><strong>Nbre. PEC</strong></th>
+                                    <th class="text-right"><strong>Totaux</strong></th>
+                                    <th class="text-right"><strong>Totaux PC</strong></th>
+                                    <th class="text-right"><strong>Totaux NPC</strong></th>
+                                    <th class="text-right"><strong>Exclusions</strong></th>
+                                    <th class="text-right"><strong>Ticket mod.</strong></th>
+                                    <th class="text-right"><strong>Part SAM</strong></th>
+                                    <th class="text-right"><strong>Net A Payer</strong></th>
+                                </thead>
+                                <tbody>
+                                    <t t-set="num" t-value="0"/>
+                                    <t t-set="tot_cout_moyen" t-value="0"/>
+                                    <t t-set="tot_nbre_pec" t-value="0"/>
+                                    <t t-set="tot_cout_total" t-value="0"/>
+                                    <t t-set="tot_total_pc" t-value="0"/>
+                                    <t t-set="tot_total_npc" t-value="0"/>
+                                    <t t-set="tot_total_exclusion" t-value="0"/>
+                                    <t t-set="tot_ticket_moderateur" t-value="0"/>
+                                    <t t-set="tot_net_tiers_payeur" t-value="0"/>
+                                    <t t-set="tot_net_a_payer" t-value="0"/>
+                                    <t t-foreach="docs" t-as="doc">
+                                        <t t-set="num" t-value="num + 1"/>
+                                        <t t-set="cout_moyen" t-value="0"/>
+                                        <t t-if="int(doc['nbre_pec']) != 0">
+                                            <t t-set="cout_moyen" t-value="int(doc['cout_total'])/int(doc['nbre_pec'])"/>
+                                        </t>
+                                        <t t-set="tot_cout_moyen" t-value="tot_cout_moyen + cout_moyen"/>
+                                        <t t-set="tot_nbre_pec" t-value="tot_nbre_pec + int(doc['nbre_pec'])"/>
+                                        <t t-set="tot_cout_total" t-value="tot_cout_total + int(doc['cout_total'])"/>
+                                        <t t-set="tot_total_pc" t-value="tot_total_pc + int(doc['total_pc'])"/>
+                                        <t t-set="tot_total_npc" t-value="tot_total_npc + int(doc['total_npc'])"/>
+                                        <t t-set="tot_total_exclusion" t-value="tot_total_exclusion + int(doc['total_exclusion'])"/>
+                                        <t t-set="tot_ticket_moderateur" t-value="tot_ticket_moderateur + int(doc['ticket_moderateur'])"/>
+                                        <t t-set="tot_net_tiers_payeur" t-value="tot_net_tiers_payeur + int(doc['net_tiers_payeur'])"/>
+                                        <t t-set="tot_net_a_payer" t-value="tot_net_a_payer + int(doc['net_a_payer'])"/>
+                                        <tr>
+                                            <td class="text-center"><strong><span t-esc="num"/></strong></td>
+                                            <td class="bg-info"><strong><span t-esc="doc['pathologie']"/></strong></td>
+                                            <td class="text-right"><strong><span t-esc="'{:,}'.format(int(cout_moyen)).replace(',',' ')"/></strong></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['nbre_pec']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{:,}'.format(int(doc['cout_total'])).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_pc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_npc']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['total_exclusion']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['ticket_moderateur']).replace(',',' ')"/></td>
+                                            <td class="text-right"><span t-esc="'{0:,.0f}'.format(doc['net_tiers_payeur']).replace(',',' ')"/></td>
+                                            <td class="text-right bg-info"><strong><span t-esc="'{0:,.0f}'.format(doc['net_a_payer']).replace(',',' ')"/></strong></td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                                <tfoot>
+                                    <tr class="text-right bg-info" style="border-top: 2px solid black;">
+                                        <td colspan="3"><strong> TOTAUX GENERAUX</strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_nbre_pec).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_cout_total).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_pc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_npc).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_total_exclusion).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_ticket_moderateur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_tiers_payeur).replace(',',' ')"/></strong></td>
+                                        <td><strong><span t-esc="'{:,}'.format(tot_net_a_payer).replace(',',' ')"/></strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                            <div class="row"> -
+                                <div class="col-xs-12">
+                                    <p><b>CADRE RESERVE COMITE DE GESTION:</b></p>
+                                    <table class="table table-condensed table-bordered table-striped h6" style="border:1px solid black;">
+                                        <tr>
+                                            <td class="col-xs-4">
+                                                <p>Rapport demandé par :________________________________</p>
+                                                <p>Service/Direction   :___________________________________</p>
+                                                <p>Date Demande        :___________/_____________/___________</p>
+                                                <p>Référence/demande   :__________________________________</p>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <strong>Visa &amp; Cachet - Comité de Gestion</strong>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <b>Visa Correspondance</b>
+                                            </td>
+                                            <td class="col-xs-3 text-center">
+                                                <img t-att-src="'/report/barcode/?type=%s&amp;value=%s&amp;width=%s&amp;height=%s'
+                                                % ('Code128', police_id, 320,  60)" style="width:320;height:60;"
+                                                />
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+                <div class="footer">
+                    <div class="row text-center" style="border-top: 2px solid black;margin-top:10px;">
+                        <div class="col-xs-4 text-left">
+                            SIGEM - Proximaas. Tous droits reservés. Copyright © <span t-esc="datetime.datetime.now().strftime('%Y')"/>.
+                        </div>
+                        <div class="col-xs-4 text-center">
+                            <t t-set="date" t-value="datetime.datetime.now()"/>
+                            <p>Edité par: <span t-esc="user.name"/> le: <span t-esc="date.strftime('%d-%m-%Y - %H:%M:%S')"/></p>
+                        </div>
+                        <div class="col-xs-4 text-right">
+                            <ul class="list-inline">
+                                <li>Page:</li>
+                                <li>
+                                    <span class="page"/>
+                                </li>
+                                <li>/</li>
+                                <li>
+                                    <span class="topage"/>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

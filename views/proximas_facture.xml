@@ -4,6 +4,32 @@
      License LGPL-3.0 or later (http://www.gnu.org/licenses/lgpl). -->
 <odoo>
     <data>
+        <!-- DATAILS PEC TREE -->
+    <record id="proximas_details_pec_facture_list" model="ir.ui.view">
+        <field name="name">proximas details pec facture list</field>
+        <field name="model">proximas.details.pec</field>
+        <field name="arch" type="xml">
+            <tree string="Details PEC">
+                <field name="num_pec"/>
+                <field name="date_execution"/>
+                <field name="code_id"/>
+                <field name="assure_id" string="Assuré"/>
+                <field name="prestataire"/>
+                <field name="details_prestation" string="Désignation"/>
+                <field name="quantite" string="Qté. Demandée"/>
+                <field name="quantite_livre" string="Livré"/>
+                <field name="cout_unite" string="Coût Unit."/>
+                <field name="cout_total" string="Totaux" sum="Totaux"/>
+                <field name="total_pc" string="Totaux PC" sum="Totauc PC"/>
+                <field name="total_npc" string="Totaux NPC" sum="Totaux NPC"/>
+                <field name="taux_couvert" string="Taux(%)"/>
+                <field name="net_tiers_payeur" sum="Part SAM"/>
+                <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod."/>
+                <field name="net_prestataire" string="Net Prestataire" sum="Net Prestataire"/>
+                <field name="net_a_payer" string="NET DÛ"/>
+            </tree>
+        </field>
+    </record>
         <!-- FACTURE VIEW TREE -->
         <record id="proximas_facture_view_tree" model="ir.ui.view">
             <field name="name">proximas.facture.view</field>
@@ -14,6 +40,24 @@
                     <field name="name"/>
                     <field name="num_facture"/>
                     <field name="prestataire" />
+                    <field name="date_emission"/>
+                    <field name="date_reception" />
+                    <field name="nbre_prestations" sum="Nbre. Actes"/>
+                    <field name="totaux_exclusions_facture" sum="Exclusions"/>
+                    <field name="net_prestataire_facture" sum="Net à payer"/>
+                    <field name="state" />
+                </tree>
+            </field>
+        </record>
+        <record id="proximas_facture_list_all_tree" model="ir.ui.view">
+            <field name="name">proximas.facture.list.view</field>
+            <field name="model">proximas.facture</field>
+            <field name="arch" type="xml">
+                <tree string="Factures Prestataires" create="0">
+                    <field name="name"/>
+                    <field name="num_facture"/>
+                    <field name="prestataire"/>
+                    <field name="categorie_id"/>
                     <field name="date_emission"/>
                     <field name="date_reception" />
                     <field name="nbre_prestations" sum="Nbre. Actes"/>
@@ -194,12 +238,13 @@
                            <page string="Détails Facture (Prestations facturées)">
                                <field name="details_pec_ids" options='{"no_create": True}'
                                       required="1"
-                                      class="text-info"
+                                      class="text-primary"
                                       widget="many2many"
-                                      context="{'default_prestataire_id':prestataire_id, 'default_facture_id':id}"
+                                      context="{'default_prestataire_id':prestataire_id, 'default_facture_id':id,
+                                      'tree_view_ref':'proximas_medical.proximas_details_pec_facture_list'}"
                                       domain="[('prestataire','=',prestataire_id),('date_execution','!=',None),
-                                      ('date_execution','!=',None),('facture_id','=',None),('total_pc','>',0),
-                                      ('pec_state','in',['dispense','oriente','termine'])]"
+                                      ('facture_id','=',None),('total_pc','>',0),('pec_state','in',['dispense',
+                                      'oriente','termine'])]"
                                ><!--('facture_id','=',None) '|','&amp;','&amp;','&amp;','&amp;','&amp;',-->
                                 <!--'form_view_ref':'proximas_medical.exclusion_details_pec_soins_form',-->
                                    <form string="Détails de Prise en charge Assuré">
@@ -373,8 +418,17 @@
             <field name="res_model">proximas.facture</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
-            <field name="domain">[]</field>
+            <field name="domain">[('state','in',['attente'])]</field>
             <field name="context">{}</field>
-    </record>
+        </record>
+        <record model="ir.actions.act_window" id="proximas_facture_list_all_action">
+            <field name="name">Proximaas: Gestion Factures Prestataires</field>
+            <field name="res_model">proximas.facture</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="proximas_facture_list_all_tree"/>
+            <field name="domain">[]</field>
+            <field name="context">{'search_default_prestataire_id':'prestataire_id'}</field>
+        </record>
     </data>
 </odoo>

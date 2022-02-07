@@ -78,7 +78,6 @@ class RubriqueMedicale(models.Model):
         string="Notes et Observations",
     )
 
-
     @api.multi
     @api.onchange('name')
     def _check_name(self):
@@ -254,7 +253,19 @@ class CodePrestation(models.Model):
         default=0,
         help="délai d'attente ==> Nombre de jours à observer pour bénéficier une seconde fois de cette prestation."
     )
-    active = fields.Boolean(default=True)
+    age_minimum = fields.Integer(
+        string="Age Minimum.(années)",
+        required=True,
+        default=0,
+        help="L'âge minimum autorisé pour l'accès à cette prestation."
+    )
+    age_maximum = fields.Integer(
+        string="Age Maxi.(années)",
+        required=True,
+        default=0,
+        help="L'âge maximum autorisé pour l'accès à cette prestation."
+    )
+    # active = fields.Boolean(default=True)
     note = fields.Text(
         string="Notes et Observations",
     )
@@ -323,9 +334,9 @@ class ClasseTherapeutiqe(models.Model):
     @api.constrains('parent_id')
     def _check_hierarchy(self):
         if not self._check_recursion():
-            raise ValidationError(
-                'Erreur! Vous ne pouvez pas créer de catégories recursives...!'
-            )
+            raise ValidationError(_(
+                u"Erreur! Vous ne pouvez pas créer de catégories recursives...!"
+            ))
 
 
 
@@ -389,7 +400,6 @@ class FormeGalenique(models.Model):
 class VoieTherapeutique(models.Model):
     _name = 'proximas.voie.therapeutique'
     _description = 'Voie therapeutique'
-
 
     sequence = fields.Integer(
         string="Sequence"
@@ -481,6 +491,18 @@ class ProduitPharmacie(models.Model):
         string="Délai d'attente (nbre. jours)",
         default=0,
         help="Nombre de jours à observer avant de dispenser le même médicament"
+    )
+    age_minimum = fields.Integer (
+        string="Age Minimum.(années)",
+        required=True,
+        default=0,
+        help="L'âge minimum autorisé pour l'accès au médicament."
+    )
+    age_maximum = fields.Integer (
+        string="Age Maxi.(années)",
+        required=True,
+        default=0,
+        help="L'âge maximum autorisé pour l'accès au médicament."
     )
     note = fields.Text(
         string="Notes et Observations",

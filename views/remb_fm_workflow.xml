@@ -26,7 +26,7 @@
             <field name="action">action_valider()</field>
         </record>
         <record model="workflow.activity" id="boucle">
-            <field name="name">Terminé</field>
+            <field name="name">Termine</field>
             <field name="wkf_id" ref="wkf_remboursement_pec"/>
             <field name="kind">function</field>
             <field name="action">action_boucler()</field>
@@ -47,7 +47,7 @@
         <record model="workflow.transition" id="rfm_valide_to_boucle">
             <field name="act_from" ref="valide"/>
             <field name="act_to" ref="boucle"/>
-            <field name="signal">Tarminé</field>
+            <field name="signal">Termine</field>
             <field name="group_id" ref="proximas_medical.group_manager"/>
         </record>
         <record model="workflow.transition" id="rfm_boucle_to_valide">

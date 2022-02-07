@@ -41,22 +41,23 @@
                                help="Permet de remettre le statut du remboursement de frais médicaux =>(En cours)."/>
                        <button name="Validation" type="workflow"
                                string="Validation" icon="fa-hand-o-right"
-                               states="create"
+                               states="create,boucle"
                                help="VALIDATION: Transmettre le remboursement des frais médicaux pour règlement."
                                class="oe_highlight"
                                confirm="VALIDATION: Vous êtes sur le point de transmettre le dossier de remboursement à
                                la validation et en vous risquez de ne plus pouvoir acceder au dossier.Voulez-vous
                                confirmer la clôture?"
                        />
-                       <button name="Terminé" type="workflow"
-                               string="Terminé" icon="fa-hand-o-right"
+                       <button name="Termine" type="workflow"
+                               string="Terminé" icon="fa-lock"
                                states="valide"
                                help="TERMINE: Terminer le processus de traitement du dossier de remboursement de frais
                                médicaux pour règlement."
                                class="oe_highlight"
                                confirm="TERMINE: Vous êtes sur le point de mettre fin au processus de traitement du
-                               dossier de remboursement des frais médicaux. Par conséquent, Vous risquez de ne plus
-                               pouvoir acceder au dossier concerné. Voulez-vous confirmer la clôture/terminer?"
+                               dossier de remboursement des frais médicaux en validant définitivement les données.
+                               Par conséquent, aucune modification ne sera possible sur le dossier concerné.
+                               Voulez-vous confirmer la clôture et y mettre Fin au processus?"
                        />
                                <!--states="cours,valide"-->
                        <!--<button name="Cloture" type="workflow" icon="fa-check-circle"
@@ -108,14 +109,41 @@
                            </button>
                        </div>
                        <field name="image"
+                           widget='image'
+                           class="oe_left oe_kanban_avatar"
+                           options="{'preview_image': 'image', 'size': [120, 120]}"
+                           readonly="1"/>
+                        <!--<field name="image" widget='image' class="oe_avatar oe_left"/>-->
+                       <div class="oe_title oe_left" name="title">
+                           <!--<label for="name" string="Adhérent/Police:"/>-->
+                           <h2><field name="name" class="text-primary" readonly="True"/></h2>
+                           <!--<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>-->
+                           <strong class="text-primary"><field name="code_saisi" readonly="1"/></strong>
+                           <h4>
+                               <field name="police_id" class="text-info"
+                                      options ='{"no_open": True, "no_create": True}'/>
+                           </h4>
+                           <h4 class="test-primary">
+                               <field name="groupe_id" class="text-info"
+                                      options ='{"no_open": True, "no_create": True}'/>
+                           </h4>
+                       </div>
+                       <newline/>
+                       <div class="oe_right text-center">
+                           <field name="code_rfm" invisible="1"/>
+                           <label for="code_remb" string="CODE REMBOURSEMENT - RFM:"/>
+                           <h2 class="bg-primary"><field name="code_remb"/></h2>
+                       </div>
+                       <hr/>
+                       <!--field name="image"
                                widget='image'
                                class="oe_left oe_avatar thumbnail"
                                options="{'preview_image': 'image', 'size': [90, 140]}" />
-                            <!--<field name="image" widget='image' class="oe_avatar oe_left"/>-->
+                            &lt;!&ndash;<field name="image" widget='image' class="oe_avatar oe_left"/>&ndash;&gt;
                        <div class="oe_title" name="title">
                            <label for="name" string="Adhérent/Police:"/>
                            <h3><field name="name" class="text-primary" readonly="True"/></h3>
-                           <!--<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>-->
+                           &lt;!&ndash;<h3><field name="prenoms" class="text-primary" readonly="True"/></h3>&ndash;&gt;
                            <strong class="text-muted"><field name="code_saisi" readonly="1"/></strong>
                            <h4>
                                <field name="police_id" class="text-info"
@@ -129,49 +157,39 @@
                        </div>
                        <div class="oe_right text-right text-info">
                        </div>
-                       <hr/>
+                       <hr/>-->
                        <notebook>
-                           <page string="Infos Fiche Remboursement">
-                               <group col="6" colspan="2">
-                                   <field name="num_fiche"/>
-                                   <field name="date_depot" required="1"/>
-                                   <field name="date_transmis"
-                                          attrs="{'required': [('state','=','valide')]}"
-                                   />
-                               </group>
-                               <group col="4" colspan="2">
-                                   <field name="prestataire_id"
-                                          options='{"no_open": True, "no_create": True}'
-                                          required="1"/>
-                                   <field name="doc_joint"
-                                          states="valide"
-                                          groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
-                                          attrs="{'required': [('state','in',['valide'])]}"
-                                          widget='binary'
-                                          filename="doc_filename"
-                                   />
-                                   <field name="doc_filename"
-                                          invisible="1"
-                                          states="valide"
-                                          attrs="{'required': [('state','in',['valide'])]}"
-                                          groups="base.group_system,proximas_medical.group_operator,proximas_medical.group_manager,proximas_medical.group_admin"
-                                   />
-                                   <field name="contrat_id" options ='{"no_open": True, "no_create": True}' invisible="1"/>
-                               </group>
+                           <page string="FICHE REMBOURSEMENT">
+                               <groupe name="data">
+                                   <group name="main">
+                                       <field name="num_fiche"/>
+                                       <field name="date_depot" required="1"/>
+                                       <field name="date_transmis"
+                                              attrs="{'required': [('state','=','valide')]}"
+                                       />
+                                   </group>
+                                   <group>
+                                       <field name="prestataire_id"
+                                              options='{"no_open": True, "no_create": True}'
+                                              required="1"/>
+                                       <field name="doc_joint"
+                                              states="valide"
+                                              groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
+                                              attrs="{'required': [('state','in',['valide'])]}"
+                                              widget='binary'
+                                              filename="doc_filename"
+                                       />
+                                       <field name="doc_filename"
+                                              invisible="1"
+                                              states="valide"
+                                              attrs="{'required': [('state','in',['valide'])]}"
+                                              groups="base.group_system,proximas_medical.group_operator,proximas_medical.group_manager,proximas_medical.group_admin"
+                                       />
+                                       <field name="contrat_id" options ='{"no_open": True, "no_create": True}' invisible="1"/>
+                                   </group>
+                               </groupe>
                            </page>
-                           <page string="Infos Adhérent">
-                               <group col="6" colspan="2">
-                                   <field name="date_saisie" readonly="1"/>
-                                   <field name="matricule"/>
-                                   <field name="num_contrat"/>
-                                   <field name="adherent_id" options ='{"no_open": True, "no_create": True}'/>
-                                   <field name="structure_id" string="Dénomination(SAM)"
-                                          options='{"no_open": True, "no_create": True}'
-                                          invisible="0"/>
-                                   <field name="date_last_rfm"/>
-                               </group>
-                           </page>
-                           <page string="Actes Médicaux &amp; Paramédicaux">
+                           <page string="FRAIS MEDICAUX &amp; PARAMEDICAUX">
                                <field name="details_rfm_soins_ids"
                                       class="text-info"
                                       widget="one2many_list"
@@ -214,23 +232,29 @@
                                                            options='{"no_open": True, "no_create": True}'
                                                            />
                                                        <!--context="{'default_prestataire_rembourse_id':prestataire_id}"-->
-                                                       <field name="date_execution" required="1"/>
-                                                       <!--<field name="exercice_id" invisible="0"/>-->
+                                                       <field name="code_id_rfm" required="1"/>
                                                        <field name="prestation_rembourse_id"
                                                               required="1"
                                                               options='{"no_open": True, "no_create": True}'
                                                               class="text-primary"
                                                               domain="[('prestataire_id', '=', prestataire_rembourse_id),
                                                               ('active', '=', True)]"/>
-                                                       <field name="code_id_rfm" required="1"/>
+                                                       <field name="date_execution" required="1"/>
+                                                       <field name="exo_sam"/>
                                                        <field name="name" readonly="1"/>
+                                                       <field name="age"/>
+                                                   </group>
+                                                   <hr/>
+                                                   <group col="6" colspan="2">
+                                                       <!--<field name="structure_id"/>-->
                                                        <field name="genre"/>
                                                        <field name="date_naissance"/>
-                                                       <field name="age"/>
                                                        <field name="statut_familial"/>
                                                    </group>
-                                                   <group>
-                                                       <field name="adherent_id" invisible="1"/>
+                                                   <hr/>
+                                                   <group invisible="1">
+                                                       <field name="prestation_id"/>
+                                                       <field name="adherent_id"/>
                                                    </group>
                                                    <group col="6" colspan="2" invisible="1">
                                                        <field name="delai_attente_prestation" string="Délai d'attente Prestation"/>
@@ -328,6 +352,20 @@
                                        <!--<field name="debit_ticket" sum="Débit Ticket:"/>-->
                                    </tree>
                                </field>
+                           </page>
+                           <page string="INFOS ADHERENT">
+                               <group>
+                                   <group>
+                                       <field name="date_saisie" readonly="1"/>
+                                       <field name="matricule"/>
+                                       <field name="num_contrat"/>
+                                       <field name="adherent_id" options ='{"no_open": True, "no_create": True}'/>
+                                       <field name="structure_id" string="SAM"
+                                              options='{"no_open": True, "no_create": True}'
+                                              invisible="0"/>
+                                       <field name="date_last_rfm"/>
+                                   </group>
+                               </group>
                            </page>
                            <!--<page string="Remboursement - Achats Médicaments">
                                &lt;!&ndash;attrs="{'invisible':[('state','=','cours'),'|',('nbre_prestations_demandes','!=',0),
@@ -471,7 +509,7 @@
                                    </group>
                                </group>&ndash;&gt;
                            </page>-->
-                           <page string="Notes/Observation">
+                           <page string="NOTES">
                                <field name="note"/>
                            </page>
                        </notebook>
@@ -494,17 +532,17 @@
                 <form string="Création Fiche Remboursement Adhérent">
                     <sheet>
                         <div class="panel">
-                            <h3 class="panel-header text-primary">
+                            <h4 class="panel-header text-primary">
                               Création Fiche Remboursement de Frais Médicaux - Adhérent:
-                          </h3>
+                          </h4>
                           <div class="panel-body">
-                            <blockquote class="blockquote mb-0">
-                              <p class="text-primary h5">Cet assistant vous permet de démarrer la procédure de traitement
+                            <blockquote class="blockquote mb-0 h5">
+                              <p class="text-primary">Cet assistant vous permet de démarrer la procédure de traitement
                                   du remboursement de frais médicaux pour le compte d'un adhérent sur présentation des
                                   justificatifs de frais de soins médicaux engagés au profit de l'adhérent et/ou de ses
                                   ayant-droits, en dehors du réseau de soins médicaux et paramédicaux.
                               </p>
-                              <p class="text-primary h5">Pour commencer le traitement des frais médicaux à rembourser, vous
+                              <p class="text-primary">Pour commencer le traitement des frais médicaux à rembourser, vous
                                   allez renseigner les champs ci-dessous :
                               </p>
                               <hr/>
@@ -514,7 +552,7 @@
                                   <field name="num_fiche" required="1"/>
                                   <field name="date_depot" required="1"/>
                               </group>
-                              <footer class="blockquote-footer"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
+                              <footer class="blockquote-footer h5"><b>IMPORTANT:</b> Veuillez prendre soins de renseigner tous les champs :
                                   <cite title="Ceux dont le fond est colorié">Champs obligatoires?</cite>
                               </footer>
                             </blockquote>
