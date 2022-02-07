@@ -1477,7 +1477,6 @@ class Contrat(models.Model):
                 rec.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
                 if rec.plafond_famille:
                     rec.taux_sinistre_plafond_famille = rec.mt_sinistres_contrat_encours * 100 / rec.plafond_famille
-        
 
     # NIVEAU CONSO COURANT
     @api.multi
