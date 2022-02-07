@@ -7,8 +7,8 @@
 from openerp.tools.translate import _
 from openerp import api, fields, models
 from openerp.exceptions import ValidationError, UserError
-from datetime import datetime, timedelta
-from dateutil.relativedelta import relativedelta
+from datetime import datetime # timedelta
+# from dateutil.relativedelta import relativedelta
 from random import randint
 from openerp.tools import amount_to_text_fr
 
@@ -308,7 +308,7 @@ class PriseEnCharge(models.Model):
     )
     num_contrat = fields.Char(
         string="Num. Contrat",
-        related='contrat_id.num_contrat',
+        related='assure_id.num_contrat',
         readonly=True,
     )
     date_debut_assure = fields.Date (
@@ -325,7 +325,7 @@ class PriseEnCharge(models.Model):
     )
     groupe_id = fields.Many2one(
         string="Groupe",
-        related="contrat_id.groupe_id",
+        related="assure_id.groupe_id",
         required=False,
     )
     police_id = fields.Many2one(
@@ -349,7 +349,7 @@ class PriseEnCharge(models.Model):
     adherent = fields.Many2one(
         comodel_name="proximas.adherent",
         string="Adhérent",
-        related='contrat_id.adherent_id',
+        related='assure_id.adherent_id',
         require=False,
         store=True,
         readonly=True,
@@ -836,13 +836,12 @@ class PriseEnCharge(models.Model):
             else:
                 rec.is_termine = False
 
-    @api.multi
-    @api.depends('pathologie_ids')
-    def _get_pathologie_pec(self):
-        for rec in self:
-            if not rec.pathologie_id and rec.pathologie_ids:
-                pathologie = rec.pathologie_ids[0]
-            rec.pathologie_id = pathologie.id
+    # @api.one
+    # @api.depends('pathologie_ids')
+    # def _get_pathologie_pec(self):
+    #     if not self.pathologie_id and self.pathologie_ids:
+    #         pathologie = self.pathologie_ids[0]
+    #         self.pathologie_id = pathologie.id
 
     @api.one
     @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
@@ -993,13 +992,13 @@ class PriseEnCharge(models.Model):
             self.ticket_moderateur_phcie_dispense = self.ticket_moderateur_phcie
             # 4. Ticket Exigible
             self.ticket_exigible_cro = sum(
-                item.ticket_moderateur for item in totaux_details_pec_cro if bool (item.ticket_exigible) or 0
+                item.montant_exigible for item in totaux_details_pec_cro
             )
             self.ticket_exigible_crs = sum(
-                item.ticket_moderateur for item in totaux_details_pec_crs if bool (item.ticket_exigible) or 0
+                item.montant_exigible for item in totaux_details_pec_crs
             )
             self.ticket_exigible_phcie = sum(
-                item.ticket_moderateur for item in totaux_details_pec_phcie if bool (item.ticket_exigible) or 0
+                item.montant_exigible for item in totaux_details_pec_phcie
             )
             self.ticket_exigible_phcie_dispense = self.ticket_exigible_phcie
             # 5. Net à Payer
@@ -2234,7 +2233,7 @@ class DetailsPec(models.Model):
     contrat_id = fields.Many2one(
         # comodel_name="proximas.contrat",
         string="Contrat Assuré",
-        related='assure_id.contrat_id',
+        related='pec_id.contrat_id',
         store=True,
     )
     num_contrat = fields.Char(
@@ -2604,6 +2603,12 @@ class DetailsPec(models.Model):
         compute='_calcul_couts_details_pec',
         store=True,
     )   # total_pc - tiers_payeur
+    montant_exigible = fields.Float(
+        string="Montant Exigible",
+        default=0,
+        digits=(6, 0),
+        compute='_calcul_couts_details_pec',
+    )
     net_prestataire = fields.Float(
         string="S/Total Net Prestataire",
         default=0,
@@ -4605,7 +4610,7 @@ class DetailsPec(models.Model):
             if bool(forfait):
                 self.net_tiers_payeur = int (self.forfait_sam)
                 self.ticket_moderateur = int (self.forfait_ticket)
-                # self.ticket_exigible = bool (controle_rubrique.ticket_exigible)
+                # self.montant_exigible = self.ticket_moderateur + total_npc
                 diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
                 # Calculs détails pour le remboursements
                 if bool (self.rfm_id):
@@ -4616,10 +4621,10 @@ class DetailsPec(models.Model):
                 self.net_tiers_payeur = total_pc * int (taux_couvert) / 100
                 taux_ticket = 100 - int (taux_couvert)
                 self.ticket_moderateur = total_pc * int (taux_ticket) / 100
-                # self.ticket_exigible = bool (controle_rubrique.ticket_exigible)
+                # self.montant_exigible = self.ticket_moderateur + total_npc
                 diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
 
-            if bool (ticket_exigible):
+            if bool(ticket_exigible):
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.debit_ticket = int (self.ticket_moderateur + self.total_npc) - int (self.mt_paye_assure)
             elif not bool (self.ticket_exigible) and (diff_ticket_mt_paye >= 0):
@@ -4631,9 +4636,11 @@ class DetailsPec(models.Model):
                 self.mt_remboursement = self.net_tiers_payeur
                 self.net_prestataire = 0
                 self.debit_ticket = 0
+                self.montant_exigible = self.ticket_moderateur + self.total_npc
                 self.mt_remboursement -= self.mt_exclusion
                 self.net_a_payer = self.mt_remboursement
             else:
+                self.montant_exigible = self.ticket_moderateur + self.total_npc
                 self.net_prestataire = int (self.net_tiers_payeur)
                 self.net_prestataire -= self.mt_exclusion
                 self.net_a_payer = self.net_prestataire

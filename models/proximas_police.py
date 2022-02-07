@@ -1442,41 +1442,41 @@ class Contrat(models.Model):
         for rec in self:
             if rec.details_pec_ids:
                 date_debut = fields.Date.from_string(rec.date_debut_contrat)
-            date_fin = fields.Date.from_string(rec.date_fin_prevue)
-            prise_en_charge_encours = []
-            rfm_encours = []
-            details_pec_encours = []
-            details_actes_encours = []
-            details_phcie_encours = []
-            for detail in rec.prise_charge_ids:
-                date_saisie = fields.Date.from_string(detail.date_saisie)
-                if date_debut <= date_saisie <= date_fin:
-                    prise_en_charge_encours.append(detail)
-            for detail in rec.rfm_ids:
-                date_saisie = fields.Date.from_string(detail.date_saisie)
-                if date_debut <= date_saisie <= date_fin:
-                    rfm_encours.append(detail)
-            for detail in rec.details_pec_ids:
-                date_execution = fields.Date.from_string (detail.date_execution)
-                if date_debut <= date_execution <= date_fin:
-                    details_pec_encours.append (detail)
-            for detail in rec.details_actes_ids:
-                date_execution = fields.Date.from_string (detail.date_execution)
-                if date_debut <= date_execution <= date_fin:
-                    details_actes_encours.append (detail)
-            for detail in rec.details_phcie_ids:
-                date_execution = fields.Date.from_string (detail.date_execution)
-                if date_debut <= date_execution <= date_fin:
-                    details_phcie_encours.append (detail)
-            rec.nbre_pec_contrat_encours = len(prise_en_charge_encours)
-            rec.nbre_rfm_contrat_encours = len(rfm_encours)
-            rec.nbre_actes_contrat_encours = len(details_actes_encours)
-            rec.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_pec_encours)
-            rec.mt_sinistres_actes_contrat_encours = sum(item.total_pc for item in details_actes_encours)
-            rec.nbre_phcie_contrat_encours = len(details_phcie_encours)
-            rec.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
-            if rec.plafond_famille:
-                rec.taux_sinistre_plafond_famille = rec.mt_sinistres_contrat_encours * 100 / rec.plafond_famille
+                date_fin = fields.Date.from_string(rec.date_fin_prevue)
+                prise_en_charge_encours = []
+                rfm_encours = []
+                details_pec_encours = []
+                details_actes_encours = []
+                details_phcie_encours = []
+                for detail in rec.prise_charge_ids:
+                    date_saisie = fields.Date.from_string(detail.date_saisie)
+                    if date_debut <= date_saisie <= date_fin:
+                        prise_en_charge_encours.append(detail)
+                for detail in rec.rfm_ids:
+                    date_saisie = fields.Date.from_string(detail.date_saisie)
+                    if date_debut <= date_saisie <= date_fin:
+                        rfm_encours.append(detail)
+                for detail in rec.details_pec_ids:
+                    date_execution = fields.Date.from_string (detail.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        details_pec_encours.append (detail)
+                for detail in rec.details_actes_ids:
+                    date_execution = fields.Date.from_string (detail.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        details_actes_encours.append (detail)
+                for detail in rec.details_phcie_ids:
+                    date_execution = fields.Date.from_string (detail.date_execution)
+                    if date_debut <= date_execution <= date_fin:
+                        details_phcie_encours.append (detail)
+                rec.nbre_pec_contrat_encours = len(prise_en_charge_encours)
+                rec.nbre_rfm_contrat_encours = len(rfm_encours)
+                rec.nbre_actes_contrat_encours = len(details_actes_encours)
+                rec.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_pec_encours)
+                rec.mt_sinistres_actes_contrat_encours = sum(item.total_pc for item in details_actes_encours)
+                rec.nbre_phcie_contrat_encours = len(details_phcie_encours)
+                rec.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
+                if rec.plafond_famille:
+                    rec.taux_sinistre_plafond_famille = rec.mt_sinistres_contrat_encours * 100 / rec.plafond_famille
         
 
     # NIVEAU CONSO COURANT

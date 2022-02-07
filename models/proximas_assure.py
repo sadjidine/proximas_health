@@ -298,6 +298,13 @@ class Assure (models.Model):
         related='contrat_id.date_activation',
         help='Date à laquelle le contrat est activé (date de prise d\'effet).'
     )
+    adherent_id = fields.Many2one(
+        comodel_name="proximas.adherent",
+        string="Adherent ID.",
+        related='contrat_id.adherent_id',
+        # store=True,
+        readonly=True,
+    )
     police_id = fields.Many2one(
         comodel_name="proximas.police",
         string="Police ID",
