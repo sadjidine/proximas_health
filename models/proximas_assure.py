@@ -731,16 +731,19 @@ class Assure (models.Model):
             self.code_id = code_id
         self.code_id = code_id
 
-    # @api.one
-    @api.depends ('nom', 'prenoms', 'full_name')
-    @api.onchange ('nom', 'prenoms', 'full_name')
+    @api.multi
+    # @api.depends('nom', 'prenoms', 'full_name')
     def _get_full_name(self):
         for rec in self:
-            rec.full_name = '%s %s' % (rec.nom, rec.prenoms)
-            if bool (rec.full_name):
+            nom = rec.nom.strip()
+            prenoms = rec.prenoms.lstrip()
+            rec.nom = nom
+            rec.prenoms = prenoms
+            rec.full_name = '%s %s' % (nom, prenoms)
+            if bool(rec.full_name):
                 rec.name = rec.full_name
             else:
-                rec.name = '%s %s' % (rec.nom, rec.prenoms)
+                rec.name = '%s %s' % (nom, prenoms)
 
     @api.multi
     # @api.depends('statut_familial', 'code_id', 'contrat_id')

@@ -1368,184 +1368,181 @@ class Contrat(models.Model):
         compute='_get_duree_activation',
     )
 
-    @api.multi
+    @api.one
     @api.depends('date_activation', 'date_resiliation',  'validite_contrat', 'validite_contrat_police', 'jours_contrat',
                  'mode_controle_plafond')
     def _compute_debut_fin_contrat(self):
         self.ensure_one()
-        for rec in self:
-            activation_contrat = fields.Date.from_string(rec.date_activation)
-            date_resiliation = fields.Date.from_string(rec.date_resiliation)
-            validite_contrat = int (rec.validite_contrat)
-            validite_police = int (rec.validite_contrat_police)
-            if validite_contrat:
-                nbre_renouvellement = rec.jours_contrat / validite_contrat
-                rec.nbre_renouvellement_contrat = nbre_renouvellement
-            elif validite_police:
-                nbre_renouvellement = rec.jours_contrat / validite_police
-                rec.nbre_renouvellement_contrat = nbre_renouvellement
-            # 1. MODE DE CONTROLE PAR EXERCICE
-            if rec.mode_controle_plafond in ['exercice']:
-                exercice = rec.env['proximas.exercice'].search ([
-                    ('res_company_id', '=', rec.structure_id.id),
-                    ('en_cours', '=', True),
-                ])
-                if exercice and len (exercice) == 1:
-                    date_debut = fields.Date.from_string (exercice.date_debut)
-                    date_fin = fields.Date.from_string (exercice.date_fin)
-                    if date_resiliation:
-                        rec.date_debut_contrat = activation_contrat
-                        rec.date_fin_prevue = date_resiliation
-                    elif activation_contrat > date_debut:
-                        rec.date_debut_contrat = activation_contrat
-                        rec.date_fin_prevue = date_fin
-                    else:
-                        rec.date_debut_contrat = date_debut
-                        rec.date_fin_prevue = date_fin
-                else:
-                    raise UserError (
-                        '''
-                             Proximaas - Contrôle des règles de Gestion :\n
-                             Le mode de contrôle défini pour le plafond famille (contrat)\
-                             est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
-                             en cours. Pour plus d'informations, veuillez contactez l'administrateur...
-                         '''
-                    )
-            # 2. MODE DE CONTROLE PAR CONTRAT
-            elif rec.mode_controle_plafond in ['contrat']:
+        activation_contrat = fields.Date.from_string(self.date_activation)
+        date_resiliation = fields.Date.from_string(self.date_resiliation)
+        validite_contrat = int (self.validite_contrat)
+        validite_police = int (self.validite_contrat_police)
+        if validite_contrat:
+            nbre_renouvellement = self.jours_contrat / validite_contrat
+            self.nbre_renouvellement_contrat = nbre_renouvellement
+        elif validite_police:
+            nbre_renouvellement = self.jours_contrat / validite_police
+            self.nbre_renouvellement_contrat = nbre_renouvellement
+        # 1. MODE DE CONTROLE PAR EXERCICE
+        if self.mode_controle_plafond in ['exercice']:
+            exercice = self.env['proximas.exercice'].search ([
+                ('res_company_id', '=', self.structure_id.id),
+                ('en_cours', '=', True),
+            ])
+            if exercice and len (exercice) == 1:
+                date_debut = fields.Date.from_string (exercice.date_debut)
+                date_fin = fields.Date.from_string (exercice.date_fin)
                 if date_resiliation:
-                    rec.date_debut_contrat = activation_contrat
-                    rec.date_fin_prevue = date_resiliation
-                elif rec.nbre_renouvellement_contrat >= 1:
-                    if validite_contrat:
-                        rec.date_debut_contrat = activation_contrat + timedelta (days=int (rec.validite_contrat))
-                        date_debut = fields.Date.from_string(rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta (days=int (rec.validite_contrat))
-                    elif validite_police:
-                        rec.date_debut_contrat = activation_contrat + timedelta (days=int (rec.validite_police))
-                        date_debut = fields.Date.from_string (rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta (days=int (rec.validite_police))
+                    self.date_debut_contrat = activation_contrat
+                    self.date_fin_prevue = date_resiliation
+                elif activation_contrat > date_debut:
+                    self.date_debut_contrat = activation_contrat
+                    self.date_fin_prevue = date_fin
                 else:
-                    if validite_contrat:
-                        rec.date_debut_contrat = activation_contrat
-                        date_debut = fields.Date.from_string (rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta (days=int (rec.validite_contrat))
-                    elif validite_police:
-                        rec.date_debut_contrat = activation_contrat
-                        date_debut = fields.Date.from_string (rec.date_debut_contrat)
-                        rec.date_fin_prevue = date_debut + timedelta(days=int (rec.validite_police))
+                    self.date_debut_contrat = date_debut
+                    self.date_fin_prevue = date_fin
+            else:
+                raise UserError (
+                    '''
+                         Proximaas - Contrôle des règles de Gestion :\n
+                         Le mode de contrôle défini pour le plafond famille (contrat)\
+                         est l'Exercice. Cependant, le système n'a détecté aucun ou plus d'un exercice\
+                         en cours. Pour plus d'informations, veuillez contactez l'administrateur...
+                     '''
+                )
+        # 2. MODE DE CONTROLE PAR CONTRAT
+        elif self.mode_controle_plafond in ['contrat']:
+            if date_resiliation:
+                self.date_debut_contrat = activation_contrat
+                self.date_fin_prevue = date_resiliation
+            elif self.nbre_renouvellement_contrat >= 1:
+                if validite_contrat:
+                    self.date_debut_contrat = activation_contrat + timedelta (days=int (self.validite_contrat))
+                    date_debut = fields.Date.from_string(self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta (days=int (self.validite_contrat))
+                elif validite_police:
+                    self.date_debut_contrat = activation_contrat + timedelta (days=int (self.validite_police))
+                    date_debut = fields.Date.from_string (self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta (days=int (self.validite_police))
+            else:
+                if validite_contrat:
+                    self.date_debut_contrat = activation_contrat
+                    date_debut = fields.Date.from_string (self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta (days=int (self.validite_contrat))
+                elif validite_police:
+                    self.date_debut_contrat = activation_contrat
+                    date_debut = fields.Date.from_string (self.date_debut_contrat)
+                    self.date_fin_prevue = date_debut + timedelta(days=int (self.validite_police))
 
-    @api.multi
+    @api.one
     @api.depends('prise_charge_ids', 'rfm_ids', 'details_pec_ids', 'details_phcie_ids')
     def _compute_sinistres_contrat(self):
         self.ensure_one()
-        for rec in self:
-            if rec.details_pec_ids:
-                date_debut = fields.Date.from_string(rec.date_debut_contrat)
-                date_fin = fields.Date.from_string(rec.date_fin_prevue)
-                prise_en_charge_encours = []
-                rfm_encours = []
-                details_pec_encours = []
-                details_actes_encours = []
-                details_phcie_encours = []
-                for detail in rec.prise_charge_ids:
-                    date_saisie = fields.Date.from_string(detail.date_saisie)
-                    if date_debut <= date_saisie <= date_fin:
-                        prise_en_charge_encours.append(detail)
-                for detail in rec.rfm_ids:
-                    date_saisie = fields.Date.from_string(detail.date_saisie)
-                    if date_debut <= date_saisie <= date_fin:
-                        rfm_encours.append(detail)
-                for detail in rec.details_pec_ids:
-                    date_execution = fields.Date.from_string (detail.date_execution)
-                    if date_debut <= date_execution <= date_fin:
-                        details_pec_encours.append (detail)
-                for detail in rec.details_actes_ids:
-                    date_execution = fields.Date.from_string (detail.date_execution)
-                    if date_debut <= date_execution <= date_fin:
-                        details_actes_encours.append (detail)
-                for detail in rec.details_phcie_ids:
-                    date_execution = fields.Date.from_string (detail.date_execution)
-                    if date_debut <= date_execution <= date_fin:
-                        details_phcie_encours.append (detail)
-                rec.nbre_pec_contrat_encours = len(prise_en_charge_encours)
-                rec.nbre_rfm_contrat_encours = len(rfm_encours)
-                rec.nbre_actes_contrat_encours = len(details_actes_encours)
-                rec.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_pec_encours)
-                rec.mt_sinistres_actes_contrat_encours = sum(item.total_pc for item in details_actes_encours)
-                rec.nbre_phcie_contrat_encours = len(details_phcie_encours)
-                rec.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
-                if rec.plafond_famille:
-                    rec.taux_sinistre_plafond_famille = rec.mt_sinistres_contrat_encours * 100 / rec.plafond_famille
+        if self.details_pec_ids:
+            date_debut = fields.Date.from_string(self.date_debut_contrat)
+            date_fin = fields.Date.from_string(self.date_fin_prevue)
+            prise_en_charge_encours = []
+            rfm_encours = []
+            details_pec_encours = []
+            details_actes_encours = []
+            details_phcie_encours = []
+            for detail in self.prise_charge_ids:
+                date_saisie = fields.Date.from_string(detail.date_saisie)
+                if date_debut <= date_saisie <= date_fin:
+                    prise_en_charge_encours.append(detail)
+            for detail in self.rfm_ids:
+                date_saisie = fields.Date.from_string(detail.date_saisie)
+                if date_debut <= date_saisie <= date_fin:
+                    rfm_encours.append(detail)
+            for detail in self.details_pec_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_pec_encours.append (detail)
+            for detail in self.details_actes_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_actes_encours.append (detail)
+            for detail in self.details_phcie_ids:
+                date_execution = fields.Date.from_string (detail.date_execution)
+                if date_debut <= date_execution <= date_fin:
+                    details_phcie_encours.append (detail)
+            self.nbre_pec_contrat_encours = len(prise_en_charge_encours)
+            self.nbre_rfm_contrat_encours = len(rfm_encours)
+            self.nbre_actes_contrat_encours = len(details_actes_encours)
+            self.mt_sinistres_contrat_encours = sum(item.total_pc for item in details_pec_encours)
+            self.mt_sinistres_actes_contrat_encours = sum(item.total_pc for item in details_actes_encours)
+            self.nbre_phcie_contrat_encours = len(details_phcie_encours)
+            self.mt_sinistres_phcie_contrat_encours = sum(item.total_pc for item in details_phcie_encours)
+            if self.plafond_famille:
+                self.taux_sinistre_plafond_famille = self.mt_sinistres_contrat_encours * 100 / self.plafond_famille
 
     # NIVEAU CONSO COURANT
-    @api.multi
+    @api.one
     @api.depends('adherent_id', 'mode_controle_plafond')
     def _sinistre_details_pec(self):
         self.ensure_one()
-        for rec in self:
-            # CALCULS DE DETAILS SINISTRES
-            # 1. MODE DE CONTROLE PAR EXERCICE
-            contrat_id = rec.id
-            plafond_famille = rec.plafond_famille
-            if bool (rec.mode_controle_plafond == 'exercice'):
-                exo = self.env['proximas.exercice'].search([
-                    ('res_company_id', '=', rec.structure_id.id),
-                    ('en_cours', '=', True),
-                ])
-                if bool (exo) and len (exo) != 1:
-                    return {'value': {},
-                            'warning': {
-                                'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
-                                'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
+        # CALCULS DE DETAILS SINISTRES
+        # 1. MODE DE CONTROLE PAR EXERCICE
+        contrat_id = self.id
+        plafond_famille = self.plafond_famille
+        if bool (self.mode_controle_plafond == 'exercice'):
+            exo = self.env['proximas.exercice'].search([
+                ('res_company_id', '=', self.structure_id.id),
+                ('en_cours', '=', True),
+            ])
+            if bool (exo) and len (exo) != 1:
+                return {'value': {},
+                        'warning': {
+                            'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
+                            'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
                                  est l'Exercice. Cependant, le système a détecté plus d'un exercice\
                                  en cours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                            }
-                            }
-                elif bool (exo) and len (exo) == 1:
-                    details_pec_exo_encours = self.env['proximas.details.pec'].search (
-                        [
-                            ('contrat_id', '=', contrat_id),
-                            ('date_execution', '!=', None),
-                            ('exo_name', '=', exo.name)
-                        ]
-                    )
-                    actes_exo_encours = self.env['proximas.details.pec'].search_count (
-                        [
-                            ('contrat_id', '=', contrat_id),
-                            ('date_execution', '!=', None),
-                            ('produit_phcie_id', '=', None),
-                            ('exo_name', '=', exo.name)
-                        ]
-                    )
-                    phcie_exo_encours = self.env['proximas.details.pec'].search_count (
-                        [
-                            ('contrat_id', '=', contrat_id),
-                            ('date_execution', '!=', None),
-                            ('produit_phcie_id', '!=', None),
-                            ('exo_name', '=', exo.name)
-                        ]
-                    )
-                    if bool (details_pec_exo_encours):
-                        rec.mt_sinistre_encours = sum (item.total_pc for item in details_pec_exo_encours) or 0
-                        if bool (actes_exo_encours):
-                            rec.nbre_acte_encours = int (actes_exo_encours)
-                        if bool (phcie_exo_encours):
-                            rec.nbre_phcie_encours = int (phcie_exo_encours)
-                        if bool (rec.plafond_famille):
-                            rec.taux_sinistre_plafond_famille = rec.mt_sinistre_encours * 100 / plafond_famille
-                else:
-                    return {'value': {},
-                            'warning': {
-                                'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
-                                'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
+                        }
+                        }
+            elif bool (exo) and len (exo) == 1:
+                details_pec_exo_encours = self.env['proximas.details.pec'].search (
+                    [
+                        ('contrat_id', '=', contrat_id),
+                        ('date_execution', '!=', None),
+                        ('exo_name', '=', exo.name)
+                    ]
+                )
+                actes_exo_encours = self.env['proximas.details.pec'].search_count (
+                    [
+                        ('contrat_id', '=', contrat_id),
+                        ('date_execution', '!=', None),
+                        ('produit_phcie_id', '=', None),
+                        ('exo_name', '=', exo.name)
+                    ]
+                )
+                phcie_exo_encours = self.env['proximas.details.pec'].search_count (
+                    [
+                        ('contrat_id', '=', contrat_id),
+                        ('date_execution', '!=', None),
+                        ('produit_phcie_id', '!=', None),
+                        ('exo_name', '=', exo.name)
+                    ]
+                )
+                if bool (details_pec_exo_encours):
+                    self.mt_sinistre_encours = sum (item.total_pc for item in details_pec_exo_encours) or 0
+                    if bool (actes_exo_encours):
+                        self.nbre_acte_encours = int (actes_exo_encours)
+                    if bool (phcie_exo_encours):
+                        self.nbre_phcie_encours = int (phcie_exo_encours)
+                    if bool (self.plafond_famille):
+                        self.taux_sinistre_plafond_famille = self.mt_sinistre_encours * 100 / plafond_famille
+            else:
+                return {'value': {},
+                        'warning': {
+                            'title': u'Proximas : Contrôle Règles de gestion => Plafond Exercice ',
+                            'message': u"Le mode de contrôle défini pour le plafond famille (contrat)\
                                  est l'Exercice. Cependant, le système n'a pu obtenir aucun exercice\
                                  en cours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                            }
-                            }
-            # 2. MODE DE CONTROLE PAR CONTRAT
-            elif bool (rec.mode_controle_plafond == 'contrat'):
-                pass
+                        }
+                        }
+        # 2. MODE DE CONTROLE PAR CONTRAT
+        elif bool (self.mode_controle_plafond == 'contrat'):
+            pass
 
     @api.multi
     def _get_assure(self):
@@ -1608,316 +1605,65 @@ class Contrat(models.Model):
     #
 
     # CALCULS DE PRIMES DE COUVERTURE PAAR CONTRAT
-    @api.multi
+    @api.one
     @api.depends('police_id', 'ayant_droit_ids', 'cotisation_ids', 'prime_contrat_ids', 'date_activation',
                  'date_resiliation', 'delai_carence', 'retard_cotisation', 'date_fin_prevue', 'validite_contrat_police')
     def _compute_prime_contrat(self):
         self.ensure_one()
-        for rec in self:
-            now = fields.Datetime.from_string (fields.Date.today ())
-            activation_contrat = fields.Datetime.from_string(rec.date_activation) or now
-            date_resiliation = fields.Datetime.from_string(rec.date_resiliation) or now
-            date_fin_prevue = fields.Datetime.from_string(rec.date_fin_prevue) or now
-            nbre_jours_validite_police = int(rec.validite_contrat_police)
-            nbre_jours_contrat = int(rec.jours_contrat)
-            mt_retard_cotisation = int(rec.retard_cotisation)
-            controle_retard = bool(rec.controle_retard_cotisation)
-            totaux_versements = int(rec.mt_totaux_versmt_cotisation)
-            mt_supp_enfant = int(rec.police_id.mt_supplement_enfant)
-            mt_supp_conjoint = int(rec.police_id.mt_supplement_conjoint)
-            mt_supp_parent = int(rec.police_id.mt_supplement_parent)
-            mt_supp_ascendant = int(rec.police_id.mt_supplement_ascendant)
-            mt_supp_malade_chronique = int(rec.police_id.mt_supplement_maladie)
-            mt_supp_global = mt_supp_conjoint + mt_supp_enfant + mt_supp_ascendant + mt_supp_parent + mt_supp_malade_chronique
-            rec.effectif_contrat = len(rec.ayant_droit_ids) + 1
-            effectif_famille = int(rec.effectif_contrat)
+        now = fields.Datetime.from_string (fields.Date.today ())
+        activation_contrat = fields.Datetime.from_string(self.date_activation) or now
+        date_resiliation = fields.Datetime.from_string(self.date_resiliation) or now
+        date_fin_prevue = fields.Datetime.from_string(self.date_fin_prevue) or now
+        nbre_jours_validite_police = int(self.validite_contrat_police)
+        nbre_jours_contrat = int(self.jours_contrat)
+        mt_retard_cotisation = int(self.retard_cotisation)
+        controle_retard = bool(self.controle_retard_cotisation)
+        totaux_versements = int(self.mt_totaux_versmt_cotisation)
+        mt_supp_enfant = int(self.police_id.mt_supplement_enfant)
+        mt_supp_conjoint = int(self.police_id.mt_supplement_conjoint)
+        mt_supp_parent = int(self.police_id.mt_supplement_parent)
+        mt_supp_ascendant = int(self.police_id.mt_supplement_ascendant)
+        mt_supp_malade_chronique = int(self.police_id.mt_supplement_maladie)
+        mt_supp_global = mt_supp_conjoint + mt_supp_enfant + mt_supp_ascendant + mt_supp_parent + mt_supp_malade_chronique
+        self.effectif_contrat = len(self.ayant_droit_ids) + 1
+        effectif_famille = int(self.effectif_contrat)
 
-            # Si le contrôle de Retard Cotisation est activé?
-            if bool(controle_retard):
-                # Si Oui, alors vérifier s'il y a un montant de retard toleré et que le net payable est superieur au
-                # montant de retard toleré?
-                if 0 < mt_retard_cotisation <= rec.mt_reste_payable:
-                    # Si Oui, Désactivé le contrat
-                    rec.actif = False
+        # Si le contrôle de Retard Cotisation est activé?
+        if bool(controle_retard):
+            # Si Oui, alors vérifier s'il y a un montant de retard toleré et que le net payable est superieur au
+            # montant de retard toleré?
+            if 0 < mt_retard_cotisation <= self.mt_reste_payable:
+                # Si Oui, Désactivé le contrat
+                self.actif = False
 
-            if bool(nbre_jours_validite_police):
-                nbre_renouvellement = int (nbre_jours_contrat / nbre_jours_validite_police) + 1
-            if date_fin_prevue >= now:
-                primes_police = self.env['proximas.prime'].search ([('police_id', '=', rec.police_id.id)])
-                primes_contrat = self.env['proximas.prime.contrat'].search ([('contrat_id', '=', rec.id)])
-                # 1. Calcul de la Prime Totale Police
-                if bool(primes_police):
-                    # Verifier s'il y a des primes enregistrées pour la police concernée du contrat.
-                    prime_payable_police = 0
-                    prime_globale_police = 0
-                    for item in primes_police:
-                        # Pour chaque prime définie pour la police concernée :
-                        # date_resiliation = fields.Datetime.from_string(rec.date_resiliation) or now
-                        applicable = item.applicable
-                        periodicite = item.periodicite
-                        mt_prime = int(item.mt_prime)
-                        date_debut = fields.Datetime.from_string (item.date_debut)
-                        date_fin = fields.Datetime.from_string (item.date_fin)
-                        nbre_jours_contrat = int(rec.jours_contrat)
-                        nbre_jours_total = 0
-                        nbre_jours_payable = 0
+        if bool(nbre_jours_validite_police):
+            nbre_renouvellement = int (nbre_jours_contrat / nbre_jours_validite_police) + 1
+        if date_fin_prevue >= now:
+            primes_police = self.env['proximas.prime'].search ([('police_id', '=', self.police_id.id)])
+            primes_contrat = self.env['proximas.prime.contrat'].search ([('contrat_id', '=', self.id)])
+            # 1. Calcul de la Prime Totale Police
+            if bool(primes_police):
+                # Verifier s'il y a des primes enregistrées pour la police concernée du contrat.
+                prime_payable_police = 0
+                prime_globale_police = 0
+                for item in primes_police:
+                    # Pour chaque prime définie pour la police concernée :
+                    # date_resiliation = fields.Datetime.from_string(self.date_resiliation) or now
+                    applicable = item.applicable
+                    periodicite = item.periodicite
+                    mt_prime = int(item.mt_prime)
+                    date_debut = fields.Datetime.from_string (item.date_debut)
+                    date_fin = fields.Datetime.from_string (item.date_fin)
+                    nbre_jours_contrat = int(self.jours_contrat)
+                    nbre_jours_total = 0
+                    nbre_jours_payable = 0
 
-                        # Si le champ d'application de la prime est le contrat (famille)
-                        if applicable == 'tous':
-                            # Vérification de la présence d'ayant-droit dans le contrat
-                            if bool(rec.ayant_droit_ids):
-                                ayant_droit = self.env['proximas.ayant.droit'].search ([('contrat_id', '=', rec.id)])
-                                total_prime_police_ayant_droit = 0
-                                # Ajout de la prime de l'adhérent
-                                if bool (date_fin) and (date_fin > date_fin_prevue):
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - date_debut).days
-                                        nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
-                                elif bool (date_fin) and not bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (date_fin - date_debut).days
-                                        nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
-                                elif not bool (date_fin) and bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - date_debut).days
-                                        nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
-                                else:
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (now - date_debut).days
-                                        nbre_jours_payable = nbre_jours_total
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (now - activation_contrat).days
-                                        nbre_jours_payable = nbre_jours_total
-                                # Vérification de la périodicité de la prime
-                                if periodicite == 'jour':
-                                    qte_prime = int (nbre_jours_payable)
-                                    qte_valide = int (nbre_jours_total)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'semaine':
-                                    qte_prime = round (nbre_jours_payable / 7) + 1
-                                    qte_valide = round (nbre_jours_total / 7)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'mois':
-                                    qte_prime = round (nbre_jours_contrat / 30) + 1
-                                    qte_valide = round (nbre_jours_total / 30)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'trimestre':
-                                    qte_prime = round (nbre_jours_payable / 90) + 1
-                                    qte_valide = round (nbre_jours_total / 90)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'annee':
-                                    qte_prime = round (nbre_jours_payable / 365) + 1
-                                    qte_valide = round (nbre_jours_total / 365)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'unique':
-                                    prime_payable_police += int (mt_prime)
-                                    prime_globale_police += int (mt_prime)
-                                # Calcul de la prime pour les ayant-droits
-                                for item in ayant_droit:
-                                    date_activation = fields.Datetime.from_string(item.date_activation)
-                                    # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
-                                    # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
-                                    if bool (date_fin) and (date_fin > date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif bool (date_fin) and not bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif not bool (date_fin) and bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    else:
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (now - date_debut).days
-                                            nbre_jours_payable = nbre_jours_total
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (now - date_activation).days
-                                            nbre_jours_payable = nbre_jours_total
-                                    # Vérification de la périodicité de la prime
-                                    if periodicite == 'jour':
-                                        qte_prime = int (nbre_jours_payable)
-                                        qte_valide = int (nbre_jours_total)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'semaine':
-                                        qte_prime = round (nbre_jours_payable / 7) + 1
-                                        qte_valide = round (nbre_jours_total / 7)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'mois':
-                                        qte_prime = round (nbre_jours_payable / 30) + 1
-                                        qte_valide = round (nbre_jours_total / 30)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'trimestre':
-                                        qte_prime = round (nbre_jours_payable / 90) + 1
-                                        qte_valide = round (nbre_jours_total / 90)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'annee':
-                                        qte_prime = round (nbre_jours_payable / 365) + 1
-                                        qte_valide = round (nbre_jours_total / 365)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'unique':
-                                        prime_payable_police += int (mt_prime)
-                                        prime_globale_police += int (mt_prime)
-                            else:
-                                # Ajout de la prime de l'adhérent
-                                if bool (date_fin) and (date_fin > date_fin_prevue):
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - date_debut).days
-                                        nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
-                                elif bool (date_fin) and not bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (date_fin - date_debut).days
-                                        nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
-                                elif not bool (date_fin) and bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - date_debut).days
-                                        nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
-                                else:
-                                    if date_debut > activation_contrat:
-                                        nbre_jours_total = (now - date_debut).days
-                                        nbre_jours_payable = nbre_jours_total
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (now - activation_contrat).days
-                                        nbre_jours_payable = nbre_jours_total
-
-                                # Vérification de la périodicité de la prime
-                                if periodicite == 'jour':
-                                    qte_prime = int (nbre_jours_payable)
-                                    qte_valide = int (nbre_jours_total)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'semaine':
-                                    qte_prime = round (nbre_jours_payable / 7) + 1
-                                    qte_valide = round (nbre_jours_total / 7)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'mois':
-                                    qte_prime = round (nbre_jours_payable / 30) + 1
-                                    qte_valide = round (nbre_jours_total / 30)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'trimestre':
-                                    qte_prime = round (nbre_jours_payable / 90) + 1
-                                    qte_valide = round (nbre_jours_total / 90)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'annee':
-                                    qte_prime = round (nbre_jours_payable / 365) + 1
-                                    qte_valide = round (nbre_jours_total / 365)
-                                    prime_payable_police += int (qte_prime * mt_prime)
-                                    prime_globale_police += int (qte_valide * mt_prime)
-                                elif periodicite == 'unique':
-                                    prime_payable_police += int (mt_prime)
-                                    prime_globale_police += int (mt_prime)
-                        # Vérification du champ d'application de la prime police
-                        elif applicable == 'ayant-droit':
-                            # Vérification de la présence d'ayant-droit dans le contrat
-                            if bool(rec.ayant_droit_ids):
-                                ayant_droit = self.env['proximas.ayant.droit'].search([('contrat_id', '=', rec.id)])
-                                # total_prime_police_ayant_droit = 0
-                                # Calcul de la prime pour les ayant-droits
-                                for item in ayant_droit:
-                                    date_activation = fields.Datetime.from_string (item.date_activation)
-                                    # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
-                                    # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
-                                    if bool (date_fin) and (date_fin > date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif bool (date_fin) and not bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif not bool (date_fin) and bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    else:
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (now - date_debut).days
-                                            nbre_jours_payable = nbre_jours_total
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (now - date_activation).days
-                                            nbre_jours_payable = nbre_jours_total
-                                    # Vérification de la périodicité de la prime
-                                    if periodicite == 'jour':
-                                        qte_prime = int (nbre_jours_payable)
-                                        qte_valide = int (nbre_jours_total)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'semaine':
-                                        qte_prime = round (nbre_jours_payable / 7) + 1
-                                        qte_valide = round (nbre_jours_total / 7)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'mois':
-                                        qte_prime = round (nbre_jours_payable / 30) + 1
-                                        qte_valide = round (nbre_jours_total / 30)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'trimestre':
-                                        qte_prime = round (nbre_jours_payable / 90) + 1
-                                        qte_valide = round (nbre_jours_total / 90)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'annee':
-                                        qte_prime = round (nbre_jours_payable / 365) + 1
-                                        qte_valide = round (nbre_jours_total / 365)
-                                        prime_payable_police += int (qte_prime * mt_prime)
-                                        prime_globale_police += int (qte_valide * mt_prime)
-                                    elif periodicite == 'unique':
-                                        prime_payable_police += int (mt_prime)
-                                        prime_globale_police += int (mt_prime)
-                        # Si le champ d'application de la prime est l'adherent
-                        elif applicable == 'adherent':
+                    # Si le champ d'application de la prime est le contrat (famille)
+                    if applicable == 'tous':
+                        # Vérification de la présence d'ayant-droit dans le contrat
+                        if bool(self.ayant_droit_ids):
+                            ayant_droit = self.env['proximas.ayant.droit'].search ([('contrat_id', '=', self.id)])
+                            total_prime_police_ayant_droit = 0
                             # Ajout de la prime de l'adhérent
                             if bool (date_fin) and (date_fin > date_fin_prevue):
                                 if date_debut > activation_contrat:
@@ -1954,8 +1700,130 @@ class Contrat(models.Model):
                                 prime_payable_police += int (qte_prime * mt_prime)
                                 prime_globale_police += int (qte_valide * mt_prime)
                             elif periodicite == 'semaine':
-                                qte_prime = round(nbre_jours_payable / 7) + 1
-                                qte_valide = round(nbre_jours_total / 7)
+                                qte_prime = round (nbre_jours_payable / 7) + 1
+                                qte_valide = round (nbre_jours_total / 7)
+                                prime_payable_police += int (qte_prime * mt_prime)
+                                prime_globale_police += int (qte_valide * mt_prime)
+                            elif periodicite == 'mois':
+                                qte_prime = round (nbre_jours_contrat / 30) + 1
+                                qte_valide = round (nbre_jours_total / 30)
+                                prime_payable_police += int (qte_prime * mt_prime)
+                                prime_globale_police += int (qte_valide * mt_prime)
+                            elif periodicite == 'trimestre':
+                                qte_prime = round (nbre_jours_payable / 90) + 1
+                                qte_valide = round (nbre_jours_total / 90)
+                                prime_payable_police += int (qte_prime * mt_prime)
+                                prime_globale_police += int (qte_valide * mt_prime)
+                            elif periodicite == 'annee':
+                                qte_prime = round (nbre_jours_payable / 365) + 1
+                                qte_valide = round (nbre_jours_total / 365)
+                                prime_payable_police += int (qte_prime * mt_prime)
+                                prime_globale_police += int (qte_valide * mt_prime)
+                            elif periodicite == 'unique':
+                                prime_payable_police += int (mt_prime)
+                                prime_globale_police += int (mt_prime)
+                            # Calcul de la prime pour les ayant-droits
+                            for item in ayant_droit:
+                                date_activation = fields.Datetime.from_string(item.date_activation)
+                                # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
+                                # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
+                                if bool (date_fin) and (date_fin > date_fin_prevue):
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_debut).days
+                                        nbre_jours_payable = (now - date_debut).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
+                                elif bool (date_fin) and not bool (date_fin_prevue):
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (date_fin - date_debut).days
+                                        nbre_jours_payable = (now - date_debut).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
+                                elif not bool (date_fin) and bool (date_fin_prevue):
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_debut).days
+                                        nbre_jours_payable = (now - date_debut).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
+                                else:
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (now - date_debut).days
+                                        nbre_jours_payable = nbre_jours_total
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (now - date_activation).days
+                                        nbre_jours_payable = nbre_jours_total
+                                # Vérification de la périodicité de la prime
+                                if periodicite == 'jour':
+                                    qte_prime = int (nbre_jours_payable)
+                                    qte_valide = int (nbre_jours_total)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
+                                elif periodicite == 'semaine':
+                                    qte_prime = round (nbre_jours_payable / 7) + 1
+                                    qte_valide = round (nbre_jours_total / 7)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
+                                elif periodicite == 'mois':
+                                    qte_prime = round (nbre_jours_payable / 30) + 1
+                                    qte_valide = round (nbre_jours_total / 30)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
+                                elif periodicite == 'trimestre':
+                                    qte_prime = round (nbre_jours_payable / 90) + 1
+                                    qte_valide = round (nbre_jours_total / 90)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
+                                elif periodicite == 'annee':
+                                    qte_prime = round (nbre_jours_payable / 365) + 1
+                                    qte_valide = round (nbre_jours_total / 365)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
+                                elif periodicite == 'unique':
+                                    prime_payable_police += int (mt_prime)
+                                    prime_globale_police += int (mt_prime)
+                        else:
+                            # Ajout de la prime de l'adhérent
+                            if bool (date_fin) and (date_fin > date_fin_prevue):
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - date_debut).days
+                                    nbre_jours_payable = (now - date_debut).days
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                    nbre_jours_payable = (now - activation_contrat).days
+                            elif bool (date_fin) and not bool (date_fin_prevue):
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (date_fin - date_debut).days
+                                    nbre_jours_payable = (now - date_debut).days
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (date_fin - activation_contrat).days
+                                    nbre_jours_payable = (now - activation_contrat).days
+                            elif not bool (date_fin) and bool (date_fin_prevue):
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - date_debut).days
+                                    nbre_jours_payable = (now - date_debut).days
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                    nbre_jours_payable = (now - activation_contrat).days
+                            else:
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (now - date_debut).days
+                                    nbre_jours_payable = nbre_jours_total
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (now - activation_contrat).days
+                                    nbre_jours_payable = nbre_jours_total
+
+                            # Vérification de la périodicité de la prime
+                            if periodicite == 'jour':
+                                qte_prime = int (nbre_jours_payable)
+                                qte_valide = int (nbre_jours_total)
+                                prime_payable_police += int (qte_prime * mt_prime)
+                                prime_globale_police += int (qte_valide * mt_prime)
+                            elif periodicite == 'semaine':
+                                qte_prime = round (nbre_jours_payable / 7) + 1
+                                qte_valide = round (nbre_jours_total / 7)
                                 prime_payable_police += int (qte_prime * mt_prime)
                                 prime_globale_police += int (qte_valide * mt_prime)
                             elif periodicite == 'mois':
@@ -1976,251 +1844,193 @@ class Contrat(models.Model):
                             elif periodicite == 'unique':
                                 prime_payable_police += int (mt_prime)
                                 prime_globale_police += int (mt_prime)
-                    # on obtinet les totaux primes pour la police
-                    rec.totaux_net_payable_police = prime_payable_police
-                    rec.totaux_prime_police = prime_globale_police
-
-                # 2. Calcul de la Prime Totale Contrat
-                if bool(primes_contrat):
-                    # Verifier s'il y a des primes enregistrées pour la police concernée du contrat.
-                    prime_payable_contrat = 0
-                    prime_globale_contrat = 0
-                    for item in primes_contrat:
-                        # Pour chaque prime définie pour la police concernée :
-                        # date_resiliation = fields.Datetime.from_string(rec.date_resiliation) or now
-                        applicable = item.applicable
-                        periodicite = item.periodicite
-                        mt_prime = int (item.mt_prime)
-                        date_debut = fields.Datetime.from_string (item.date_debut)
-                        date_fin = fields.Datetime.from_string (item.date_fin)
-                        nbre_jours_contrat = int(rec.jours_contrat)
-                        nbre_jours_total = 0
-                        nbre_jours_payable = 0
-                        # Vérification du champ d'application de la prime contrat
-                        if applicable == 'ayant-droit':
-                            # Vérification de la présence d'ayant-droit dans le contrat
-                            if bool(rec.ayant_droit_ids):
-                                ayant_droit = self.env['proximas.ayant.droit'].search(
-                                    [('contrat_id', '=', rec.id)])
-                                # total_prime_police_ayant_droit = 0
-
-                                for item in ayant_droit:
-                                    date_activation = fields.Datetime.from_string (item.date_activation)
-                                    # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
-                                    # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
-                                    if bool (date_fin) and (date_fin > date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif bool (date_fin) and not bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif not bool (date_fin) and bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    else:
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (now - date_debut).days
-                                            nbre_jours_payable = nbre_jours_total
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (now - date_activation).days
-                                            nbre_jours_payable = nbre_jours_total
-                                    # Vérification de la périodicité de la prime
-                                    if periodicite == 'jour':
-                                        qte_prime = int (nbre_jours_payable)
-                                        qte_valide = int (nbre_jours_total)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'semaine':
-                                        qte_prime = round (nbre_jours_payable / 7) + 1
-                                        qte_valide = round (nbre_jours_total / 7)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'mois':
-                                        qte_prime = round (nbre_jours_payable / 30) + 1
-                                        qte_valide = round (nbre_jours_total / 30)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'trimestre':
-                                        qte_prime = round (nbre_jours_payable / 90) + 1
-                                        qte_valide = round (nbre_jours_total / 90)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'annee':
-                                        qte_prime = round (nbre_jours_payable / 365) + 1
-                                        qte_valide = round (nbre_jours_total / 365)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'unique':
-                                        prime_payable_contrat += int (mt_prime)
-                                        prime_globale_contrat += int (mt_prime)
-                        # Si le champ d'application de la prime est le contrat (famille)
-                        elif applicable == 'tous':
-                            # Vérification de la présence d'ayant-droit dans le contrat
-                            if bool (rec.ayant_droit_ids):
-                                ayant_droit = self.env['proximas.ayant.droit'].search (
-                                    [('contrat_id', '=', rec.id)])
-                                total_prime_police_ayant_droit = 0
-                                # Ajout de la prime de l'adhérent
+                    # Vérification du champ d'application de la prime police
+                    elif applicable == 'ayant-droit':
+                        # Vérification de la présence d'ayant-droit dans le contrat
+                        if bool(self.ayant_droit_ids):
+                            ayant_droit = self.env['proximas.ayant.droit'].search([('contrat_id', '=', self.id)])
+                            # total_prime_police_ayant_droit = 0
+                            # Calcul de la prime pour les ayant-droits
+                            for item in ayant_droit:
+                                date_activation = fields.Datetime.from_string (item.date_activation)
+                                # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
+                                # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
                                 if bool (date_fin) and (date_fin > date_fin_prevue):
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (date_fin_prevue - date_debut).days
                                         nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
                                 elif bool (date_fin) and not bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (date_fin - date_debut).days
                                         nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
                                 elif not bool (date_fin) and bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (date_fin_prevue - date_debut).days
                                         nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
                                 else:
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (now - date_debut).days
                                         nbre_jours_payable = nbre_jours_total
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (now - date_activation).days
                                         nbre_jours_payable = nbre_jours_total
                                 # Vérification de la périodicité de la prime
                                 if periodicite == 'jour':
                                     qte_prime = int (nbre_jours_payable)
                                     qte_valide = int (nbre_jours_total)
-                                    prime_payable_contrat += int (qte_prime * mt_prime)
-                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
                                 elif periodicite == 'semaine':
                                     qte_prime = round (nbre_jours_payable / 7) + 1
                                     qte_valide = round (nbre_jours_total / 7)
-                                    prime_payable_contrat += int (qte_prime * mt_prime)
-                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
                                 elif periodicite == 'mois':
-                                    qte_prime = round (nbre_jours_contrat / 30) + 1
+                                    qte_prime = round (nbre_jours_payable / 30) + 1
                                     qte_valide = round (nbre_jours_total / 30)
-                                    prime_payable_contrat += int (qte_prime * mt_prime)
-                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
                                 elif periodicite == 'trimestre':
                                     qte_prime = round (nbre_jours_payable / 90) + 1
                                     qte_valide = round (nbre_jours_total / 90)
-                                    prime_payable_contrat += int (qte_prime * mt_prime)
-                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
                                 elif periodicite == 'annee':
                                     qte_prime = round (nbre_jours_payable / 365) + 1
                                     qte_valide = round (nbre_jours_total / 365)
-                                    prime_payable_contrat += int (qte_prime * mt_prime)
-                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                    prime_payable_police += int (qte_prime * mt_prime)
+                                    prime_globale_police += int (qte_valide * mt_prime)
                                 elif periodicite == 'unique':
-                                    prime_payable_contrat += int (mt_prime)
-                                    prime_globale_contrat += int (mt_prime)
-                                # Calcul de la prime contrat pour les ayants-droit
-                                for item in ayant_droit:
-                                    date_activation = fields.Datetime.from_string (item.date_activation)
-                                    # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
-                                    # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
-                                    if bool (date_fin) and (date_fin > date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif bool (date_fin) and not bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    elif not bool (date_fin) and bool (date_fin_prevue):
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_debut).days
-                                            nbre_jours_payable = (now - date_debut).days
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (date_fin_prevue - date_activation).days
-                                            nbre_jours_payable = (now - date_activation).days
-                                    else:
-                                        if date_debut > date_activation:
-                                            nbre_jours_total = (now - date_debut).days
-                                            nbre_jours_payable = nbre_jours_total
-                                        elif date_debut <= date_activation:
-                                            nbre_jours_total = (now - date_activation).days
-                                            nbre_jours_payable = nbre_jours_total
-                                    # Vérification de la périodicité de la prime
-                                    if periodicite == 'jour':
-                                        qte_prime = int (nbre_jours_payable)
-                                        qte_valide = int (nbre_jours_total)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'semaine':
-                                        qte_prime = round (nbre_jours_payable / 7) + 1
-                                        qte_valide = round (nbre_jours_total / 7)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'mois':
-                                        qte_prime = round (nbre_jours_payable / 30) + 1
-                                        qte_valide = round (nbre_jours_total / 30)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'trimestre':
-                                        qte_prime = round (nbre_jours_payable / 90) + 1
-                                        qte_valide = round (nbre_jours_total / 90)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'annee':
-                                        qte_prime = round (nbre_jours_payable / 365) + 1
-                                        qte_valide = round (nbre_jours_total / 365)
-                                        prime_payable_contrat += int (qte_prime * mt_prime)
-                                        prime_globale_contrat += int (qte_valide * mt_prime)
-                                    elif periodicite == 'unique':
-                                        prime_payable_contrat += int (mt_prime)
-                                        prime_globale_contrat += int (mt_prime)
-                            else:
-                                # Ajout de la prime de l'adhérent
+                                    prime_payable_police += int (mt_prime)
+                                    prime_globale_police += int (mt_prime)
+                    # Si le champ d'application de la prime est l'adherent
+                    elif applicable == 'adherent':
+                        # Ajout de la prime de l'adhérent
+                        if bool (date_fin) and (date_fin > date_fin_prevue):
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - date_debut).days
+                                nbre_jours_payable = (now - date_debut).days
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                nbre_jours_payable = (now - activation_contrat).days
+                        elif bool (date_fin) and not bool (date_fin_prevue):
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (date_fin - date_debut).days
+                                nbre_jours_payable = (now - date_debut).days
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (date_fin - activation_contrat).days
+                                nbre_jours_payable = (now - activation_contrat).days
+                        elif not bool (date_fin) and bool (date_fin_prevue):
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - date_debut).days
+                                nbre_jours_payable = (now - date_debut).days
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                nbre_jours_payable = (now - activation_contrat).days
+                        else:
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (now - date_debut).days
+                                nbre_jours_payable = nbre_jours_total
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (now - activation_contrat).days
+                                nbre_jours_payable = nbre_jours_total
+                        # Vérification de la périodicité de la prime
+                        if periodicite == 'jour':
+                            qte_prime = int (nbre_jours_payable)
+                            qte_valide = int (nbre_jours_total)
+                            prime_payable_police += int (qte_prime * mt_prime)
+                            prime_globale_police += int (qte_valide * mt_prime)
+                        elif periodicite == 'semaine':
+                            qte_prime = round(nbre_jours_payable / 7) + 1
+                            qte_valide = round(nbre_jours_total / 7)
+                            prime_payable_police += int (qte_prime * mt_prime)
+                            prime_globale_police += int (qte_valide * mt_prime)
+                        elif periodicite == 'mois':
+                            qte_prime = round (nbre_jours_payable / 30) + 1
+                            qte_valide = round (nbre_jours_total / 30)
+                            prime_payable_police += int (qte_prime * mt_prime)
+                            prime_globale_police += int (qte_valide * mt_prime)
+                        elif periodicite == 'trimestre':
+                            qte_prime = round (nbre_jours_payable / 90) + 1
+                            qte_valide = round (nbre_jours_total / 90)
+                            prime_payable_police += int (qte_prime * mt_prime)
+                            prime_globale_police += int (qte_valide * mt_prime)
+                        elif periodicite == 'annee':
+                            qte_prime = round (nbre_jours_payable / 365) + 1
+                            qte_valide = round (nbre_jours_total / 365)
+                            prime_payable_police += int (qte_prime * mt_prime)
+                            prime_globale_police += int (qte_valide * mt_prime)
+                        elif periodicite == 'unique':
+                            prime_payable_police += int (mt_prime)
+                            prime_globale_police += int (mt_prime)
+                # on obtinet les totaux primes pour la police
+                self.totaux_net_payable_police = prime_payable_police
+                self.totaux_prime_police = prime_globale_police
+
+            # 2. Calcul de la Prime Totale Contrat
+            if bool(primes_contrat):
+                # Verifier s'il y a des primes enregistrées pour la police concernée du contrat.
+                prime_payable_contrat = 0
+                prime_globale_contrat = 0
+                for item in primes_contrat:
+                    # Pour chaque prime définie pour la police concernée :
+                    # date_resiliation = fields.Datetime.from_string(self.date_resiliation) or now
+                    applicable = item.applicable
+                    periodicite = item.periodicite
+                    mt_prime = int (item.mt_prime)
+                    date_debut = fields.Datetime.from_string (item.date_debut)
+                    date_fin = fields.Datetime.from_string (item.date_fin)
+                    nbre_jours_contrat = int(self.jours_contrat)
+                    nbre_jours_total = 0
+                    nbre_jours_payable = 0
+                    # Vérification du champ d'application de la prime contrat
+                    if applicable == 'ayant-droit':
+                        # Vérification de la présence d'ayant-droit dans le contrat
+                        if bool(self.ayant_droit_ids):
+                            ayant_droit = self.env['proximas.ayant.droit'].search(
+                                [('contrat_id', '=', self.id)])
+                            # total_prime_police_ayant_droit = 0
+
+                            for item in ayant_droit:
+                                date_activation = fields.Datetime.from_string (item.date_activation)
+                                # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
+                                # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
                                 if bool (date_fin) and (date_fin > date_fin_prevue):
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (date_fin_prevue - date_debut).days
                                         nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
                                 elif bool (date_fin) and not bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (date_fin - date_debut).days
                                         nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
                                 elif not bool (date_fin) and bool (date_fin_prevue):
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (date_fin_prevue - date_debut).days
                                         nbre_jours_payable = (now - date_debut).days
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (date_fin_prevue - activation_contrat).days
-                                        nbre_jours_payable = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
                                 else:
-                                    if date_debut > activation_contrat:
+                                    if date_debut > date_activation:
                                         nbre_jours_total = (now - date_debut).days
                                         nbre_jours_payable = nbre_jours_total
-                                    elif date_debut <= activation_contrat:
-                                        nbre_jours_total = (now - activation_contrat).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (now - date_activation).days
                                         nbre_jours_payable = nbre_jours_total
                                 # Vérification de la périodicité de la prime
                                 if periodicite == 'jour':
@@ -2251,8 +2061,134 @@ class Contrat(models.Model):
                                 elif periodicite == 'unique':
                                     prime_payable_contrat += int (mt_prime)
                                     prime_globale_contrat += int (mt_prime)
-                        # Si le champ d'application de la prime est l'adherent
-                        elif applicable == 'adherent':
+                    # Si le champ d'application de la prime est le contrat (famille)
+                    elif applicable == 'tous':
+                        # Vérification de la présence d'ayant-droit dans le contrat
+                        if bool (self.ayant_droit_ids):
+                            ayant_droit = self.env['proximas.ayant.droit'].search (
+                                [('contrat_id', '=', self.id)])
+                            total_prime_police_ayant_droit = 0
+                            # Ajout de la prime de l'adhérent
+                            if bool (date_fin) and (date_fin > date_fin_prevue):
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - date_debut).days
+                                    nbre_jours_payable = (now - date_debut).days
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                    nbre_jours_payable = (now - activation_contrat).days
+                            elif bool (date_fin) and not bool (date_fin_prevue):
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (date_fin - date_debut).days
+                                    nbre_jours_payable = (now - date_debut).days
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (date_fin - activation_contrat).days
+                                    nbre_jours_payable = (now - activation_contrat).days
+                            elif not bool (date_fin) and bool (date_fin_prevue):
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - date_debut).days
+                                    nbre_jours_payable = (now - date_debut).days
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                    nbre_jours_payable = (now - activation_contrat).days
+                            else:
+                                if date_debut > activation_contrat:
+                                    nbre_jours_total = (now - date_debut).days
+                                    nbre_jours_payable = nbre_jours_total
+                                elif date_debut <= activation_contrat:
+                                    nbre_jours_total = (now - activation_contrat).days
+                                    nbre_jours_payable = nbre_jours_total
+                            # Vérification de la périodicité de la prime
+                            if periodicite == 'jour':
+                                qte_prime = int (nbre_jours_payable)
+                                qte_valide = int (nbre_jours_total)
+                                prime_payable_contrat += int (qte_prime * mt_prime)
+                                prime_globale_contrat += int (qte_valide * mt_prime)
+                            elif periodicite == 'semaine':
+                                qte_prime = round (nbre_jours_payable / 7) + 1
+                                qte_valide = round (nbre_jours_total / 7)
+                                prime_payable_contrat += int (qte_prime * mt_prime)
+                                prime_globale_contrat += int (qte_valide * mt_prime)
+                            elif periodicite == 'mois':
+                                qte_prime = round (nbre_jours_contrat / 30) + 1
+                                qte_valide = round (nbre_jours_total / 30)
+                                prime_payable_contrat += int (qte_prime * mt_prime)
+                                prime_globale_contrat += int (qte_valide * mt_prime)
+                            elif periodicite == 'trimestre':
+                                qte_prime = round (nbre_jours_payable / 90) + 1
+                                qte_valide = round (nbre_jours_total / 90)
+                                prime_payable_contrat += int (qte_prime * mt_prime)
+                                prime_globale_contrat += int (qte_valide * mt_prime)
+                            elif periodicite == 'annee':
+                                qte_prime = round (nbre_jours_payable / 365) + 1
+                                qte_valide = round (nbre_jours_total / 365)
+                                prime_payable_contrat += int (qte_prime * mt_prime)
+                                prime_globale_contrat += int (qte_valide * mt_prime)
+                            elif periodicite == 'unique':
+                                prime_payable_contrat += int (mt_prime)
+                                prime_globale_contrat += int (mt_prime)
+                            # Calcul de la prime contrat pour les ayants-droit
+                            for item in ayant_droit:
+                                date_activation = fields.Datetime.from_string (item.date_activation)
+                                # Vérification de la date de fin d'application de la prime et calcul du nbre de jours
+                                # écoulés selon la date d'activation de l'ayant-droit, la date début et fin de la prime
+                                if bool (date_fin) and (date_fin > date_fin_prevue):
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_debut).days
+                                        nbre_jours_payable = (now - date_debut).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
+                                elif bool (date_fin) and not bool (date_fin_prevue):
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (date_fin - date_debut).days
+                                        nbre_jours_payable = (now - date_debut).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
+                                elif not bool (date_fin) and bool (date_fin_prevue):
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_debut).days
+                                        nbre_jours_payable = (now - date_debut).days
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (date_fin_prevue - date_activation).days
+                                        nbre_jours_payable = (now - date_activation).days
+                                else:
+                                    if date_debut > date_activation:
+                                        nbre_jours_total = (now - date_debut).days
+                                        nbre_jours_payable = nbre_jours_total
+                                    elif date_debut <= date_activation:
+                                        nbre_jours_total = (now - date_activation).days
+                                        nbre_jours_payable = nbre_jours_total
+                                # Vérification de la périodicité de la prime
+                                if periodicite == 'jour':
+                                    qte_prime = int (nbre_jours_payable)
+                                    qte_valide = int (nbre_jours_total)
+                                    prime_payable_contrat += int (qte_prime * mt_prime)
+                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                elif periodicite == 'semaine':
+                                    qte_prime = round (nbre_jours_payable / 7) + 1
+                                    qte_valide = round (nbre_jours_total / 7)
+                                    prime_payable_contrat += int (qte_prime * mt_prime)
+                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                elif periodicite == 'mois':
+                                    qte_prime = round (nbre_jours_payable / 30) + 1
+                                    qte_valide = round (nbre_jours_total / 30)
+                                    prime_payable_contrat += int (qte_prime * mt_prime)
+                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                elif periodicite == 'trimestre':
+                                    qte_prime = round (nbre_jours_payable / 90) + 1
+                                    qte_valide = round (nbre_jours_total / 90)
+                                    prime_payable_contrat += int (qte_prime * mt_prime)
+                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                elif periodicite == 'annee':
+                                    qte_prime = round (nbre_jours_payable / 365) + 1
+                                    qte_valide = round (nbre_jours_total / 365)
+                                    prime_payable_contrat += int (qte_prime * mt_prime)
+                                    prime_globale_contrat += int (qte_valide * mt_prime)
+                                elif periodicite == 'unique':
+                                    prime_payable_contrat += int (mt_prime)
+                                    prime_globale_contrat += int (mt_prime)
+                        else:
                             # Ajout de la prime de l'adhérent
                             if bool (date_fin) and (date_fin > date_fin_prevue):
                                 if date_debut > activation_contrat:
@@ -2311,15 +2247,75 @@ class Contrat(models.Model):
                             elif periodicite == 'unique':
                                 prime_payable_contrat += int (mt_prime)
                                 prime_globale_contrat += int (mt_prime)
-                    # on obtinet les totaux primes pour le contrat
-                    rec.totaux_net_payable_contrat = prime_payable_contrat
-                    rec.totaux_prime_contrat = prime_globale_contrat
-                # On obtient les totaux des primes à devoir
-                rec.totaux_net_payable = rec.totaux_net_payable_police + rec.totaux_net_payable_contrat
-                rec.totaux_prime = rec.totaux_prime_police + rec.totaux_prime_contrat
-                rec.mt_reste_payable = rec.totaux_net_payable - totaux_versements
-            else:
-                pass
+                    # Si le champ d'application de la prime est l'adherent
+                    elif applicable == 'adherent':
+                        # Ajout de la prime de l'adhérent
+                        if bool (date_fin) and (date_fin > date_fin_prevue):
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - date_debut).days
+                                nbre_jours_payable = (now - date_debut).days
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                nbre_jours_payable = (now - activation_contrat).days
+                        elif bool (date_fin) and not bool (date_fin_prevue):
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (date_fin - date_debut).days
+                                nbre_jours_payable = (now - date_debut).days
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (date_fin - activation_contrat).days
+                                nbre_jours_payable = (now - activation_contrat).days
+                        elif not bool (date_fin) and bool (date_fin_prevue):
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - date_debut).days
+                                nbre_jours_payable = (now - date_debut).days
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (date_fin_prevue - activation_contrat).days
+                                nbre_jours_payable = (now - activation_contrat).days
+                        else:
+                            if date_debut > activation_contrat:
+                                nbre_jours_total = (now - date_debut).days
+                                nbre_jours_payable = nbre_jours_total
+                            elif date_debut <= activation_contrat:
+                                nbre_jours_total = (now - activation_contrat).days
+                                nbre_jours_payable = nbre_jours_total
+                        # Vérification de la périodicité de la prime
+                        if periodicite == 'jour':
+                            qte_prime = int (nbre_jours_payable)
+                            qte_valide = int (nbre_jours_total)
+                            prime_payable_contrat += int (qte_prime * mt_prime)
+                            prime_globale_contrat += int (qte_valide * mt_prime)
+                        elif periodicite == 'semaine':
+                            qte_prime = round (nbre_jours_payable / 7) + 1
+                            qte_valide = round (nbre_jours_total / 7)
+                            prime_payable_contrat += int (qte_prime * mt_prime)
+                            prime_globale_contrat += int (qte_valide * mt_prime)
+                        elif periodicite == 'mois':
+                            qte_prime = round (nbre_jours_payable / 30) + 1
+                            qte_valide = round (nbre_jours_total / 30)
+                            prime_payable_contrat += int (qte_prime * mt_prime)
+                            prime_globale_contrat += int (qte_valide * mt_prime)
+                        elif periodicite == 'trimestre':
+                            qte_prime = round (nbre_jours_payable / 90) + 1
+                            qte_valide = round (nbre_jours_total / 90)
+                            prime_payable_contrat += int (qte_prime * mt_prime)
+                            prime_globale_contrat += int (qte_valide * mt_prime)
+                        elif periodicite == 'annee':
+                            qte_prime = round (nbre_jours_payable / 365) + 1
+                            qte_valide = round (nbre_jours_total / 365)
+                            prime_payable_contrat += int (qte_prime * mt_prime)
+                            prime_globale_contrat += int (qte_valide * mt_prime)
+                        elif periodicite == 'unique':
+                            prime_payable_contrat += int (mt_prime)
+                            prime_globale_contrat += int (mt_prime)
+                # on obtinet les totaux primes pour le contrat
+                self.totaux_net_payable_contrat = prime_payable_contrat
+                self.totaux_prime_contrat = prime_globale_contrat
+            # On obtient les totaux des primes à devoir
+            self.totaux_net_payable = self.totaux_net_payable_police + self.totaux_net_payable_contrat
+            self.totaux_prime = self.totaux_prime_police + self.totaux_prime_contrat
+            self.mt_reste_payable = self.totaux_net_payable - totaux_versements
+        else:
+            pass
 
     # DETAILS CONTROLES POLICE
     # @api.multi

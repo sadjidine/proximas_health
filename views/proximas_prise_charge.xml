@@ -1502,7 +1502,6 @@
                 <field name="genre" />
                 <field name="statut_familial"/>
                 <field name="num_pec"/>
-                <field name="date_execution"/>
                 <field name="prestataire"/>
                 <field name="details_prestation" string="Prestation/Acte"/>
                 <field name="cout_total" sum="Cout Total"/>
@@ -1511,7 +1510,7 @@
                 <field name="ticket_moderateur" string="Ticket Mod." sum="Ticket Mod."/>
                 <field name="net_tiers_payeur" sum="Part SAM"/>
                 <field name="net_prestataire" sum="Net à payer"/>
-                <field name="is_valide"/>
+                <field name="write_uid"/>
             </tree>
         </field>
     </record>
