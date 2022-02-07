@@ -363,3 +363,4 @@ access_proximas_remboursement_pec_controle,proximas.remboursement.pec.controle,m
 access_proximas_medecin_cro,proximas.medecin.cro,model_proximas_medecin,proximas_medical.group_cro,1,0,0,0
 access_proximas_medecin_crs,proximas.medecin.crs,model_proximas_medecin,proximas_medical.group_crs,1,0,0,0
 access_proximas_medecin_pharmacy,proximas.medecin.pharmacy,model_proximas_medecin,proximas_medical.group_pharmacy,1,0,0,0
+access_proximas_sms_user_admin,proximas.sms.user,model_proximas_sms_user,proximas_medical.group_admin,1,1,1,1
