@@ -747,6 +747,13 @@ class PriseEnCharge(models.Model):
         related='police_id.mt_plafond_prescription',
         readonly=True,
     )
+    mt_plafond_produit_phcie = fields.Float(
+        string="Mt. Plafond/Médicament",
+        digits=(9, 0),
+        related='police_id.mt_plafond_produit_phcie',
+        default=0,
+        help="Montant du plafond sur le coût unitaire des produits pharmaceutiques"
+    )
     leve_plafond_prescription = fields.Boolean(
         string="Lever Plafond Prescription",
         help='Attention! En cochant, cela permet de lever le plafond pour les prescriptions. le système ne contrôlera \
@@ -829,21 +836,21 @@ class PriseEnCharge(models.Model):
             else:
                 rec.is_termine = False
 
-    @api.one
+    @api.multi
     @api.depends('pathologie_ids')
     def _get_pathologie_pec(self):
-        if not self.pathologie_id and self.pathologie_ids:
-            pathologie = self.pathologie_ids[0]
-            self.pathologie_id = pathologie.id
+        for rec in self:
+            if not rec.pathologie_id and rec.pathologie_ids:
+                pathologie = rec.pathologie_ids[0]
+            rec.pathologie_id = pathologie.id
 
     @api.one
     @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
     def _get_encaisse_phcie(self):
-        if self.mt_encaisse_phcie:
+        self.ensure_one()
+        if 0 < self.mt_encaisse_phcie:
             self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
-        elif self.mt_encaisse_phcie_dispense:
-            self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
-        self.tot_encaisse_phcie = self.mt_encaisse_phcie if self.mt_encaisse_phcie else self.mt_encaisse_phcie_dispense
+        self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
@@ -2009,6 +2016,14 @@ class DetailsPec(models.Model):
         digits=(6, 0),
         related='substitut_phcie_id.marge_medicament',
         readonly=True,
+    )
+    mt_plafond_produit_phcie = fields.Float(
+        string="Mt. Plafond/Médicament",
+        digits=(9, 0),
+        related='pec_id.mt_plafond_produit_phcie',
+        default=0,
+        readonly=True,
+        help="Montant du plafond sur le coût unitaire des produits pharmaceutiques"
     )
     arret_produit = fields.Boolean(
         string="Produit en arrêt?",
@@ -4152,9 +4167,6 @@ class DetailsPec(models.Model):
 
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
-    # @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_rembourse_id',
-    #              'produit_phcie_id', 'mt_exclusion', 'code_id_rfm', 'prestataire_public', 'zone_couverte',
-    #              'prestataire', 'ticket_exigible', 'substitut_phcie_id', 'cout_unit', 'quantite_livre')
     @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
                  'prestataire_public', 'zone_couverte', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
@@ -4209,6 +4221,7 @@ class DetailsPec(models.Model):
             taux_couvert = self.taux_couvert
             plafond = 0
             forfait = 0
+            plafond_medicament = self.mt_plafond_produit_phcie
             if bool (code_medical_police):
                 plafond = int (code_medical_police.mt_plafond)
             self.mt_plafond = plafond
@@ -4233,11 +4246,15 @@ class DetailsPec(models.Model):
                 marge_police = int (self.marge_medicament_police)
                 marge_substitut = int (self.marge_medicament_substitut)
                 prix_majore = 0
-                if 0 < marge_substitut:
+                if 0 < plafond_medicament < cout_produit:
+                    self.cout_total = cout_produit * quantite
+                    self.total_pc = int(plafond_medicament * quantite)
+                    self.total_npc = self.cout_total - self.total_pc
+                elif 0 < marge_substitut:
                     prix_majore = int (prix_substitut + marge_substitut)
                 elif 0 < marge_police:
                     prix_majore = int (prix_substitut + marge_police)
-                if 0 < prix_majore < cout_produit:
+                elif 0 < prix_majore < cout_produit:
                     if quantite_prescrite > quantite:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
@@ -4281,11 +4298,15 @@ class DetailsPec(models.Model):
                 marge_police = int (self.marge_medicament_police)
                 marge_produit = int (self.marge_medicament_produit)
                 prix_majore = 0
-                if 0 < marge_produit:
-                    prix_majore = int (prix_produit + marge_produit)
+                if 0 < plafond_medicament < cout_produit:
+                    self.cout_total = cout_produit * quantite
+                    self.total_pc = int(plafond_medicament * quantite)
+                    self.total_npc = self.cout_total - self.total_pc
+                elif 0 < marge_produit:
+                    prix_majore = int(prix_produit + marge_produit)
                 elif 0 < marge_police:
-                    prix_majore = int (prix_produit + marge_police)
-                if 0 < prix_majore < cout_produit:
+                    prix_majore = int(prix_produit + marge_police)
+                elif 0 < prix_majore < cout_produit:
                     if quantite_prescrite > quantite:
                         self.cout_total = cout_produit * quantite
                         self.total_pc = (prix_majore * quantite)  # - self.mt_exclusion
