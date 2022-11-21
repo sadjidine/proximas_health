@@ -4679,7 +4679,7 @@ class DetailsPec(models.Model):
             return {'value': {},
                     'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Fournie.',
                                 'message': u"Il semble que vous avez omis de renseigner la quantité fournie \
-                                (livrée) concerant le produit: %s. Veuillez bien renseigner la quantité exacte \
+                                (livrée) concernant le produit: %s. Veuillez bien renseigner la quantité exacte \
                                 dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
                                            % self.produit_phcie
                                 }
