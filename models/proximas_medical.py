@@ -243,7 +243,6 @@ class CodePrestation(models.Model):
     )
     rubrique = fields.Char(
         string="Rubrique",
-        related='rubrique_id.name',
         readonly=True,
     )
     # Gestion de délai à observer avant de bénéficier de la même prestation médicale

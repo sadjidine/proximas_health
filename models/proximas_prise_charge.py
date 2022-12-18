@@ -5132,7 +5132,7 @@ class DetailsPec(models.Model):
                     self.delai_prestation = 0
         # 3. Vérifier s'il s'agit d'une prestation médicale?
         # delai_attente = int(self.delai_attente_prestation)
-        elif int(self.delai_attente_prestation) > 0 and self.pec_state in ['cours', 'oriente']:
+        elif int(self.delai_attente_prestation) and self.pec_state in ['cours', 'oriente']:
             # Si OUI, Récupère la date du jour
             now = datetime.now()
             # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
@@ -5142,27 +5142,26 @@ class DetailsPec(models.Model):
                 ('assure_id', '=', self.assure_id.id),
                 ('prestation_id', '=', self.prestation_id.id),
             ])
-            count_pec_prestations_assure = self.search_count(
-                [
-                    ('date_execution', '!=', False),
-                    ('assure_id', '=', self.assure_id.id),
-                    ('prestation_id', '=', self.prestation_id.id),
-                ]
-            )
-            if int(count_pec_prestations_assure) >= 1:
+            # count_pec_prestations_assure = self.search_count(
+            #     [
+            #         ('date_execution', '!=', False),
+            #         ('assure_id', '=', self.assure_id.id),
+            #         ('prestation_id', '=', self.prestation_id.id),
+            #     ]
+            # )
+            if pec_prestations_assure:
                 # Récupérer la dernier acte liée à la prestation offerte à l'assuré
                 dernier_acte_assure = pec_prestations_assure[0]
                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today())
-                date_acte_format = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
+                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
+                format_date_dernier_acte = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
                 self.date_dernier_acte = dernier_acte_assure.date_execution
                 # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                 nbre_jours_dernier_acte = (now - date_dernier_acte).days
                 # => différence en les 2 dates en nombre de jours.
                 self.delai_prestation = int(nbre_jours_dernier_acte)
                 # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
-                if 0 < int(nbre_jours_dernier_acte) <= int(self.delai_attente_prestation):
+                if 0 <= int(nbre_jours_dernier_acte) <= int(self.delai_attente_prestation):
                     # Sinon, rejeter la prestation
                     raise UserError (_ (
                         u"Proximaas : Contrôle de Règles de Gestion.\n \
@@ -5171,7 +5170,7 @@ class DetailsPec(models.Model):
                         La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
                         (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
                     ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
-                         date_acte_format, int (nbre_jours_dernier_acte))
+                         format_date_dernier_acte, int(nbre_jours_dernier_acte))
                                      )
                 else:
                     pass
@@ -5197,7 +5196,7 @@ class DetailsPec(models.Model):
                 ]
             )
             if int(count_pec_prestations_assure) >= 1:
-                # Récupérer la dernier acte liée à la prestation offerte à l'assuré
+                # Récupérer le dernier acte liée à la prestation offerte à l'assuré
                 dernier_acte_assure = pec_prestations_assure[0]
                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
                 date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)or \
