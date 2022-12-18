@@ -2068,6 +2068,11 @@ class DetailsPec(models.Model):
         default=True,
         help="Cocher pour indiquer que le prestataire est situé dans une zone couverte par le réseau de soins."
     )
+    couvert_complete = fields.Boolean(
+        string="100% Remboursée?",
+        default=False,
+        help="Cocher pour indiquer que la prestation médicale/Médicaments est totalement remboursé (100%)."
+    )
     prestataire_public = fields.Boolean(
         string="Ets. Public?",
         default=True,
@@ -4173,7 +4178,7 @@ class DetailsPec(models.Model):
     # CALCULS DES COUTS DES ACTES / PRESTATIONS & MEDICAMENTS
     @api.one
     @api.depends('cout_unite', 'cout_unit', 'quantite', 'quantite_livre', 'taux_couvert', 'mt_paye_assure',
-                 'prestataire_public', 'zone_couverte', 'mt_exclusion')
+                 'couvert_complete', 'prestataire_public', 'zone_couverte', 'mt_exclusion')
     def _calcul_couts_details_pec(self):
         self.ensure_one()
         if bool(self.prestation_id):
@@ -4195,7 +4200,9 @@ class DetailsPec(models.Model):
             ############################################################################################################
             # Taux de couverture PEC Ou Temboursement
             if bool(self.rfm_id):
-                if bool (self.zone_couverte) and bool(self.prestataire_public):
+                if bool(self.couvert_complete):
+                    self.taux_couvert = 100
+                elif bool (self.zone_couverte) and bool(self.prestataire_public):
                     self.taux_couvert = int(self.police_id.tx_couv_public_couvert)
                 # Taux Couverture (Remboursement) Zone Non Couverte et prestataire public
                 elif not bool(self.zone_couverte) and bool(self.prestataire_public):

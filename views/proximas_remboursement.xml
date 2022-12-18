@@ -310,14 +310,17 @@
                                                        </group>
                                                    </group>
                                                    <hr/>
-                                                    <group col="8" colspan="2" invisible="0">
+                                                    <group col="6" colspan="2" invisible="0">
+                                                        <field name="couvert_complete"/>
                                                         <field name="zone_couverte"/>
                                                         <field name="prestataire_public"/>
-                                                        <field name="code_medical_id"
-                                                              options='{"no_open": True, "no_create": True}'/>
-                                                        <field name="rubrique_id" string="Rubrisue médicale"
-                                                              options='{"no_open": True, "no_create": True}'/>
                                                     </group>
+                                                   <group invisible="1">
+                                                       <field name="code_medical_id"
+                                                              options='{"no_open": True, "no_create": True}'/>
+                                                       <field name="rubrique_id" string="Rubrisue médicale"
+                                                              options='{"no_open": True, "no_create": True}'/>
+                                                   </group>
                                                </page>
                                                <page string="Traitement des exclusions sur prestation "
                                                      groups="base.group_system,proximas_medical.group_manager,
