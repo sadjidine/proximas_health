@@ -4989,8 +4989,8 @@ class DetailsPec(models.Model):
                     ) % (rec.assure_id.name, details_prestation, age_minimum, age_maximum)
                                            )
 
-    @api.one
-    @api.depends('prestation_id', 'date_demande', 'date_execution', 'delai_prestation')
+    @api. multi
+    @api.onchange('prestation_id', 'date_demande', 'date_execution', 'delai_prestation')
     def _check_delai_attente_prestation(self):
         # Contrôle du délai d'attente Substitut Médicament
         if bool(self.substitut_phcie_id):
@@ -5170,15 +5170,25 @@ class DetailsPec(models.Model):
                 # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
                 if 0 <= int(nbre_jours_dernier_acte) <= int(self.delai_attente_prestation):
                     # Sinon, rejeter la prestation
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
+                    return {'value': {},
+                            'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
+                                        'message': u"L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
                         Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
                         La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
                         (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
-                         format_date_dernier_acte, int(nbre_jours_dernier_acte))
-                                     )
+                                                   % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
+                                                      format_date_dernier_acte, int(nbre_jours_dernier_acte))
+                                        }
+                            }
+                    # raise UserError (_ (
+                    #     u"Proximaas : Contrôle de Règles de Gestion.\n \
+                    #     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
+                    #     Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
+                    #     La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
+                    #     (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
+                    # ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
+                    #      format_date_dernier_acte, int(nbre_jours_dernier_acte))
+                    #                  )
                 else:
                     pass
             else:
