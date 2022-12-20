@@ -5273,7 +5273,7 @@ class DetailsPec(models.Model):
                     rec.date_dernier_acte = dernier_acte_assure.date_execution
                     # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                     date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
-                    nbre_jours_dernier_acte = (now - date_dernier_acte).day
+                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
                     # => différence en les 2 dates en nombre de jours.
                     rec.delai_prestation = int(nbre_jours_dernier_acte)
                     # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
