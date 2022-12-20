@@ -148,8 +148,9 @@
                                 <div class="row">
                                    <div class="col-xs-2 small invisible h4">CODE AFFECTION</div>
                                    <div class="col-xs-4 h4">
+                                       <b><span t-field="o.pathologie_id.name"/></b>
                                        <t t-foreach="o.pathologie_ids" t-as="pathologie">
-                                           <b><span t-field="pathologie.name"/></b>  *
+                                           - <span t-field="pathologie.name"/>
                                        </t>
                                    </div>
                                     <div class="col-xs-3 text-right invisible h4"><strong>SOLDE (NET A PAYER SAM)</strong></div>
