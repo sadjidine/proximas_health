@@ -3280,14 +3280,14 @@ class DetailsPec(models.Model):
                 # Récupérer la prestation médicale du CRS
                 code_prestation_id = rec.prestation_demande_id.id
                 prestataire_id = rec.prestataire_crs_id.id
-                prestation = rec.env['proximas.prestation'].search(
+                prestation = self.env['proximas.prestation'].search(
                     [
                         ('code_prestation_id', '=', code_prestation_id),
                         ('prestataire_id', '=', prestataire_id)
                     ]
                 )
                 if not bool(prestation):
-                    raise UserError(_(
+                    raise ValidationError(_(
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         La prestation demandée: %s ne figure pas dans la liste des prestations fournies par le\
                         prestataire: %s. Par conséquent, cette prestation ne peut être prise en compte dans le cadre \
@@ -3316,7 +3316,7 @@ class DetailsPec(models.Model):
                         ) % rec.prestataire_rembourse_id.name
                                         )
                 else:
-                    raise UserError(_(
+                    raise ValidationError(_(
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dipenser\
                         de médicament(s) pour le prestaire concerné. \
@@ -3336,7 +3336,7 @@ class DetailsPec(models.Model):
                         ]
                     )
                     if not bool(prestation):
-                        raise UserError(_(
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion:\n \
                             Le prestataire concerné: {}, n'a pas été parametré pour dispenser les médicaments (Pharmacie).\
                             Par conséquent, vous ne pourrez enregistrer les produits pour le compte de celui-ci. \
@@ -3344,7 +3344,7 @@ class DetailsPec(models.Model):
                         ).format(pharmacie)
                                         )
                 else:
-                    raise UserError(_(
+                    raise ValidationError(_(
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dispenser\
                         des médicaments pour le prestataire concerné. Pour plus d'informations, veuillez contactez \
@@ -5154,7 +5154,7 @@ class DetailsPec(models.Model):
             pec_prestations_assure = self.search([
                 ('date_execution', '!=', False),
                 ('assure_id', '=', self.assure_id.id),
-                ('prestation_id', '=', self.prestation_id.id),
+                ('code_prestation_id', '=', self.code_prestation_id.id),
             ])
             if pec_prestations_assure:
                 dernier_acte_assure = pec_prestations_assure[0]
@@ -5170,7 +5170,7 @@ class DetailsPec(models.Model):
                 # print(nbre_jours)
                 for acte in pec_prestations_assure:
                     date_acte = fields.Datetime.from_string(acte.date_execution)
-                    dif_jours_acte = (date_execution - date_acte).days
+                    dif_jours_acte = abs((date_execution - date_acte).days)
                     if dif_jours_acte == nbre_jours:
                         date_acte_proche = date_acte
                         format_date_acte_proche = datetime.strftime(date_acte_proche, '%d-%m-%Y')
