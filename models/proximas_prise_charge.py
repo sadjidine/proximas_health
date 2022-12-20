@@ -838,15 +838,16 @@ class PriseEnCharge(models.Model):
 
 
     @api.one
-    @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
+    @api.depends('mt_encaisse_phcie_dispense')
     def _get_encaisse_phcie(self):
-        self.ensure_one()
-        self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie_dispense, \
-                                                                  self.mt_encaisse_phcie
+        self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
         self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
-        # if 0 < self.mt_encaisse_phcie:
-        #     self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
-        # self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
+
+    @api.one
+    @api.depends('mt_encaisse_phcie')
+    def _get_encaisse_phcie(self):
+        self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
+        self.tot_encaisse_phcie = self.mt_encaisse_phcie
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
@@ -3020,7 +3021,7 @@ class DetailsPec(models.Model):
     # IDENTIFICATION DES PRESTATIONS FOURNIES
     # @api.one
     @api.depends('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                 'date_execution', 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
+                 'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id',
                  'prestataire_rembourse_id')
     def _check_prestation_id(self):
         # self.ensure_one()
@@ -3083,7 +3084,7 @@ class DetailsPec(models.Model):
                         rec.prestation_id = prestation.id
 
     @api.onchange('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
-                  'date_execution', 'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id',
+                  'code_id_rfm', 'prestation_crs_id', 'pool_medical_crs_id',
                   'prestation_rembourse_id', 'prestataire_rembourse_id')
     def _track_prestation_id(self):
         if bool(self.prestation_demande_id) and bool(self.prestataire_crs_id) and bool(self.pool_medical_crs_id):
@@ -4563,7 +4564,7 @@ class DetailsPec(models.Model):
         res = super(DetailsPec, self).write(values)
         return res
 
-    @api.onchange('substitut_phcie_id', 'cout_unit', 'date_execution', 'quantite_livre', 'mt_paye_assure', 'quantite')
+    @api.onchange('substitut_phcie_id', 'cout_unit', 'quantite_livre', 'mt_paye_assure', 'quantite')
     def _check_quantite_prescription(self):
         if bool(self.produit_phcie_id) and self.quantite == 0:
             return {'value': {},
