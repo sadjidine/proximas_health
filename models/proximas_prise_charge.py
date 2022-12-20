@@ -841,7 +841,8 @@ class PriseEnCharge(models.Model):
     @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
     def _get_encaisse_phcie(self):
         self.ensure_one()
-        self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie_dispense, self.mt_encaisse_phcie
+        self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie_dispense, \
+                                                                  self.mt_encaisse_phcie
         self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
         # if 0 < self.mt_encaisse_phcie:
         #     self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
