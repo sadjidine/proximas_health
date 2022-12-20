@@ -7,7 +7,7 @@
 from openerp.tools.translate import _
 from openerp import api, fields, models
 from openerp.exceptions import ValidationError, UserError
-from datetime import datetime # timedelta
+from datetime import datetime  # timedelta
 # from dateutil.relativedelta import relativedelta
 from random import randint
 from openerp.tools import amount_to_text_fr
@@ -33,7 +33,7 @@ class PriseEnCharge(models.Model):
         store=True,
         help='Code généré automatiquement par la système'
     )
-    code_pc = fields.Char (
+    code_pc = fields.Char(
         string="Code PC",
         compute='_get_code_pc',
         help="Code PC généré par la système.",
@@ -50,12 +50,12 @@ class PriseEnCharge(models.Model):
     state = fields.Selection(
         string="Etat",
         selection=[
-                ('cours', 'En cours'),
-                ('oriente', 'Orientation'),
-                ('dispense', 'Dispensation'),
-                ('termine', 'Terminée'),
-                ('expire', 'Expirée'),
-                ],
+            ('cours', 'En cours'),
+            ('oriente', 'Orientation'),
+            ('dispense', 'Dispensation'),
+            ('termine', 'Terminée'),
+            ('expire', 'Expirée'),
+        ],
         default="cours",
     )
     code_saisi = fields.Char(
@@ -179,7 +179,7 @@ class PriseEnCharge(models.Model):
         store=True,
         readonly=True,
     )
-    code_id_externe = fields.Char (
+    code_id_externe = fields.Char(
         string="Code ID. Externe",
         related="assure_id.code_id_externe",
         store=True,
@@ -311,13 +311,13 @@ class PriseEnCharge(models.Model):
         related='assure_id.num_contrat',
         readonly=True,
     )
-    date_debut_assure = fields.Date (
+    date_debut_assure = fields.Date(
         string="Date Début Assuré",
         related='assure_id.date_debut_assure',
         # store=True,
         help="Date de début de la couverture en rapport avec le délai de validité de la police."
     )
-    date_fin_prevue_assure = fields.Date (
+    date_fin_prevue_assure = fields.Date(
         string="Date Fin Contrat",
         related='assure_id.date_fin_prevue_assure',
         # store=True,
@@ -502,19 +502,19 @@ class PriseEnCharge(models.Model):
         compute='_compute_details_pec',
         default=0,
     )
-    net_prestataire_crs = fields.Float (
+    net_prestataire_crs = fields.Float(
         string="Net à payer (CRS)",
         digits=(9, 0),
         compute='_compute_details_pec',
         default=0,
     )
-    net_prestataire_phcie = fields.Float (
+    net_prestataire_phcie = fields.Float(
         string="Net à payer (Phcie)",
         digits=(9, 0),
         compute='_compute_details_pec',
         default=0,
     )
-    net_prestataire_phcie_dispense = fields.Float (
+    net_prestataire_phcie_dispense = fields.Float(
         string="Net à payer (Phcie)",
         digits=(9, 0),
         compute='_compute_details_pec',
@@ -599,14 +599,14 @@ class PriseEnCharge(models.Model):
     mt_encaisse_cro = fields.Float(
         string="Montant Encaissé (CRO)",
         digits=(9, 0),
-        #compute='_compute_details_pec',
+        # compute='_compute_details_pec',
         default=0,
         help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
     )
     mt_encaisse_crs = fields.Float(
         string="Montant Encaissé (CRS)",
         digits=(9, 0),
-        #compute='_compute_details_pec',
+        # compute='_compute_details_pec',
         default=0,
         help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
     )
@@ -622,7 +622,7 @@ class PriseEnCharge(models.Model):
         default=0,
         help='Montant total perçu de la part de l\'assuré, au titre de règlement du ticket modérateur',
     )
-    tot_encaisse_phcie = fields.Float (
+    tot_encaisse_phcie = fields.Float(
         string="Mt. Encaissé (Phcie)",
         digits=(9, 0),
         compute='_get_encaisse_phcie',
@@ -684,7 +684,7 @@ class PriseEnCharge(models.Model):
         help='Nombre de Prestations médicales et paramédicales Demandées',
         default=0,
     )
-    nbre_prescriptions_medecin = fields.Integer (
+    nbre_prescriptions_medecin = fields.Integer(
         string="Nbre. Prescriptions Médecin",
         compute='_check_nbre_details_pec',
         help='Nombre de Prescriptions Médecin',
@@ -786,7 +786,7 @@ class PriseEnCharge(models.Model):
     user_prise_charge = fields.Boolean(
         string="Utitlisateur/Prise charge?",
         compute='_get_current_user',
-        #store=True,
+        # store=True,
         help='Défini si l\'utilisateur courant est le prestataire exécutant de la prise en charge?',
     )
     user_id = fields.Many2one(
@@ -823,7 +823,7 @@ class PriseEnCharge(models.Model):
         for rec in self:
             if 0 < int(rec.validite_pec) < int(rec.delai_pec):
                 rec.is_valide = False
-                #return rec.write({'pec_valide': False})
+                # return rec.write({'pec_valide': False})
             else:
                 rec.is_valide = True
                 # return rec.write({'pec_valide': True})
@@ -864,7 +864,7 @@ class PriseEnCharge(models.Model):
         self.nbre_prescriptions_medecin = len(details_pec_prescription_encours)
         self.nbre_prescriptions = len(details_pec_phcie_encours)
         self.totaux_cro = sum(item.total_pc for item in self.details_pec_soins_ids)
-        self.totaux_crs = sum (item.total_pc for item in self.details_pec_soins_crs_ids)
+        self.totaux_crs = sum(item.total_pc for item in self.details_pec_soins_crs_ids)
         self.totaux_phcie = sum(item.total_pc for item in details_pec_phcie_encours)
         self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
 
@@ -956,12 +956,12 @@ class PriseEnCharge(models.Model):
             ('prestataire', '=', self.prestataire_id.id),
             ('date_execution', '!=', None),
         ])
-        totaux_details_pec_crs = self.env['proximas.details.pec'].search ([
+        totaux_details_pec_crs = self.env['proximas.details.pec'].search([
             ('pec_id', '=', self.id),
             ('prestataire', '=', self.prestataire_crs_id.id),
             ('date_execution', '!=', None),
         ])
-        totaux_details_pec_phcie = self.env['proximas.details.pec'].search ([
+        totaux_details_pec_phcie = self.env['proximas.details.pec'].search([
             ('pec_id', '=', self.id),
             ('prestataire', '=', self.prestataire_phcie_id.id),
             ('produit_phcie_id', '!=', None),
@@ -1028,22 +1028,22 @@ class PriseEnCharge(models.Model):
                 prescriprions ne peut faire l'objet d'une orientation vers un autre prestataire de soins. Vous \
                 devez en tenir compte, avant de procéder à l'orientation du patient. \
                 Pour plus d'informations, veuillez contactez l'administrateur..."
-                ) % self.nbre_prescriptions
-            )
+            ) % self.nbre_prescriptions
+                            )
         elif int(self.nbre_prestations_demandes) == 0:
             raise UserError(_(
                 u"Cette prise en charge ne contient aucune prestation demandée. Une prise en charge qui ne contient pas \
                 de prestation demandée ne peut faire l'objet d'une orientation vers un autre prestataire de soins. \
                 Vous devez en tenir compte, avant de procéder à l'orientation du patient.\n \
                 Pour plus d'informations, veuillez contactez l'administrateur..."
-                )
             )
-        elif  not self.pathologie_id:
+            )
+        elif not self.pathologie_id:
             raise UserError(_(
                 u"Cette prise en charge ne contient aucune pathologie (affection) diagnostiquée. Il faudra renseigner\
                  au moins un code affection avant de pouvoir orienter le patient vers un autre prestataire de soins. \
                  Pour plus d'informations, veuillez contactez l'administrateur..."
-                )
+            )
             )
         elif 0 < self.ticket_exigible_cro > self.mt_encaisse_cro:
             raise UserError(_(
@@ -1052,8 +1052,8 @@ class PriseEnCharge(models.Model):
                   exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
                   de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
                   contactez l'administrateur..."
-                ) % self.ticket_exigible_cro
-            )
+            ) % self.ticket_exigible_cro
+                            )
         else:
             self.state = 'oriente'
             menu_id = self.env['ir.ui.menu'].search([('sequence', '=', 2010), ]).id
@@ -1074,17 +1074,17 @@ class PriseEnCharge(models.Model):
                 u"Cette prise en charge ne contient aucune pathologie (affection) diagnostiquée. Il faudra renseigner\
                  au moins un code affection avant de pouvoir transférer la prise ne charge vers une pharmacie pour \
                  dispensation. Pour plus d'informations, veuillez contactez l'administrateur..."
-                )
+            )
             )
         elif 0 < self.ticket_exigible_cro > self.mt_encaisse_cro:
-            raise UserError (_ (
+            raise UserError(_(
                 u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
                   Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
                   exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
                   de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
                   contactez l'administrateur..."
-                ) % self.ticket_exigible_cro
-            )
+            ) % self.ticket_exigible_cro
+                            )
         elif 0 < self.ticket_exigible_crs > self.mt_encaisse_crs:
             raise UserError(_(
                 u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
@@ -1092,11 +1092,11 @@ class PriseEnCharge(models.Model):
                 exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
                 de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
                 contactez l'administrateur..."
-                ) % self.ticket_exigible_crs
-            )
+            ) % self.ticket_exigible_crs
+                            )
         else:
             self.state = 'dispense'
-            menu_id = self.env['ir.ui.menu'].search([('sequence', '=', 2010),]).id
+            menu_id = self.env['ir.ui.menu'].search([('sequence', '=', 2010), ]).id
             action = {
                 'type': 'ir.actions.client',
                 'tag': 'reload',
@@ -1114,46 +1114,46 @@ class PriseEnCharge(models.Model):
                   de prestation fournie ne peut faire l'objet d'une validation. Vous devez en tenir compte, avant de \
                   procéder à la validation de la prise en charge. \
                   Pour plus d'informations, veuillez contactez l'administrateur..."
-                )
+            )
             )
         elif not self.pathologie_id:
             raise UserError(_(
                 u"Cette prise en charge ne contient aucune pathologie (affection) diagnostiquée. Il faudra renseigner\
                  au moins un code affection avant de pouvoir orienter le patient vers un autre prestataire de soins. \
                  Pour plus d'informations, veuillez contactez l'administrateur..."
-                )
+            )
             )
         elif 0 < self.ticket_exigible_cro > self.mt_encaisse_cro:
-            raise UserError (_ (
+            raise UserError(_(
                 u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
                   Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
                   exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
                   de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
                   contactez l'administrateur..."
-                ) % self.ticket_exigible_cro
-            )
+            ) % self.ticket_exigible_cro
+                            )
         elif 0 < self.ticket_exigible_crs > self.mt_encaisse_crs:
-            raise UserError (_ (
+            raise UserError(_(
                 u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
                   Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
                   exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
                   de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
                   contactez l'administrateur..."
-                ) % self.ticket_exigible_crs
-            )
+            ) % self.ticket_exigible_crs
+                            )
         elif 0 < self.ticket_exigible_phcie > self.tot_encaisse_phcie:
-            raise UserError (_ (
-               u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
-                Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
-                exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
-                de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
-                contactez l'administrateur..."
-                ) % self.ticket_exigible_phcie
-            )
+            raise UserError(_(
+                u"Vous êtes tenus d'encaisser la somme de : %d F.cfa, au titre de ticket modérateur. \
+                 Par conséquent, vous devez absolument confirmer le paiement du ticket modérateur \
+                 exigé et le notifier en renseignant le montant exact dans le champ indiqué. Faute \
+                 de quoi, vos données ne seront pas validées. Pour plus d'informations, veuillez \
+                 contactez l'administrateur..."
+            ) % self.ticket_exigible_phcie
+                            )
         else:
             # self.env.user.notify_info('La Prise en charge : %s a été sauvegardée et terminée avec succès.') % self.name
             self.state = 'termine'
-            menu_id = self.env['ir.ui.menu'].search ([('sequence', '=', 2010), ]).id
+            menu_id = self.env['ir.ui.menu'].search([('sequence', '=', 2010), ]).id
             action = {
                 'type': 'ir.actions.client',
                 'tag': 'reload',
@@ -1374,14 +1374,14 @@ class PriseEnCharge(models.Model):
         # self.ensure_one()
         if 0 < int(self.validite_pec) < int(self.delai_pec):
             action = {'warning': {
-                            'title': u'Proximaas : Règles de Gestion',
-                              'message': u"Les modifications effectuées ne peuvent être validées pour des \
+                'title': u'Proximaas : Règles de Gestion',
+                'message': u"Les modifications effectuées ne peuvent être validées pour des \
                               raisons de validité de délai de traitement.Cette prise en charge a été générée \
                               depuis : %d heures, alors que le délai maximum (en heures) autorisé avant \
                               expiration est de : %d heures. \n Pour plus d'informations, veuillez contactez \
                               l'administrateur..." % (self.delai_pec, self.validite_pec)
-                            }
-                    }
+            }
+            }
             return action
 
     # @api.multi
@@ -1396,12 +1396,12 @@ class PriseEnCharge(models.Model):
                 Cette prise en charge a été générée depuis : %d heures, alors que le délai maximum \
                 (en heures) autorisé avant expiration est de : %d heures. \n \
                 Pour plus d'informations, veuillez contactez l'administrateur..."
-                ) % (self.delai_pec, self.validite_pec)
-            )
+            ) % (self.delai_pec, self.validite_pec)
+                                  )
 
     @api.onchange('details_pec_phcie_ids', 'nbre_prescriptions', 'nbre_prescription_maxi')
     def _check_details_prescription(self):
-        if 0 < int (self.nbre_prescription_maxi) < int(self.nbre_prescriptions):
+        if 0 < int(self.nbre_prescription_maxi) < int(self.nbre_prescriptions):
             return {'warning':
                         {'title': u'Proximas : Contrôle de règles de Gestion => Nombre Maxi Prescriptions:',
                          'message': u"Cette prise en charge ne peut contenir plus de : (%d) prescriptions. Par conséquent,\
@@ -1410,39 +1410,38 @@ class PriseEnCharge(models.Model):
                                     % self.nbre_prescription_maxi
                          }
                     }
-        elif 0 < int(self.mt_plafond_prescription) <= int(self.totaux_phcie) and not bool (
+        elif 0 < int(self.mt_plafond_prescription) <= int(self.totaux_phcie) and not bool(
                 self.leve_plafond_prescription):
             return {'warning':
                         {'title': u'Proximas : Contrôle de règles de Gestion => Plafond Prescriptions :',
                          'message': u"Cette prise en charge ne peut excéder le plafond pour les prescriptions: (%d).  \
                         Par conséquent, vous devez en tenir compte pour pouvoir valider les données.  \
                         Pour plus d'informations, veuillez contactez l'administrateur..."
-                        % self.mt_plafond_prescription
-                        }
-            }
+                                    % self.mt_plafond_prescription
+                         }
+                    }
 
     @api.constrains('details_pec_phcie_ids', 'nbre_prescriptions')
     def _validate_details_prescriptions(self):
         for rec in self:
             if 0 < int(rec.nbre_prescription_maxi) < int(rec.nbre_prescriptions):
-                raise ValidationError (_ (
+                raise ValidationError(_(
                     u"Proximas : Contrôle de règles de Gestion => Nombre Maxi Prescriptions:\n \
                     Cette prise en charge ne peut contenir plus de : (%d) prescriptions. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. \
                     Pour plus d'informations, veuillez contactez l'administrateur..."
                 ) % rec.nbre_prescription_maxi
-                                       )
-            elif 0 < int(rec.mt_plafond_prescription) < int(rec.totaux_phcie) and not bool (
+                                      )
+            elif 0 < int(rec.mt_plafond_prescription) < int(rec.totaux_phcie) and not bool(
                     rec.leve_plafond_prescription):
-                raise ValidationError (_ (
+                raise ValidationError(_(
                     u"Proximas : Contrôle de règles de Gestion => Plafond Prescriptions : :\n \
                     Cette prise en charge ne peut excéder le plafond pour les prescriptions: (%d).  \
                     Par conséquent, vous devez en tenir compte pour pouvoir valider les données. \
                     Pour plus d'informations, veuillez contactez l'administrateur..."
 
                 ) % rec.mt_plafond_prescription
-                )
-
+                                      )
 
     # @api.one
     # @api.constrains('details_pec_phcie_ids', 'nbre_prescriptions', 'nbre_prescription_maxi')
@@ -1475,39 +1474,39 @@ class PriseEnCharge(models.Model):
     #             )
     #             )
 
-    @api.constrains('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids',)
+    @api.constrains('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', )
     def _validate_ticket_exigible_and_encaissement(self):
         for rec in self:
             # 1. Controle cas de CRO
             if rec.state == 'cours' and 0 < int(rec.ticket_exigible_cro) > int(rec.mt_encaisse_cro):
-                raise ValidationError (_ (
+                raise ValidationError(_(
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
                     Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
                 ) % (rec.ticket_exigible_cro, rec.mt_encaisse_cro)
-                                       )
+                                      )
             # 2. Controle cas de CRS
             if rec.state == 'oriente' and 0 < int(rec.ticket_exigible_crs) > int(rec.mt_encaisse_crs):
-                raise ValidationError (_ (
+                raise ValidationError(_(
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
                     Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
                 ) % (rec.ticket_exigible_crs, rec.mt_encaisse_crs)
-                                       )
+                                      )
             # 3. Controle cas de PHARMACIE
             if rec.state == 'dispense' and 0 < int(rec.ticket_exigible_phcie) > int(rec.tot_encaisse_phcie):
-                raise ValidationError (_ (
+                raise ValidationError(_(
                     u"Proximas : Contrôle de règles de Gestion => Montant Ticket Exigible:\n \
                     Cette prise en charge exige l'encaissement d'un ticket modérateur de : (%d Fcfa).\n \
                     Le montant encaissé est de : (%d Fcfa) inférieur au montant exigé. Par conséquent,\
                     vous devez en tenir compte pour pouvoir valider les données. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
                 ) % (rec.ticket_exigible_phcie, rec.tot_encaisse_phcie)
-                                       )
+                                      )
 
     @api.multi
     def name_get(self):
@@ -1551,8 +1550,8 @@ class PriseEnCharge(models.Model):
                 Risque de doublon pour le Code PEC : %s. Le code PEC généré par le système existe déjà pour une autre \
                 prise en charge. Cependant, ce code doit être unique par prise en charge.\n \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % self.code_pec
-            )
+            ) % self.code_pec
+                                  )
 
 
 class PecWizard(models.TransientModel):
@@ -1579,13 +1578,13 @@ class PecWizard(models.TransientModel):
         info_assure = assure.name
         # 1. Vérification de la présence de doublon sur l'assuré.
         if len(assure) > 1:
-            raise UserError (_ (
+            raise UserError(_(
                 u"Proximaas : Contrôle Règles de Gestion:\n\
                 L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                 l'objet d'une prise en charge actuellement, car il y a un doublon du code ID. \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % (info_assure, self.code_saisi)
-            )
+            ) % (info_assure, self.code_saisi)
+                            )
         # 2. Vérification du contrat pour l'assuré.
         elif bool(assure) and not bool(assure.police_id):
             raise UserError(_(
@@ -1593,8 +1592,8 @@ class PecWizard(models.TransientModel):
                 L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                 l'objet d'une prise en charge actuellement, pour absence de contrat faisant référence à sa police de \
                 couverture. Veuillez contactez les administrateurs pour plus détails..."
-                ) % (assure.name, assure.code_id)
-            )
+            ) % (assure.name, assure.code_id)
+                            )
         # 3. Vérification du statut de l'assuré (actif ou non).
         elif bool(assure) and assure.state != 'actif':
             raise ValidationError(_(
@@ -1602,8 +1601,8 @@ class PecWizard(models.TransientModel):
                 L'assuré: %s - Code ID.: %s est bel et bien enregistré en tant que bénéficiaire. Cependant, \
                 ne peut faire l'objet d'une prise en charge actuellement, en rapport avec son statut.\n \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % (assure.name, assure.code_id)
-            )
+            ) % (assure.name, assure.code_id)
+                                  )
         elif bool(assure) and assure.state == 'actif':
             if assure.code_id_externe == self.code_saisi:
                 code_id = assure.code_id
@@ -1674,7 +1673,7 @@ class PecMajWizard(models.TransientModel):
         pec_maj = self.env['proximas.pec.maj.wizard']
         # Contrôle de l'existence du code PEC
         if not bool(pec):
-            raise ValidationError (_ (
+            raise ValidationError(_(
                 u"CODE ERRONE : Le Code PEC fourni n'est pas reconnu et se réfère à aucune Prise en charge valide. \
                 Pour plus d'informations, veuillez contactez l'administrateur en cas de besoin..!"
             )
@@ -1686,28 +1685,28 @@ class PecMajWizard(models.TransientModel):
                 Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, il est possible \
                 que le code PEC soit dupliqué, c-à-d que le code PEC concerné est attribué à une autre prise en charge.\
                  Veuillez contacter au besoin, les administrateurs pour plus détails..."
-                ) % pec.code_pec
-            )
+            ) % pec.code_pec
+                                  )
         # Contrôle du statut Assuré - assure.state == 'actif'
-        elif bool (pec) and (pec.assure_id.state != 'actif'):
+        elif bool(pec) and (pec.assure_id.state != 'actif'):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
             raise ValidationError(_(
                 u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
                 Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, ne peut faire \
                 l'objet d'un traitement du fait de : (STATUT NON ACTIF) de l'assuré: %s. \
                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
-                ) % (pec.code_pec, info_assure)
-            )
+            ) % (pec.code_pec, info_assure)
+                                  )
         # Contrôle de délai PEC
         elif bool(pec) and (0 < validite_pec < delai_pec):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError (_ (
+            raise ValidationError(_(
                 u"PROXIMAS : Contrôle du Statut PEC: Désolé!\n \
                 Le code PEC: %s (se référant à l'assuré: %s) concerné est bel et bien enregistré en tant \
                 que prise en charge. Cependant, ne peut faire l'objet d'un traitement pour cause de: DELAI \
                 VALIDITE EXPIRE. Veuillez contacter au besoin, les administrateurs pour plus détails..."
             ) % (pec.code_pec, info_assure)
-                                   )
+                                  )
         elif bool(pec) and pec.state == 'oriente' and prestataire.categorie_id != 'Pharmacie':
             # Rediriger vers le formulaire de prise en charge pour Prestations CRS
             pec.prestataire_crs_id = prestataire.id
@@ -1736,13 +1735,13 @@ class PecMajWizard(models.TransientModel):
             return action
         else:
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError (_ (
+            raise ValidationError(_(
                 u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
                 Le code PEC concerné : %s - (se référant à l'assuré: %s) est bel et bien enregistré en tant que prise \
                 en charge. Cependant, vous n'y avez pas accès, parce que cette prise en charge n'a pas été transmise \
                 en Dipensation. Pour plus d'informations, veuillez contactez les administrateurs..."
             ) % (pec.code_pec, info_assure)
-                                   )
+                                  )
 
     @api.multi
     def phcie_open_popup(self):
@@ -1765,37 +1764,37 @@ class PecMajWizard(models.TransientModel):
             raise ValidationError(_(
                 u"CODE ERRONE : Le Code PEC fourni n'est pas reconnu et se réfère à aucune Prise en charge valide. \
                 Pour plus d'informations, veuillez contactez l'administrateur en cas de besoin..!"
-                )
+            )
             )
         # Contrôle de doublon PEC
         if pec and len(pec) != 1:
-            raise ValidationError (_ (
+            raise ValidationError(_(
                 u"PROXIMAS : Contrôle Code PEC : Code PEC en double!\n \
                 Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, il est possible \
                 que le code PEC soit dupliqué, c-à-d que le code PEC concerné est attribué à une autre prise en charge.\
                  Veuillez contacter au besoin, les administrateurs pour plus détails..."
-                ) % pec.code_pec
-            )
+            ) % pec.code_pec
+                                  )
         # Contrôle du statut Assuré - assure.state == 'actif'
-        elif bool (pec) and (pec.assure_id.state != 'actif'):
+        elif bool(pec) and (pec.assure_id.state != 'actif'):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError (_ (
+            raise ValidationError(_(
                 u"PROXIMAS : Contrôle du Statut PEC :Désolé!\n \
                 Le code PEC concerné : %s existe bel et bien celui d'une prise en charge. Cependant, ne peut faire \
                 l'objet d'un traitement du fait de : (STATUT NON ACTIF) de l'assuré: %s. \
                 Veuillez contacter au besoin, les administrateurs pour plus détails..."
             ) % (pec.code_pec, info_assure)
-                                   )
+                                  )
         # Contrôle de délai PEC
         elif bool(pec) and (0 < validite_pec < delai_pec):
             # bool(pec_id) and (pec.state != 'oriente' or pec.state != 'termine'):
-            raise ValidationError (_ (
+            raise ValidationError(_(
                 u"PROXIMAS : Contrôle du Statut PEC: Désolé!\n \
                 Le code PEC: %s (se référant à l'assuré: %s) concerné est bel et bien enregistré en tant \
                 que prise en charge. Cependant, ne peut faire l'objet d'un traitement pour cause de: DELAI \
                 VALIDITE EXPIRE. Veuillez contacter au besoin, les administrateurs pour plus détails..."
             ) % (pec.code_pec, info_assure)
-                                   )
+                                  )
         elif bool(pec_id) and pec.state == 'dispense':
             # Rediriger vers le formulaire de prise en charge pour Dispensation Médicaments
             pec.prestataire_phcie_id = prestataire.id
@@ -1829,8 +1828,8 @@ class PecMajWizard(models.TransientModel):
                 Le code PEC concerné : %s - (se référant à l'assuré: %s) est bel et bien enregistré en tant que prise \
                 en charge. Cependant, vous n'y avez pas accès, parce que cette prise en charge n'a pas été transmise \
                 en Dipensation. Pour plus d'informations, veuillez contactez les administrateurs..."
-                ) % (pec.code_pec, info_assure)
-            )
+            ) % (pec.code_pec, info_assure)
+                                  )
 
 
 class DetailsPec(models.Model):
@@ -1903,7 +1902,7 @@ class DetailsPec(models.Model):
         comodel_name="proximas.prestation",
         string="Prestation médicale",
         compute='_check_prestation_id',
-        #index=True,
+        # index=True,
         store=True,
     )
     pool_medical_id = fields.Many2one(
@@ -1911,7 +1910,7 @@ class DetailsPec(models.Model):
         string="Médecin CRO",
         # store=True,
     )
-    pool_medical = fields.Many2one (
+    pool_medical = fields.Many2one(
         comodel_name="proximas.pool.medical",
         string="Medécin Traitant",
         compute='_get_pool_medical',
@@ -2003,7 +2002,7 @@ class DetailsPec(models.Model):
         related='pec_id.marge_medicament',
         readonly=True,
     )
-    marge_medicament_produit = fields.Float (
+    marge_medicament_produit = fields.Float(
         string='Marge/Produit Phcie.',
         help="Marge tolérée sur le coût du médicament",
         digits=(6, 0),
@@ -2050,14 +2049,14 @@ class DetailsPec(models.Model):
         readonly=True,
         help="Nombre de jours à observer avant de dispenser le même médicament"
     )
-    age_minimum = fields.Integer (
+    age_minimum = fields.Integer(
         string="Age Minimum.(années)",
         related='produit_phcie_id.age_minimum',
         default=0,
         readonly=True,
         help="L'âge minimum autorisé pour l'accès au médicament."
     )
-    age_maximum = fields.Integer (
+    age_maximum = fields.Integer(
         string="Age Maxi.(années)",
         related='produit_phcie_id.age_maximum',
         default=0,
@@ -2095,7 +2094,7 @@ class DetailsPec(models.Model):
         default=0,
         help="Indiquer la quantité demandée"
     )
-    quantite_demande = fields.Integer (
+    quantite_demande = fields.Integer(
         string="Qté. demandée",
         compute='_check_quantite_demande',
         default=0,
@@ -2217,16 +2216,16 @@ class DetailsPec(models.Model):
         required=False,
         readonly=True,
     )
-    age_entier = fields.Integer (
+    age_entier = fields.Integer(
         string='Age assuré',
         related='assure_id.age_entier',
     )
-    age_details = fields.Char (
+    age_details = fields.Char(
         string="Age",
         related="assure_id.age_details",
         readonly=True,
     )
-    date_activation = fields.Date (
+    date_activation = fields.Date(
         string="Date Activation",
         related="assure_id.date_activation",
         readonly=True,
@@ -2245,16 +2244,16 @@ class DetailsPec(models.Model):
     num_contrat = fields.Char(
         string="Num. Contrat",
         related='contrat_id.num_contrat',
-        #store=True,
+        # store=True,
         readonly=True,
     )
-    date_debut_assure = fields.Date (
+    date_debut_assure = fields.Date(
         string="Date Débur Assuré",
         related='assure_id.date_debut_assure',
         # store=True,
         help="Date de début de la couverture en rapport avec le délai de validité de la police."
     )
-    date_fin_prevue_assure = fields.Date (
+    date_fin_prevue_assure = fields.Date(
         string="Date Fin Contrat",
         related='assure_id.date_fin_prevue_assure',
         # store=True,
@@ -2418,7 +2417,7 @@ class DetailsPec(models.Model):
         related='prestation_id.forfait_sam',
         readonly=True,
     )
-    forfait_ticket = fields.Float (
+    forfait_ticket = fields.Float(
         comodel_name="proximas.prestation",
         string="Forfait Ticket",
         digits=(6, 0),
@@ -2486,7 +2485,7 @@ class DetailsPec(models.Model):
         readonly=True,
     )
     # Champs relatifs Prise.charge (PEC)
-    date_saisie = fields.Datetime (
+    date_saisie = fields.Datetime(
         string="Date Enregistrement",
         related='pec_id.date_saisie',
         readonly=True,
@@ -2497,14 +2496,14 @@ class DetailsPec(models.Model):
         store=True,
         readonly=True,
     )
-    pathologie_id = fields.Many2one (
+    pathologie_id = fields.Many2one(
         comodel_name="proximas.pathologie",
         string="Affection Principale",
         related='pec_id.pathologie_id',
         store=True,
         help='Veuillez Indiquer le code de l\'affection( pathologie) principale.',
     )
-    accorde = fields.Boolean (
+    accorde = fields.Boolean(
         string="Accord?",
         default=False,
         help='Reservé au Médecin Conseil pour accorder l\'exécution d\'une prestation par orientation',
@@ -2530,13 +2529,13 @@ class DetailsPec(models.Model):
     doc_filename = fields.Char(
         "Nom fichier joint",
     )
-    date_dernier_acte = fields.Date (
+    date_dernier_acte = fields.Date(
         string="Date dernier Acte",
         compute='_check_delai_attente_prestation',
         default=fields.Date.today(),
         help='Date de la dernière fois où le patient a bénéficié de cette prestation.',
     )
-    delai_prestation = fields.Integer (
+    delai_prestation = fields.Integer(
         string="Délai Prestation (En jours)",
         compute='_check_delai_attente_prestation',
         default=0,
@@ -2601,14 +2600,14 @@ class DetailsPec(models.Model):
         digits=(9, 0),
         compute='_calcul_couts_details_pec',
         store=True,
-    )   # total_pc x taux_couvert
+    )  # total_pc x taux_couvert
     ticket_moderateur = fields.Float(
         string="Ticket Modérateur",
         default=0,
         digits=(6, 0),
         compute='_calcul_couts_details_pec',
         store=True,
-    )   # total_pc - tiers_payeur
+    )  # total_pc - tiers_payeur
     montant_exigible = fields.Float(
         string="Montant Exigible",
         default=0,
@@ -2628,21 +2627,21 @@ class DetailsPec(models.Model):
         default=0,
         digits=(6, 0),
         store=True,
-    )   # = net_tiers_payeur
+    )  # = net_tiers_payeur
     debit_ticket = fields.Float(
         string="Débit Ticket",
         digits=(6, 0),
         compute='_calcul_couts_details_pec',
         default=0,
         store=True,
-    )   # = ticket_moderateur - paye_assure
-    mt_plafond = fields.Float (
+    )  # = ticket_moderateur - paye_assure
+    mt_plafond = fields.Float(
         string="Mt. PLafond",
         digits=(6, 0),
         compute='_calcul_couts_details_pec',
         default=0,
     )
-    net_a_payer = fields.Float (
+    net_a_payer = fields.Float(
         string="Net A Payer",
         digits=(6, 0),
         compute='_compute_net_a_payer',
@@ -2707,34 +2706,34 @@ class DetailsPec(models.Model):
         store=True,
         required=False,
     )
-    en_cours_exo = fields.Boolean (
+    en_cours_exo = fields.Boolean(
         string="Exo en cours",
         compute='_get_exercice_sam',
         store=True,
     )
-    totaux_rubrique_assure = fields.Float (
+    totaux_rubrique_assure = fields.Float(
         string="S/Totaux/Rubrique - Asuré",
         digits=(6, 0),
         compute='_get_rubrique_medicale',
         default=0,
     )
-    totaux_rubrique_contrat = fields.Float (
+    totaux_rubrique_contrat = fields.Float(
         string="S/Totaux/Rubrique - Famille",
         digits=(6, 0),
         compute='_get_rubrique_medicale',
         default=0,
     )
-    nbre_actes_rubrique_assure = fields.Integer (
+    nbre_actes_rubrique_assure = fields.Integer(
         string="Nbre. Actes Rubrique - Assuré",
         compute='_get_rubrique_medicale',
         default=0,
     )
-    nbre_actes_rubrique_contrat = fields.Integer (
+    nbre_actes_rubrique_contrat = fields.Integer(
         string="Nbre. Actes Rubrique - Famille",
         compute='_get_rubrique_medicale',
         default=0,
     )
-    niveau_plafond_rubrique_assure = fields.Float (
+    niveau_plafond_rubrique_assure = fields.Float(
         string="Niveau Plafond Rubrique - Assuré",
         digits=(6, 0),
         compute='_get_rubrique_medicale',
@@ -2742,7 +2741,7 @@ class DetailsPec(models.Model):
             est rattachée la prestation médicale fournie par le prestataire...',
         default=0,
     )
-    niveau_plafond_rubrique_contrat = fields.Float (
+    niveau_plafond_rubrique_contrat = fields.Float(
         string="Niveau Plafond Rubrique - Famille",
         digits=(6, 0),
         compute='_get_rubrique_medicale',
@@ -2783,18 +2782,18 @@ class DetailsPec(models.Model):
     @api.onchange('accorde', 'non_accorde')
     def _check_action_accorder(self):
         for rec in self:
-            if bool (rec.accorde) and bool (rec.non_accorde):
+            if bool(rec.accorde) and bool(rec.non_accorde):
                 warning = {
-                    'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                    'message': _ (u"Attention! Vous ne pouvez pas à la fois, autoriser et rejeter la demande  \
+                    'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
+                    'message': _(u"Attention! Vous ne pouvez pas à la fois, autoriser et rejeter la demande  \
                      d'exécution de la prestation : %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                                  ) % rec.prestation_demande_id.name
+                                 ) % rec.prestation_demande_id.name
                 }
                 return {'warning': warning}
-            elif bool (rec.non_accorde) and not bool (rec.motif_non_accord):
+            elif bool(rec.non_accorde) and not bool(rec.motif_non_accord):
                 warning = {
-                    'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                    'message': _ (u"Attention! Vous devez absolument motiver le rejet (refus) de l'exécution de la\
+                    'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
+                    'message': _(u"Attention! Vous devez absolument motiver le rejet (refus) de l'exécution de la\
                          prestation : %s. En cas de refus, le champ motif de refus doit impérativement être renseigné.\
                           Pour plus d'informations, veuillez contactez l'administrateur...")
                                % rec.prestation_demande_id.name
@@ -2806,17 +2805,17 @@ class DetailsPec(models.Model):
         for rec in self:
             if bool(rec.accorde) and bool(rec.non_accorde):
                 raise ValidationError(
-                    _ (u"Attention! Vous ne pouvez pas à la fois, autoriser et rejeter la demande  \
+                    _(u"Attention! Vous ne pouvez pas à la fois, autoriser et rejeter la demande  \
                         d'exécution de la prestation : %s. Pour plus d'informations, \
                         veuillez contactez l'administrateur..."
-                       ) % rec.prestation_demande_id.name
+                      ) % rec.prestation_demande_id.name
                 )
             elif bool(rec.non_accorde) and not bool(rec.motif_non_accord):
                 raise ValidationError(
-                    _ (u"Attention! Vous devez absolument motiver le rejet (refus) de l'exécution de la\
+                    _(u"Attention! Vous devez absolument motiver le rejet (refus) de l'exécution de la\
                         la prestation : %s.En cas de refus, le champ motif de refus doit impérativement \
                         être renseigné. Pour plus d'informations, veuillez contactez l'administrateur..."
-                       ) % rec.prestation_demande_id.name
+                      ) % rec.prestation_demande_id.name
                 )
 
     @api.depends('quantite')
@@ -2847,7 +2846,6 @@ class DetailsPec(models.Model):
                 pool_medical_id = rec.pec_id.pool_medical_id.id
                 rec.pool_medical = pool_medical_id
 
-
     # @api.one
     # @api.depends('pool_medical')
     # def _get_medecin_id(self):
@@ -2855,19 +2853,18 @@ class DetailsPec(models.Model):
     #         medecin_id = rec.pool_medical.medecin_id.id
     #         rec.medecin_id = medecin_id
 
-
     # @api.multi
     @api.onchange('date_execution', 'date_demande')
     def _check_date_details_pec(self):
-        now = datetime.now ()
-        date_execution = fields.Datetime.from_string (self.date_execution)
-        date_demande = fields.Datetime.from_string (self.date_demande)
+        now = datetime.now()
+        date_execution = fields.Datetime.from_string(self.date_execution)
+        date_demande = fields.Datetime.from_string(self.date_demande)
         if bool(date_execution) and date_execution > now:
             # date = self.date_execution.strftime('%d-%m-%Y')
-            date = datetime.strftime (date_execution, '%d-%m-%Y')
+            date = datetime.strftime(date_execution, '%d-%m-%Y')
             warning = {
-                'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                'message': _ (u"Vous avez fourni des informations sur la date d'exécution de la prestation: %s. \
+                'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
+                'message': _(u"Vous avez fourni des informations sur la date d'exécution de la prestation: %s. \
                                           Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
                                           antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus \
                                           d'informations, veuillez contactez l'administrateur...") % date
@@ -2877,8 +2874,8 @@ class DetailsPec(models.Model):
             # date = self.date_execution.strftime('%d-%m-%Y')
             date = datetime.strftime(date_demande, '%d-%m-%Y')
             warning = {
-                'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                'message': _ (u"Vous avez fourni des informations sur la date de demande de la prestation: %s. \
+                'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
+                'message': _(u"Vous avez fourni des informations sur la date de demande de la prestation: %s. \
                                           Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
                                           antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus \
                                           d'informations, veuillez contactez l'administrateur...") % date
@@ -2900,8 +2897,8 @@ class DetailsPec(models.Model):
                     Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
                     antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus d'informations,\
                     veuillez contactez l'administrateur..."
-                    ) % date
-                )
+                ) % date
+                                      )
             if bool(date_demande) and date_demande > now:
                 date = datetime.strftime(date_demande, '%d-%m-%Y')
                 raise ValidationError(_(
@@ -2910,20 +2907,20 @@ class DetailsPec(models.Model):
                     Cependant, cette date est postérieure à la date du jour. La prestation ne peut être \
                     antidatée. Veuillez corriger la date d'exécution de la prestation. Pour plus d'informations,\
                     veuillez contactez l'administrateur..."
-                    ) % date
-                )
+                ) % date
+                                      )
 
     # @api.multi
     @api.onchange('produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id', 'prestation_crs_id',
                   'prestation_demande_id')
     def _check_nbre_prestations(self):
         if self.produit_phcie_id:
-            nbre_produit_phcie = self.search_count ([
+            nbre_produit_phcie = self.search_count([
                 ('pec_id', '=', self.pec_id.id),
                 ('produit_phcie_id', '=', self.produit_phcie_id.id),
             ])
-            self.nbre_produit_phcie = int (nbre_produit_phcie)
-            if int (nbre_produit_phcie) >= 1:
+            self.nbre_produit_phcie = int(nbre_produit_phcie)
+            if int(nbre_produit_phcie) >= 1:
                 # produit_phcie = '%s %s %s' %(self.produit_phcie_id.name, self.produit_phcie_id.forme_galenique_id.name or '',
                 #        self.produit_phcie_id.dosage)
                 return {'value': {},
@@ -2935,12 +2932,12 @@ class DetailsPec(models.Model):
                                     }
                         }
         elif self.substitut_phcie_id:
-            nbre_substitut_phcie = self.search_count ([
+            nbre_substitut_phcie = self.search_count([
                 ('pec_id', '=', self.pec_id.id),
                 '|', ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
                 ('produit_phcie_id', '=', self.substitut_phcie_id.id),
             ])
-            if int (nbre_substitut_phcie) >= 1:
+            if int(nbre_substitut_phcie) >= 1:
                 substitut_phcie = self.substitut_phcie
                 return {'value': {},
                         'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
@@ -2951,12 +2948,12 @@ class DetailsPec(models.Model):
                                     }
                         }
         elif self.prestation_id and not self.rfm_id:
-            nbre_prestation = self.search_count ([
+            nbre_prestation = self.search_count([
                 ('pec_id', '=', self.pec_id.id),
                 ('produit_phcie_id', '=', None),
                 ('prestation_id', '=', self.prestation_id.id),
             ])
-            if int (nbre_prestation) >= 1:
+            if int(nbre_prestation) >= 1:
                 return {'value': {},
                         'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
                                     'message': u"Il semble que la prestation : (%s) ait déjà été fournie pour cette \
@@ -2968,11 +2965,11 @@ class DetailsPec(models.Model):
 
     # @api.one
     @api.constrains('prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id', 'produit_phcie_id',
-                     'substitut_phcie_id')
+                    'substitut_phcie_id')
     def _validate_nbre_prestations(self):
         for rec in self:
             if bool(rec.produit_phcie_id):
-                nbre_produit_phcie = self.search_count ([
+                nbre_produit_phcie = self.search_count([
                     ('pec_id', '=', rec.pec_id.id),
                     ('produit_phcie_id', '=', rec.produit_phcie_id.id),
                 ])
@@ -2982,47 +2979,47 @@ class DetailsPec(models.Model):
                         Il semble que le produit (médicament): (%s) ait déjà été prescrit pour cette prise en charge.\
                         Par conséquent, il ne peut y avoir plus d'une fois le même médicament prescrit sur la \
                         même prise en charge: (%s). Vérifiez s'il n'y pas de doublon ou contactez l'administrateur."
-                        ) % (rec.produit_phcie, rec.pec_id.name)
-                    )
+                    ) % (rec.produit_phcie, rec.pec_id.name)
+                                          )
             elif bool(rec.substitut_phcie_id):
                 nbre_substitut_phcie = self.search_count([
                     ('pec_id', '=', rec.pec_id.id),
                     ('substitut_phcie_id', '=', rec.substitut_phcie_id.id),
                 ])
                 if nbre_substitut_phcie > 1:
-                    raise ValidationError (_ (
+                    raise ValidationError(_(
                         "Proximaas : Contrôle de Règles de Gestion.\n\
                         Il semble que le produit (médicament): (%s) ait déjà été prescrit pour cette prise en charge.\
                         Par conséquent, il ne peut y avoir plus d'une fois le même médicament prescrit sur la \
                         même prise en charge : (%s). Vérifiez s'il n'y pas de doublon ou contactez l'administrateur."
-                        ) % (rec.substitut_phcie, rec.pec_id.name)
-                    )
+                    ) % (rec.substitut_phcie, rec.pec_id.name)
+                                          )
             elif bool(rec.prestation_demande_id):
-                nbre_prestation_demande = self.search_count ([
+                nbre_prestation_demande = self.search_count([
                     ('pec_id', '=', rec.pec_id.id),
                     ('prestation_demande_id', '=', rec.prestation_demande_id.id),
                 ])
                 if int(nbre_prestation_demande) > 1:
-                    raise ValidationError (_ (
+                    raise ValidationError(_(
                         "Proximaas : Contrôle de Règles de Gestion: Demande Centre d'orientation (CRS).\n\
                         Il semble que la prestation : (%s) ait déjà été fournie pour cette prise en charge.\
                         Par conséquent, il ne peut y avoir plus d'une fois la même prestation offerte sur une \
                         même prise en charge : (%s). Vérifiez s'il n'y pas de doublon ou contactez l'administrateur."
-                        ) % (rec.prestation_demande_id.name, rec.pec_id.name)
-                    )
+                    ) % (rec.prestation_demande_id.name, rec.pec_id.name)
+                                          )
             elif bool(rec.prestation_cro_id):
-                nbre_prestation_cro = self.search_count ([
+                nbre_prestation_cro = self.search_count([
                     ('pec_id', '=', rec.pec_id.id),
                     ('prestation_cro_id', '=', rec.prestation_cro_id.id),
                 ])
                 if int(nbre_prestation_cro) > 1 and not rec.rfm_id:
-                    raise ValidationError (_ (
+                    raise ValidationError(_(
                         "Proximaas : Contrôle de Règles de Gestion.\n\
                         Il semble que la prestation: (%s) ait déjà été fournie pour cette prise en charge.\
                         Par conséquent, il ne peut y avoir plus d'une fois la même prestation offerte sur une \
                         même prise en charge : (%s). Vérifiez s'il n'y pas de doublon ou contactez l'administrateur."
-                        ) % (rec.prestation_cro_id.name, rec.pec_id.name)
-                    )
+                    ) % (rec.prestation_cro_id.name, rec.pec_id.name)
+                                          )
 
     # @api.one
     @api.depends('produit_phcie_id', 'substitut_phcie_id')
@@ -3030,13 +3027,13 @@ class DetailsPec(models.Model):
         for rec in self:
             if bool(rec.substitut_phcie_id):
                 rec.substitut_phcie = '%s - %s %s' % (rec.substitut_phcie_id.name,
-                                                   rec.produit_phcie_id.forme_galenique_id.name or '',
-                                                   rec.substitut_phcie_id.dosage or '')
+                                                      rec.produit_phcie_id.forme_galenique_id.name or '',
+                                                      rec.substitut_phcie_id.dosage or '')
                 rec.medicament = rec.substitut_phcie
             elif bool(rec.produit_phcie_id):
                 rec.produit_phcie = '%s - %s %s' % (rec.produit_phcie_id.name,
-                                                 rec.produit_phcie_id.forme_galenique_id.name or '',
-                                                 rec.produit_phcie_id.dosage or '')
+                                                    rec.produit_phcie_id.forme_galenique_id.name or '',
+                                                    rec.produit_phcie_id.dosage or '')
                 rec.medicament = rec.produit_phcie
 
     @api.multi
@@ -3062,14 +3059,14 @@ class DetailsPec(models.Model):
     def send_accord_pec_mail(self):
         # self.ensure_one()
         for rec in self:
-            if bool(rec.accord_prealable) and not bool (rec.accorde):
+            if bool(rec.accord_prealable) and not bool(rec.accorde):
                 # Find the e-mail template
-                template = rec.env.ref ('proximas_medical.accord_pec_mail_template')
+                template = rec.env.ref('proximas_medical.accord_pec_mail_template')
                 # You can also find the e-mail template like this:
                 # template = rec.env['ir.model.data'].get_object('mail_template_demo', 'example_email_template')
 
                 # Send out the e-mail template to the user
-                rec.env['mail.template'].browse (template.id).send_mail (rec.id)
+                rec.env['mail.template'].browse(template.id).send_mail(rec.id)
                 action = {
                     'warning': {
                         'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
@@ -3077,7 +3074,7 @@ class DetailsPec(models.Model):
                                     A cet effet, il faudra impérativement l'autorisation expresse du médecin avant \
                                     l'exécution de la prestation concernée. Une notification a été envoyée au médecin \
                                     pour validation. Pour plus d'informations, veuillez contactez l'administrateur..."
-                                    ) % rec.prestation_id.name
+                                     ) % rec.prestation_id.name
                     },
                 }
                 return action
@@ -3095,23 +3092,23 @@ class DetailsPec(models.Model):
                                      l'exécution de la prestation concernée. Une notification est envoyée au médecin\
                                      pour validation. Pour plus d'informations, veuillez contactez \
                                      l'administrateur."
-                                      ) % self.prestation_id.name
+                                     ) % self.prestation_id.name
                     },
                 }
                 return action
 
-    @api.onchange('prestation_crs_id',)
+    @api.onchange('prestation_crs_id', )
     def _warning_crs_prestation(self):
         for rec in self:
             if bool(rec.prestation_crs_id) and not bool(rec.prestation_demande_id):
                 action = {
                     'warning': {
-                        'title': _ (u'Proximaas : Contrôle de Règles de Gestion.'),
-                        'message': _ (u"La prestation: %s que vous allez fournir est soumise à la validation  \
+                        'title': _(u'Proximaas : Contrôle de Règles de Gestion.'),
+                        'message': _(u"La prestation: %s que vous allez fournir est soumise à la validation  \
                                      du médecin conseil. \n A cet effet, il faudra impérativement l'autorisation \
                                      expresse de celui-ci. Sans cela, la prestation concernée ne figurera pas dans \
                                      votre facture. Pour plus d'informations, veuillez contactez l'administrateur."
-                                      ) % rec.prestation_id.name
+                                     ) % rec.prestation_id.name
                     },
                 }
                 return action
@@ -3127,8 +3124,8 @@ class DetailsPec(models.Model):
                         attendre l'autorisation expresse de ce dernier avant l'exécution de la prestation concernée. \
                         Une notification est envoyée au médecin pour validation. Pour plus d'informations, veuillez \
                         contactez l'administrateur..."
-                        ) % rec_id.prestation_id.name
-                    )
+                    ) % rec_id.prestation_id.name
+                                          )
 
     # IDENTIFICATION DES PRESTATIONS FOURNIES
     # @api.one
@@ -3141,16 +3138,16 @@ class DetailsPec(models.Model):
             if bool(rec.prestation_crs_id):
                 # Récupérer la prestation médicale du CRS
                 rec.prestation_id = rec.prestation_crs_id.id
-            elif bool (rec.prestation_cro_id):
+            elif bool(rec.prestation_cro_id):
                 # Récupérer la prestation médicale du CRO
                 rec.prestation_id = rec.prestation_cro_id.id
 
-            elif bool (rec.prestation_demande_id) and bool (rec.prestataire_crs_id) and bool (
+            elif bool(rec.prestation_demande_id) and bool(rec.prestataire_crs_id) and bool(
                     rec.pool_medical_crs_id):
                 # Récupérer la prestation médicale demandée du CRS
                 code_prestation_id = rec.prestation_demande_id.id
                 prestataire_id = rec.prestataire_crs_id.id
-                prestation = self.env['proximas.prestation'].search (
+                prestation = self.env['proximas.prestation'].search(
                     [
                         ('code_prestation_id', '=', code_prestation_id),
                         ('prestataire_id', '=', prestataire_id)
@@ -3165,21 +3162,21 @@ class DetailsPec(models.Model):
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
                 pharmacie_rembourse_id = rec.prestataire_rembourse_id.id
                 if bool(pharmacie_rembourse_id):
-                    prestation = self.env['proximas.prestation'].search (
+                    prestation = self.env['proximas.prestation'].search(
                         [
                             ('prestataire_id', '=', pharmacie_rembourse_id),
                             ('rubrique', '=', 'PHARMACIE')
                         ]
                     )
-                    if bool (prestation):
+                    if bool(prestation):
                         # rec.ensure_one()
                         rec.prestation_id = prestation.id
             # Cas de remboursement de frais médicaux
-            elif bool (rec.code_id_rfm) and bool (rec.prestation_rembourse_id):
+            elif bool(rec.code_id_rfm) and bool(rec.prestation_rembourse_id):
                 # Récupérer le prestataire vde soins et la prestation médicale concernée
                 rec.prestation_id = rec.prestation_rembourse_id.id
             # PHARMACIE PEC
-            elif (bool(rec.prestataire_phcie_id) or bool (rec.produit_phcie_id)) or bool (
+            elif (bool(rec.prestataire_phcie_id) or bool(rec.produit_phcie_id)) or bool(
                     rec.substitut_phcie_id) and rec.date_execution:
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
                 pharmacie_id = rec.prestataire_phcie_id.id
@@ -3210,21 +3207,21 @@ class DetailsPec(models.Model):
                 ]
             )
             if not bool(prestation):
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion:\n \
                     La prestation demandée: %s ne figure pas dans la liste des prestations fournies par le\
                     prestataire: %s. Par conséquent, cette prestation ne peut être prise en compte dans le cadre \
                     de la convention signée avec le prestataire concernée. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
-                    ) % (self.prestation_demande_id.name, self.prestataire_crs_id.name)
-                )
+                ) % (self.prestation_demande_id.name, self.prestataire_crs_id.name)
+                                )
         # self.code_medical_id = self.prestation_crs_id.code_medical_id.id
         # REMBOURSEMENT - PHARMACIE
         elif bool(self.code_id_rfm) and bool(self.prestataire_rembourse_id) and bool(self.produit_phcie_id):
             # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
             pharmacie_rembourse_id = self.prestataire_rembourse_id.id
             if bool(pharmacie_rembourse_id):
-                prestation = self.env['proximas.prestation'].search (
+                prestation = self.env['proximas.prestation'].search(
                     [
                         ('prestataire_id', '=', pharmacie_rembourse_id),
                         ('rubrique', '=', 'PHARMACIE')
@@ -3236,15 +3233,15 @@ class DetailsPec(models.Model):
                         Le prestataire concerné : %s n'a pas été parametré pour fournir les médicaments (Pharmacie).\
                         Par conséquent, vous ne pourrez dispenser de médicament(s) pour le compte de celui-ci. \
                         Pour plus d'informations, veuillez contactez l'administrateur..."
-                        ) % self.prestataire_rembourse_id.name
-                    )
+                    ) % self.prestataire_rembourse_id.name
+                                    )
             else:
                 raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion:\n \
                     Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dipenser\
                     de médicament(s) pour le prestaire concerné. \
                     Pour plus d'informations, veuillez contactez l'administrateur..."
-                    )
+                )
                 )
         # PHARMACIE PEC
         elif (self.prestataire_phcie_id or self.produit_phcie_id or self.substitut_phcie_id) and self.date_execution:
@@ -3252,74 +3249,74 @@ class DetailsPec(models.Model):
             pharmacie_id = self.prestataire_phcie_id.id
             if bool(pharmacie_id):
                 pharmacie = self.prestataire_phcie_id.name
-                prestation = self.env['proximas.prestation'].search (
+                prestation = self.env['proximas.prestation'].search(
                     [
                         ('prestataire_id', '=', pharmacie_id),
                         ('rubrique', 'ilike', 'PHARMACIE')
                     ]
                 )
                 if not bool(prestation):
-                    raise UserError (_ (
+                    raise UserError(_(
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         Le prestataire concerné: {}, n'a pas été parametré pour dispenser les médicaments (Pharmacie).\
                         Par conséquent, vous ne pourrez enregistrer les produits pour le compte de celui-ci. \
                         Pour plus d'informations, veuillez contactez l'administrateur..."
-                        ).format(pharmacie)
-                    )
+                    ).format(pharmacie)
+                                    )
             else:
                 raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion:\n \
                     Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dispenser\
                     des médicaments pour le prestataire concerné. Pour plus d'informations, veuillez contactez \
                     l'administrateur..."
-                    )
+                )
                 )
 
     @api.constrains('prestation_demande_id', 'produit_phcie_id', 'substitut_phcie_id', 'prestation_cro_id',
                     'prestation_crs_id', 'pool_medical_crs_id', 'prestation_rembourse_id')
     def _valide_prestation_id(self):
         for rec in self:
-            if bool(rec.prestation_demande_id) and bool (rec.prestataire_crs_id) and bool(rec.pool_medical_crs_id):
+            if bool(rec.prestation_demande_id) and bool(rec.prestataire_crs_id) and bool(rec.pool_medical_crs_id):
                 # Récupérer la prestation médicale du CRS
                 code_prestation_id = rec.prestation_demande_id.id
                 prestataire_id = rec.prestataire_crs_id.id
-                prestation = rec.env['proximas.prestation'].search (
+                prestation = rec.env['proximas.prestation'].search(
                     [
                         ('code_prestation_id', '=', code_prestation_id),
                         ('prestataire_id', '=', prestataire_id)
                     ]
                 )
                 if not bool(prestation):
-                    raise UserError (_ (
+                    raise UserError(_(
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         La prestation demandée: %s ne figure pas dans la liste des prestations fournies par le\
                         prestataire: %s. Par conséquent, cette prestation ne peut être prise en compte dans le cadre \
                         de la convention signée avec le prestataire concernée. Pour plus d'informations, \
                         veuillez contactez l'administrateur..."
                     ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
-                                     )
+                                    )
             # rec.code_medical_id = rec.prestation_crs_id.code_medical_id.id
             # REMBOURSEMENT - PHARMACIE
-            elif bool(rec.code_id_rfm) and bool (rec.prestataire_rembourse_id) and bool (rec.produit_phcie_id):
+            elif bool(rec.code_id_rfm) and bool(rec.prestataire_rembourse_id) and bool(rec.produit_phcie_id):
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
                 pharmacie_rembourse_id = rec.prestataire_rembourse_id.id
-                if bool (pharmacie_rembourse_id):
-                    prestation = rec.env['proximas.prestation'].search (
+                if bool(pharmacie_rembourse_id):
+                    prestation = rec.env['proximas.prestation'].search(
                         [
                             ('prestataire_id', '=', pharmacie_rembourse_id),
                             ('rubrique', '=', 'PHARMACIE')
                         ]
                     )
-                    if not bool (prestation):
-                        raise UserError (_ (
+                    if not bool(prestation):
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion:\n \
                             Le prestataire concerné : %s n'a pas été parametré pour fournir les médicaments (Pharmacie).\
                             Par conséquent, vous ne pourrez dispenser de médicament(s) pour le compte de celui-ci. \
                             Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % rec.prestataire_rembourse_id.name
-                                         )
+                                        )
                 else:
-                    raise UserError (_ (
+                    raise UserError(_(
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dipenser\
                         de médicament(s) pour le prestaire concerné. \
@@ -3330,24 +3327,24 @@ class DetailsPec(models.Model):
             elif (rec.prestataire_phcie_id or rec.produit_phcie_id or rec.substitut_phcie_id) and rec.date_execution:
                 # Récupérer la prestation médicale pour la pharmacie (Dispensation Médicaments)
                 pharmacie_id = rec.prestataire_phcie_id.id
-                if bool (pharmacie_id):
+                if bool(pharmacie_id):
                     pharmacie = rec.prestataire_phcie_id.name
-                    prestation = rec.env['proximas.prestation'].search (
+                    prestation = rec.env['proximas.prestation'].search(
                         [
                             ('prestataire_id', '=', pharmacie_id),
                             ('rubrique', 'ilike', 'PHARMACIE')
                         ]
                     )
-                    if not bool (prestation):
-                        raise UserError (_ (
+                    if not bool(prestation):
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion:\n \
                             Le prestataire concerné: {}, n'a pas été parametré pour dispenser les médicaments (Pharmacie).\
                             Par conséquent, vous ne pourrez enregistrer les produits pour le compte de celui-ci. \
                             Pour plus d'informations, veuillez contactez l'administrateur..."
-                        ).format (pharmacie)
-                                         )
+                        ).format(pharmacie)
+                                        )
                 else:
-                    raise UserError (_ (
+                    raise UserError(_(
                         u"Proximaas : Contrôle de Règles de Gestion:\n \
                         Aucun prestataire (Pharmacie) n'est défini. Par conséquent, vous ne pourrez dispenser\
                         des médicaments pour le prestataire concerné. Pour plus d'informations, veuillez contactez \
@@ -3382,8 +3379,8 @@ class DetailsPec(models.Model):
                              Le code ID. que vous avez renseigné est celui de l'assuré: %s (Code ID.: %s) \
                              qui n'est pas déclaré en tant que'un des ayant-droits pour le compte de l'adhérent \
                              concerné: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
-                            ) % (assure.name, assure.code_id, adherent.name)
-                        )
+                        ) % (assure.name, assure.code_id, adherent.name)
+                                        )
                 elif assure.statut_familial == 'adherent':
                     if assure.code_id == adherent.code_id:
                         rec.assure_id = assure.id
@@ -3393,14 +3390,14 @@ class DetailsPec(models.Model):
                              Le code ID. que vous avez renseigné est celui de l'assuré: %s (Code ID.: %s) \
                              ne correspondant pas à celui indiqué comme demandeur du remboursement : %s. \
                              Pour plus d'informations, veuillez contactez l'administrateur..."
-                            ) % (assure.name, assure.code_id, adherent.name)
-                        )
+                        ) % (assure.name, assure.code_id, adherent.name)
+                                        )
             elif bool(rec.code_id_rfm) and not bool(assure):
                 raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                      Le code ID. assuré que vous avez renseigné ne correspondant à aucun assuré dans le système.\
                      Pour plus d'informations, veuillez contactez l'administrateur..."
-                    )
+                )
                 )
             elif bool(rec.assure) and not bool(rec.code_id_rfm):
                 rec.assure_id = rec.assure.id
@@ -3409,7 +3406,7 @@ class DetailsPec(models.Model):
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
                  'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     @api.onchange('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
-                 'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
+                  'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _get_rubrique_medicale(self):
         controle_rubrique = self.env['proximas.controle.rubrique'].search([
             ('rubrique_id', '=', self.rubrique_id.id),
@@ -3418,84 +3415,84 @@ class DetailsPec(models.Model):
         # Contrôles à effectuer sur la rubrique médicale
         if bool(controle_rubrique):
             # Si la rubrique médicale existe dans la table de contrôles rubriques médicales
-            genre_rubrique = str (controle_rubrique.genre)
-            statut_familial_rubrique = str (controle_rubrique.statut_familial)
-            plafond_individu_rubrique = int (controle_rubrique.plafond_individu)
-            plafond_famille_rubrique = int (controle_rubrique.plafond_famille)
-            delai_carence_rubrique = int (controle_rubrique.delai_carence)
-            age_limite_rubrique = int (controle_rubrique.age_limite)
-            nbre_actes_individu_rubrique = int (controle_rubrique.nbre_actes_maxi_individu)
-            nbre_actes_famille_rubrique = int (controle_rubrique.nbre_actes_maxi_famille)
-            delai_attente_rubrique = int (controle_rubrique.delai_attente)
-            verou_rubrique = bool (controle_rubrique.controle_strict)
-            ticket_exigible_rubrique = bool (controle_rubrique.ticket_exigible)
+            genre_rubrique = str(controle_rubrique.genre)
+            statut_familial_rubrique = str(controle_rubrique.statut_familial)
+            plafond_individu_rubrique = int(controle_rubrique.plafond_individu)
+            plafond_famille_rubrique = int(controle_rubrique.plafond_famille)
+            delai_carence_rubrique = int(controle_rubrique.delai_carence)
+            age_limite_rubrique = int(controle_rubrique.age_limite)
+            nbre_actes_individu_rubrique = int(controle_rubrique.nbre_actes_maxi_individu)
+            nbre_actes_famille_rubrique = int(controle_rubrique.nbre_actes_maxi_famille)
+            delai_attente_rubrique = int(controle_rubrique.delai_attente)
+            verou_rubrique = bool(controle_rubrique.controle_strict)
+            ticket_exigible_rubrique = bool(controle_rubrique.ticket_exigible)
             # self.rubrique_id = controle_rubrique.id
             self.ticket_exigible = bool(ticket_exigible_rubrique)
 
             now = fields.Date.from_string(fields.Date.today())
             debut_carence = fields.Date.from_string(
-                self.assure_id.date_activation) or fields.Date.from_string(fields.Date.today ())
+                self.assure_id.date_activation) or fields.Date.from_string(fields.Date.today())
             jours_activation = (now - debut_carence).days  # => différence en les 2 dates en nombre de jours.
-            if 0 < delai_carence_rubrique >= int (jours_activation):
-                raise UserError (_ (
+            if 0 < delai_carence_rubrique >= int(jours_activation):
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                       L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
                       observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
                       contactez l'administrateur..."
                 ) % (self.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
-                                 )
+                                )
             # 2. Contrôle age limite pour la rubrique
-            if 0 < age_limite_rubrique < int (self.assure_id.age):
-                raise UserError (_ (
+            if 0 < age_limite_rubrique < int(self.assure_id.age):
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à :\
                     (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
                     l'administrateur..."
                 ) % (self.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
-                                 )
+                                )
             # 3. Contrôle sur le genre de l'assuré
-            if str (self.assure_id.genre) != str (genre_rubrique) and genre_rubrique != 'tous':
-                raise UserError (_ (
+            if str(self.assure_id.genre) != str(genre_rubrique) and genre_rubrique != 'tous':
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n\
                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
                     La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations,\
                     veuillez contactez l'administrateur..."
                 ) % (self.assure_id.name, self.assure_id.genre, genre_rubrique)
-                                 )
+                                )
             # 4. Contrôle sur le statut familial de l'assuré
             if self.assure_id.statut_familial != statut_familial_rubrique and statut_familial_rubrique not in [
                 'adherent_conjoint', 'adherent_enfant', 'conjoint_enfant', 'tous']:
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                       L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                       familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
                       est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                 ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                 )
+                                )
             elif self.assure_id.statut_familial == 'enfant' and statut_familial_rubrique == 'adherent_conjoint':
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                      familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                      %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                 ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                 )
+                                )
             elif self.assure_id.statut_familial == 'conjoint' and statut_familial_rubrique == 'adherent_enfant':
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                      familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                      %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                 ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                 )
+                                )
             elif self.assure_id.statut_familial == 'adherent' and statut_familial_rubrique == 'conjoint_enfant':
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                      familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                      %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                 ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
-                                 )
+                                )
             # Calculs sur les plafonds RUBRIQUE  / EXERCICE
             date_debut = fields.Date.from_string(self.date_debut_assure)
             date_fin = fields.Date.from_string(self.date_fin_prevue_assure)
@@ -3505,7 +3502,7 @@ class DetailsPec(models.Model):
                 ('date_execution', '>=', date_debut),
                 ('date_execution', '<=', date_fin),
             ])
-            details_pec_rubrique_contrat = self.env['proximas.details.pec'].search ([
+            details_pec_rubrique_contrat = self.env['proximas.details.pec'].search([
                 ('contrat_id', '=', self.contrat_id.id),
                 ('rubrique_id', '=', self.rubrique_id.id),
                 ('date_execution', '>=', date_debut),
@@ -3533,50 +3530,50 @@ class DetailsPec(models.Model):
                 nbre_jours_dernier_acte = (now - date_dernier_acte).days
                 # Comparer le délai d'attente prévu par la rubrique et le nombre de jours écoulés
                 if 0 < int(delai_attente_rubrique) >= int(nbre_jours_dernier_acte) != 0:
-                    raise UserError (_ (
+                    raise UserError(_(
                         u"Proximas : Proximaas : Contrôle de Règles de Gestion.\n \
                          L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Car le délai d'attente\
                          à observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
                          d'informations, veuillez contactez l'administrateur..."
                     ) % (self.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
-                                     )
+                                    )
             # 5.1. Contrôle Plafond Individu pour la rubrique
             if 0 < plafond_individu_rubrique <= totaux_rubrique_assure:
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
                      fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
                      contactez l'administrateur..."
                 ) % (self.assure_id.name, controle_rubrique.plafond_individu,
                      controle_rubrique.rubrique_name)
-                                 )
+                                )
             # 5.2. Contrôle Plafond famille (contrat)
             elif 0 < plafond_famille_rubrique <= totaux_rubrique_contrat:
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
                      fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
                      contactez l'administrateur..."
                 ) % (self.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
-                                 )
+                                )
             # 6.1. Contrôle Nombre d'actes par individu pour la rubrique
             elif 0 < nbre_actes_individu_rubrique < nbre_actes_rubrique_assure:
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                      L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
                      par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations,\
                      veuillez contactez l'administrateur..."
                 ) % (self.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
-                                 )
+                                )
             # 6.2. Contrôle nombre d'actes par famille pour la rubrique
             elif 0 < nbre_actes_famille_rubrique < nbre_actes_rubrique_contrat:
-                raise UserError (_ (
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion.\n \
                       L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
                       par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
                       d'informations, veuillez contactez l'administrateur..."
                 ) % (self.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
-                                 )
+                                )
             # CALCULS DE TAUX DES SINISTRES PAR RUBRIQUE MEDICALE
             if plafond_individu_rubrique:
                 self.niveau_plafond_rubrique_assure = totaux_rubrique_assure * 100 / plafond_individu_rubrique
@@ -3587,288 +3584,288 @@ class DetailsPec(models.Model):
                     'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _validate_rubrique_medicale(self):
         for rec in self:
-            controle_rubrique = rec.env['proximas.controle.rubrique'].search ([
+            controle_rubrique = rec.env['proximas.controle.rubrique'].search([
                 ('rubrique_id', '=', rec.rubrique_id.id),
                 ('police_id', '=', rec.police_id.id),
             ])
             # Contrôles à effectuer sur la rubrique médicale
-            if bool (controle_rubrique):
+            if bool(controle_rubrique):
                 # Si la rubrique médicale existe dans la table de contrôles rubriques médicales
-                genre_rubrique = str (controle_rubrique.genre)
-                statut_familial_rubrique = str (controle_rubrique.statut_familial)
-                plafond_individu_rubrique = int (controle_rubrique.plafond_individu)
-                plafond_famille_rubrique = int (controle_rubrique.plafond_famille)
-                delai_carence_rubrique = int (controle_rubrique.delai_carence)
-                age_limite_rubrique = int (controle_rubrique.age_limite)
-                nbre_actes_individu_rubrique = int (controle_rubrique.nbre_actes_maxi_individu)
-                nbre_actes_famille_rubrique = int (controle_rubrique.nbre_actes_maxi_famille)
-                delai_attente_rubrique = int (controle_rubrique.delai_attente)
-                verou_rubrique = bool (controle_rubrique.controle_strict)
-                ticket_exigible_rubrique = bool (controle_rubrique.ticket_exigible)
+                genre_rubrique = str(controle_rubrique.genre)
+                statut_familial_rubrique = str(controle_rubrique.statut_familial)
+                plafond_individu_rubrique = int(controle_rubrique.plafond_individu)
+                plafond_famille_rubrique = int(controle_rubrique.plafond_famille)
+                delai_carence_rubrique = int(controle_rubrique.delai_carence)
+                age_limite_rubrique = int(controle_rubrique.age_limite)
+                nbre_actes_individu_rubrique = int(controle_rubrique.nbre_actes_maxi_individu)
+                nbre_actes_famille_rubrique = int(controle_rubrique.nbre_actes_maxi_famille)
+                delai_attente_rubrique = int(controle_rubrique.delai_attente)
+                verou_rubrique = bool(controle_rubrique.controle_strict)
+                ticket_exigible_rubrique = bool(controle_rubrique.ticket_exigible)
                 # rec.rubrique_id = controle_rubrique.id
-                rec.ticket_exigible = bool (ticket_exigible_rubrique)
+                rec.ticket_exigible = bool(ticket_exigible_rubrique)
                 # nbre_actes_rubrique_assure = 0
                 # totaux_rubrique_assure = 0
                 # nbre_actes_rubrique_contrat = 0
                 # totaux_rubrique_contrat = 0
                 # CONTROLES SUR LA RUBRIQUE MEDICALE
                 # 1. Contrôle Delai de carence pour la rubrique médicale
-                now = fields.Date.from_string (fields.Date.today ())
-                debut_carence = fields.Date.from_string (
-                    rec.assure_id.date_activation) or fields.Date.from_string (fields.Date.today ())
+                now = fields.Date.from_string(fields.Date.today())
+                debut_carence = fields.Date.from_string(
+                    rec.assure_id.date_activation) or fields.Date.from_string(fields.Date.today())
                 jours_activation = (now - debut_carence).days  # => différence en les 2 dates en nombre de jours.
-                if 0 < delai_carence_rubrique >= int (jours_activation):
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                if 0 < delai_carence_rubrique >= int(jours_activation):
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
                              observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
                              contactez l'administrateur..."
                         ) % (rec.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                               L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le délai de carence à \
                               observé est fixé à : %d pour la rubrique médicale : %s. Pour plus d'informations, veuillez \
                               contactez l'administrateur..."
                         ) % (rec.assure_id.name, delai_carence_rubrique, controle_rubrique.rubrique_name)
-                                         )
+                                        )
                 # 2. Contrôle age limite pour la rubrique
-                if 0 < age_limite_rubrique < int (rec.assure_id.age):
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                if 0 < age_limite_rubrique < int(rec.assure_id.age):
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à : \
                              (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
                              l'administrateur..."
                         ) % (rec.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. L'âge limite est fixé à :\
                             (%d) an(s) pour la rubrique médicale : (%s). Pour plus d'informations, veuillez contactez \
                             l'administrateur..."
                         ) % (rec.assure_id.name, age_limite_rubrique, controle_rubrique.rubrique_name)
-                                         )
+                                        )
                 # 3. Contrôle sur le genre de l'assuré
-                if str (rec.assure_id.genre) != str (genre_rubrique) and genre_rubrique != 'tous':
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                if str(rec.assure_id.genre) != str(genre_rubrique) and genre_rubrique != 'tous':
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n\
                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
                             La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations, \
                             veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.genre, genre_rubrique)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n\
                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son genre: %s.\
                             La prestation est exclusivement reservée aux assurés du genre: %s. Pour plus d'informations,\
                             veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.genre, genre_rubrique)
-                                         )
+                                        )
 
                 # 4. Contrôle sur le statut familial de l'assuré
                 if rec.assure_id.statut_familial != statut_familial_rubrique and statut_familial_rubrique not in [
                     'adherent_conjoint', 'adherent_enfant', 'conjoint_enfant', 'tous']:
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                               L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                               familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
                               est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                               L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                               familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
                               est: %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                         )
+                                        )
 
                 elif rec.assure_id.statut_familial == 'enfant' and statut_familial_rubrique == 'adherent_conjoint':
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial \
                              est:%s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                              %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                         )
+                                        )
                 elif rec.assure_id.statut_familial == 'conjoint' and statut_familial_rubrique == 'adherent_enfant':
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                              %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                              %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                         )
+                                        )
                 elif rec.assure_id.statut_familial == 'adherent' and statut_familial_rubrique == 'conjoint_enfant':
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                              %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation compte tenu de son statut \
                              familial: %s. La prestation est exclusivement reservée aux assurés dont la statut familial est:\
                              %s. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
-                                         )
+                                        )
                 # Calculs sur les plafonds RUBRIQUE  / EXERCICE
-                date_debut = fields.Date.from_string (rec.date_debut_assure)
-                date_fin = fields.Date.from_string (rec.date_fin_prevue_assure)
-                details_pec_rubrique_assure = rec.search ([
+                date_debut = fields.Date.from_string(rec.date_debut_assure)
+                date_fin = fields.Date.from_string(rec.date_fin_prevue_assure)
+                details_pec_rubrique_assure = rec.search([
                     ('assure_id', '=', rec.assure_id.id),
                     ('rubrique_id', '=', rec.rubrique_id.id),
                     ('date_execution', '>=', date_debut),
                     ('date_execution', '<=', date_fin),
                 ])
-                details_pec_rubrique_contrat = rec.env['proximas.details.pec'].search ([
+                details_pec_rubrique_contrat = rec.env['proximas.details.pec'].search([
                     ('contrat_id', '=', rec.contrat_id.id),
                     ('rubrique_id', '=', rec.rubrique_id.id),
                     ('date_execution', '>=', date_debut),
                     ('date_execution', '<=', date_fin),
                 ])
-                nbre_actes_rubrique_assure = len (details_pec_rubrique_assure)
-                nbre_actes_rubrique_contrat = len (details_pec_rubrique_contrat)
+                nbre_actes_rubrique_assure = len(details_pec_rubrique_assure)
+                nbre_actes_rubrique_contrat = len(details_pec_rubrique_contrat)
                 # CALCULS NIVEAU DES SINISTRES PAR RUBRIQUE MEDICALE
-                totaux_rubrique_assure = sum (item.total_pc for item in details_pec_rubrique_assure)
-                totaux_rubrique_contrat = sum (item.total_pc for item in details_pec_rubrique_contrat)
+                totaux_rubrique_assure = sum(item.total_pc for item in details_pec_rubrique_assure)
+                totaux_rubrique_contrat = sum(item.total_pc for item in details_pec_rubrique_contrat)
 
                 rec.totaux_rubrique_assure = totaux_rubrique_assure  # + rec.total_pc
                 rec.totaux_rubrique_contrat = totaux_rubrique_contrat  # + rec.total_pc
                 rec.nbre_actes_rubrique_assure = nbre_actes_rubrique_assure  # + 1
                 rec.nbre_actes_rubrique_contrat = nbre_actes_rubrique_contrat  # + 1
                 # 8. Contrôle délai d'attente à observer
-                if bool (details_pec_rubrique_assure):
+                if bool(details_pec_rubrique_assure):
                     # Contrôles si les prestations fournies à l'assuré sont liées à la rubrique
                     # si OUI, sélectionner la dernière prestation liée à la rubrique
                     dernier_acte_rubrique_assure = details_pec_rubrique_assure[0]
                     # Récupérer la date de la dernière prestation liée à la rubrique
-                    date_dernier_acte = fields.Date.from_string (dernier_acte_rubrique_assure.date_execution) or \
-                                        fields.Date.from_string (fields.Date.today ())
+                    date_dernier_acte = fields.Date.from_string(dernier_acte_rubrique_assure.date_execution) or \
+                                        fields.Date.from_string(fields.Date.today())
                     # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                     nbre_jours_dernier_acte = (now - date_dernier_acte).days
                     # Comparer le délai d'attente prévu par la rubrique et le nombre de jours écoulés
-                    if 0 < int (delai_attente_rubrique) >= int (nbre_jours_dernier_acte) != 0:
-                        if bool (verou_rubrique):
-                            raise ValidationError (_ (
+                    if 0 < int(delai_attente_rubrique) >= int(nbre_jours_dernier_acte) != 0:
+                        if bool(verou_rubrique):
+                            raise ValidationError(_(
                                 u"Proximaas : Contrôle de Règles de Gestion.\n \
                                  L'assuré(e) concerné(e) : %s ne peut bénéficier de cette prestation. Le délai d'attente à \
                                  observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
                                  d'informations, veuillez contactez l'administrateur..."
                             ) % (rec.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
-                                                   )
+                                                  )
                         else:
-                            raise UserError (_ (
+                            raise UserError(_(
                                 u"Proximas : Proximaas : Contrôle de Règles de Gestion.\n \
                                  L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Car le délai d'attente\
                                  à observer est fixé à : (%d) jour(s) pour la rubrique médicale : (%s). Pour plus \
                                  d'informations, veuillez contactez l'administrateur..."
                             ) % (rec.assure_id.name, delai_attente_rubrique, controle_rubrique.rubrique_name)
-                                             )
+                                            )
                 # 5.1. Contrôle Plafond Individu pour la rubrique
                 if 0 < plafond_individu_rubrique <= totaux_rubrique_assure:
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
                              fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
                              contactez l'administrateur..."
                         ) % (rec.assure_id.name, controle_rubrique.plafond_individu,
                              controle_rubrique.rubrique_name)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par individu \
                              fixé à : %d pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
                              contactez l'administrateur..."
                         ) % (rec.assure_id.name, controle_rubrique.plafond_individu,
                              controle_rubrique.rubrique_name)
-                                         )
+                                        )
                 # 5.2. Contrôle Plafond famille (contrat)
                 elif 0 < plafond_famille_rubrique <= totaux_rubrique_contrat:
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
                              fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
                              contactez l'administrateur..."
                         ) % (rec.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le plafond par famille \
                              fixé à : %s pour la rubrique médicale : %s est atteint. Pour plus d'informations, veuillez \
                              contactez l'administrateur..."
                         ) % (rec.assure_id.name, controle_rubrique.plafond_famille, controle_rubrique.rubrique_name)
-                                         )
+                                        )
                 # 6.1. Contrôle Nombre d'actes par individu pour la rubrique
                 elif 0 < nbre_actes_individu_rubrique < nbre_actes_rubrique_assure:
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
                              par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations, \
                              veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                              L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
                              par assuré est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus d'informations,\
                              veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, nbre_actes_individu_rubrique, controle_rubrique.rubrique_name)
-                                         )
+                                        )
                 # 6.2. Contrôle nombre d'actes par famille pour la rubrique
                 elif 0 < nbre_actes_famille_rubrique < nbre_actes_rubrique_contrat:
-                    if bool (verou_rubrique):
-                        raise ValidationError (_ (
+                    if bool(verou_rubrique):
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                               L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite \
                               par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
                               d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
-                                               )
+                                              )
                     else:
-                        raise UserError (_ (
+                        raise UserError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                               L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation. Le nombre d'actes limite\
                               par famille(contrat) est fixé à : (%d) pour la rubrique médicale : (%s). Pour plus \
                               d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
-                                         )
+                                        )
                 # CALCULS DE TAUX DES SINISTRES PAR RUBRIQUE MEDICALE
                 if plafond_individu_rubrique:
                     rec.niveau_plafond_rubrique_assure = totaux_rubrique_assure * 100 / plafond_individu_rubrique
@@ -4173,7 +4170,7 @@ class DetailsPec(models.Model):
         self.ensure_one()
         if bool(self.cout_unit):
             self.cout_unite = self.cout_unit
-        elif bool (self.cout_unitaire):
+        elif bool(self.cout_unitaire):
             self.cout_unite = self.cout_unitaire
         else:
             self.cout_unite = 0
@@ -4190,12 +4187,12 @@ class DetailsPec(models.Model):
                 ('rubrique_id', '=', self.rubrique_id.id),
                 ('police_id', '=', self.police_id.id)
             ])
-            code_medical_police = self.env['proximas.code.medical.police'].search ([
+            code_medical_police = self.env['proximas.code.medical.police'].search([
                 ('police_id', '=', self.police_id.id),
                 ('code_medical_id', '=', self.code_medical_id.id)
             ])
 
-            ticket_exigible = bool (controle_rubrique.ticket_exigible)
+            ticket_exigible = bool(controle_rubrique.ticket_exigible)
             self.ticket_exigible = ticket_exigible
             ############################################################################################################
             # Sinon, traitement de prise en charge normal : appliquer le taux de couverture selon les cas.             #
@@ -4205,7 +4202,7 @@ class DetailsPec(models.Model):
             if bool(self.rfm_id):
                 if bool(self.couvert_complete):
                     self.taux_couvert = 100
-                elif bool (self.zone_couverte) and bool(self.prestataire_public):
+                elif bool(self.zone_couverte) and bool(self.prestataire_public):
                     self.taux_couvert = int(self.police_id.tx_couv_public_couvert)
                 # Taux Couverture (Remboursement) Zone Non Couverte et prestataire public
                 elif not bool(self.zone_couverte) and bool(self.prestataire_public):
@@ -4237,14 +4234,14 @@ class DetailsPec(models.Model):
             plafond = 0
             forfait = 0
             plafond_medicament = self.mt_plafond_produit_phcie
-            if bool (code_medical_police):
-                plafond = int (code_medical_police.mt_plafond)
+            if bool(code_medical_police):
+                plafond = int(code_medical_police.mt_plafond)
             self.mt_plafond = plafond
 
-            if bool (self.substitut_phcie_id):
+            if bool(self.substitut_phcie_id):
                 # Cas de substitution de produit pharmacie (médicaments)
-                prix_substitut = int (self.prix_indicatif_substitut)
-                prix_produit = int (self.prix_indicatif_produit)
+                prix_substitut = int(self.prix_indicatif_substitut)
+                prix_produit = int(self.prix_indicatif_produit)
                 # if prix_substitut > prix_produit:
                 #     # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
                 #     raise UserError (_ (
@@ -4254,21 +4251,21 @@ class DetailsPec(models.Model):
                 #         d'informations, veuillez contactez l'administrateur..."
                 #     ) % (prix_produit, prix_substitut)
                 #                      )
-                cout_produit = int (self.cout_unite)
-                quantite_prescrite = int (self.quantite)
-                quantite = int (self.quantite_livre)
-                quantite_reste = int (quantite_prescrite) - int (quantite)
-                marge_police = int (self.marge_medicament_police)
-                marge_substitut = int (self.marge_medicament_substitut)
+                cout_produit = int(self.cout_unite)
+                quantite_prescrite = int(self.quantite)
+                quantite = int(self.quantite_livre)
+                quantite_reste = int(quantite_prescrite) - int(quantite)
+                marge_police = int(self.marge_medicament_police)
+                marge_substitut = int(self.marge_medicament_substitut)
                 prix_majore = 0
                 if 0 < plafond_medicament < cout_produit:
                     self.cout_total = cout_produit * quantite
                     self.total_pc = int(plafond_medicament * quantite)
                     self.total_npc = self.cout_total - self.total_pc
                 elif 0 < marge_substitut:
-                    prix_majore = int (prix_substitut + marge_substitut)
+                    prix_majore = int(prix_substitut + marge_substitut)
                 elif 0 < marge_police:
-                    prix_majore = int (prix_substitut + marge_police)
+                    prix_majore = int(prix_substitut + marge_police)
                 elif 0 < prix_majore < cout_produit:
                     if quantite_prescrite > quantite:
                         self.cout_total = cout_produit * quantite
@@ -4303,15 +4300,15 @@ class DetailsPec(models.Model):
                         self.cout_total = cout_produit * quantite
                         self.total_pc = self.cout_total  # - self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
-            elif bool (self.produit_phcie_id):
+            elif bool(self.produit_phcie_id):
                 # Cas de produit pharmacie (médicaments)
-                cout_produit = int (self.cout_unite)
-                prix_produit = int (self.prix_indicatif_produit)
-                quantite_prescrite = int (self.quantite)
-                quantite = int (self.quantite_livre)
-                quantite_reste = int (quantite_prescrite) - int (quantite)
-                marge_police = int (self.marge_medicament_police)
-                marge_produit = int (self.marge_medicament_produit)
+                cout_produit = int(self.cout_unite)
+                prix_produit = int(self.prix_indicatif_produit)
+                quantite_prescrite = int(self.quantite)
+                quantite = int(self.quantite_livre)
+                quantite_reste = int(quantite_prescrite) - int(quantite)
+                marge_police = int(self.marge_medicament_police)
+                marge_produit = int(self.marge_medicament_produit)
                 prix_majore = 0
                 if 0 < plafond_medicament < cout_produit:
                     self.cout_total = cout_produit * quantite
@@ -4367,52 +4364,52 @@ class DetailsPec(models.Model):
                     # donné par l'utilisateur
                     if self.mt_rabais > 0:
                         # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
-                        self.cout_total = int (cout_unitaire * self.coefficient * quantite) - int (self.mt_rabais)
-                        self.total_pc = int (plafond * self.coefficient * quantite) - int (
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite) - int(self.mt_rabais)
+                        self.total_pc = int(plafond * self.coefficient * quantite) - int(
                             self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     elif self.remise_prestation > 0:
                         # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
-                        cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = int (self.plafond * self.coefficient * quantite) - int (
+                        self.total_pc = int(self.plafond * self.coefficient * quantite) - int(
                             remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
-                        self.cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        self.total_pc = int (plafond * self.coefficient * quantite)  # - int(self.mt_exclusion)
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        self.total_pc = int(plafond * self.coefficient * quantite)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
                 else:
                     # Sinon, il n'y pas de plafond applicable
                     if self.mt_rabais > 0:
                         # Si OUI, il y a t-il un montant de rabais prédéfini et non nulle?
-                        self.cout_total = int (
-                            cout_unitaire * self.coefficient * quantite) - int (self.mt_rabais)
-                        self.total_pc = int (
-                            cout_unitaire * self.coefficient * quantite) - int (
+                        self.cout_total = int(
+                            cout_unitaire * self.coefficient * quantite) - int(self.mt_rabais)
+                        self.total_pc = int(
+                            cout_unitaire * self.coefficient * quantite) - int(
                             self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
 
                     elif self.remise_prestation > 0:
                         # Sinon, alors s'il y a t-il un taux de remise prédéfini non nulle?
-                        cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = cout_total - int (remise)  # + self.mt_exclusion
+                        self.total_pc = cout_total - int(remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
-                        self.cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        self.total_pc = int (
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        self.total_pc = int(
                             cout_unitaire * self.coefficient * quantite)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
             #########################################
             # 2. Prestation Cas de cout modifiable et non Quantité exigée
-            elif bool (self.cout_modifiable) and not bool (self.quantite_exige):
+            elif bool(self.cout_modifiable) and not bool(self.quantite_exige):
                 cout_unitaire = self.cout_unite
                 code_non_controle = self.code_non_controle
                 # 1. Si oui, alors vérifier si le coût de la prestation est modifiable
@@ -4421,52 +4418,52 @@ class DetailsPec(models.Model):
                     # donné par l'utilisateur
                     if self.mt_rabais > 0:
                         # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
-                        self.cout_total = int (cout_unitaire * self.coefficient) - int (self.mt_rabais)
-                        self.total_pc = int (plafond * self.coefficient) - int (
+                        self.cout_total = int(cout_unitaire * self.coefficient) - int(self.mt_rabais)
+                        self.total_pc = int(plafond * self.coefficient) - int(
                             self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     elif self.remise_prestation > 0:
                         # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
-                        cout_total = int (cout_unitaire * self.coefficient)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(cout_unitaire * self.coefficient)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = int (self.plafond * self.coefficient) - int (
+                        self.total_pc = int(self.plafond * self.coefficient) - int(
                             remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
-                        self.cout_total = int (cout_unitaire * self.coefficient)
-                        self.total_pc = int (plafond * self.coefficient)  # - int(self.mt_exclusion)
+                        self.cout_total = int(cout_unitaire * self.coefficient)
+                        self.total_pc = int(plafond * self.coefficient)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
                 else:
                     # Sinon, il n'y pas de plafond applicable
                     if self.mt_rabais > 0:
                         # Si OUI, il y a t-il un montant de rabais prédéfini et non nulle?
-                        self.cout_total = int (
+                        self.cout_total = int(
                             cout_unitaire * self.coefficient) - self.mt_rabais
-                        self.total_pc = int (
-                            cout_unitaire * self.coefficient) - int (
+                        self.total_pc = int(
+                            cout_unitaire * self.coefficient) - int(
                             self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
 
                     elif self.remise_prestation > 0:
                         # Sinon, alors s'il y a t-il un taux de remise prédéfini non nulle?
-                        cout_total = int (cout_unitaire * self.coefficient)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(cout_unitaire * self.coefficient)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = cout_total - int (remise)  # + self.mt_exclusion
+                        self.total_pc = cout_total - int(remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
-                        self.cout_total = int (cout_unitaire * self.coefficient)
-                        self.total_pc = int (
+                        self.cout_total = int(cout_unitaire * self.coefficient)
+                        self.total_pc = int(
                             cout_unitaire * self.coefficient)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
             #########################################################
             # 3. Prestation Cas de quantité exigée et non cout modifiable
-            elif bool (self.quantite_exige) and not bool (self.cout_modifiable):
+            elif bool(self.quantite_exige) and not bool(self.cout_modifiable):
                 quantite = self.quantite_livre
                 cout_unitaire = self.cout_unite
                 code_non_controle = self.code_non_controle
@@ -4476,18 +4473,19 @@ class DetailsPec(models.Model):
                     # donné par l'utilisateur
                     if self.mt_rabais > 0:
                         # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
-                        self.cout_total = int (cout_unitaire * self.coefficient * quantite) - int (
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite) - int(
                             self.mt_rabais)
-                        self.total_pc = int (plafond * self.coefficient * quantite) - int (
+                        self.total_pc = int(plafond * self.coefficient * quantite) - int(
                             self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     elif self.remise_prestation > 0:
                         # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
-                        cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = int (self.plafond * self.coefficient * quantite) - int(remise)  # + self.mt_exclusion
+                        self.total_pc = int(self.plafond * self.coefficient * quantite) - int(
+                            remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
@@ -4501,148 +4499,149 @@ class DetailsPec(models.Model):
                     if self.mt_rabais > 0:
                         # Si OUI, alors s'il y a un montant de rabais prédéfini et non nulle
                         self.cout_total = int(cout_unitaire * self.coefficient * quantite) - int(self.mt_rabais)
-                        self.total_pc = int(plafond * self.coefficient * quantite) - int(self.mt_rabais)  # + self.mt_exclusion
+                        self.total_pc = int(plafond * self.coefficient * quantite) - int(
+                            self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     elif self.remise_prestation > 0:
                         # Si OUI, alors s'il y a un taux de remise prédéfini non nulle
-                        cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = int (self.plafond * self.coefficient * quantite) - int (
+                        self.total_pc = int(self.plafond * self.coefficient * quantite) - int(
                             remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
-                        self.cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        self.total_pc = int (plafond * self.coefficient * quantite)  # - int(self.mt_exclusion)
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        self.total_pc = int(plafond * self.coefficient * quantite)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
                 else:
                     # Sinon, il n'y pas de plafond applicable
                     if self.mt_rabais > 0:
                         # Si OUI, il y a t-il un montant de rabais prédéfini et non nulle?
-                        self.cout_total = int (
+                        self.cout_total = int(
                             cout_unitaire * self.coefficient * quantite) - self.mt_rabais
-                        self.total_pc = int (
-                            cout_unitaire * self.coefficient * quantite) - int (
+                        self.total_pc = int(
+                            cout_unitaire * self.coefficient * quantite) - int(
                             self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
 
                     elif self.remise_prestation > 0:
                         # Sinon, alors s'il y a t-il un taux de remise prédéfini non nulle?
-                        cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = cout_total - int (remise)  # + self.mt_exclusion
+                        self.total_pc = cout_total - int(remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
                         # Sinon, alors il y a ni rabais, ni remise
-                        self.cout_total = int (cout_unitaire * self.coefficient * quantite)
-                        self.total_pc = int (
+                        self.cout_total = int(cout_unitaire * self.coefficient * quantite)
+                        self.total_pc = int(
                             cout_unitaire * self.coefficient * quantite)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
             # Forfait éclaté ( forfait SAM + Forfait Assuré)
-            elif 0 < int (self.forfait_sam + self.forfait_ticket) and int (
-                    self.forfait_sam + self.forfait_ticket) <= int (self.cout_unite):
-                forfait = int (self.forfait_sam + self.forfait_ticket)
+            elif 0 < int(self.forfait_sam + self.forfait_ticket) and int(
+                    self.forfait_sam + self.forfait_ticket) <= int(self.cout_unite):
+                forfait = int(self.forfait_sam + self.forfait_ticket)
                 self.mt_forfait = forfait
                 # Sinon, si le coût de la prestation n'est pas modifiable, il y a t-il un forfait SAM et forfait Ticket
-                if 0 < int (plafond * self.coefficient) < forfait:
+                if 0 < int(plafond * self.coefficient) < forfait:
                     # s'il y a t-il un plafond pour la prestation
                     if self.mt_rabais:
                         # S'il y a t-il un Rabais
-                        self.cout_total = int (forfait) - int (self.mt_rabais)  # + self.mt_exclusion
-                        self.total_pc = int (plafond * self.coefficient) - int (self.mt_rabais)
+                        self.cout_total = int(forfait) - int(self.mt_rabais)  # + self.mt_exclusion
+                        self.total_pc = int(plafond * self.coefficient) - int(self.mt_rabais)
                         self.total_npc = self.cout_total - self.total_pc
                     elif self.remise_prestation:
                         # S'il y a t-il une Remise
-                        cout_total = int (forfait)
-                        total_pc = int (plafond * self.coefficient)
-                        taux_remise = int (self.remise_prestation)
-                        remise_cout_total = cout_total - int (cout_total * taux_remise / 100)
-                        remise_total_pc = total_pc - int (total_pc * taux_remise / 100)
+                        cout_total = int(forfait)
+                        total_pc = int(plafond * self.coefficient)
+                        taux_remise = int(self.remise_prestation)
+                        remise_cout_total = cout_total - int(cout_total * taux_remise / 100)
+                        remise_total_pc = total_pc - int(total_pc * taux_remise / 100)
                         self.cout_total = cout_total - remise_cout_total
                         self.total_pc = total_pc - remise_total_pc  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
-                        self.cout_total = int (forfait)  # - int(self.mt_exclusion)
-                        self.total_pc = int (plafond * self.coefficient)
+                        self.cout_total = int(forfait)  # - int(self.mt_exclusion)
+                        self.total_pc = int(plafond * self.coefficient)
                         self.total_npc = self.cout_total - self.total_pc
                 else:
-                    forfait = int (self.forfait_sam + self.forfait_ticket)
+                    forfait = int(self.forfait_sam + self.forfait_ticket)
                     self.mt_forfait = forfait
                     if self.mt_rabais:
-                        self.cout_total = int (forfait) - int (self.mt_rabais)
-                        self.total_pc = int (forfait) - int (self.mt_rabais)  # + self.mt_exclusion
+                        self.cout_total = int(forfait) - int(self.mt_rabais)
+                        self.total_pc = int(forfait) - int(self.mt_rabais)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     elif self.remise_prestation:
                         # S'il y a t-il une Remise
-                        cout_total = int (forfait)
-                        total_pc = int (forfait)
-                        taux_remise = int (self.remise_prestation)
-                        remise = cout_total - int (cout_total * taux_remise / 100)
+                        cout_total = int(forfait)
+                        total_pc = int(forfait)
+                        taux_remise = int(self.remise_prestation)
+                        remise = cout_total - int(cout_total * taux_remise / 100)
                         self.cout_total = cout_total - remise
-                        self.total_pc = total_pc - int (remise)  # + self.mt_exclusion
+                        self.total_pc = total_pc - int(remise)  # + self.mt_exclusion
                         self.total_npc = self.cout_total - self.total_pc
                     else:
-                        self.cout_total = int (forfait)
-                        self.total_pc = int (forfait)  # - int(self.mt_exclusion)
+                        self.cout_total = int(forfait)
+                        self.total_pc = int(forfait)  # - int(self.mt_exclusion)
                         self.total_npc = self.cout_total - self.total_pc
             elif 0 < plafond < self.cout_unite and not self.code_non_controle:
                 if self.mt_rabais:
-                    self.cout_total = int (self.cout_unite * self.coefficient) - int (self.mt_rabais)
-                    self.total_pc = int (plafond * self.coefficient) - int (self.mt_rabais)  # + self.mt_exclusion
+                    self.cout_total = int(self.cout_unite * self.coefficient) - int(self.mt_rabais)
+                    self.total_pc = int(plafond * self.coefficient) - int(self.mt_rabais)  # + self.mt_exclusion
                     self.total_npc = self.cout_total - self.total_pc
                 else:
-                    self.cout_total = int (self.cout_unite * self.coefficient)
-                    self.total_pc = int (plafond * self.coefficient)  # - int(self.mt_exclusion)
+                    self.cout_total = int(self.cout_unite * self.coefficient)
+                    self.total_pc = int(plafond * self.coefficient)  # - int(self.mt_exclusion)
                     self.total_npc = self.cout_total - self.total_pc
             elif plafond == 0:
                 if self.mt_rabais:
-                    self.cout_total = int (self.cout_unite * self.coefficient) - int (self.mt_rabais)
-                    self.total_pc = int (self.cout_unite * self.coefficient) - int (
+                    self.cout_total = int(self.cout_unite * self.coefficient) - int(self.mt_rabais)
+                    self.total_pc = int(self.cout_unite * self.coefficient) - int(
                         self.mt_rabais)  # + self.mt_exclusion
                     self.total_npc = self.cout_total - self.total_pc
                 else:
-                    self.cout_total = int (self.cout_unite * self.coefficient)
-                    self.total_pc = int (self.cout_unite * self.coefficient)  # - int(self.mt_exclusion)
+                    self.cout_total = int(self.cout_unite * self.coefficient)
+                    self.total_pc = int(self.cout_unite * self.coefficient)  # - int(self.mt_exclusion)
                     self.total_npc = self.cout_total - self.total_pc
             else:
-                self.total_pc = int (self.cout_unite * self.coefficient) - int (self.mt_rabais)
-                self.cout_total = int (self.cout_unite * self.coefficient) - int (
+                self.total_pc = int(self.cout_unite * self.coefficient) - int(self.mt_rabais)
+                self.cout_total = int(self.cout_unite * self.coefficient) - int(
                     self.mt_rabais)  # + self.mt_exclusion
                 self.total_npc = self.cout_total - self.total_pc
-            self.total_npc = int (self.cout_total) - int (self.total_pc)
-            total_pc = int (self.total_pc)
-            total_npc = int (self.total_npc)
+            self.total_npc = int(self.cout_total) - int(self.total_pc)
+            total_pc = int(self.total_pc)
+            total_npc = int(self.total_npc)
             diff_ticket_mt_paye = 0
             if bool(forfait):
-                self.net_tiers_payeur = int (self.forfait_sam)
-                self.ticket_moderateur = int (self.forfait_ticket)
+                self.net_tiers_payeur = int(self.forfait_sam)
+                self.ticket_moderateur = int(self.forfait_ticket)
                 # self.montant_exigible = self.ticket_moderateur + total_npc
-                diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
+                diff_ticket_mt_paye = int(self.mt_paye_assure) - int(self.ticket_moderateur)
                 # Calculs détails pour le remboursements
-                if bool (self.rfm_id):
+                if bool(self.rfm_id):
                     self.mt_remboursement = self.net_tiers_payeur
                     self.net_prestataire = 0
                     self.debit_ticket = 0
             else:
-                self.net_tiers_payeur = total_pc * int (taux_couvert) / 100
-                taux_ticket = 100 - int (taux_couvert)
-                self.ticket_moderateur = total_pc * int (taux_ticket) / 100
+                self.net_tiers_payeur = total_pc * int(taux_couvert) / 100
+                taux_ticket = 100 - int(taux_couvert)
+                self.ticket_moderateur = total_pc * int(taux_ticket) / 100
                 # self.montant_exigible = self.ticket_moderateur + total_npc
-                diff_ticket_mt_paye = int (self.mt_paye_assure) - int (self.ticket_moderateur)
+                diff_ticket_mt_paye = int(self.mt_paye_assure) - int(self.ticket_moderateur)
 
             if bool(ticket_exigible):
-                self.net_prestataire = int (self.net_tiers_payeur)
-                self.debit_ticket = int (self.ticket_moderateur + self.total_npc) - int (self.mt_paye_assure)
-            elif not bool (self.ticket_exigible) and (diff_ticket_mt_paye >= 0):
-                self.net_prestataire = total_pc - int (self.ticket_moderateur)
-                self.debit_ticket = int (self.ticket_moderateur + self.total_npc) - int (self.mt_paye_assure)
+                self.net_prestataire = int(self.net_tiers_payeur)
+                self.debit_ticket = int(self.ticket_moderateur + self.total_npc) - int(self.mt_paye_assure)
+            elif not bool(self.ticket_exigible) and (diff_ticket_mt_paye >= 0):
+                self.net_prestataire = total_pc - int(self.ticket_moderateur)
+                self.debit_ticket = int(self.ticket_moderateur + self.total_npc) - int(self.mt_paye_assure)
 
             # Calculs détails pour le remboursements
-            if bool (self.rfm_id):
+            if bool(self.rfm_id):
                 self.mt_remboursement = self.net_tiers_payeur
                 self.net_prestataire = 0
                 self.debit_ticket = 0
@@ -4651,7 +4650,7 @@ class DetailsPec(models.Model):
                 self.net_a_payer = self.mt_remboursement
             else:
                 self.montant_exigible = self.ticket_moderateur + self.total_npc
-                self.net_prestataire = int (self.net_tiers_payeur)
+                self.net_prestataire = int(self.net_tiers_payeur)
                 self.net_prestataire -= self.mt_exclusion
                 self.net_a_payer = self.net_prestataire
 
@@ -4676,7 +4675,7 @@ class DetailsPec(models.Model):
 
     @api.onchange('substitut_phcie_id', 'cout_unit', 'date_execution', 'quantite_livre', 'mt_paye_assure', 'quantite')
     def _check_quantite_prescription(self):
-        if bool (self.produit_phcie_id) and self.quantite == 0:
+        if bool(self.produit_phcie_id) and self.quantite == 0:
             return {'value': {},
                     'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Prescription.',
                                 'message': u"Vous essayez de dispenser le produit: %s, dont la quantité prescrite \
@@ -4684,7 +4683,7 @@ class DetailsPec(models.Model):
                                 Pour plus de détails, veuillez contacter l'administrateur..." % self.produit_phcie
                                 }
                     }
-        if bool(self.produit_phcie_id) and bool (self.date_execution) and int (self.cout_unit) > 0 and int (
+        if bool(self.produit_phcie_id) and bool(self.date_execution) and int(self.cout_unit) > 0 and int(
                 self.quantite_livre) == 0:
             return {'value': {},
                     'warning': {'title': u'Proximaas : Règles de Gestion : Erreur Quantité Fournie.',
@@ -4696,11 +4695,11 @@ class DetailsPec(models.Model):
                     }
         if self.substitut_phcie_id:
             # Cas de substitution de produit pharmacie (médicaments)
-            cout_produit = int (self.cout_unit)
-            prix_substitut = int (self.prix_indicatif_substitut)
-            prix_produit = int (self.prix_indicatif_produit)
-            marge_police = int (self.marge_medicament_police)
-            marge_produit = int (self.marge_medicament_produit)
+            cout_produit = int(self.cout_unit)
+            prix_substitut = int(self.prix_indicatif_substitut)
+            prix_produit = int(self.prix_indicatif_produit)
+            marge_police = int(self.marge_medicament_police)
+            marge_produit = int(self.marge_medicament_produit)
             prix_majore = 0
             if 0 < prix_produit < prix_substitut:
                 # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
@@ -4716,7 +4715,7 @@ class DetailsPec(models.Model):
             if 0 < marge_produit:
                 prix_majore = int(prix_produit + marge_produit)
             elif 0 < marge_police:
-                prix_majore = int (prix_produit + marge_police)
+                prix_majore = int(prix_produit + marge_police)
             if 0 < prix_majore < cout_produit:
                 return {'value': {},
                         'warning': {'title': u'Proximaas : Règles de Gestion :',
@@ -4726,8 +4725,8 @@ class DetailsPec(models.Model):
                                                % (self.medicament, cout_produit, prix_majore)
                                     }
                         }
-            quantite_prescrite = int (self.quantite)
-            quantite = int (self.quantite_livre)
+            quantite_prescrite = int(self.quantite)
+            quantite = int(self.quantite_livre)
             if quantite_prescrite < quantite:
                 return {'value': {},
                         'warning': {'title': u'Proximaas : Règles de Gestion :',
@@ -4741,15 +4740,15 @@ class DetailsPec(models.Model):
             # Cas de produit pharmacie (médicaments)
             cout_produit = int(self.cout_unit)
             prix_produit = int(self.prix_indicatif_produit)
-            quantite_prescrite = int (self.quantite)
-            quantite = int (self.quantite_livre)
-            marge_police = int (self.marge_medicament_police)
-            marge_produit = int (self.marge_medicament_produit)
+            quantite_prescrite = int(self.quantite)
+            quantite = int(self.quantite_livre)
+            marge_police = int(self.marge_medicament_police)
+            marge_produit = int(self.marge_medicament_produit)
             prix_majore = 0
             if 0 < marge_produit:
-                prix_majore = int (prix_produit + marge_produit)
+                prix_majore = int(prix_produit + marge_produit)
             elif 0 < marge_police:
-                prix_majore = int (prix_produit + marge_police)
+                prix_majore = int(prix_produit + marge_police)
             if 0 < prix_majore < cout_produit:
                 return {'value': {},
                         'warning': {'title': u'Proximaas : Règles de Gestion :',
@@ -4778,8 +4777,8 @@ class DetailsPec(models.Model):
                       Vous êtes tenus de renseigner la quantité demandée (prescrite) concernant le produit: %s.\
                       Veuillez à bien renseigner la quantité exacte demandée par le médecin traitant. Pour plus de\
                       détails, veuillez contacter l'administrateur..."
-                    ) % rec.produit_phcie
-                )
+                ) % rec.produit_phcie
+                                      )
             if bool(rec.produit_phcie_id) and bool(
                     rec.date_execution) and rec.cout_unit > 0 and rec.quantite_livre == 0:
                 raise ValidationError(_(
@@ -4787,15 +4786,15 @@ class DetailsPec(models.Model):
                       Il semble que vous avez omis de renseigner la quantité fournie \
                       (livrée) concerant le produit: %s. Veuillez bien renseigner la quantité exacte \
                       dispensée. Pour plus de détails, veuillez contacter l'administrateur..."
-                    ) % rec.produit_phcie
-                )
+                ) % rec.produit_phcie
+                                      )
             if rec.substitut_phcie_id:
                 # Cas de substitution de produit pharmacie (médicaments)
-                cout_produit = int (rec.cout_unit)
-                prix_substitut = int (rec.prix_indicatif_substitut)
-                prix_produit = int (rec.prix_indicatif_produit)
-                marge_police = int (rec.marge_medicament_police)
-                marge_produit = int (rec.marge_medicament_produit)
+                cout_produit = int(rec.cout_unit)
+                prix_substitut = int(rec.prix_indicatif_substitut)
+                prix_produit = int(rec.prix_indicatif_produit)
+                marge_police = int(rec.marge_medicament_police)
+                marge_produit = int(rec.marge_medicament_produit)
                 prix_majore = 0
                 if 0 < prix_produit < prix_substitut:
                     # Vérifier si le prix indicatif du substitut est inférieur à celui du produit prescrit
@@ -4809,9 +4808,9 @@ class DetailsPec(models.Model):
                                         }
                             }
                 if 0 < marge_produit:
-                    prix_majore = int (prix_produit + marge_produit)
+                    prix_majore = int(prix_produit + marge_produit)
                 elif 0 < marge_police:
-                    prix_majore = int (prix_produit + marge_police)
+                    prix_majore = int(prix_produit + marge_police)
                 if 0 < prix_majore < cout_produit:
                     return {'value': {},
                             'warning': {'title': u'Proximaas : Règles de Gestion :',
@@ -4821,8 +4820,8 @@ class DetailsPec(models.Model):
                                                    % (rec.medicament, cout_produit, prix_majore)
                                         }
                             }
-                quantite_prescrite = int (rec.quantite)
-                quantite = int (rec.quantite_livre)
+                quantite_prescrite = int(rec.quantite)
+                quantite = int(rec.quantite_livre)
                 if quantite_prescrite < quantite:
                     return {'value': {},
                             'warning': {'title': u'Proximaas : Règles de Gestion :',
@@ -4834,17 +4833,17 @@ class DetailsPec(models.Model):
                             }
             elif rec.produit_phcie_id:
                 # Cas de produit pharmacie (médicaments)
-                cout_produit = int (rec.cout_unit)
-                prix_produit = int (rec.prix_indicatif_produit)
-                quantite_prescrite = int (rec.quantite)
-                quantite = int (rec.quantite_livre)
-                marge_police = int (rec.marge_medicament_police)
-                marge_produit = int (rec.marge_medicament_produit)
+                cout_produit = int(rec.cout_unit)
+                prix_produit = int(rec.prix_indicatif_produit)
+                quantite_prescrite = int(rec.quantite)
+                quantite = int(rec.quantite_livre)
+                marge_police = int(rec.marge_medicament_police)
+                marge_produit = int(rec.marge_medicament_produit)
                 prix_majore = 0
                 if 0 < marge_produit:
-                    prix_majore = int (prix_produit + marge_produit)
+                    prix_majore = int(prix_produit + marge_produit)
                 elif 0 < marge_police:
-                    prix_majore = int (prix_produit + marge_police)
+                    prix_majore = int(prix_produit + marge_police)
                 if 0 < prix_majore < cout_produit:
                     return {'value': {},
                             'warning': {'title': u'Proximaas : Règles de Gestion :',
@@ -4915,7 +4914,7 @@ class DetailsPec(models.Model):
                                     prescription commme substitut médicament. La contrainte d'âge minimum et maximum\
                                     pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
                                     . Pour plus d'informations, veuillez contactez l'administrateur..."
-                                    % (self.assure_id.name, substitut_phcie, age_minimum, age_maximum)
+                                               % (self.assure_id.name, substitut_phcie, age_minimum, age_maximum)
                                     }
                         }
         elif self.produit_phcie_id:
@@ -4929,7 +4928,7 @@ class DetailsPec(models.Model):
                                     prescription commme médicament. La contrainte d'âge minimum et maximum\
                                     pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
                                     . Pour plus d'informations, veuillez contactez l'administrateur..."
-                                    % (self.assure_id.name, produit_phcie, age_minimum, age_maximum)
+                                               % (self.assure_id.name, produit_phcie, age_minimum, age_maximum)
                                     }
                         }
         elif self.prestation_id:
@@ -4943,7 +4942,7 @@ class DetailsPec(models.Model):
                                     prestation médicale. La contrainte d'âge minimum et maximum\
                                     pour la prestation : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
                                     . Pour plus d'informations, veuillez contactez l'administrateur..."
-                                    % (self.assure_id.name, details_prestation, age_minimum, age_maximum)
+                                               % (self.assure_id.name, details_prestation, age_minimum, age_maximum)
                                     }
                         }
 
@@ -4954,46 +4953,46 @@ class DetailsPec(models.Model):
             age_assure = int(rec.age)
             if rec.substitut_phcie_id:
                 substitut_phcie = rec.substitut_phcie
-                age_minimum = int (rec.substitut_phcie_id.age_minimum)
-                age_maximum = int (rec.substitut_phcie_id.age_maximum)
+                age_minimum = int(rec.substitut_phcie_id.age_minimum)
+                age_maximum = int(rec.substitut_phcie_id.age_maximum)
                 if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
-                    raise ValidationError (_ (
+                    raise ValidationError(_(
                         u"Proximaas : Contrôle de Règles de Gestion.\n \
                          L'assuré concerné: %s ne peut bénéficier de cette \
                          prescription commme substitut médicament. La contrainte d'âge minimum et maximum\
                          pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
                          . Pour plus d'informations, veuillez contactez l'administrateur..."
-                        ) % (rec.assure_id.name, substitut_phcie, age_minimum, age_maximum)
-                    )
+                    ) % (rec.assure_id.name, substitut_phcie, age_minimum, age_maximum)
+                                          )
             elif rec.produit_phcie_id:
                 produit_phcie = rec.produit_phcie
                 age_minimum = int(rec.produit_phcie_id.age_minimum)
                 age_maximum = int(rec.produit_phcie_id.age_maximum)
                 if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
-                    raise ValidationError (_ (
+                    raise ValidationError(_(
                         u"Proximaas : Contrôle de Règles de Gestion.\n \
                          L'assuré concerné: %s ne peut bénéficier de cette \
                          prescription commme médicament. La contrainte d'âge minimum et maximum\
                          pour le produit : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
                         . Pour plus d'informations, veuillez contactez l'administrateur..."
-                        ) % (rec.assure_id.name, produit_phcie, age_minimum, age_maximum)
-                    )
+                    ) % (rec.assure_id.name, produit_phcie, age_minimum, age_maximum)
+                                          )
             elif rec.prestation_id:
                 details_prestation = rec.details_prestation
                 age_minimum = int(rec.code_prestation_id.age_minimum)
                 age_maximum = int(rec.code_prestation_id.age_maximum)
                 if 0 != age_minimum > age_assure or 0 != age_maximum < age_assure:
-                    raise ValidationError (_ (
+                    raise ValidationError(_(
                         u"Proximaas : Contrôle de Règles de Gestion.\n \
                          L'assuré concerné: %s ne peut bénéficier de cette \
                          prestation médicale. La contrainte d'âge minimum et maximum\
                          pour la prestation : (%s) est fixée à : minimum: (%d) et maximum: (%d) année(s). \
                          . Pour plus d'informations, veuillez contactez l'administrateur..."
                     ) % (rec.assure_id.name, details_prestation, age_minimum, age_maximum)
-                                           )
+                                          )
 
-    @api. one
-    @api.onchange('prestation_id', 'date_demande', 'date_execution', 'delai_prestation')
+    @api.one
+    @api.onchange('prestation_id', 'produit_phcie_id', 'substitut_phcie_id')
     def _check_delai_attente_prestation(self):
         # Contrôle du délai d'attente Substitut Médicament
         self.ensure_one()
@@ -5004,12 +5003,130 @@ class DetailsPec(models.Model):
             # Si OUI, y a-t-il un délai d'attente à observer pour le substitut?
             if 0 < int(self.delai_attente_substitut):
                 # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                pec_substitut_phcie_assure = self.env['proximas.details.pec'].search(
+                    [
+                        ('date_execution', '!=', None),
+                        ('assure_id', '=', self.assure_id.id),
+                        ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
+                    ]
+                )
+                if bool(pec_substitut_phcie_assure):
+                    dernier_acte_assure = pec_substitut_phcie_assure[0]
+                    date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
+                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                    jours = []
+                    date_execution = fields.Datetime.from_string(self.date_execution)
+                    date_acte_proche = ''
+                    format_date_acte_proche = ''
+                    for item in pec_substitut_phcie_assure:
+                        date_execution_acte = fields.Datetime.from_string(item.date_execution)
+                        jours.append(abs((date_execution - date_execution_acte).days))
+                    nbre_jours = min(jours)
+                    for acte in pec_substitut_phcie_assure:
+                        date_acte = fields.Datetime.from_string(acte.date_execution)
+                        dif_jours_acte = (date_execution - date_acte).days
+                        if dif_jours_acte == nbre_jours:
+                            date_acte_proche = date_acte
+                            format_date_acte_proche = datetime.strftime(date_acte_proche, '%d-%m-%Y')
+                    self.delai_prestation = int(nbre_jours_dernier_acte)
+                    # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
+                    if 0 <= int(nbre_jours) <= int(self.delai_attente_prestation):
+                        # Sinon, rejeter la prestation
+                        raise UserError(_(
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                        L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. \
+                        Le délai d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit\
+                        a été prescrit à l'assuré le: (%s), il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
+                        contactez l'administrateur..."
+                        ) % (self.assure_id.name, substitut_phcie, self.delai_attente_produit,
+                             format_date_acte_proche, int(nbre_jours))
+                                        )
+                else:
+                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                    self.date_dernier_acte = self.date_execution
+                    self.delai_prestation = 0
+            else:
+                # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
                 pec_produit_phcie_assure = self.env['proximas.details.pec'].search(
                     [
                         ('date_execution', '!=', None),
                         ('assure_id', '=', self.assure_id.id),
                         '|', ('produit_phcie_id', '=', self.substitut_phcie_id.id),
                         ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
+                    ]
+                )
+                if bool(pec_produit_phcie_assure):
+                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
+                    dernier_acte_assure = pec_produit_phcie_assure[0]
+                    date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
+                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
+                    date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
+                    self.date_dernier_acte = dernier_acte_assure.date_execution
+                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
+                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                    # => différence en les 2 dates en nombre de jours.
+                    self.delai_prestation = int(nbre_jours_dernier_acte)
+                else:
+                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                    self.date_dernier_acte = self.date_execution
+                    self.delai_prestation = 0
+        # 2. Vérifier s'il s'agit d'une prescription de médicament?
+        if bool(self.produit_phcie_id):
+            # Récupère la date du jour
+            now = datetime.now()
+            produit_phcie = self.produit_phcie
+            # Si OUI, y a-t-il un délai d'attente à observer pour le produit prescrit?
+            if 0 < int(self.delai_attente_produit):
+                # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                pec_produit_phcie_assure = self.search(
+                    [
+                        ('date_execution', '!=', None),
+                        ('assure_id', '=', self.assure_id.id),
+                        ('produit_phcie_id', '=', self.produit_phcie_id.id),
+                    ]
+                )
+                if bool(pec_produit_phcie_assure):
+                    dernier_acte_assure = pec_produit_phcie_assure[0]
+                    jours = []
+                    date_execution = fields.Datetime.from_string(self.date_execution)
+                    date_acte_proche = ''
+                    format_date_acte_proche = ''
+                    for item in pec_produit_phcie_assure:
+                        date_execution_acte = fields.Datetime.from_string(item.date_execution)
+                        jours.append(abs((date_execution - date_execution_acte).days))
+                    nbre_jours = min(jours)
+                    for acte in pec_produit_phcie_assure:
+                        date_acte = fields.Datetime.from_string(acte.date_execution)
+                        dif_jours_acte = (date_execution - date_acte).days
+                        if dif_jours_acte == nbre_jours:
+                            date_acte_proche = date_acte
+                            format_date_acte_proche = datetime.strftime(date_acte_proche, '%d-%m-%Y')
+                    self.delai_prestation = int(nbre_jours_dernier_acte)
+                    # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
+                    if 0 <= int(nbre_jours) <= int(self.delai_attente_prestation):
+                        # Sinon, rejeter la prestation
+                        raise UserError(_(
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                        L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. \
+                        Le délai d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit\
+                        a été prescrit à l'assuré le: (%s), il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
+                        contactez l'administrateur..."
+                        ) % (self.assure_id.name, produit_phcie, self.delai_attente_produit,
+                             format_date_acte_proche, int(nbre_jours))
+                                        )
+                else:
+                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
+                    self.date_dernier_acte = self.date_execution
+                    self.delai_prestation = 0
+            else:
+                # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                pec_produit_phcie_assure = self.env['proximas.details.pec'].search(
+                    [
+                        ('date_execution', '!=', None),
+                        ('assure_id', '=', self.assure_id.id),
+                        '|', ('produit_phcie_id', '=', self.produit_phcie_id.id),
+                        ('substitut_phcie_id', '=', self.produit_phcie_id.id),
                     ]
                 )
                 if bool(pec_produit_phcie_assure):
@@ -5023,120 +5140,6 @@ class DetailsPec(models.Model):
                     nbre_jours_dernier_acte = (now - date_dernier_acte).days
                     # => différence en les 2 dates en nombre de jours.
                     self.delai_prestation = int(nbre_jours_dernier_acte)
-                    # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
-                    if int(nbre_jours_dernier_acte) <= int(self.delai_attente_substitut):
-                        # Sinon, rejeter la prescription
-                        return {'value': {},
-                                'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
-                                            'message': u"L'assuré(e) concerné(e): %s ne peut bénéficier de cette \
-                                            prescription commme substitut médicament. Le délai d'attente à observer\
-                                             pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit a été \
-                                             prescrit à l'assuré  concerné il y a de cela : (%d) jours. Pour plus \
-                                             d'informations, veuillez contactez l'administrateur..."
-                                                       % (self.assure_id.name, substitut_phcie,
-                                                          self.delai_attente_substitut,
-                                                          int(nbre_jours_dernier_acte))
-                                            }
-                                }
-                    else:
-                        pass
-                else:
-                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                    self.date_dernier_acte = self.date_execution
-                    self.delai_prestation = 0
-            else:
-                # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
-                    [
-                        ('date_execution', '!=', None),
-                        ('assure_id', '=', self.assure_id.id),
-                        '|', ('produit_phcie_id', '=', self.substitut_phcie_id.id),
-                        ('substitut_phcie_id', '=', self.substitut_phcie_id.id),
-                    ]
-                )
-                if bool (pec_produit_phcie_assure):
-                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
-                    dernier_acte_assure = pec_produit_phcie_assure[0]
-                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                    date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today ())
-                    self.date_dernier_acte = dernier_acte_assure.date_execution
-                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                    # => différence en les 2 dates en nombre de jours.
-                    self.delai_prestation = int (nbre_jours_dernier_acte)
-                else:
-                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                    self.date_dernier_acte = self.date_execution
-                    self.delai_prestation = 0
-        # 2. Vérifier s'il s'agit d'une prescription de médicament?
-        if bool(self.produit_phcie_id):
-            # Récupère la date du jour
-            now = datetime.now ()
-            produit_phcie = self.produit_phcie
-            # Si OUI, y a-t-il un délai d'attente à observer pour le produit prescrit?
-            if 0 < int(self.delai_attente_produit):
-                # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.search(
-                    [
-                        ('date_execution', '!=', None),
-                        ('assure_id', '=', self.assure_id.id),
-                        '|', ('produit_phcie_id', '=', self.produit_phcie_id.id),
-                        ('substitut_phcie_id', '=', self.produit_phcie_id.id),
-                    ]
-                )
-                if bool(pec_produit_phcie_assure):
-                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
-                    dernier_acte_assure = pec_produit_phcie_assure[0]
-                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                    date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today ())
-                    self.date_dernier_acte = dernier_acte_assure.date_execution
-                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                    # => différence en les 2 dates en nombre de jours.
-                    self.delai_prestation = int (nbre_jours_dernier_acte)
-                    # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
-                    if int(nbre_jours_dernier_acte) <= int(self.delai_attente_produit):
-                        # Sinon, rejeter la prescription
-                        return {'value': {},
-                                'warning': {'title': u'Proximaas : Contrôle de Règles de Gestion.',
-                                            'message': u"Proximaas : Contrôle de Règles de Gestion.\n \
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. \
-                        Le délai d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit\
-                        a été prescrit à l'assuré il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
-                        contactez l'administrateur..." % (self.assure_id.name, produit_phcie,
-                                                          self.delai_attente_produit,
-                                                          int(nbre_jours_dernier_acte))
-                                            }
-                                }
-                    else:
-                        pass
-                else:
-                    # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
-                    self.date_dernier_acte = self.date_execution
-                    self.delai_prestation = 0
-            else:
-                # Si NON, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-                pec_produit_phcie_assure = self.env['proximas.details.pec'].search (
-                    [
-                        ('date_execution', '!=', None),
-                        ('assure_id', '=', self.assure_id.id),
-                        '|', ('produit_phcie_id', '=', self.produit_phcie_id.id),
-                        ('substitut_phcie_id', '=', self.produit_phcie_id.id),
-                    ]
-                )
-                if bool (pec_produit_phcie_assure):
-                    # Récupérer la dernière fourniture du médicament prescrit ou substituer
-                    dernier_acte_assure = pec_produit_phcie_assure[0]
-                    # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                    date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution) or \
-                                        fields.Datetime.from_string (fields.Date.today())
-                    self.date_dernier_acte = dernier_acte_assure.date_execution
-                    # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-                    nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                    # => différence en les 2 dates en nombre de jours.
-                    self.delai_prestation = int (nbre_jours_dernier_acte)
                 else:
                     # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
                     self.date_dernier_acte = self.date_execution
@@ -5153,13 +5156,6 @@ class DetailsPec(models.Model):
                 ('assure_id', '=', self.assure_id.id),
                 ('prestation_id', '=', self.prestation_id.id),
             ])
-            # count_pec_prestations_assure = self.search_count(
-            #     [
-            #         ('date_execution', '!=', False),
-            #         ('assure_id', '=', self.assure_id.id),
-            #         ('prestation_id', '=', self.prestation_id.id),
-            #     ]
-            # )
             if pec_prestations_assure:
                 dernier_acte_assure = pec_prestations_assure[0]
                 jours = []
@@ -5169,20 +5165,20 @@ class DetailsPec(models.Model):
                 for item in pec_prestations_assure:
                     date_execution_acte = fields.Datetime.from_string(item.date_execution)
                     jours.append(abs((date_execution - date_execution_acte).days))
-                print(jours)
+                # print(jours)
                 nbre_jours = min(jours)
-                print(nbre_jours)
+                # print(nbre_jours)
                 for acte in pec_prestations_assure:
                     date_acte = fields.Datetime.from_string(acte.date_execution)
                     dif_jours_acte = (date_execution - date_acte).days
                     if dif_jours_acte == nbre_jours:
                         date_acte_proche = date_acte
                         format_date_acte_proche = datetime.strftime(date_acte_proche, '%d-%m-%Y')
-                print(date_acte_proche, format_date_acte_proche)
+                # print(date_acte_proche, format_date_acte_proche)
                 # Récupérer la dernier acte liée à la prestation offerte à l'assuré
-                #dernier_acte_assure = pec_prestations_assure[0]
+                # dernier_acte_assure = pec_prestations_assure[0]
                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                #date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
+                # date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
 
                 self.date_dernier_acte = dernier_acte_assure.date_execution
                 # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
@@ -5194,34 +5190,33 @@ class DetailsPec(models.Model):
                 # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
                 if 0 <= int(nbre_jours) <= int(self.delai_attente_prestation):
                     # Sinon, rejeter la prestation
-                    # return {'value': {},
-                    #         'warning': {'title': u"Proximaas : Contrôle de Règles de Gestion.",
-                    #                     'message': u"L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
-                    #     Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
-                    #     La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
-                    #     (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    #                                % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
-                    #                                   format_date_dernier_acte, int(nbre_jours_dernier_acte))
-                    #                     }
-                    #         }
-                    raise UserError (_ (
-                        u"Proximaas : Contrôle de Règles de Gestion.\n \
-                        L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
-                        Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
-                        La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
-                        (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
-                    ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
-                         format_date_acte_proche, int(nbre_jours))
-                                     )
-                else:
-                    pass
+                    if int(nbre_jours) == 0:
+                        raise UserError(_(
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                            L'assuré(e) concerné(e): %s ne peut bénéficier le même jour, plus d'une fois\
+                            cette prestation médicale. Le délai d'attente à observer pour la prestation: (%s) \
+                            est fixé à : (%d) jour(s). Cet assuré a déjà bénéficié de cette prestation le (%s). \
+                            Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
+                             format_date_acte_proche)
+                                        )
+                    else:
+                        raise UserError(_(
+                            u"Proximaas : Contrôle de Règles de Gestion.\n \
+                            L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
+                            Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
+                            La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
+                            (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
+                        ) % (self.assure_id.name, self.prestation_id.name, self.delai_attente_prestation,
+                             format_date_acte_proche, int(nbre_jours))
+                                        )
             else:
                 # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
                 self.date_dernier_acte = self.date_execution
                 self.delai_prestation = 0
         else:
             # Si NON, Récupère la date du jour
-            now = datetime.now ()
+            now = datetime.now()
             # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
             # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
             pec_prestations_assure = self.search([
@@ -5229,7 +5224,7 @@ class DetailsPec(models.Model):
                 ('assure_id', '=', self.assure_id.id),
                 ('prestation_id', '=', self.prestation_id.id),
             ])
-            count_pec_prestations_assure = self.search_count (
+            count_pec_prestations_assure = self.search_count(
                 [
                     ('date_execution', '!=', False),
                     ('assure_id', '=', self.assure_id.id),
@@ -5240,19 +5235,18 @@ class DetailsPec(models.Model):
                 # Récupérer le dernier acte liée à la prestation offerte à l'assuré
                 dernier_acte_assure = pec_prestations_assure[0]
                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
-                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)or \
-                                        fields.Datetime.from_string (fields.Date.today())
+                date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution) or \
+                                    fields.Datetime.from_string(fields.Date.today())
                 self.date_dernier_acte = dernier_acte_assure.date_execution
                 # Calcul le nombre de jours écoulés entre la dernière prestation liée et aujourd'hui
                 nbre_jours_dernier_acte = (now - date_dernier_acte).days
-                self.delai_prestation = int (nbre_jours_dernier_acte)
+                self.delai_prestation = int(nbre_jours_dernier_acte)
             else:
                 # Si aucun acte trouvé concernant la pretation pour l'assuré concerné
                 self.date_dernier_acte = self.date_execution
                 self.delai_prestation = 0
-   
-    
-    @api.constrains('prestation_id', 'date_demande', 'date_execution')
+
+    @api.constrains('prestation_id')
     def _validate_delai_attente_prestation(self):
         # 3. Vérifier s'il s'agit d'une prestation médicale?
         # delai_attente = int(self.delai_attente_prestation)
@@ -5274,7 +5268,7 @@ class DetailsPec(models.Model):
                     dernier_acte_assure = pec_prestations_assure[0]
                     # Récupérer la date de la dernière prescription ou substitution liée au médicament
                     date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
-                    format_date_dernier_acte = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
+                    format_date_dernier_acte = datetime.strftime(date_dernier_acte, '%d-%m-%Y')
                     rec.date_dernier_acte = dernier_acte_assure.date_execution
                     # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
                     nbre_jours_dernier_acte = (now - date_dernier_acte).days
@@ -5284,7 +5278,7 @@ class DetailsPec(models.Model):
                     # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
                     if 0 <= int(nbre_jours_dernier_acte) <= int(rec.delai_attente_prestation):
                         # Sinon, rejeter la prestation
-                        raise ValidationError (_ (
+                        raise ValidationError(_(
                             u"Proximaas : Contrôle de Règles de Gestion.\n \
                             L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
                             Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
@@ -5292,131 +5286,99 @@ class DetailsPec(models.Model):
                             (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, rec.prestation_id.name, rec.delai_attente_prestation,
                              format_date_dernier_acte, int(nbre_jours_dernier_acte))
-                                               )
-                    else:
-                        pass
+                                              )
 
-
-
-
-
-
-        # Contrôle du délai d'attente Substitut Médicament
-        # 1. Vérifier s'il s'agit d'une substitution de médicament?
-        # for rec in self:
-        #     if bool(rec.substitut_phcie_id):
-        #         # Récupère la date du jour
-        #         now = datetime.now()
-        #         substitut_phcie = rec.substitut_phcie
-        #         # Si OUI, y a-t-il un délai d'attente à observer pour le substitut?
-        #         if 0 < int(rec.delai_attente_substitut):
-        #             # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-        #             pec_produit_phcie_assure = self.search(
-        #                 [
-        #                     ('date_execution', '!=', None),
-        #                     ('assure_id', '=', rec.assure_id.id),
-        #                     '|', ('produit_phcie_id', '=', rec.substitut_phcie_id.id),
-        #                     ('substitut_phcie_id', '=', rec.substitut_phcie_id.id),
-        #                 ]
-        #             )
-        #             if bool(pec_produit_phcie_assure):
-        #                 # Récupérer la dernière fourniture du médicament prescrit ou substituer
-        #                 dernier_acte_assure = pec_produit_phcie_assure[0]
-        #                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
-        #                 date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution)
-        #                 # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-        #                 nbre_jours_dernier_acte = (
-        #                         now - date_dernier_acte).days  # => différence en les 2 dates en nombre de jours.
-        #                 # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
-        #                 if int(rec.delai_attente_substitut) >= int(nbre_jours_dernier_acte):
-        #                     # Sinon, rejeter la prescription
-        #                     raise ValidationError (_ (
-        #                         u"Proximaas : Contrôle de Règles de Gestion.\n \
-        #                          L'assuré(e) concerné(e): %s ne peut bénéficier de cette prescription commme substitut \
-        #                          médicament. Le délai d'attente à observer pour le produit : (%s) est fixé à : \
-        #                          (%d) jour(s). Ce produit a été prescrit à l'assuré  concerné il y a de cela : (%d) \
-        #                          jours. Pour plus d'informations, veuillez contactez l'administrateur..."
-        #                     ) % (rec.assure_id.name, substitut_phcie, rec.delai_attente_substitut,
-        #                          int (nbre_jours_dernier_acte))
-        #                                            )
-        #     # 2. Vérifier s'il s'agit d'une prescription de médicament?
-        #     elif bool(rec.produit_phcie_id):
-        #         # Récupère la date du jour
-        #         now = datetime.now ()
-        #         produit_phcie = rec.produit_phcie
-        #         # Si OUI, y a-t-il un délai d'attente à observer pour le produit prescrit?
-        #         if 0 < int (rec.delai_attente_produit):
-        #             # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
-        #             pec_produit_phcie_assure = self.search(
-        #                 [
-        #                     ('date_execution', '!=', None),
-        #                     ('assure_id', '=', rec.assure_id.id),
-        #                     '|', ('produit_phcie_id', '=', rec.produit_phcie_id.id),
-        #                     ('substitut_phcie_id', '=', rec.produit_phcie_id.id),
-        #                 ]
-        #             )
-        #             if bool (pec_produit_phcie_assure):
-        #                 # Récupérer la dernière fourniture du médicament prescrit ou substituer
-        #                 dernier_acte_assure = pec_produit_phcie_assure[0]
-        #                 # Récupérer la date de la dernière prescription ou substitution liée au médicament
-        #                 date_dernier_acte = fields.Datetime.from_string (dernier_acte_assure.date_execution)
-        #                 # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-        #                 nbre_jours_dernier_acte = (
-        #                         now - date_dernier_acte).days  # => différence en les 2 dates en nombre de jours.
-        #                 # Vérifier si le délai d'attente pour le produit est écoulé ou pas?
-        #                 if int(rec.delai_attente_produit) >= int (nbre_jours_dernier_acte):
-        #                     # Sinon, rejeter la prescription
-        #                     raise ValidationError (_ (
-        #                         u"Proximaas : Contrôle de Règles de Gestion.\n \
-        #                          L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. Le délai \
-        #                          d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit a été \
-        #                          prescrit à l'assuré il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
-        #                          contactez l'administrateur..."
-        #                     ) % (rec.assure_id.name, produit_phcie, rec.delai_attente_produit,
-        #                          int (nbre_jours_dernier_acte))
-        #                                            )
-        #     # 3. Vérifier s'il s'agit d'une prestation médicale?
-        #     # delai_attente = int(rec.delai_attente_prestation)
-        #     elif int(rec.delai_attente_prestation) > 0 and rec.pec_state in ['cours', 'oriente']:
-        #         # Si OUI, Récupère la date du jour
-        #         now = datetime.now ()
-        #         # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
-        #         # Si OUI, chercher les prestations de l'assure contenant la prestation concernée
-        #         pec_prestations_assure = self.env['proximas.details.pec'].search (
-        #             [
-        #                 ('date_execution', '!=', False),
-        #                 ('assure_id', '=', rec.assure_id.id),
-        #                 ('prestation_id', '=', rec.prestation_id.id),
-        #             ]
-        #         )
-        #         count_pec_prestations_assure = self.env['proximas.details.pec'].search_count (
-        #             [
-        #                 ('date_execution', '!=', False),
-        #                 ('assure_id', '=', rec.assure_id.id),
-        #                 ('prestation_id', '=', rec.prestation_id.id),
-        #             ]
-        #         )
-        #         if int(count_pec_prestations_assure) > 1:
-        #             # Récupérer la dernier acte liée à la prestation offerte à l'assuré
-        #             dernier_acte_assure = pec_prestations_assure[0]
-        #             # Récupérer la date de la dernière prescription ou substitution liée au médicament
-        #             date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
-        #             date_acte_format = datetime.strftime (date_dernier_acte, '%d-%m-%Y')
-        #             # Calcul le nombre de jours écoulés entre la dernière prestation liée à la rubrique et aujourd'hui
-        #             nbre_jours_dernier_acte = (
-        #                     now - date_dernier_acte).days  # => différence en les 2 dates en nombre de jours.
-        #             # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
-        #             if 0 < int(nbre_jours_dernier_acte) <= int(rec.delai_attente_prestation):
-        #                 # Sinon, rejeter la prestation
-        #                 raise ValidationError (_ (
-        #                     u"Proximaas : Contrôle de Règles de Gestion.\n \
-        #                     L'assuré(e) concerné(e): %s ne peut bénéficier de cette prestation médicale. \
-        #                     Car le délai d'attente à observer pour la prestation: (%s) est fixé à : (%d) jour(s).\
-        #                     La dernière fois que cet assuré a bénéficié de cette prestation (%s) remonte à : \
-        #                     (%d) jours. Pour plus d'informations, veuillez contactez l'administrateur..."
-        #                 ) % (rec.assure_id.name, rec.prestation_id.name, rec.delai_attente_prestation,
-        #                      date_acte_format, int(nbre_jours_dernier_acte))
-        #                                        )
+    @api.constrains('produit_phcie_id', 'substitut_phcie_id')
+    def _validate_produit_phcie(self):
+        for rec in self:
+            if bool(rec.substitut_phcie_id):
+                # Récupère la date du jour
+                now = datetime.now()
+                substitut_phcie = rec.substitut_phcie
+                # Si OUI, y a-t-il un délai d'attente à observer pour le substitut?
+                if 0 < int(rec.delai_attente_produit):
+                    # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                    pec_substitut_phcie_assure = self.search(
+                        [
+                            ('date_execution', '!=', None),
+                            ('assure_id', '=', rec.assure_id.id),
+                            ('substitut_phcie_id', '=', rec.produit_phcie_id.id),
+                        ]
+                    )
+                    if bool(pec_substitut_phcie_assure):
+                        dernier_acte_assure = pec_substitut_phcie_assure[0]
+                        date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
+                        nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                        jours = []
+                        date_execution = fields.Datetime.from_string(rec.date_execution)
+                        date_acte_proche = ''
+                        format_date_acte_proche = ''
+                        for item in pec_substitut_phcie_assure:
+                            date_execution_acte = fields.Datetime.from_string(item.date_execution)
+                            jours.append(abs((date_execution - date_execution_acte).days))
+                        nbre_jours = min(jours)
+                        for acte in pec_substitut_phcie_assure:
+                            date_acte = fields.Datetime.from_string(acte.date_execution)
+                            dif_jours_acte = (date_execution - date_acte).days
+                            if dif_jours_acte == nbre_jours:
+                                date_acte_proche = date_acte
+                                format_date_acte_proche = datetime.strftime(date_acte_proche, '%d-%m-%Y')
+                        # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
+                        if 0 <= int(nbre_jours) <= int(rec.delai_attente_prestation):
+                            # Sinon, rejeter la prestation
+                            raise ValidationError(_(
+                                u"Proximaas : Contrôle de Règles de Gestion.\n \
+                            L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. \
+                            Le délai d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit\
+                            a été prescrit à l'assuré le: (%s), il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
+                            contactez l'administrateur..."
+                            ) % (rec.assure_id.name, substitut_phcie, rec.delai_attente_produit,
+                                 format_date_acte_proche, int(nbre_jours))
+                                                  )
+            elif bool(rec.produit_phcie_id):
+                # Récupère la date du jour
+                now = datetime.now()
+                produit_phcie = rec.produit_phcie_id
+                # Si OUI, y a-t-il un délai d'attente à observer pour le produit?
+                if 0 < int(rec.delai_attente_substitut):
+                    # Si OUI, chercher les prescriptions de l'assure contenant le médicament (ou substituer)
+                    pec_produit_phcie_assure = self.search(
+                        [
+                            ('date_execution', '!=', None),
+                            ('assure_id', '=', rec.assure_id.id),
+                            ('produit_phcie_id', '=', rec.produit_phcie_id.id),
+                        ]
+                    )
+                    if bool(pec_produit_phcie_assure):
+                        dernier_acte_assure = pec_produit_phcie_assure[0]
+                        date_dernier_acte = fields.Datetime.from_string(dernier_acte_assure.date_execution)
+                        nbre_jours_dernier_acte = (now - date_dernier_acte).days
+                        jours = []
+                        date_execution = fields.Datetime.from_string(rec.date_execution)
+                        date_acte_proche = ''
+                        format_date_acte_proche = ''
+                        for item in pec_produit_phcie_assure:
+                            date_execution_acte = fields.Datetime.from_string(item.date_execution)
+                            jours.append(abs((date_execution - date_execution_acte).days))
+                        nbre_jours = min(jours)
+                        for acte in pec_produit_phcie_assure:
+                            date_acte = fields.Datetime.from_string(acte.date_execution)
+                            dif_jours_acte = (date_execution - date_acte).days
+                            if dif_jours_acte == nbre_jours:
+                                date_acte_proche = date_acte
+                                format_date_acte_proche = datetime.strftime(date_acte_proche, '%d-%m-%Y')
+                        # Vérifier si le délai d'attente pour la prestation est écoulé ou pas?
+                        if 0 <= int(nbre_jours) <= int(rec.delai_attente_prestation):
+                            # Sinon, rejeter la prestation
+                            raise ValidationError(_(
+                                u"Proximaas : Contrôle de Règles de Gestion.\n \
+                            L'assuré(e) concerné(e): %s ne peut bénéficier de la prescription de ce médicament. \
+                            Le délai d'attente à observer pour le produit : (%s) est fixé à : (%d) jour(s). Ce produit\
+                            a été prescrit à l'assuré le: (%s), il y a de cela : (%d) jours. Pour plus d'informations, veuillez \
+                            contactez l'administrateur..."
+                            ) % (rec.assure_id.name, produit_phcie, rec.delai_attente_produit,
+                                 format_date_acte_proche, int(nbre_jours))
+                                                  )
 
     @api.constrains('prestation_id')
     def _validate_prestation_crs(self):
@@ -5428,8 +5390,8 @@ class DetailsPec(models.Model):
                     le prestataire: %s. Par conséquent, cette prestation ne peut être prise en compte dans le cadre \
                     de la convention signée avec le prestataire concernée. Pour plus d'informations, \
                     veuillez contactez l'administrateur..."
-                    ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
-                )
+                ) % (rec.prestation_demande_id.name, rec.prestataire_crs_id.name)
+                                      )
 
     @api.depends('date_demande', 'date_execution')
     def _get_exercice_sam(self):
@@ -5440,20 +5402,20 @@ class DetailsPec(models.Model):
             ])
             if bool(exercices):
                 for exo in exercices:
-                    date_debut = fields.Date.from_string (exo.date_debut)
-                    date_fin = fields.Date.from_string (exo.date_fin)
+                    date_debut = fields.Date.from_string(exo.date_debut)
+                    date_fin = fields.Date.from_string(exo.date_fin)
                     if rec.date_execution and not rec.date_demande:
-                        date_execution = fields.Date.from_string (rec.date_execution)
+                        date_execution = fields.Date.from_string(rec.date_execution)
                         if date_debut <= date_execution <= date_fin:
                             rec.exo_sam = exo.name
                             rec.en_cours_exo = exo.en_cours
                     elif rec.date_execution and rec.date_demande:
-                        date_execution = fields.Date.from_string (rec.date_execution)
+                        date_execution = fields.Date.from_string(rec.date_execution)
                         if date_debut <= date_execution <= date_fin:
                             rec.exo_sam = exo.name
                             rec.en_cours_exo = exo.en_cours
                     elif rec.date_demande and not rec.date_execution:
-                        date_demande = fields.Date.from_string (rec.date_demande)
+                        date_demande = fields.Date.from_string(rec.date_demande)
                         if date_debut <= date_demande <= date_fin:
                             rec.exo_sam = exo.name
                             rec.en_cours_exo = exo.en_cours
@@ -5463,7 +5425,7 @@ class DetailsPec(models.Model):
 
     @api.onchange('date_execution', 'date_demande')
     def _check_exo_sam(self):
-        exercices = self.env['proximas.exercice'].search ([
+        exercices = self.env['proximas.exercice'].search([
             ('res_company_id', '=', self.structure_id.id),
             ('cloture', '=', False),
         ])
@@ -5489,78 +5451,78 @@ class DetailsPec(models.Model):
         date_demande_acte = self.date_demande
         date_execution_acte = self.date_execution
         if date_execution_acte and not exercice_id:
-            date_execution = fields.Datetime.from_string (self.date_execution)
-            date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
-            raise UserError (_ (
+            date_execution = fields.Datetime.from_string(self.date_execution)
+            date_execution_format = datetime.strftime(date_execution, '%d-%m-%Y')
+            raise UserError(_(
                 u"Proximaas : Contrôle de Règles de Gestion:\n \
                 La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
                 paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
                 offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
                 Pour plus d'informations, veuillez contactez l'administrateur..."
             ) % date_execution_format
-                             )
+                            )
         elif date_demande_acte and not exercice_id:
-            date_demande = fields.Datetime.from_string (self.date_demande)
-            date_demande_format = datetime.strftime (date_demande, '%d/%m/%Y')
-            raise UserError (_ (
+            date_demande = fields.Datetime.from_string(self.date_demande)
+            date_demande_format = datetime.strftime(date_demande, '%d/%m/%Y')
+            raise UserError(_(
                 u"Proximaas : Contrôle de Règles de Gestion:\n \
                 La date de la demande renseignée ici: %s n'est conforme à aucun des exercices \
                 paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
                 offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
                 Pour plus d'informations, veuillez contactez l'administrateur..."
             ) % date_demande_format
-                             )
+                            )
 
     @api.constrains('date_demande', 'date_execution')
     def _validate_exo_sam(self):
         for rec in self:
-            exercices = self.env['proximas.exercice'].search ([
+            exercices = self.env['proximas.exercice'].search([
                 ('res_company_id', '=', rec.structure_id.id),
                 ('cloture', '=', False),
             ])
             exercice_id = 0
-            if bool (exercices):
+            if bool(exercices):
                 for exo in exercices:
-                    date_debut = fields.Date.from_string (exo.date_debut)
-                    date_fin = fields.Date.from_string (exo.date_fin)
+                    date_debut = fields.Date.from_string(exo.date_debut)
+                    date_fin = fields.Date.from_string(exo.date_fin)
                     if rec.date_execution and not rec.date_demande:
-                        date_execution = fields.Date.from_string (rec.date_execution)
+                        date_execution = fields.Date.from_string(rec.date_execution)
                         if date_debut <= date_execution <= date_fin:
                             exercice_id = exo.id
                     elif rec.date_execution and rec.date_demande:
-                        date_execution = fields.Date.from_string (rec.date_execution)
+                        date_execution = fields.Date.from_string(rec.date_execution)
                         if date_debut <= date_execution <= date_fin:
                             exercice_id = exo.id
                     elif rec.date_demande and not rec.date_execution:
-                        date_demande = fields.Date.from_string (rec.date_demande)
+                        date_demande = fields.Date.from_string(rec.date_demande)
                         if date_debut <= date_demande <= date_fin:
                             exercice_id = exo.id
-                    elif bool (exo.en_cours):
+                    elif bool(exo.en_cours):
                         exercice_id = exo.id
             date_demande_acte = rec.date_demande
             date_execution_acte = rec.date_execution
             if date_execution_acte and not exercice_id:
-                date_execution = fields.Datetime.from_string (rec.date_execution)
-                date_execution_format = datetime.strftime (date_execution, '%d-%m-%Y')
-                raise UserError (_ (
+                date_execution = fields.Datetime.from_string(rec.date_execution)
+                date_execution_format = datetime.strftime(date_execution, '%d-%m-%Y')
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion:\n \
                     La date d'exécution renseignée ici: %s n'est conforme à aucun des exercices \
                     paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
                     offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
                     Pour plus d'informations, veuillez contactez l'administrateur..."
                 ) % date_execution_format
-                                 )
+                                )
             elif date_demande_acte and not exercice_id:
-                date_demande = fields.Datetime.from_string (rec.date_demande)
-                date_demande_format = datetime.strftime (date_demande, '%d/%m/%Y')
-                raise UserError (_ (
+                date_demande = fields.Datetime.from_string(rec.date_demande)
+                date_demande_format = datetime.strftime(date_demande, '%d/%m/%Y')
+                raise UserError(_(
                     u"Proximaas : Contrôle de Règles de Gestion:\n \
                     La date de la demande renseignée ici: %s n'est conforme à aucun des exercices \
                     paramétrés à cet effet ou l'exercice concerné est clôturé. Par conséquent, les prestations\
                     offertes à cette période ne peuvent plus faire l'objet d'un traitement dans le système.\
                     Pour plus d'informations, veuillez contactez l'administrateur..."
                 ) % date_demande_format
-                                 )
+                                )
 
     sql_constraints = [
         (
@@ -5614,6 +5576,7 @@ class DetailsPec(models.Model):
             '''
         ),
     ]
+
 
 # from openerp.osv import osv, fields
 # import logging
@@ -5691,10 +5654,10 @@ class RemboursementPEC(models.Model):
     state = fields.Selection(
         string="Statut",
         selection=[
-                ('create', 'Création'),
-                ('valide', 'Validation'),
-                ('boucle', 'Terminé')
-                ],
+            ('create', 'Création'),
+            ('valide', 'Validation'),
+            ('boucle', 'Terminé')
+        ],
         default="create",
     )
     code_saisi = fields.Char(
@@ -5732,7 +5695,7 @@ class RemboursementPEC(models.Model):
         string="Facture pièce jointe",
         # attachment=True,
     )
-    doc_filename = fields.Char (
+    doc_filename = fields.Char(
         "Nom du fichier joint",
     )
     note = fields.Text(
@@ -5787,7 +5750,7 @@ class RemboursementPEC(models.Model):
         related='police_id.structure_id',
         readonly=True,
     )
-    matricule = fields.Char (
+    matricule = fields.Char(
         string="Matricule",
         related='adherent_id.matricule',
         readonly=True,
@@ -5804,7 +5767,7 @@ class RemboursementPEC(models.Model):
         store=True,
         readonly=True,
     )
-    nom = fields.Char (
+    nom = fields.Char(
         string="Nom",
         related="adherent_id.nom",
         readonly=True,
@@ -5829,12 +5792,12 @@ class RemboursementPEC(models.Model):
         related='adherent_id.genre',
         readonly=True,
     )
-    date_naissance = fields.Date (
+    date_naissance = fields.Date(
         string="Date Naissance",
         related="adherent_id.date_naissance",
         readonly=True,
     )
-    age = fields.Char (
+    age = fields.Char(
         string="Age",
         related="adherent_id.age",
         readonly=True,
@@ -5866,19 +5829,19 @@ class RemboursementPEC(models.Model):
         related='police_id.nbre_maxi_demande',
         readonly=True,
     )
-    mt_plafond_remb_demande = fields.Float (
+    mt_plafond_remb_demande = fields.Float(
         string="Montant Plafond/Demande (remboursement)",
         digits=(6, 0),
         related='police_id.mt_plafond_remb_demande',
         readonly=True,
     )
-    mt_plafond_remb_individu = fields.Float (
+    mt_plafond_remb_individu = fields.Float(
         string="Montant Plafond/Individu (remboursement)",
         digits=(6, 0),
         related='police_id.mt_plafond_remb_individu',
         readonly=True,
     )
-    mt_plafond_remb_famille = fields.Float (
+    mt_plafond_remb_famille = fields.Float(
         string="Montant Plafond/Famille (remboursement)",
         digits=(6, 0),
         related='police_id.mt_plafond_remb_famille',
@@ -5927,7 +5890,7 @@ class RemboursementPEC(models.Model):
         compute='_compute_rfm_details',
         default=0,
     )
-    sous_totaux_actes_pc_remb = fields.Float (
+    sous_totaux_actes_pc_remb = fields.Float(
         string="S/Totaux Actes(Couverts)",
         digits=(9, 0),
         compute='_compute_rfm_details',
@@ -5939,19 +5902,19 @@ class RemboursementPEC(models.Model):
         compute='_compute_rfm_details',
         default=0,
     )
-    sous_totaux_part_sam_remb = fields.Float (
+    sous_totaux_part_sam_remb = fields.Float(
         string="S/Totaux Part SAM",
         digits=(9, 0),
         compute='_compute_rfm_details',
         default=0,
     )
-    sous_totaux_ticket_moderateur_remb = fields.Float (
+    sous_totaux_ticket_moderateur_remb = fields.Float(
         string="S/Totaux Net Ticket Modérateur",
         digits=(9, 0),
         compute='_compute_rfm_details',
         default=0,
     )
-    sous_totaux_exclusions_remb = fields.Float (
+    sous_totaux_exclusions_remb = fields.Float(
         string="S/Totaux Exclusions.",
         digits=(6, 0),
         compute='_compute_rfm_details',
@@ -5976,25 +5939,25 @@ class RemboursementPEC(models.Model):
         compute='_compute_rfm_details',
         default=0,
     )
-    net_part_sam_phcie = fields.Float (
+    net_part_sam_phcie = fields.Float(
         string="Net Part SAM (Phcie.)",
         digits=(9, 0),
         compute='_compute_rfm_details',
         default=0,
     )
-    net_ticket_moderateur_phcie = fields.Float (
+    net_ticket_moderateur_phcie = fields.Float(
         string="Net Part SAM (Phcie.)",
         digits=(9, 0),
         compute='_compute_rfm_details',
         default=0,
     )
-    net_exclusions_phcie = fields.Float (
+    net_exclusions_phcie = fields.Float(
         string="Net Exclusions (Phcie.)",
         digits=(9, 0),
         compute='_compute_rfm_details',
         default=0,
     )
-    net_remboursement_phcie = fields.Float (
+    net_remboursement_phcie = fields.Float(
         string="Net Remb.(Phcie.)",
         digits=(9, 0),
         compute='_compute_rfm_details',
@@ -6017,14 +5980,14 @@ class RemboursementPEC(models.Model):
         # store=True,
         default=0,
     )
-    net_ticket_moderateur_rfm = fields.Float (
+    net_ticket_moderateur_rfm = fields.Float(
         string="Net Remb. Ticket Mod.",
         digits=(9, 0),
         compute='_compute_rfm_details',
         # store=True,
         default=0,
     )
-    net_exclusions_rfm = fields.Float (
+    net_exclusions_rfm = fields.Float(
         string="Net Exclusions",
         digits=(9, 0),
         compute='_compute_rfm_details',
@@ -6098,7 +6061,7 @@ class RemboursementPEC(models.Model):
     user_prise_charge = fields.Boolean(
         string="Utitlisateur/Prise charge?",
         compute='_get_current_user',
-        #store=True,
+        # store=True,
         help='Défini si l\'utilisateur courant est le prestataire exécutant de la prise en charge?',
     )
     user_id = fields.Many2one(
@@ -6111,7 +6074,6 @@ class RemboursementPEC(models.Model):
         compute='_check_valide_rfm',
         help="Indique si la prise en charge est valide (PEC) ou non",
     )
-
 
     @api.multi
     def _get_contrat_id(self):
@@ -6135,7 +6097,6 @@ class RemboursementPEC(models.Model):
     def action_boucler(self):
         self.state = 'boucle'
 
-
     @api.multi
     def _check_valide_rfm(self):
         for rec in self:
@@ -6143,7 +6104,6 @@ class RemboursementPEC(models.Model):
                 rec.is_valie = True
             else:
                 rec.is_valie = False
-
 
     @api.multi
     def _get_date_user(self):
@@ -6161,7 +6121,6 @@ class RemboursementPEC(models.Model):
             rec.user_prestataire = user.partner_id.name
             if rec.prestataire_cro == rec.user_prestataire:
                 rec.user_prise_charge = True
-
 
     @api.multi
     def _check_date_last_rfm(self):
@@ -6214,50 +6173,50 @@ class RemboursementPEC(models.Model):
             self.sous_totaux_actes_remb = sum(item.cout_total for item in details_actes_rfm) or 0
             self.sous_totaux_actes_pc_remb = sum(item.total_pc for item in details_actes_rfm) or 0
             self.sous_totaux_actes_npc_remb = sum(item.total_npc for item in details_actes_rfm) or 0
-            self.sous_totaux_part_sam_remb = sum (item.net_tiers_payeur for item in details_actes_rfm) or 0
-            self.sous_totaux_ticket_moderateur_remb = sum (item.ticket_moderateur for item in details_actes_rfm) or 0
-            self.sous_totaux_exclusions_remb = sum (item.mt_exclusion for item in details_actes_rfm) or 0
-            self.net_remboursement_actes_remb = sum (item.mt_remboursement for item in details_actes_rfm) or 0
+            self.sous_totaux_part_sam_remb = sum(item.net_tiers_payeur for item in details_actes_rfm) or 0
+            self.sous_totaux_ticket_moderateur_remb = sum(item.ticket_moderateur for item in details_actes_rfm) or 0
+            self.sous_totaux_exclusions_remb = sum(item.mt_exclusion for item in details_actes_rfm) or 0
+            self.net_remboursement_actes_remb = sum(item.mt_remboursement for item in details_actes_rfm) or 0
         if bool(self.details_rfm_phcie_ids):
             # 2. Calculs détails Pharmacie
             details_phcie_rfm = self.details_rfm_phcie_ids
-            self.nbre_prescriptions_remb = len (details_phcie_rfm)
-            self.sous_totaux_phcie_remb = sum (item.cout_total for item in details_phcie_rfm) or 0
-            self.net_part_sam_phcie = sum (item.net_tiers_payeur for item in details_phcie_rfm) or 0
-            self.net_ticket_moderateur_phcie = sum (item.ticket_moderateur for item in details_phcie_rfm) or 0
+            self.nbre_prescriptions_remb = len(details_phcie_rfm)
+            self.sous_totaux_phcie_remb = sum(item.cout_total for item in details_phcie_rfm) or 0
+            self.net_part_sam_phcie = sum(item.net_tiers_payeur for item in details_phcie_rfm) or 0
+            self.net_ticket_moderateur_phcie = sum(item.ticket_moderateur for item in details_phcie_rfm) or 0
             self.net_exclusions_phcie = sum(item.mt_exclusion for item in details_phcie_rfm) or 0
-            self.net_remboursement_phcie = sum (item.mt_remboursement for item in details_phcie_rfm) or 0
+            self.net_remboursement_phcie = sum(item.mt_remboursement for item in details_phcie_rfm) or 0
         # 3. Calculs Cumuls Actes médicaux + Médicaments
         self.net_totaux_rfm = self.sous_totaux_actes_remb + self.sous_totaux_phcie_remb
         self.net_part_sam_rfm = self.sous_totaux_part_sam_remb + self.net_part_sam_phcie
         self.net_ticket_moderateur_rfm = self.sous_totaux_ticket_moderateur_remb + self.net_ticket_moderateur_phcie
         self.net_exclusions_rfm = self.sous_totaux_exclusions_remb + self.net_exclusions_phcie
         self.net_remboursement_rfm = self.net_remboursement_actes_remb + self.net_remboursement_phcie
-    
+
     @api.multi
     def _compute_rfm_details(self):
         for rec in self:
             if bool(rec.details_rfm_soins_ids):
                 # 1. Calculs détails Actes médicaux
                 details_actes_rfm = rec.details_rfm_soins_ids
-                rec.nbre_actes_remb = len (details_actes_rfm)
-                rec.sous_totaux_actes_remb = sum (item.cout_total for item in details_actes_rfm) or 0
-                rec.sous_totaux_actes_pc_remb = sum (item.total_pc for item in details_actes_rfm) or 0
-                rec.sous_totaux_actes_npc_remb = sum (item.total_npc for item in details_actes_rfm) or 0
-                rec.sous_totaux_part_sam_remb = sum (item.net_tiers_payeur for item in details_actes_rfm) or 0
-                rec.sous_totaux_ticket_moderateur_remb = sum (
+                rec.nbre_actes_remb = len(details_actes_rfm)
+                rec.sous_totaux_actes_remb = sum(item.cout_total for item in details_actes_rfm) or 0
+                rec.sous_totaux_actes_pc_remb = sum(item.total_pc for item in details_actes_rfm) or 0
+                rec.sous_totaux_actes_npc_remb = sum(item.total_npc for item in details_actes_rfm) or 0
+                rec.sous_totaux_part_sam_remb = sum(item.net_tiers_payeur for item in details_actes_rfm) or 0
+                rec.sous_totaux_ticket_moderateur_remb = sum(
                     item.ticket_moderateur for item in details_actes_rfm) or 0
-                rec.sous_totaux_exclusions_remb = sum (item.mt_exclusion for item in details_actes_rfm) or 0
-                rec.net_remboursement_actes_remb = sum (item.mt_remboursement for item in details_actes_rfm) or 0
-            if bool (rec.details_rfm_phcie_ids):
+                rec.sous_totaux_exclusions_remb = sum(item.mt_exclusion for item in details_actes_rfm) or 0
+                rec.net_remboursement_actes_remb = sum(item.mt_remboursement for item in details_actes_rfm) or 0
+            if bool(rec.details_rfm_phcie_ids):
                 # 2. Calculs détails Pharmacie
                 details_phcie_rfm = rec.details_rfm_phcie_ids
-                rec.nbre_prescriptions_remb = len (details_phcie_rfm)
-                rec.sous_totaux_phcie_remb = sum (item.cout_total for item in details_phcie_rfm) or 0
-                rec.net_part_sam_phcie = sum (item.net_tiers_payeur for item in details_phcie_rfm) or 0
-                rec.net_ticket_moderateur_phcie = sum (item.ticket_moderateur for item in details_phcie_rfm) or 0
-                rec.net_exclusions_phcie = sum (item.mt_exclusion for item in details_phcie_rfm) or 0
-                rec.net_remboursement_phcie = sum (item.mt_remboursement for item in details_phcie_rfm) or 0
+                rec.nbre_prescriptions_remb = len(details_phcie_rfm)
+                rec.sous_totaux_phcie_remb = sum(item.cout_total for item in details_phcie_rfm) or 0
+                rec.net_part_sam_phcie = sum(item.net_tiers_payeur for item in details_phcie_rfm) or 0
+                rec.net_ticket_moderateur_phcie = sum(item.ticket_moderateur for item in details_phcie_rfm) or 0
+                rec.net_exclusions_phcie = sum(item.mt_exclusion for item in details_phcie_rfm) or 0
+                rec.net_remboursement_phcie = sum(item.mt_remboursement for item in details_phcie_rfm) or 0
             # 3. Calculs Cumuls Actes médicaux + Médicaments
             rec.net_totaux_rfm = rec.sous_totaux_actes_remb + rec.sous_totaux_phcie_remb
             rec.net_part_sam_rfm = rec.sous_totaux_part_sam_remb + rec.net_part_sam_phcie
@@ -6305,20 +6264,20 @@ class RemboursementPEC(models.Model):
                 Risque de doublon pour le Code PEC : %s. Le code PEC généré par le système existe déjà pour une autre \
                 prise en charge. cependant, le code PEC doit être unique par prise en charge.\n \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % self.code_rfm
-            )
+            ) % self.code_rfm
+                                  )
 
     @api.constrains('details_rfm_soins_ids', 'date_transmis', 'code_saisi', 'prestataire_id', 'details_rfm_soins_ids',
                     'details_rfm_phcie_ids', 'doc_joint')
     def validate_rfm_boucle(self):
         if self.state == 'boucle':
-            raise ValidationError (_ (
+            raise ValidationError(_(
                 u"Proximaas : Contrôle Contrôle Règles de Gestion \n \
                 Désolé! Vous essayez de modifier des données de la fiche de ramboursement : %s. \n \
                 Cette fiche a été déjà traitée et terminée. Par conséquent, aucune modification n'est autorisée.\n \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % self.num_fiche
-            )
+            ) % self.num_fiche
+                                  )
 
     _sql_constraints = [
         ('code_rfm_uniq',
@@ -6344,7 +6303,7 @@ class RemboursementWizard(models.TransientModel):
         string="Réf./Num. Fiche",
         help="Indiquer le N° de référence de la fiche de remboursement",
     )
-    date_depot = fields.Date (
+    date_depot = fields.Date(
         string="Date Dépôt Remb.",
         readonly=False,
     )
@@ -6372,13 +6331,13 @@ class RemboursementWizard(models.TransientModel):
         contrat = self.env['proximas.contrat'].search([('adherent_id', '=', adherent.id)])
 
         if not bool(adherent):
-            raise UserError (_ (
+            raise UserError(_(
                 "Proximaas : Contrôle Règles de Gestion: \n\
                 Le code identifiant : %s ne correspond à aucun adhérent identifié dans le système. \
                 par conséquent, ne peut faire l'objet de remboursement de frais médicaux. \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % self.code_saisi
-            )
+            ) % self.code_saisi
+                            )
 
         # 3. Vérification du contrat pour l'assuré.
         if bool(assure) and not bool(contrat):
@@ -6387,8 +6346,8 @@ class RemboursementWizard(models.TransientModel):
                 L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                 l'objet d'une prise en charge actuellement, pour absence de contrat faisant référence à sa police de \
                 couverture. Veuillez contactez les administrateurs pour plus détails..."
-                ) % (assure.name, assure.code_id)
-            )
+            ) % (assure.name, assure.code_id)
+                            )
         # 4. Vérification de la présence de doublon sur l'assuré.
         elif len(assure) > 1:
             raise UserError(_(
@@ -6396,8 +6355,8 @@ class RemboursementWizard(models.TransientModel):
                 L'assuré: %s - Code ID.: %s est bel et bien identifié dans le système. Cependant, ne peut faire \
                 l'objet d'une prise en charge actuellement, car il y a risque de doublon sur l'assuré en question. \
                 Veuillez contactez les administrateurs pour plus détails..."
-                ) % (assure.name, assure.code_id)
-            )
+            ) % (assure.name, assure.code_id)
+                            )
 
         elif bool(assure) and bool(adherent) and bool(contrat):
             return {
@@ -6424,5 +6383,5 @@ class RemboursementWizard(models.TransientModel):
                 "Proximaas : Contrôle Règles de Gestion: \n\
                  Le Code ID. que vous avez fourni ne correspond à aucun adhérent dans le système.\n\
                  Réverifiez le code ID. ou contacter l'administrateur en cas de besoin..!"
-                )
+            )
             )
