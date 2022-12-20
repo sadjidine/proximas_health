@@ -836,20 +836,16 @@ class PriseEnCharge(models.Model):
             else:
                 rec.is_termine = False
 
-    # @api.one
-    # @api.depends('pathologie_ids')
-    # def _get_pathologie_pec(self):
-    #     if not self.pathologie_id and self.pathologie_ids:
-    #         pathologie = self.pathologie_ids[0]
-    #         self.pathologie_id = pathologie.id
 
     @api.one
     @api.depends('mt_encaisse_phcie', 'mt_encaisse_phcie_dispense')
     def _get_encaisse_phcie(self):
         self.ensure_one()
-        if 0 < self.mt_encaisse_phcie:
-            self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
+        self.mt_encaisse_phcie, self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie_dispense, self.mt_encaisse_phcie
         self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
+        # if 0 < self.mt_encaisse_phcie:
+        #     self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
+        # self.tot_encaisse_phcie = self.mt_encaisse_phcie_dispense
 
     @api.one
     @api.depends('details_pec_soins_crs_ids', 'details_pec_soins_ids', 'details_pec_demande_crs_ids',
@@ -867,82 +863,6 @@ class PriseEnCharge(models.Model):
         self.totaux_crs = sum(item.total_pc for item in self.details_pec_soins_crs_ids)
         self.totaux_phcie = sum(item.total_pc for item in details_pec_phcie_encours)
         self.totaux_phcie_estimation = sum(item.prix_indicatif_produit for item in details_pec_phcie_encours)
-
-        # if self.mt_encaisse_phcie:
-        #     self.mt_encaisse_phcie_dispense = self.mt_encaisse_phcie
-        # elif self.mt_encaisse_phcie_dispense:
-        #     self.mt_encaisse_phcie = self.mt_encaisse_phcie_dispense
-
-    # @api.one
-    # @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
-    # def _get_sinistres_encours(self):
-    #     self.ensure_one()
-    #     pec_assure = self.search([
-    #         '|', ('assure_id', '=', self.assure_id.id),
-    #         ('code_id', '=ilike', self.code_id)
-    #     ])
-    #     details_pec_assure = self.env['proximas.details.pec'].search([
-    #         '|', ('assure_id', '=', self.assure_id.id),
-    #         ('code_id', '=ilike', self.code_id),
-    #         ('date_execution', '!=', None),
-    #     ])
-    #     details_actes_assure = self.env['proximas.details.pec'].search ([
-    #         '|', ('assure_id', '=', self.assure_id.id),
-    #         ('code_id', '=ilike', self.code_id),
-    #         ('date_execution', '!=', None),
-    #         ('produit_phcie_id', '=', None),
-    #     ])
-    #     details_phcie_assure = self.env['proximas.details.pec'].search ([
-    #         '|', ('assure_id', '=', self.assure_id.id),
-    #         ('code_id', '=ilike', self.code_id),
-    #         ('date_execution', '!=', None),
-    #         ('produit_phcie_id', '!=', None),
-    #     ])
-    #     details_pec_contrat = self.env['proximas.details.pec'].search ([
-    #         # ('adherent_id', '=', self.adherent.id),
-    #         ('contrat_id', '=', self.contrat_id.id),
-    #         ('date_execution', '!=', None),
-    #     ])
-    #     date_debut = fields.Date.from_string(self.date_debut_assure)
-    #     date_fin = fields.Date.from_string(self.date_fin_prevue_assure)
-    #     pec_assure_encours = []
-    #     details_pec_assure_encours = []
-    #     details_actes_assure_encours = []
-    #     details_phcie_assure_encours = []
-    #     details_pec_contrat_encours = []
-    #     if pec_assure:
-    #         for item in pec_assure:
-    #             date_saisie = fields.Date.from_string(item.date_saisie)
-    #             if date_debut <= date_saisie <= date_fin:
-    #                 pec_assure_encours.append(item)
-    #         for item in details_pec_assure:
-    #             date_execution = fields.Date.from_string(item.date_execution)
-    #             if date_debut <= date_execution <= date_fin:
-    #                 details_pec_assure_encours.append(item)
-    #         for item in details_actes_assure:
-    #             date_execution = fields.Date.from_string(item.date_execution)
-    #             if date_debut <= date_execution <= date_fin:
-    #                 details_actes_assure_encours.append(item)
-    #         for item in details_phcie_assure:
-    #             date_execution = fields.Date.from_string(item.date_execution)
-    #             if date_debut <= date_execution <= date_fin:
-    #                 details_phcie_assure_encours.append(item)
-    #         for item in details_pec_contrat:
-    #             date_execution = fields.Date.from_string(item.date_execution)
-    #             if date_debut <= date_execution <= date_fin:
-    #                 details_pec_contrat_encours.append(item)
-    #         self.nbre_pec_assure = len(pec_assure_encours)
-    #         self.nbre_actes_assure = len(details_actes_assure_encours)
-    #         self.nbre_phcie_assure = len(details_phcie_assure_encours)
-    #         self.nbre_actes_contrat = len(details_pec_contrat_encours)
-    #         self.totaux_assure = sum(item.total_pc for item in details_pec_assure_encours)
-    #         self.totaux_actes_assure = sum (item.total_pc for item in details_actes_assure_encours)
-    #         self.totaux_phcie_assure = sum (item.total_pc for item in details_phcie_assure_encours)
-    #         self.totaux_contrat = sum(item.total_pc for item in details_pec_contrat_encours)
-    #         self.niveau_sinistre_assure = (self.totaux_assure * 100 / self.plafond_individu) \
-    #             if self.plafond_individu else 0
-    #         self.niveau_sinistre_contrat = (self.totaux_contrat * 100 / self.plafond_famille) \
-    #             if self.plafond_famille else 0
 
     @api.one
     @api.depends('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids')
@@ -1442,37 +1362,6 @@ class PriseEnCharge(models.Model):
 
                 ) % rec.mt_plafond_prescription
                                       )
-
-    # @api.one
-    # @api.constrains('details_pec_phcie_ids', 'nbre_prescriptions', 'nbre_prescription_maxi')
-    # def _check_maxi_prescription_validation(self):
-    #     if int(self.nbre_prescriptions) > int(self.nbre_prescription_maxi):
-    #         raise ValidationError(_(
-    #             u"Proximas : Contrôle de règles de Gestion - Nbre. Maxi Prescriptions : \n \
-    #             Cette prise en charge ne peut contenir plus de %d Prescriptions. Par conséquent, vous devez en tenir \
-    #             compte et supprimer le(s) surplus de prescriptions au choix.\n Pour plus d'informations, veuillez \
-    #             contactez l'administrateur..."
-    #             % self.nbre_prescription_maxi
-    #             )
-    #         )
-
-    # @api.one
-    # @api.onchange('details_pec_phcie_ids')
-    # def _check_doublon_details_pec(self):
-    #     for item in self.details_pec_phcie_ids:
-    #         nbre_produit_phcie = self.env['proximas.details.pec'].search_count([
-    #             ('pec_id', '=', self.id),
-    #             ('produit_phcie_id', '=', item.produit_phcie_id.id)
-    #         ])
-    #         if nbre_produit_phcie > 1:
-    #             raise UserError(_(
-    #                 u"Proximas: Risque de doublon sur Médicament\n\
-    #                 Il semble que le médicament: %s %s %s ait déjà été prescrit pour cette prise en charge.\
-    #                 Par conséquent, il ne peut y avoir plus d\'une fois le même médicament prescrit sur une \
-    #                 même prise en charge. Vérifiez s'il n'y pas de doublon ou contactez l'administrateur."
-    #                 % (item.produit_phcie_id.name, item.produit_phcie_id.forme_galenique, item.produit_phcie_id.dosage)
-    #             )
-    #             )
 
     @api.constrains('details_pec_soins_ids', 'details_pec_soins_crs_ids', 'details_pec_phcie_ids', )
     def _validate_ticket_exigible_and_encaissement(self):
