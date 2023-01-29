@@ -2598,6 +2598,15 @@ class DetailsPec(models.Model):
         compute='_get_exercice_sam',
         store=True,
     )
+    # Ajout de champs pour Exercice en cours
+    exo_date_debut = fields.Date(
+        string="Date Début Exercice",
+        compute='_get_exercice_sam',
+    )
+    exo_date_fin = fields.Date(
+        string="Date Fin Exercice",
+        compute='_get_exercice_sam',
+    )
     totaux_rubrique_assure = fields.Float(
         string="S/Totaux/Rubrique - Asuré",
         digits=(6, 0),
@@ -5000,8 +5009,8 @@ class DetailsPec(models.Model):
                         self.delai_prestation = 0
         # 3. Vérifier s'il s'agit d'une prestation médicale?
         # delai_attente = int(self.delai_attente_prestation)
-        elif int(self.delai_attente_prestation):
-            if self.pec_state in ['cours', 'oriente']:
+        elif self.pec_state in ['cours', 'oriente']:
+            if int(self.delai_attente_prestation):
                 # Si OUI, Récupère la date du jour
                 now = datetime.now()
                 # Vérifier s'il y a til un délai d'attente à observer pour la prestation concernée?
@@ -5243,19 +5252,27 @@ class DetailsPec(models.Model):
                         if date_debut <= date_execution <= date_fin:
                             rec.exo_sam = exo.name
                             rec.en_cours_exo = exo.en_cours
+                            rec.exo_date_debut = exo.date_debut
+                            rec.exo_date_fin = exo.date_fin
                     elif rec.date_execution and rec.date_demande:
                         date_execution = fields.Date.from_string(rec.date_execution)
                         if date_debut <= date_execution <= date_fin:
                             rec.exo_sam = exo.name
                             rec.en_cours_exo = exo.en_cours
+                            rec.exo_date_debut = exo.date_debut
+                            rec.exo_date_fin = exo.date_fin
                     elif rec.date_demande and not rec.date_execution:
                         date_demande = fields.Date.from_string(rec.date_demande)
                         if date_debut <= date_demande <= date_fin:
                             rec.exo_sam = exo.name
                             rec.en_cours_exo = exo.en_cours
+                            rec.exo_date_debut = exo.date_debut
+                            rec.exo_date_fin = exo.date_fin
                     elif bool(exo.en_cours):
                         rec.exo_sam = exo.name
                         rec.en_cours_exo = exo.en_cours
+                        rec.exo_date_debut = exo.date_debut
+                        rec.exo_date_fin = exo.date_fin
 
     @api.onchange('date_execution', 'date_demande')
     def _check_exo_sam(self):

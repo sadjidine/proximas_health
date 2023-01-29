@@ -204,7 +204,7 @@
         <field name="name">proximas.pec.tree</field>
         <field name="model">proximas.prise.charge</field>
         <field name="arch" type="xml">
-            <tree string="Prise en charge Assuré" create="0">
+            <tree string="Prise en charge Assuré" create="0" edit="0">
                 <field name="code_pec"/>
                 <field name="prestataire_cro"/>
                 <field name="date_saisie"/>
@@ -228,7 +228,7 @@
         <field name="name">proximas.pec.tree</field>
         <field name="model">proximas.prise.charge</field>
         <field name="arch" type="xml">
-            <tree string="Prise en charge Assuré" create="0">
+            <tree string="Prise en charge Assuré" create="0" > <!--editable="bottom"-->
                 <field name="code_pec"/>
                 <field name="code_id" />
                 <field name="num_bon"/>
@@ -434,7 +434,8 @@
                                             groups="base.group_system,proximas_medical.group_manager,proximas_medical.group_admin"
                                             attrs="{'invisible': ['|',('mt_plafond_prescription','=',0),('mt_plafond_prescription','>=','totaux_phcie')]}"
                                      />
-                                     <field name="nbre_prescriptions_medecin"/>
+                                    <!--<field name="state" groups="base.group_system"/>-->
+                                     <field name="nbre_prescriptions_medecin" invisible="1"/>
                                      <field name="mt_plafond_prescription" invisible="1"/>
                                      <!--<field name="totaux_phcie" invisible="1"/>-->
                                      <field name="tot_encaisse_phcie" invisible="1"/>
@@ -460,6 +461,7 @@
                                     <field name="organisation" invisible="1"/>
                                     <field name="structure_id" options='{"no_open": True, "no_create": True}'
                                            invisible="0"/>
+                                    <field name="matricule" string="Matricule"/>
                                 </group>
                                 <group>
                                     <field name="adherent"
@@ -1986,7 +1988,7 @@
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="validation_details_pec_demande_tree_view"/>
-        <field name="domain">[('date_execution','=',None),('date_demande','!=', None),('en_cours_exo','=',True),('facture_id','=',None)]</field>
+        <field name="domain">[('prestation_demande_id','!=',None),('date_demande','!=', None),('facture_id','=',None)]</field>
         <field name="context">{'default_user_id':uid}</field>
     </record>
     <record model="ir.actions.act_window" id="proximas_details_pec_action">
@@ -1995,7 +1997,7 @@
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
         <field name="view_id" ref="proximas_details_pec_list_view"/>
-        <field name="domain">[('date_execution','!=',None)]</field>
+        <field name="domain">['|',('date_execution','!=',None),('date_demande','!=',None)]</field>
         <field name="context">{}</field>
     </record>
     <record model="ir.actions.act_window" id="proximas_details_pec_encours_action">

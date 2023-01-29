@@ -410,8 +410,8 @@
                     <field name="genre"/>
                     <field name="statut_familial"/>
                     <field name="date_naissance"/>
-                    <field name="age" />
-                    <field name="date_activation"/>
+                    <field name="matricule" />
+                    <field name="localite_id"/>
                    <!-- <field name="contrat_id"/>-->
                     <field name="state"/>
                 </tree>
@@ -814,9 +814,9 @@
                                   munir du certificat de scolarite (Fréquentation) ou d'invalidité délivré et dûment
                                   signé par une autorité compétente en la matière.
                               </p>
-                              <p class="text-primary h5">Pour enregistrer le justificatif concerné,
-                                  vous allez indiquer le Code d'identification de l'assuré,
-                                  inscrit sur la carte d'accès, dans le champ ci-dessous :
+                              <p class="text-primary h5">Pour enregistrer le certificat de décès concerné, vous allez
+                                  indiquer le Code d'identification de l'assuré, inscrit sur la carte d'accès, dans le
+                                  champ ci-dessous :
                                   <field name='code_saisi'  class="text-primary h4"
                                          default_focus="1"
                                          placeholder="Ex.: 01234567AB"/>
