@@ -3390,8 +3390,8 @@ class DetailsPec(models.Model):
                 ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
                                 )
             # Calculs sur les plafonds RUBRIQUE  / EXERCICE
-            date_debut = fields.Date.from_string(self.date_debut_assure)
-            date_fin = fields.Date.from_string(self.date_fin_prevue_assure)
+            date_debut = fields.Date.from_string(self.exo_date_debut)
+            date_fin = fields.Date.from_string(self.exo_date_fin)
             details_pec_rubrique_assure = self.search([
                 ('assure_id', '=', self.assure_id.id),
                 ('rubrique_id', '=', self.rubrique_id.id),
@@ -3636,8 +3636,8 @@ class DetailsPec(models.Model):
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
                                         )
                 # Calculs sur les plafonds RUBRIQUE  / EXERCICE
-                date_debut = fields.Date.from_string(rec.date_debut_assure)
-                date_fin = fields.Date.from_string(rec.date_fin_prevue_assure)
+                date_debut = fields.Date.from_string(rec.exo_date_debut)
+                date_fin = fields.Date.from_string(rec.exo_date_fin)
                 details_pec_rubrique_assure = rec.search([
                     ('assure_id', '=', rec.assure_id.id),
                     ('rubrique_id', '=', rec.rubrique_id.id),

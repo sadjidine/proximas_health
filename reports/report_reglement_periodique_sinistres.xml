@@ -175,8 +175,8 @@
                                            <caption>1. Détails Facture Prestataire:</caption>
                                             <tr>
                                                 <td>
-                                                    <h4>FACTURE N°      : <strong><t t-esc="num_facture"/> </strong></h4>
-                                                    <p>V/Réf.           : <t t-esc="ref_facture"/></p>
+                                                    <h4>FACTURE N°      : <strong><t t-esc="num_facture"/></strong></h4>
+                                                    <p>V/Réf.           : <t t-esc="ref_facture"/> - N/Réf.: <t t-esc="ref_interne"/></p>
                                                     <p>Date Emission    : <t t-esc="date_emission"/> </p>
                                                     <p>Date Réception   : <t t-esc="date_reception"/></p>
                                                 </td>
