@@ -714,8 +714,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police': police.name,
                         'assure_id': assure_id,
                         'code_id': assure.code_id,
-                        'date_activation': datetime.strptime(assure.date_activation, DATE_FORMAT).strftime(
-                            '%d/%m/%Y'),
+                        'date_activation': assure.date_activation,
                         'code_id_externe': assure.code_id_externe,
                         'contrat_id': assure.contrat_id,
                         'num_contrat': assure.contrat_id.num_contrat,
@@ -723,8 +722,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'groupe_id': assure.groupe_id,
                         'photo': assure.image,
                         'assure': assure.name,
-                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
-                            '%d/%m/%Y'),
+                        'date_naissance': assure.date_naissance,
                         'age': assure.age,
                         'statut_familial': assure.statut_familial,
                         'genre': assure.genre,
@@ -812,8 +810,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police': police.name,
                         'assure_id': assure_id,
                         'code_id': assure.code_id,
-                        'date_activation': datetime.strptime (assure.date_activation, DATE_FORMAT).strftime (
-                            '%d/%m/%Y'),
+                        'date_activation': assure.date_activation,
                         'code_id_externe': assure.code_id_externe,
                         'contrat_id': assure.contrat_id,
                         'num_contrat': assure.contrat_id.num_contrat,
@@ -821,8 +818,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'groupe_id': assure.groupe_id,
                         'photo': assure.image,
                         'assure': assure.name,
-                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
-                            '%d/%m/%Y'),
+                        'date_naissance': assure.date_naissance,
                         'age': assure.age,
                         'statut_familial': assure.statut_familial,
                         'genre': assure.genre,
@@ -925,8 +921,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'police': police.name,
                         'assure_id': assure_id,
                         'code_id': assure.code_id,
-                        'date_activation': datetime.strptime (assure.date_activation, DATE_FORMAT).strftime(
-                            '%d/%m/%Y'),
+                        'date_activation': assure.date_activation,
                         'code_id_externe': assure.code_id_externe,
                         'contrat_id': assure.contrat_id,
                         'num_contrat': assure.contrat_id.num_contrat,
@@ -934,8 +929,7 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'groupe_id': assure.groupe_id,
                         'photo': assure.image,
                         'assure': assure.name,
-                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
-                            '%d/%m/%Y'),
+                        'date_naissance': assure.date_naissance,
                         'age': assure.age,
                         'statut_familial': assure.statut_familial,
                         'genre': assure.genre,
@@ -986,15 +980,13 @@ class ReportPecDetailsRecap(models.AbstractModel):
                         'code_id': assure.code_id,
                         'beneficiaire': assure.name,
                         'code_id_externe': assure.code_id_externe,
-                        'date_naissance': datetime.strptime(assure.date_naissance, DATE_FORMAT).strftime(
-                            '%d/%m/%Y'),
+                        'date_naissance': assure.date_activation,
                         'statut_familial': assure.statut_familial.capitalize(),
                         'genre': assure.genre.capitalize(),
                         'num_contrat': assure.contrat_id.num_contrat,
                         'matricule': assure.contrat_id.matricule,
                         'groupe_name': assure.contrat_id.groupe_id.name,
-                        'date_activation': datetime.strptime(assure.date_activation, DATE_FORMAT).strftime(
-                            '%d/%m/%Y'),
+                        'date_activation': assure.date_naissance,
                         'nbre_actes': int(details_pec[0]),
                         'cout_total': int (details_pec[1]),
                         'total_pc': int (details_pec[2]),

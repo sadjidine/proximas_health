@@ -310,11 +310,17 @@
                                                        </group>
                                                    </group>
                                                    <hr/>
-                                                    <group col="6" colspan="2" invisible="0">
+                                                    <group col="6" colspan="2">
                                                         <field name="couvert_complete"/>
                                                         <field name="zone_couverte"/>
                                                         <field name="prestataire_public"/>
                                                     </group>
+                                                   <group col="8" colspan="2">
+                                                       <field name="totaux_rubrique_assure" string="Totaux/Assuré"/>
+                                                       <field name="totaux_rubrique_contrat" string="Totaux/Famille"/>
+                                                       <field name="nbre_actes_rubrique_assure" string="NB.Actes/Assuré"/>
+                                                       <field name="nbre_actes_rubrique_contrat" string="NB.Actes/Famille"/>
+                                                   </group>
                                                    <group invisible="1">
                                                        <field name="code_medical_id"
                                                               options='{"no_open": True, "no_create": True}'/>

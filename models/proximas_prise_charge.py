@@ -3416,6 +3416,7 @@ class DetailsPec(models.Model):
     @api.depends('prestation_id', 'prestation_cro_id', 'prestation_crs_id', 'prestation_demande_id',
                  'produit_phcie_id', 'substitut_phcie_id', 'prestation_rembourse_id')
     def _get_rubrique_medicale(self):
+        self.ensure_one()
         controle_rubrique = self.env['proximas.controle.rubrique'].search([
             ('rubrique_id', '=', self.rubrique_id.id),
             ('police_id', '=', self.police_id.id),
@@ -3502,17 +3503,20 @@ class DetailsPec(models.Model):
                 ) % (self.assure_id.name, self.assure_id.statut_familial, statut_familial_rubrique)
                                  )
             # Calculs sur les plafonds RUBRIQUE  / EXERCICE
-            date_debut = fields.Date.from_string(self.exo_date_debut)
-            date_fin = fields.Date.from_string(self.exo_date_fin)
+            date_debut = self.exo_date_debut
+            date_fin = self.exo_date_fin
+            assure_id = self.assure_id.id
+            contrat_id = self.contrat_id.id
+            rubrique_id = self.rubrique_id.id
             details_pec_rubrique_assure = self.search([
-                ('assure_id', '=', self.assure_id.id),
-                ('rubrique_id', '=', self.rubrique_id.id),
+                ('assure_id', '=', assure_id),
+                ('rubrique_id', '=', rubrique_id),
                 ('date_execution', '>=', date_debut),
                 ('date_execution', '<=', date_fin),
             ])
-            details_pec_rubrique_contrat = self.env['proximas.details.pec'].search ([
-                ('contrat_id', '=', self.contrat_id.id),
-                ('rubrique_id', '=', self.rubrique_id.id),
+            details_pec_rubrique_contrat = self.env['proximas.details.pec'].search([
+                ('contrat_id', '=', contrat_id),
+                ('rubrique_id', '=', rubrique_id),
                 ('date_execution', '>=', date_debut),
                 ('date_execution', '<=', date_fin),
             ])
@@ -3748,19 +3752,19 @@ class DetailsPec(models.Model):
                         ) % (rec.assure_id.name, rec.assure_id.statut_familial, statut_familial_rubrique)
                                          )
                 # Calculs sur les plafonds RUBRIQUE  / EXERCICE
-                date_debut = fields.Date.from_string (rec.date_debut_assure)
-                date_fin = fields.Date.from_string (rec.date_fin_prevue_assure)
+                date_debut = fields.Date.from_string(rec.exo_date_debut)
+                date_fin = fields.Date.from_string(rec.exo_date_fin)
                 details_pec_rubrique_assure = rec.search ([
                     ('assure_id', '=', rec.assure_id.id),
                     ('rubrique_id', '=', rec.rubrique_id.id),
-                    ('date_execution', '>=', date_debut),
-                    ('date_execution', '<=', date_fin),
+                    ('date_execution', '>=', rec.exo_date_debut),
+                    ('date_execution', '<=', rec.exo_date_fin),
                 ])
                 details_pec_rubrique_contrat = rec.env['proximas.details.pec'].search ([
                     ('contrat_id', '=', rec.contrat_id.id),
                     ('rubrique_id', '=', rec.rubrique_id.id),
-                    ('date_execution', '>=', date_debut),
-                    ('date_execution', '<=', date_fin),
+                    ('date_execution', '>=', rec.exo_date_debut),
+                    ('date_execution', '<=', rec.exo_date_fin),
                 ])
                 nbre_actes_rubrique_assure = len (details_pec_rubrique_assure)
                 nbre_actes_rubrique_contrat = len (details_pec_rubrique_contrat)
@@ -3768,12 +3772,8 @@ class DetailsPec(models.Model):
                 totaux_rubrique_assure = sum (item.total_pc for item in details_pec_rubrique_assure)
                 totaux_rubrique_contrat = sum (item.total_pc for item in details_pec_rubrique_contrat)
 
-                rec.totaux_rubrique_assure = totaux_rubrique_assure  # + rec.total_pc
-                rec.totaux_rubrique_contrat = totaux_rubrique_contrat  # + rec.total_pc
-                rec.nbre_actes_rubrique_assure = nbre_actes_rubrique_assure  # + 1
-                rec.nbre_actes_rubrique_contrat = nbre_actes_rubrique_contrat  # + 1
                 # 8. Contrôle délai d'attente à observer
-                if bool (details_pec_rubrique_assure):
+                if bool(details_pec_rubrique_assure):
                     # Contrôles si les prestations fournies à l'assuré sont liées à la rubrique
                     # si OUI, sélectionner la dernière prestation liée à la rubrique
                     dernier_acte_rubrique_assure = details_pec_rubrique_assure[0]
@@ -3874,11 +3874,6 @@ class DetailsPec(models.Model):
                               d'informations, veuillez contactez l'administrateur..."
                         ) % (rec.assure_id.name, nbre_actes_famille_rubrique, controle_rubrique.rubrique_name)
                                          )
-                # CALCULS DE TAUX DES SINISTRES PAR RUBRIQUE MEDICALE
-                if plafond_individu_rubrique:
-                    rec.niveau_plafond_rubrique_assure = totaux_rubrique_assure * 100 / plafond_individu_rubrique
-                if plafond_famille_rubrique:
-                    rec.niveau_plafond_rubrique_contrat = totaux_rubrique_contrat * 100 / plafond_famille_rubrique
 
     # CONTROLES A EFFECTUER SUR PRESTATIONS MEDICALE ET CONTROLES POLICE
     # 1. CONTROLE RUBRIQUE MEDICALE POLICE

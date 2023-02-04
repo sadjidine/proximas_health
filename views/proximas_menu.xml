@@ -169,6 +169,12 @@
               sequence="2024"
               action="proximas_list_rfm_action"
               groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
+    <menuitem id="proximas_gestion_details_pec_remboursement"
+              name=">> Gestion Prestations Médicales - Remboursements"
+              parent="proximas_details_pec"
+              sequence="2025"
+              action="proximas_details_pec_remboursement_action"
+              groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
     <menuitem id="proximas_details_pec"
               name="3. Suivi &amp; Contrôles Prestations/Actes"
               parent="proximas_prise_en_charge_root"

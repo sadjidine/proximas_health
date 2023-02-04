@@ -1973,6 +1973,16 @@
         <field name="domain">[('date_demande','!=', None),('en_cours_exo','=',True),('accord_prestation_demande','=',True),'|',('accorde','=',True),('non_accorde','=',True)]</field>
         <field name="context">{'default_user_id':uid,'form_view_ref':'proximas_medical.accord_details_pec_crs_form'}</field>
     </record>
+    <record model="ir.actions.act_window" id="proximas_details_pec_remboursement_action">
+        <field name="name">Proximaas: Liste Actes/Prestations en Remboursements Adhérents</field>
+        <field name="res_model">proximas.details.pec</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="proximas_details_pec_list_view"/>
+        <field name="search_view_id" ref="details_pec_search_view"/>
+        <field name="domain">[('rfm_id','!=', None),('en_cours_exo','=',True)]</field>
+        <field name="context">{'default_user_id':uid}</field>
+    </record>
     <record model="ir.actions.act_window" id="proximas_validation_details_pec_crs_action">
         <field name="name">Proximaas: Validation des Actes/Prestations CRS (Non demandés)</field>
         <field name="res_model">proximas.details.pec</field>
