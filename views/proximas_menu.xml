@@ -171,7 +171,7 @@
               groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
     <menuitem id="proximas_gestion_details_pec_remboursement"
               name=">> Détails Prestations Médicales - Remboursements"
-              parent="proximas_details_pec"
+              parent="proximas_facture_remb"
               sequence="2025"
               action="proximas_details_pec_remboursement_action"
               groups="base.group_system,proximas_medical.group_admin,proximas_medical.group_manager,proximas_medical.group_operator"/>
