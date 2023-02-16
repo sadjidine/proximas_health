@@ -24,6 +24,45 @@
                 </tree>
             </field>
         </record>
+        <!-- REMBOURSEMENT SEARCH VIEW -->
+        <record id="proximas_remboursement_search_view" model="ir.ui.view">
+            <field name="name">proximas.remboursement.search</field>
+            <field name="model">proximas.remboursement.pec</field>
+            <field name="arch" type="xml">
+                <search string="Remboursement de frais médicaux">
+                    <field name="num_fiche"/>
+                    <field name="code_rfm" />
+                    <field name="date_saisie"/>
+                    <field name="date_depot"/>
+                    <field name="code_id"/>
+                    <field name="code_id_externe"/>
+                    <field name="groupe_id"/>
+                    <field name="name" />
+                    <field name="nom"/>
+                    <field name="prenoms"/>
+                    <field name="num_contrat"/>
+                    <field name="matricule"/>
+                    <newline />
+                    <group expand="0" string="Grouper par...">
+                        <filter string="Num. Fiche"
+                                domain="[]"
+                                context="{'group_by':'num_fiche'}" />
+                        <filter string="Code RFM"
+                                domain="[]"
+                                context="{'group_by':'code_rfm'}" />
+                        <filter string="Matricule"
+                                domain="[]"
+                                context="{'group_by':'matricule'}" />
+                        <filter string="Code ID."
+                                domain="[]"
+                                context="{'group_by':'code_id'}" />
+                        <filter string="Groupe"
+                                domain="[]"
+                                context="{'group_by':'groupe_id'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
         <!-- REMBOURSEMENT Form view-->
         <record id="proximas_remboursement_form_view" model="ir.ui.view">
            <field name="name">Remboursement form view</field>
@@ -264,11 +303,7 @@
                                                <page string="Détails Coûts - Prestation à Rembourser">
                                                    <group>
                                                        <group>
-                                                           <field name="details_prestation"
-                                                                  options='{"no_open": True, "no_create": True}'
-                                                                  class="text-primary"
-                                                                  invisible="0"
-                                                           />
+                                                           <field name="details_prestation"/>
                                                            <!--domain="[('prestataire_id', '=', prestataire_id),('active', '=', True)]"-->
                                                            <!--<field name="quantite"/>-->
                                                        </group>
@@ -586,6 +621,7 @@
             <field name="res_model">proximas.remboursement.pec</field>
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+            <field name="search_id" ref="proximas_remboursement_search_view"/>
             <field name="domain">[]</field>
             <field name="context">{}</field>
         </record>

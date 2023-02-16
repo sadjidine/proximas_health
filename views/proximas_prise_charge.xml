@@ -149,6 +149,89 @@
             </tree>
         </field>
     </record>
+    <!-- DETAILS PEC REMBOURSEMENT TREE -->
+    <record id="proximas_details_pec_remboursement_tree_view" model="ir.ui.view">
+        <field name="name">proximas details pec remboursement</field>
+        <field name="model">proximas.details.pec</field>
+        <field name="arch" type="xml">
+            <tree string="Details PEC" create="0" edit="0">
+                <field name="num_rfm"/>
+                <field name="code_id"/>
+                <field name="police_id" options ='{"no_open": True, "no_create": True}'/>
+                <field name="assure_id" options ='{"no_open": True, "no_create": True}'/>
+                <field name="date_execution"/>
+                <field name="prestation_id"
+                       string="Prestation médicale"
+                       options ='{"no_open": True, "no_create": True}'
+                />
+                <field name="rubrique_id"/>
+                <field name="cout_total" sum="Totaux PC"/>
+                <field name="total_pc" sum="Totaux Hors PC"/>
+                <field name="taux_couvert"/>
+                <field name="net_tiers_payeur" sum="Totaux Part SAM"/>
+                <field name="ticket_moderateur" sum="Totaux Ticket Modérateur"/>
+                <field name="net_prestataire" sum="Totaux Prestataire"/>
+            </tree>
+        </field>
+    </record>
+    <!-- DETAILS PEC REMBOURSEMENT SEARCH VIEW -->
+    <record id="details_pec_search_remboursement_view" model="ir.ui.view">
+        <field name="name">details.pec.search.remboursement</field>
+        <field name="model">proximas.details.pec</field>
+        <field name="arch" type="xml">
+            <search string="Détails Prise en charge (Prestations)">
+                <field name="num_rfm"/>
+                <field name="assure_id"/>
+                <field name="police_id"/>
+                <field name="adherent"/>
+                <field name="date_execution"/>
+                <field name="exo_sam"/>
+                <field name="code_id" />
+                <field name="nom"/>
+                <field name="prenoms"/>
+                <field name="date_naissance"/>
+                <field name="genre"/>
+                <field name="statut_familial" />
+                <field name="contrat_id" />
+                <newline />
+                <group expand="0" string="Grouper par...">
+                    <filter string="Code PEC"
+                            domain="[]"
+                            context="{'group_by':'num_rfm'}" />
+                    <filter string="Rubrique Médicale"
+                            domain="[]"
+                            context="{'group_by':'rubrique_id'}" />
+                    <filter string="Prestation Médicale"
+                            domain="[]"
+                            context="{'group_by':'prestation_id'}" />
+                    <filter string="Statut Familial"
+                            domain="[]"
+                            context="{'group_by':'statut_familial'}" />
+                    <filter string="Genre"
+                            domain="[]"
+                            context="{'group_by':'genre'}" />
+                    <filter string="Assuré"
+                            domain="[]"
+                            context="{'group_by':'assure_id'}" />
+                    <filter string="Date exécution"
+                            domain="[]"
+                            context="{'group_by':'date_execution'}" />
+                    <filter string="Contrat"
+                            domain="[]"
+                            context="{'group_by':'contrat_id'}" />
+                    <filter string="Adhérent"
+                            domain="[]"
+                            context="{'group_by':'adherent'}" />
+                    <filter string="Police"
+                            domain="[]"
+                            context="{'group_by':'police_id'}" />
+                    <filter string="Prestataire"
+                            domain="[]"
+                            context="{'group_by':'prestataire'}" />
+                </group>
+            </search>
+        </field>
+    </record>
     <!-- PRISE EN CHARGE SEARCH VIEW -->
     <record id="prise_charge_view_search" model="ir.ui.view">
         <field name="name">prise.charge.search</field>
@@ -1978,9 +2061,9 @@
         <field name="res_model">proximas.details.pec</field>
         <field name="view_type">form</field>
         <field name="view_mode">tree,form</field>
-        <field name="view_id" ref="proximas_details_pec_list_view"/>
-        <field name="search_view_id" ref="details_pec_search_view"/>
-        <field name="domain">[('rfm_id','!=', None),('en_cours_exo','=',True)]</field>
+        <field name="view_id" ref="proximas_details_pec_remboursement_tree_view"/>
+        <field name="search_view_id" ref="details_pec_search_remboursement_view"/>
+        <field name="domain">[('rfm_id','!=', None)]</field>
         <field name="context">{'default_user_id':uid}</field>
     </record>
     <record model="ir.actions.act_window" id="proximas_validation_details_pec_crs_action">
